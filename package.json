@@ -1,15 +1,23 @@
 {
-  "name": "scaffoldvuer",
+  "name": "@abi-software/scaffoldvuer",
   "version": "0.1.0",
-  "private": true,
+  "main": "scaffoldvuer.common.js",
+  "files": [
+    "dist/*",
+    "src/*",
+    "public/*",
+    "*.json",
+    "*.js"
+  ],
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "build-bundle": "vue-cli-service build --target lib --name scaffoldvuer ./src/components/index.js",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "core-js": "^3.3.2",
-    "physiomeportal": "^0.4.8",
+    "physiomeportal": "^0.4.9",
     "vue": "^2.6.10"
   },
   "devDependencies": {
@@ -19,7 +27,8 @@
     "babel-eslint": "^10.0.3",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
-    "vue-template-compiler": "^2.6.10"
+    "vue-template-compiler": "^2.6.10",
+    "raw-loader": "^0.5.1"
   },
   "eslintConfig": {
     "root": true,

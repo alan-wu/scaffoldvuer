@@ -1,10 +1,7 @@
 <template>
   <div class="scaffold-container">
-    <div id="organGui" class="portalDatGui">
-    </div>
     <div id="organsDisplayArea" style="height:100%;width:100%;" ref="display">
     </div>
-    <input id="texSlider" orient="vertical" style="display:none;position:absolute;left: 2%;top:25%; -webkit-appearance: slider-vertical; width: 3%; height: 50%;" type="range"  step="0.01" value="1" min="0" max="1"/>
     <div id="timeSliderContainer" class="mpbrow" style="position:absolute;bottom: 6%;width:95%;">
       <div class="col-sm-1" >
       </div>
@@ -18,17 +15,12 @@
       </div>
     </div>
 
-    <div style="text-align:center;left:25%;width:50%;position: absolute;visibility:hidden;bottom: 3%;">
-      <input id="organLinkButton" type="button" value="Models & data">
-    </div>
   </div>
 </template>
 
 <script>
 /* eslint-disable no-alert, no-console */
-const OrgansViewer = require('physiomeportal').OrgansViewer;
-//console.log(this)
-//Object.defineProperty(this.prototype, '$organsRenderer', { value: organsRenderer });
+const OrgansViewer = require('physiomeportal/src/modules/organsRenderer').OrgansViewer;
 
 export default {
   name: 'ScaffoldVuer',
@@ -47,9 +39,4 @@ export default {
   height:100%;
 }
 
-.portalDatGui {
-	position:absolute;
-	height: 95%;
-	pointer-events: none;
-}
 </style>
