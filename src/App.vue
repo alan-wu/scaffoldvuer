@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <ScaffoldVuer url="https://mapcore-bucket1.s3-us-west-2.amazonaws.com/ISAN/scaffold/use_case4/rat_heart_metadata.json"/>
+    <ScaffoldVuer url="https://mapcore-bucket1.s3-us-west-2.amazonaws.com/ISAN/scaffold/use_case4/rat_heart_metadata.json" ref="scaffold"/>
   </div>
 </template>
 
@@ -25,5 +25,9 @@ export default {
   height:100%;
   width: 100%;
   position:absolute;
+}
+
+body {
+  margin: 0px;
 }
 </style>

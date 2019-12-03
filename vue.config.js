@@ -2,7 +2,7 @@ module.exports = {
     chainWebpack: config => {
       // GraphQL Loader
       config.module
-        .rule('sahder')
+        .rule('shader')
         .test(/\.(vs|fs)$/i)
         .use('raw-loader')
           .loader('raw-loader')
