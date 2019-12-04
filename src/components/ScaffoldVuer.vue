@@ -1,17 +1,19 @@
 <template>
   <div class="scaffold-container">
-    <div id="organsDisplayArea" style="height:100%;width:100%;" ref="display">
-    </div>
-    <div id="check-list">
-      <button @click="viewAll">View all</button>
-      <div v-for="item in sceneData.groups" v-bind:key="item">
-        <input type="checkbox" :id="item" :value="item" @change="visibilityToggle(item, $event)" checked>
-        <label :for="item">{{item}}</label>
+    <div style="height:100%;width:100%;position:relative">
+      <div id="organsDisplayArea" style="height:100%;width:100%;" ref="display">
       </div>
-      <button v-if="isPlaying" @click="play(false)">Stop</button>
-      <button v-else @click="play(true)">Play</button>
+      <div id="check-list">
+        <button @click="viewAll">View all</button>
+        <div v-for="item in sceneData.groups" v-bind:key="item">
+          <input type="checkbox" :id="item" :value="item" @change="visibilityToggle(item, $event)" checked>
+          <label :for="item">{{item}}</label>
+        </div>
+        <button v-if="isPlaying" @click="play(false)">Stop</button>
+        <button v-else @click="play(true)">Play</button>
+      </div>
+      <input v-if="sceneData.timeVarying" id="timeSlider" type="range" min="0" max="100" :value="sceneData.currentTime" step="0.1" @input="timeChange($event)"/>
     </div>
-    <input v-if="sceneData.timeVarying" id="timeSlider" type="range" min="0" max="100" :value="sceneData.currentTime" step="0.1" @input="timeChange($event)"/>
   </div>
 </template>
 
@@ -71,6 +73,7 @@ export default {
 
 .scaffold-container {
   height:100%;
+  width:100%;
 }
 
 #check-list {
