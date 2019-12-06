@@ -14,20 +14,20 @@ npm run build-bundle
 ```
 
 ## How to use
-Install the package "npm i @abi-software/scaffoldvuer" to your vue app.
-Include the package in your script.
+Install the package in your vue app project with the following command "npm i @abi-software/scaffoldvuer".
+Import the package in your script as followed:
 ```javascript
 import '@abi-software/scaffoldvuer';
 import '@abi-software/scaffoldvuer/dist/scaffoldvuer.css';
 ```
 
-The codes above registers the ScaffoldVuer component into the global scope.
+The codes above register the ScaffoldVuer component in the global scope.
 You can now use the ScaffoldVuer in your vue template as followed:
 ```html
 <ScaffoldVuer url="Metafile.json" v-on:scaffold-selected="ScaffoldSelected"  style="height:50%"/>
 ```
 
-url should be the variable/string containing the url of the compatible json model.
+url should be a variable/string containing the url of a compatible json model.
 scaffold-selected is the custom event triggered when a part of the 3D-scaffold is selected, see below for a
 sample callback.
 
