@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/scaffoldvuer",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "./dist/scaffoldvuer.common.js",
   "files": [
     "dist/*",
@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "core-js": "^3.3.2",
+    "element-ui": "^2.13.0",
     "physiomeportal": "^0.4.11",
     "vue": "^2.6.10"
   },
@@ -24,10 +25,11 @@
     "@vue/cli-plugin-eslint": "^4.0.0",
     "@vue/cli-service": "^4.0.0",
     "babel-eslint": "^10.0.3",
+    "babel-plugin-component": "^1.1.1",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
-    "vue-template-compiler": "^2.6.10",
-    "raw-loader": "^0.5.1"
+    "raw-loader": "^0.5.1",
+    "vue-template-compiler": "^2.6.10"
   },
   "eslintConfig": {
     "root": true,
