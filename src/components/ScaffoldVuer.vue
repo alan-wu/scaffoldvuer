@@ -3,22 +3,33 @@
     <div style="height:100%;width:100%;position:relative">
       <div id="organsDisplayArea" style="height:100%;width:100%;" ref="display">
       </div>
-      <div id="check-list">
-        <button @click="viewAll">View all</button>
-        <div v-for="item in sceneData.groups" v-bind:key="item">
-          <input type="checkbox" :id="item" :value="item" @change="visibilityToggle(item, $event)" checked>
-          <label :for="item">{{item}}</label>
-        </div>
-        <button v-if="isPlaying" @click="play(false)">Stop</button>
-        <button v-else @click="play(true)">Play</button>
+      <div class="check-list">
+        <el-row style="margin-bottom:10px;">
+          <el-button type="success" @click="viewAll" round>View all</el-button>
+        </el-row>
+        <el-row v-for="item in sceneData.groups" :key="item">
+          <el-checkbox-button :label="item" @change="visibilityToggle(item, $event)" :checked=true size="small">{{item}}</el-checkbox-button>
+        </el-row>
       </div>
-      <input v-if="sceneData.timeVarying" id="timeSlider" type="range" min="0" max="100" :value="sceneData.currentTime" step="0.1" @input="timeChange($event)"/>
+      <div class="timeSlider" v-if="sceneData.timeVarying">
+        <el-button type="success" v-if="isPlaying" @click="play(false)" icon="el-icon-video-pause" round>Pause</el-button>
+        <el-button type="success" v-else @click="play(true)" icon="el-icon-video-play" round>Play</el-button>
+        <el-slider :min=0 :max=100 :value="sceneData.currentTime" :step=0.1 @input="timeChange($event)"></el-slider>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 /* eslint-disable no-alert, no-console */
+import Vue from "vue";
+import { Button, CheckboxButton, Row, Slider } from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
+Vue.use(Button);
+Vue.use(CheckboxButton);
+Vue.use(Row);
+Vue.use(Slider);
+
 const OrgansViewer = require('physiomeportal/src/modules/organsRenderer').OrgansViewer;
 const EventNotifier = require("physiomeportal/src/utilities/eventNotifier").EventNotifier;
 
@@ -44,10 +55,10 @@ export default {
       this.$module.viewAll();
     },
     visibilityToggle: function(item, event) {
-      this.$module.changeOrganPartsVisibility(item, event.srcElement.checked);
+      this.$module.changeOrganPartsVisibility(item, event);
     },
     timeChange: function(event) {
-      this.$module.updateTime(event.srcElement.value);
+      this.$module.updateTime(event);
     },
     play: function(flag) {
       this.$module.playAnimation(flag);
@@ -58,7 +69,8 @@ export default {
   data: function() {
     return {
        sceneData: this.$module.sceneData,
-       isPlaying: false
+       isPlaying: false,
+       step: 0.1
     }
   },
   mounted: function () {
@@ -76,19 +88,19 @@ export default {
   width:100%;
 }
 
-#check-list {
+.check-list {
   position: absolute;
   top:10px;
   left: 10px;
   text-align:left;
 }
 
-#timeSlider {
+.timeSlider {
   position: absolute;
   left: 2.5%;
   height: 48px;
   width:95%;
-  bottom: 10px;
+  bottom: 40px;
 }
 
 </style>

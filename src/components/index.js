@@ -3,6 +3,7 @@
 import Vue from "vue";
 import ScaffoldVuer from "./ScaffoldVuer.vue";
 
+
 const Components = {
     ScaffoldVuer
   };
