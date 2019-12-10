@@ -58,7 +58,8 @@ export default {
       this.$module.changeOrganPartsVisibility(item, event);
     },
     timeChange: function(event) {
-      this.$module.updateTime(event);
+      if (event != this.sceneData.currentTime)
+        this.$module.updateTime(event);
     },
     play: function(flag) {
       this.$module.playAnimation(flag);
