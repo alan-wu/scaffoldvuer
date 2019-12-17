@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <ScaffoldVuer url="https://mapcore-bucket1.s3-us-west-2.amazonaws.com/ISAN/scaffold/colon/colon_metadata.json" ref="scaffold"/>
+    <ScaffoldVuer url="https://mapcore-bucket1.s3-us-west-2.amazonaws.com/ISAN/scaffold/use_case4/rat_heart_metadata.json" ref="scaffold" showColourPicker/>
   </div>
 </template>
 

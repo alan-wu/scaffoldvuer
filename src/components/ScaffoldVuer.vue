@@ -7,9 +7,14 @@
         <el-row style="margin-bottom:10px;">
           <el-button type="success" @click="viewAll" round>View all</el-button>
         </el-row>
+        <el-checkbox-group v-model="checkboxGroup" size="small">
         <el-row v-for="item in sceneData.groups" :key="item">
-          <el-checkbox-button :label="item" @change="visibilityToggle(item, $event)" :checked=true size="small">{{item}}</el-checkbox-button>
+          <el-container>
+            <el-checkbox style="margin-top:3px;" :label="item" @change="visibilityToggle(item, $event)" :checked=true border>{{item}}</el-checkbox>
+            <el-color-picker v-if="showColourPicker" style="margin-top:3px;" :value="colour(item)" @change="colourChanged(item, $event)" size="small"></el-color-picker>
+          </el-container>
         </el-row>
+        </el-checkbox-group>
       </div>
       <div class="timeSlider" v-if="sceneData.timeVarying">
         <el-button type="success" v-if="isPlaying" @click="play(false)" icon="el-icon-video-pause" round>Pause</el-button>
@@ -23,10 +28,17 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
-import { Button, CheckboxButton, Row, Slider } from 'element-ui';
+import { Button, Checkbox, CheckboxGroup, ColorPicker, Container, Row, Slider } from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
+import lang from 'element-ui/lib/locale/lang/en';
+import locale from 'element-ui/lib/locale';
+
+locale.use(lang);
 Vue.use(Button);
-Vue.use(CheckboxButton);
+Vue.use(Checkbox);
+Vue.use(CheckboxGroup);
+Vue.use(ColorPicker);
+Vue.use(Container);
 Vue.use(Row);
 Vue.use(Slider);
 
@@ -64,15 +76,30 @@ export default {
     play: function(flag) {
       this.$module.playAnimation(flag);
       this.isPlaying = flag;
+    },
+    colourChanged: function(name, colour) {
+      let array = this.$module.scene.findGeometriesWithGroupName(name);
+      let hexString = colour.replace('#', '0x');
+      array.forEach(geometry => geometry.morph.material.color.setHex(hexString));
+      this.lastColourChanged = name;
+    },
+    colour: function (name) {
+        let array = this.$module.scene.findGeometriesWithGroupName(name);
+        return '#' + array[0].morph.material.color.getHexString();
     }
   },
-  props: ['url'],
+  props: {'url': String,
+          'showColourPicker': Boolean},
   data: function() {
     return {
-       sceneData: this.$module.sceneData,
-       isPlaying: false,
-       step: 0.1
+      sceneData: this.$module.sceneData,
+      isPlaying: false,
+      step: 0.1,
+      checkboxGroup: []
     }
+  },
+  computed: {
+
   },
   mounted: function () {
     this.$module.loadOrgansFromURL(this.url, undefined, undefined, "Overlay", undefined);
