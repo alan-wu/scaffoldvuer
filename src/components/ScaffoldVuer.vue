@@ -8,7 +8,7 @@
           <el-button type="success" @click="viewAll" round>View all</el-button>
         </el-row>
         <el-checkbox-group v-model="checkboxGroup" size="small">
-        <el-row v-for="item in sceneData.groups" :key="item">
+        <el-row v-for="item in orderedGroups" :key="item">
           <el-container>
             <el-checkbox style="margin-top:3px;" :label="item" @change="visibilityToggle(item, $event)" :checked=true border>{{item}}</el-checkbox>
             <el-color-picker v-if="showColourPicker" style="margin-top:3px;" :value="colour(item)" @change="colourChanged(item, $event)" size="small"></el-color-picker>
@@ -32,6 +32,7 @@ import { Button, Checkbox, CheckboxGroup, ColorPicker, Container, Row, Slider } 
 import 'element-ui/lib/theme-chalk/index.css';
 import lang from 'element-ui/lib/locale/lang/en';
 import locale from 'element-ui/lib/locale';
+var orderBy = require('lodash/orderBy');
 
 locale.use(lang);
 Vue.use(Button);
@@ -99,7 +100,9 @@ export default {
     }
   },
   computed: {
-
+    orderedGroups: function () {
+      return orderBy(this.sceneData.groups);
+    }
   },
   mounted: function () {
     this.$module.loadOrgansFromURL(this.url, undefined, undefined, "Overlay", undefined);

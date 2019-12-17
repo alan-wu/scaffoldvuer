@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/scaffoldvuer",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "main": "./dist/scaffoldvuer.common.js",
   "files": [
     "dist/*",
@@ -17,6 +17,7 @@
   "dependencies": {
     "core-js": "^3.3.2",
     "element-ui": "^2.13.0",
+    "lodash": "^4.17.15",
     "physiomeportal": "^0.4.12",
     "vue": "^2.6.10"
   },
