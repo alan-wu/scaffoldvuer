@@ -18,7 +18,7 @@
     "core-js": "^3.3.2",
     "element-ui": "^2.13.0",
     "lodash": "^4.17.15",
-    "physiomeportal": "^0.4.12",
+    "physiomeportal": "^0.4.13",
     "vue": "^2.6.10"
   },
   "devDependencies": {
