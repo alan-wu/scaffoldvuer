@@ -15,7 +15,7 @@
           >
             <el-checkbox-group v-model="group.checkbox" size="small">
               <el-row v-for="item in orderedList(group.primitives)" :key="item">
-                <el-container>
+                <div style= "display: flex;justify-content: space-between;">
                   <el-checkbox
                     style="margin-top:3px;"
                     :label="item"
@@ -30,7 +30,7 @@
                     @change="colourChanged(type, item, $event)"
                     size="small"
                   ></el-color-picker>
-                </el-container>
+                </div>
               </el-row>
             </el-checkbox-group>
           </el-collapse-item>
