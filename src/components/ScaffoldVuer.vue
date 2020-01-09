@@ -209,7 +209,9 @@ export default {
   position: absolute;
   top: 10px;
   left: 10px;
+  height: calc(100% - 20px);
   text-align: left;
+  overflow:auto;
 }
 
 .timeSlider {
