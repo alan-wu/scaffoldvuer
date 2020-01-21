@@ -14,7 +14,7 @@
             :name="type"
           >
             <el-checkbox-group v-model="group.checkbox" size="small">
-              <el-row v-for="item in orderedList(group.primitives)" :key="item">
+              <el-row v-for="item in group.sorted" :key="item">
                 <div style= "display: flex;justify-content: space-between;">
                   <el-checkbox
                     style="margin-top:3px;"
@@ -160,29 +160,40 @@ export default {
       primitivesList: {
         Geometries: {
           checkbox: [],
-          primitives: this.$module.sceneData.geometries
+          primitives: this.$module.sceneData.geometries,
+          sorted: []
         },
         Lines: {
           checkbox: [],
-          primitives: this.$module.sceneData.lines
+          primitives: this.$module.sceneData.lines,
+          sorted: []
         },
         Glyphsets: {
           checkbox: [],
-          primitives: this.$module.sceneData.glyphsets
+          primitives: this.$module.sceneData.glyphsets,
+          sorted: []
         },
         Pointsets: {
           checkbox: [],
-          primitives: this.$module.sceneData.pointsets
+          primitives: this.$module.sceneData.pointsets,
+          sorted: []
         }
       },
       activeCollapseItems: []
     };
   },
-  computed: {
-    orderedList: function() {
-      return function(primitives) {
-        return orderBy(primitives);
-      };
+  watch: {
+    "primitivesList.Geometries.primitives": function() {
+      this.primitivesList.Geometries.sorted = orderBy(this.primitivesList.Geometries.primitives);
+    },
+    "primitivesList.Lines.primitives": function() {
+      this.primitivesList.Lines.sorted = orderBy(this.primitivesList.Lines.primitives);
+    },
+    "primitivesList.Glyphsets.primitives": function() {
+      this.primitivesList.Glyphsets.sorted = orderBy(this.primitivesList.Glyphsets.primitives);
+    },
+    "primitivesList.Pointsets.primitives": function() {
+      this.primitivesList.Pointsets.sorted = orderBy(this.primitivesList.Pointsets.primitives);
     }
   },
   mounted: function() {
