@@ -194,16 +194,29 @@ export default {
     },
     "primitivesList.Pointsets.primitives": function() {
       this.primitivesList.Pointsets.sorted = orderBy(this.primitivesList.Pointsets.primitives);
+    },
+    "url": function(newValue) {
+      if (newValue) {
+        this.$module.loadOrgansFromURL(
+          newValue,
+          undefined,
+          undefined,
+          "scene",
+          undefined
+        );
+      }
     }
   },
   mounted: function() {
-    this.$module.loadOrgansFromURL(
-      this.url,
-      undefined,
-      undefined,
-      "Overlay",
-      undefined
-    );
+    if (this.url) {
+      this.$module.loadOrgansFromURL(
+        this.url,
+        undefined,
+        undefined,
+        "Overlay",
+        undefined
+      );
+    }
     this.$module.initialiseRenderer(this.$refs.display);
   }
 };
@@ -226,6 +239,7 @@ export default {
 }
 
 .timeSlider {
+  text-align:center;
   position: absolute;
   left: 2.5%;
   height: 48px;
