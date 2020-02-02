@@ -22,6 +22,7 @@
                     @change="visibilityToggle(item, $event, type)"
                     :checked="true"
                     border
+                    @mouseover.native="checkboxHover(item)"
                   >{{item}}</el-checkbox>
                   <el-color-picker
                     v-if="showColourPicker&&colour(type, item)"
@@ -118,6 +119,9 @@ export default {
     this.$module.addNotifier(eventNotifier);
   },
   methods: {
+    checkboxHover: function(item) {
+      this.$module.setHighlightedByGroupName(item);
+    },
     viewAll: function() {
       this.$module.viewAll();
     },
