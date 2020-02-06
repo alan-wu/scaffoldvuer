@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <ScaffoldVuer url="https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/a3/a3_metadata.json" ref="scaffold" showColourPicker/>
+    <input v-model="url" style="width:80%">
+    <ScaffoldVuer :url="url" ref="scaffold" showColourPicker/>
   </div>
 </template>
 
@@ -11,6 +12,11 @@ export default {
   name: 'app',
   components: {
     ScaffoldVuer
+  },
+  data: function() {
+    return {
+      url:"https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json"
+    };
   }
 }
 </script>

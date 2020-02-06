@@ -14,14 +14,15 @@
             :name="type"
           >
             <el-checkbox-group v-model="group.checkbox" size="small">
-              <el-row v-for="item in orderedList(group.primitives)" :key="item">
-                <el-container>
+              <el-row v-for="item in group.sorted" :key="item">
+                <div style= "display: flex;justify-content: space-between;">
                   <el-checkbox
                     style="margin-top:3px;"
                     :label="item"
                     @change="visibilityToggle(item, $event, type)"
                     :checked="true"
                     border
+                    @mouseover.native="checkboxHover(item)"
                   >{{item}}</el-checkbox>
                   <el-color-picker
                     v-if="showColourPicker&&colour(type, item)"
@@ -30,7 +31,7 @@
                     @change="colourChanged(type, item, $event)"
                     size="small"
                   ></el-color-picker>
-                </el-container>
+                </div>
               </el-row>
             </el-checkbox-group>
           </el-collapse-item>
@@ -118,6 +119,9 @@ export default {
     this.$module.addNotifier(eventNotifier);
   },
   methods: {
+    checkboxHover: function(item) {
+      this.$module.setHighlightedByGroupName(item);
+    },
     viewAll: function() {
       this.$module.viewAll();
     },
@@ -160,39 +164,63 @@ export default {
       primitivesList: {
         Geometries: {
           checkbox: [],
-          primitives: this.$module.sceneData.geometries
+          primitives: this.$module.sceneData.geometries,
+          sorted: []
         },
         Lines: {
           checkbox: [],
-          primitives: this.$module.sceneData.lines
+          primitives: this.$module.sceneData.lines,
+          sorted: []
         },
         Glyphsets: {
           checkbox: [],
-          primitives: this.$module.sceneData.glyphsets
+          primitives: this.$module.sceneData.glyphsets,
+          sorted: []
         },
         Pointsets: {
           checkbox: [],
-          primitives: this.$module.sceneData.pointsets
+          primitives: this.$module.sceneData.pointsets,
+          sorted: []
         }
       },
       activeCollapseItems: []
     };
   },
-  computed: {
-    orderedList: function() {
-      return function(primitives) {
-        return orderBy(primitives);
-      };
+  watch: {
+    "primitivesList.Geometries.primitives": function() {
+      this.primitivesList.Geometries.sorted = orderBy(this.primitivesList.Geometries.primitives);
+    },
+    "primitivesList.Lines.primitives": function() {
+      this.primitivesList.Lines.sorted = orderBy(this.primitivesList.Lines.primitives);
+    },
+    "primitivesList.Glyphsets.primitives": function() {
+      this.primitivesList.Glyphsets.sorted = orderBy(this.primitivesList.Glyphsets.primitives);
+    },
+    "primitivesList.Pointsets.primitives": function() {
+      this.primitivesList.Pointsets.sorted = orderBy(this.primitivesList.Pointsets.primitives);
+    },
+    "url": function(newValue) {
+      if (newValue) {
+        this.$module.loadOrgansFromURL(
+          newValue,
+          undefined,
+          undefined,
+          "scene",
+          undefined
+        );
+      }
     }
   },
   mounted: function() {
-    this.$module.loadOrgansFromURL(
-      this.url,
-      undefined,
-      undefined,
-      "Overlay",
-      undefined
-    );
+    if (this.url) {
+      this.$module.loadOrgansFromURL(
+        this.url,
+        undefined,
+        undefined,
+        "Overlay",
+        undefined
+      );
+    }
     this.$module.initialiseRenderer(this.$refs.display);
   }
 };
@@ -215,6 +243,7 @@ export default {
 }
 
 .timeSlider {
+  text-align:center;
   position: absolute;
   left: 2.5%;
   height: 48px;
