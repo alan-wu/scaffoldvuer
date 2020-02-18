@@ -3,39 +3,46 @@
     <div style="height:100%;width:100%;position:relative">
       <div id="organsDisplayArea" style="height:100%;width:100%;" ref="display"></div>
       <div class="check-list">
-        <el-row style="margin-bottom:10px;">
-          <el-button type="success" @click="viewAll" round>View all</el-button>
-        </el-row>
-        <el-collapse v-model="activeCollapseItems">
-          <el-collapse-item
-            v-for="(group, type) in primitivesList"
-            :title="type"
-            :key="type"
-            :name="type"
-          >
-            <el-checkbox-group v-model="group.checkbox" size="small">
-              <el-row v-for="item in group.sorted" :key="item">
-                <div style= "display: flex;justify-content: space-between;">
-                  <el-checkbox
-                    style="margin-top:3px;"
-                    :label="item"
-                    @change="visibilityToggle(item, $event, type)"
-                    :checked="true"
-                    border
-                    @mouseover.native="checkboxHover(item)"
-                  >{{item}}</el-checkbox>
-                  <el-color-picker
-                    v-if="showColourPicker&&colour(type, item)"
-                    style="margin-top:3px;"
-                    :value="colour(type, item)"
-                    @change="colourChanged(type, item, $event)"
-                    size="small"
-                  ></el-color-picker>
-                </div>
-              </el-row>
-            </el-checkbox-group>
-          </el-collapse-item>
-        </el-collapse>
+        <div class="control-menu" ref="control-menu" @click="toggleControl">
+          <div class="bar1"></div>
+          <div class="bar2"></div>
+          <div class="bar3"></div>
+        </div>
+        <div :style="toggleStyle">
+          <el-row style="margin-bottom:10px;">
+            <el-button type="primary" @click="viewAll" round>View all</el-button>
+          </el-row>
+          <el-collapse v-model="activeCollapseItems">
+            <el-collapse-item
+              v-for="(group, type) in primitivesList"
+              :title="type"
+              :key="type"
+              :name="type"
+            >
+              <el-checkbox-group v-model="group.checkbox" size="small">
+                <el-row v-for="item in group.sorted" :key="item">
+                  <div style="display: flex;justify-content: space-between;">
+                    <el-checkbox
+                      style="margin-top:3px;"
+                      :label="item"
+                      @change="visibilityToggle(item, $event, type)"
+                      :checked="true"
+                      border
+                      @mouseover.native="checkboxHover(item)"
+                    >{{item}}</el-checkbox>
+                    <el-color-picker
+                      v-if="showColourPicker&&colour(type, item)"
+                      style="margin-top:3px;"
+                      :value="colour(type, item)"
+                      @change="colourChanged(type, item, $event)"
+                      size="small"
+                    ></el-color-picker>
+                  </div>
+                </el-row>
+              </el-checkbox-group>
+            </el-collapse-item>
+          </el-collapse>
+        </div>
       </div>
       <div class="timeSlider" v-if="sceneData.timeVarying">
         <el-button
@@ -72,7 +79,15 @@ import {
   Row,
   Slider
 } from "element-ui";
-import "element-ui/lib/theme-chalk/index.css";
+import "../styles/purple/button.css";
+import "../styles/purple/checkbox.css";
+import "../styles/purple/checkbox-group.css";
+import "../styles/purple/color-picker.css";
+import "../styles/purple/collapse.css";
+import "../styles/purple/collapse-item.css";
+import "../styles/purple/container.css";
+import "../styles/purple/row.css";
+import "../styles/purple/slider.css";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 var orderBy = require("lodash/orderBy");
@@ -103,7 +118,7 @@ const eventNotifierCallback = function(component) {
 
 const getPrimitivesListWithGroupName = function(scene, type, name) {
   let array = [];
-  if (type == "Geometries") array = scene.findGeometriesWithGroupName(name);
+  if (type == "Surfaces") array = scene.findGeometriesWithGroupName(name);
   else if (type == "Lines") array = scene.findLinesWithGroupName(name);
   else if (type == "Glyphsets") array = scene.findGlyphsetsWithGroupName(name);
   else if (type == "Pointsets") array = scene.findPointsetsWithGroupName(name);
@@ -119,6 +134,17 @@ export default {
     this.$module.addNotifier(eventNotifier);
   },
   methods: {
+    toggleControl: function() {
+      this.$refs["control-menu"].classList.toggle("change");
+      if (this.toggleStyle.visibility == "hidden") {
+        this.toggleStyle.visibility = "visible";
+        this.toggleStyle.opacity = 1.0;
+      }
+      else {
+        this.toggleStyle.opacity = 0.0;
+        this.toggleStyle.visibility = "hidden";
+      }
+    },
     checkboxHover: function(item) {
       this.$module.setHighlightedByGroupName(item);
     },
@@ -126,7 +152,13 @@ export default {
       this.$module.viewAll();
     },
     visibilityToggle: function(item, event, type) {
-      this.$module.changeOrganPartsVisibility(item, event, type.toLowerCase());
+      let typeName = type;
+      if (typeName == "Surfaces") typeName = "Geometries";
+      this.$module.changeOrganPartsVisibility(
+        item,
+        event,
+        typeName.toLowerCase()
+      );
     },
     timeChange: function(event) {
       if (event != this.sceneData.currentTime) this.$module.updateTime(event);
@@ -162,7 +194,7 @@ export default {
       isPlaying: false,
       step: 0.1,
       primitivesList: {
-        Geometries: {
+        Surfaces: {
           checkbox: [],
           primitives: this.$module.sceneData.geometries,
           sorted: []
@@ -183,23 +215,32 @@ export default {
           sorted: []
         }
       },
-      activeCollapseItems: []
+      activeCollapseItems: [],
+      toggleStyle: {visibility:"hidden", opacity:0, transition: "visibility  0s, opacity 0.5s"}
     };
   },
   watch: {
-    "primitivesList.Geometries.primitives": function() {
-      this.primitivesList.Geometries.sorted = orderBy(this.primitivesList.Geometries.primitives);
+    "primitivesList.Surfaces.primitives": function() {
+      this.primitivesList.Surfaces.sorted = orderBy(
+        this.primitivesList.Surfaces.primitives
+      );
     },
     "primitivesList.Lines.primitives": function() {
-      this.primitivesList.Lines.sorted = orderBy(this.primitivesList.Lines.primitives);
+      this.primitivesList.Lines.sorted = orderBy(
+        this.primitivesList.Lines.primitives
+      );
     },
     "primitivesList.Glyphsets.primitives": function() {
-      this.primitivesList.Glyphsets.sorted = orderBy(this.primitivesList.Glyphsets.primitives);
+      this.primitivesList.Glyphsets.sorted = orderBy(
+        this.primitivesList.Glyphsets.primitives
+      );
     },
     "primitivesList.Pointsets.primitives": function() {
-      this.primitivesList.Pointsets.sorted = orderBy(this.primitivesList.Pointsets.primitives);
+      this.primitivesList.Pointsets.sorted = orderBy(
+        this.primitivesList.Pointsets.primitives
+      );
     },
-    "url": function(newValue) {
+    url: function(newValue) {
       if (newValue) {
         this.$module.loadOrgansFromURL(
           newValue,
@@ -239,15 +280,46 @@ export default {
   left: 10px;
   height: calc(100% - 20px);
   text-align: left;
-  overflow:auto;
+  overflow: auto;
 }
 
 .timeSlider {
-  text-align:center;
+  text-align: center;
   position: absolute;
   left: 2.5%;
   height: 48px;
   width: 95%;
   bottom: 40px;
 }
+
+.control-menu {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.bar1,
+.bar2,
+.bar3 {
+  width: 35px;
+  height: 5px;
+  background-color: #333;
+  margin: 6px 0;
+  transition: 0.4s;
+}
+
+.change .bar1 {
+  -webkit-transform: rotate(-45deg) translate(-9px, 6px);
+  transform: rotate(-45deg) translate(-9px, 6px);
+}
+
+.change .bar2 {
+  opacity: 0;
+}
+
+.change .bar3 {
+  -webkit-transform: rotate(45deg) translate(-8px, -8px);
+  transform: rotate(45deg) translate(-8px, -8px);
+}
+
+
 </style>
