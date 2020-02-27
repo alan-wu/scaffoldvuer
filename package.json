@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/scaffoldvuer",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "main": "./dist/scaffoldvuer.common.js",
   "files": [
     "dist/*",
@@ -30,7 +30,9 @@
     "babel-plugin-component": "^1.1.1",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
+    "node-sass": "^4.13.1",
     "raw-loader": "^0.5.1",
+    "sass-loader": "^8.0.2",
     "vue-template-compiler": "^2.6.10"
   },
   "eslintConfig": {
