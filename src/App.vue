@@ -1,6 +1,8 @@
 <template>
   <div id="app">
-    <input v-model="url" style="width:80%">
+    <button v-on:click="onClick('rat')">Rat</button>
+    <button v-on:click="onClick('mouse')">Mouse</button>
+    <input v-model="url" style="width:80%;padding-left: 15px;">
     <ScaffoldVuer :url="url" ref="scaffold" showColourPicker/>
   </div>
 </template>
@@ -12,6 +14,15 @@ export default {
   name: 'app',
   components: {
     ScaffoldVuer
+  },
+  methods: {
+    onClick: function(species) {
+      if (species == "rat") {
+        this.url = "https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json";
+      } else if (species == "mouse") {
+        this.url = "https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/27_Feb_2020/mouse_heart/mouse_heart_1.json";
+      }
+    }
   },
   data: function() {
     return {

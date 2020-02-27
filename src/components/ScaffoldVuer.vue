@@ -79,15 +79,6 @@ import {
   Row,
   Slider
 } from "element-ui";
-import "../styles/purple/button.css";
-import "../styles/purple/checkbox.css";
-import "../styles/purple/checkbox-group.css";
-import "../styles/purple/color-picker.css";
-import "../styles/purple/collapse.css";
-import "../styles/purple/collapse-item.css";
-import "../styles/purple/container.css";
-import "../styles/purple/row.css";
-import "../styles/purple/slider.css";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 var orderBy = require("lodash/orderBy");
@@ -269,6 +260,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
 .scaffold-container {
   height: 100%;
   width: 100%;
@@ -320,6 +312,23 @@ export default {
   -webkit-transform: rotate(45deg) translate(-8px, -8px);
   transform: rotate(45deg) translate(-8px, -8px);
 }
+</style>
 
-
+<style scoped src="../styles/purple/button.css">
+</style>
+<style scoped src="../styles/purple/checkbox.css">
+</style>
+<style scoped src="../styles/purple/checkbox-group.css">
+</style>
+<style scoped src="../styles/purple/color-picker.css">
+</style>
+<style scoped src="../styles/purple/collapse.css">
+</style>
+<style scoped src="../styles/purple/collapse-item.css">
+</style>
+<style scoped src="../styles/purple/container.css">
+</style>
+<style scoped src="../styles/purple/row.css">
+</style>
+<style scoped src="../styles/purple/slider.css">
 </style>
