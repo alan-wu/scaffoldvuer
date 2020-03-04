@@ -28,6 +28,12 @@ export default {
     return {
       url:"https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json"
     };
+  },
+  beforeMount: function() {
+    const queryString = require('query-string');
+    const parsed = queryString.parse(location.search);
+    if (parsed.url)
+      this.url= parsed.url;
   }
 }
 </script>
