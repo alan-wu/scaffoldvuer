@@ -9,7 +9,14 @@
         <div>Opacity</div>
         <div class="block">
           <span class="display">{{displayString}}</span>
-          <el-slider class="my-slider" :step="step" :min="min" :max="max" v-model="material.opacity" :format-tooltip="formatTooltip"></el-slider>
+          <el-slider
+            class="my-slider"
+            :step="step"
+            :min="min"
+            :max="max"
+            v-model="material.opacity"
+            :format-tooltip="formatTooltip"
+          ></el-slider>
         </div>
       </el-main>
     </el-container>
@@ -19,13 +26,7 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
-import {
-  Container,
-  Header,
-  Icon,
-  Main,
-  Slider
-} from "element-ui";
+import { Container, Header, Icon, Main, Slider } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 locale.use(lang);
@@ -39,7 +40,7 @@ export default {
   name: "OpacityControls",
   methods: {
     formatTooltip(val) {
-      this.displayString = Math.floor((100 * val) + 0.5)  + "%";
+      this.displayString = Math.floor(100 * val + 0.5) + "%";
       return this.displayString;
     }
   },
@@ -49,26 +50,21 @@ export default {
       displayString: "100%",
       material: undefined,
       step: 0.01,
-      min:0,
-      max:1
-    }
+      min: 0,
+      max: 1
+    };
   },
   watch: {
     target: function() {
       if (this.target) {
         this.material = this.target.morph.material;
-      }
-      else
-        this.material = undefined;
+      } else this.material = undefined;
     },
     "material.opacity": function() {
       if (this.material) {
-        if (this.material.opacity != 1)
-          this.material.transparent = true;
-        else
-          this.material.transparent = false;
+        if (this.material.opacity != 1) this.material.transparent = true;
+        else this.material.transparent = false;
       }
-
     }
   }
 };
@@ -76,7 +72,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
 .opacity-control {
   position: absolute;
   top: 181px;
@@ -86,38 +81,38 @@ export default {
 
 .header {
   color: #606266;
-  line-height:1;
+  line-height: 1;
   padding: 9px 17px 0 15px;
   border-bottom: 1px solid #ebeef5;
-  font-size:14px;
+  font-size: 14px;
 }
 
 .display {
-  width:44px;
+  width: 44px;
 }
 
 .icon {
-  right:17px;
+  right: 17px;
   position: absolute;
-  top:10px;
+  top: 10px;
 }
 
 .main {
-  font-size:13px;
+  font-size: 13px;
   padding: 20px 17px 0 15px;
 }
 
 .block {
-  right:17px;
+  right: 17px;
   position: absolute;
-  top:57px;
-  width:110px;
+  top: 57px;
+  width: 110px;
 }
 
 .my-slider {
-  position:absolute;
-  width:65px;
-  top:-12px;
+  position: absolute;
+  width: 65px;
+  top: -12px;
   right: 0px;
 }
 
@@ -129,6 +124,9 @@ export default {
   background-color: #fff;
 }
 
+>>> .el-slider__bar {
+  background-color: #8300bf;
+}
 </style>
 
 <style scoped src="../styles/purple/container.css">
