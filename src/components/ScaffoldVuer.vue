@@ -47,15 +47,6 @@ const OrgansViewer = require("physiomeportal/src/modules/organsRenderer")
 const EventNotifier = require("physiomeportal/src/utilities/eventNotifier")
   .EventNotifier;
 
-const eventNotifierCallback = function(component) {
-  return function(event) {
-    if (event.eventType == 1)
-      component.$emit("scaffold-selected", event.identifiers);
-    else if (event.eventType == 2)
-      component.$emit("scaffold-highlighted", event.identifiers);
-  };
-};
-
 export default {
   name: "ScaffoldVuer",
     components: {
@@ -64,18 +55,31 @@ export default {
     TraditionalControls
   },
   beforeCreate: function() {
-    let eventNotifier = new EventNotifier();
-    eventNotifier.subscribe(this, eventNotifierCallback(this));
     this.$module = new OrgansViewer();
-    this.$module.addNotifier(eventNotifier);
   },
   methods: {
+    eventNotifierCallback: function(event) {
+        if (event.eventType == 1) {
+          if (event.identifiers[0])
+            this.$refs.selectControl.changeActiveByName(event.identifiers[0].data.id);
+          else
+            this.$refs.selectControl.removeActive();
+          this.$emit("scaffold-selected", event.identifiers);
+        }
+        else if (event.eventType == 2)
+          this.$emit("scaffold-highlighted", event.identifiers);
+    },
     timeChange: function(event) {
       if (event != this.sceneData.currentTime) this.$module.updateTime(event);
     },
     objectSelected: function(object) {
-      this.$module.setSelectedByObjects([object.morph], true);
-      this.selectedObject = object;
+      if (object !== this.selectedObject) {
+        if (object)
+          this.$module.setSelectedByObjects([object.morph], true);
+        else
+          this.$module.setSelectedByObjects([], true);
+        this.selectedObject = object;
+      }
     },
     play: function(flag) {
       this.$module.playAnimation(flag);
@@ -96,7 +100,6 @@ export default {
     url: function(newValue) {
       if (newValue) {
         this.$refs.selectControl.clear();
-
         this.$module.loadOrgansFromURL(
           newValue,
           undefined,
@@ -108,6 +111,9 @@ export default {
     }
   },
   mounted: function() {
+    let eventNotifier = new EventNotifier();
+    eventNotifier.subscribe(this, this.eventNotifierCallback);
+    this.$module.addNotifier(eventNotifier);
     if (this.url) {
       this.$module.loadOrgansFromURL(
         this.url,

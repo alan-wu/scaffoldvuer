@@ -35,6 +35,36 @@ export default {
       this.sortedPrimitiveGroups = orderBy(tmpArray);
       this.module.changeOrganPartsVisibility(name, false);
     },
+    changeActiveByElement: function(e) {
+      if (this.activeRegion.name !== e.innerText) {
+        if (this.activeRegion.element)
+          this.activeRegion.element.classList.remove("activeTag");
+        this.activeRegion.element = e.parentNode;
+        this.activeRegion.element.classList.add("activeTag");
+        this.activeRegion.name = e.innerText;
+        let activeObject = this.getPrimitivesListWithGroupName(
+          this.module.scene, "Surfaces", this.activeRegion.name);
+        if (activeObject)
+          this.$emit("object-selected", activeObject);
+      }
+    },
+    changeActiveByName: function(name) {
+      const tags = Array.prototype.slice.call(
+        this.$refs.select.querySelectorAll('.el-select__tags-text'));
+      for (let i = 0; i < tags.length; i++) {
+        if (tags[i].innerText == name) {
+          this.changeActiveByElement(tags[i]);
+          return;
+        }
+      }
+    },
+    removeActive: function() {
+        if (this.activeRegion.element)
+          this.activeRegion.element.classList.remove("activeTag");
+        this.activeRegion.element = undefined;
+        this.activeRegion.name = "";
+        this.$emit("object-selected", undefined);
+    },
     clear: function() {
       this.sortedPrimitiveGroups = [];
       this.checkedItems = [];
@@ -45,18 +75,10 @@ export default {
       if (type == "Surfaces") 
         array = this.module.scene.findGeometriesWithGroupName(name);
       return array[0];
-    }, 
+    },
     tagsOnClicked: function(e) {
       e.stopPropagation();
-      if (this.activeRegion.element)
-        this.activeRegion.element.classList.remove("activeTag");
-      this.activeRegion.element = e.srcElement.parentNode;
-      this.activeRegion.element.classList.add("activeTag");
-      this.activeRegion.name = e.srcElement.innerText;
-      let activeObject = this.getPrimitivesListWithGroupName(this.module.scene, "Surfaces",
-        this.activeRegion.name);
-      if (activeObject)
-        this.$emit("object-selected", activeObject);
+      this.changeActiveByElement(e.srcElement);
     },
     addTagsEventListener: function(tags) {
       tags.forEach(tag => {
@@ -67,15 +89,15 @@ export default {
       for (let i = 0; i < this.checkedItems.length; i++)
         this.module.changeOrganPartsVisibility(this.checkedItems[i], true);
       this.$nextTick(() => {
-        const tags = Array.prototype.slice.call(this.$refs.select.querySelectorAll('.el-select__tags-text'))
+        const tags = Array.prototype.slice.call(
+          this.$refs.select.querySelectorAll('.el-select__tags-text'))
         this.addTagsEventListener(tags);
       })
     },
     tagRemoved: function(removedValue) {
       this.module.changeOrganPartsVisibility(removedValue, false);
       if (this.activeRegion.name === removedValue) {
-        this.activeRegion.element.classList.remove("activeTag");
-        this.$emit("object-selected", undefined);
+        this.removeActive();
       }
     }
   },
@@ -115,6 +137,7 @@ export default {
         this.module.changeOrganPartsVisibility(this.sortedPrimitiveGroups[i], false);
     }
     this.module.addOrganPartAddedCallback(this.organsAdded);
+    this.module.graphicsHighlight.selectColour = 0x444444;
   }
 };
 </script>

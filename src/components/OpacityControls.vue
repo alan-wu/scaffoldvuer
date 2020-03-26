@@ -39,7 +39,7 @@ export default {
   name: "OpacityControls",
   methods: {
     formatTooltip(val) {
-      this.displayString = 100 * val  + "%";
+      this.displayString = Math.floor((100 * val) + 0.5)  + "%";
       return this.displayString;
     }
   },
@@ -55,8 +55,9 @@ export default {
   },
   watch: {
     target: function() {
-      if (this.target)
+      if (this.target) {
         this.material = this.target.morph.material;
+      }
       else
         this.material = undefined;
     },
