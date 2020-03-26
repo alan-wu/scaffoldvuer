@@ -162,7 +162,7 @@ export default {
 }
 
 >>> .activeTag {
-  background-color:#ccc;
+  background-color:#ccc!important;
 }
 
 >>> .el-tag.el-tag--info {
