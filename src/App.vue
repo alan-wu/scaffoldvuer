@@ -3,7 +3,7 @@
     <button v-on:click="onClick('rat')">Rat</button>
     <button v-on:click="onClick('mouse')">Mouse</button>
     <input v-model="input" style="width:80%;padding-left: 15px;">
-    <ScaffoldVuer :url="url" ref="scaffold" showColourPicker/>
+    <ScaffoldVuer :traditional="traditional" :url="url" ref="scaffold" showColourPicker/>
   </div>
 </template>
 
@@ -24,22 +24,8 @@ export default {
       } else if (species == "mouse") {
         this.input = "https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/27_Feb_2020/mouse_heart/mouse_heart_1.json";
       }
-    }
-  },
-  data: function() {
-    return {
-      url: "https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json",
-      input: "https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json"
-    };
-  },
-  beforeMount: function() {
-    const queryString = require('query-string');
-    const parsed = queryString.parse(location.search);
-    if (parsed.url)
-      this.input= parsed.url;
-  },
-  watch: {
-    input: function() {
+    },
+    parseInput: function() {
       console.log(this.input)
       if (this.input.includes("N:package:")) {
         let requestURL = "/services/bts/getInfo";
@@ -61,6 +47,28 @@ export default {
         console.log(this.input)
         this.url = this.input;
       }
+    }
+  },
+  data: function() {
+    return {
+      url: undefined,
+      input: undefined,
+      traditional: true
+    };
+  },
+  beforeMount: function() {
+    const queryString = require('query-string');
+    const parsed = queryString.parse(location.search);
+    console.log(parsed)
+    if (parsed.url) {
+      this.input= parsed.url;
+    } else {
+      this.input = "https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json";
+    }
+  },
+  watch: {
+    input: function() {
+      this.parseInput();
     }
   }
 

@@ -49,7 +49,7 @@ const EventNotifier = require("physiomeportal/src/utilities/eventNotifier")
 
 export default {
   name: "ScaffoldVuer",
-    components: {
+  components: {
     OpacityControls,
     SelectControls,
     TraditionalControls
@@ -86,10 +86,16 @@ export default {
       this.isPlaying = flag;
     }
   },
-  props: { url: String, showColourPicker: Boolean },
+  props: { 
+    traditional: {
+      type: Boolean,
+      default: false
+    },
+    url: String,
+    showColourPicker: Boolean
+  },
   data: function() {
     return {
-      traditional: false,
       sceneData: this.$module.sceneData,
       isPlaying: false,
       step: 0.1,
@@ -99,7 +105,8 @@ export default {
   watch: {
     url: function(newValue) {
       if (newValue) {
-        this.$refs.selectControl.clear();
+        if (this.$refs.selectControl)
+          this.$refs.selectControl.clear();
         this.$module.loadOrgansFromURL(
           newValue,
           undefined,
