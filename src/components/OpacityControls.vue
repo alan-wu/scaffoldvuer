@@ -16,6 +16,7 @@
             :max="max"
             v-model="material.opacity"
             :format-tooltip="formatTooltip"
+            :show-tooltip=false
           ></el-slider>
         </div>
       </el-main>
@@ -56,9 +57,10 @@ export default {
   },
   watch: {
     target: function() {
-      if (this.target) {
+      if (this.target && (!this.target.isGlyphset))
         this.material = this.target.morph.material;
-      } else this.material = undefined;
+      else 
+        this.material = undefined;
     },
     "material.opacity": function() {
       if (this.material) {

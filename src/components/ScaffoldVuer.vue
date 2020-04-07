@@ -2,25 +2,27 @@
   <div class="scaffold-container">
     <div style="height:100%;width:100%;position:relative">
       <div id="organsDisplayArea" style="height:100%;width:100%;" ref="display"></div>
-      <TraditionalControls v-if="traditional" :module="$module" :showColourPicker="showColourPicker" />
-      <SelectControls v-else :module="$module" @object-selected="objectSelected" ref="selectControl"/>
-      <OpacityControls v-if="traditional == false" :target="selectedObject"/>
-      <div class="timeSlider" v-if="sceneData.timeVarying">
-        <el-button
-          type="success"
-          v-if="isPlaying"
-          @click="play(false)"
-          icon="el-icon-video-pause"
-          round
-        >Pause</el-button>
-        <el-button type="success" v-else @click="play(true)" icon="el-icon-video-play" round>Play</el-button>
-        <el-slider
-          :min="0"
-          :max="100"
-          :value="sceneData.currentTime"
-          :step="0.1"
-          @input="timeChange($event)"
-        ></el-slider>
+      <div v-if="displayUI">
+        <TraditionalControls v-if="traditional" :module="$module" :showColourPicker="showColourPicker" />
+        <SelectControls v-else :module="$module" @object-selected="objectSelected" ref="selectControl"/>
+        <OpacityControls v-if="traditional == false" :target="selectedObject"/>
+        <div class="timeSlider" v-if="sceneData.timeVarying">
+          <el-button
+            type="success"
+            v-if="isPlaying"
+            @click="play(false)"
+            icon="el-icon-video-pause"
+            round
+          >Pause</el-button>
+          <el-button type="success" v-else @click="play(true)" icon="el-icon-video-play" round>Play</el-button>
+          <el-slider
+            :min="0"
+            :max="100"
+            :value="sceneData.currentTime"
+            :step="0.1"
+            @input="timeChange($event)"
+          ></el-slider>
+        </div>
       </div>
     </div>
   </div>
@@ -59,26 +61,36 @@ export default {
   },
   methods: {
     eventNotifierCallback: function(event) {
-        if (event.eventType == 1) {
-          if (event.identifiers[0])
-            this.$refs.selectControl.changeActiveByName(event.identifiers[0].data.id);
-          else
+      if (event.eventType == 1) {
+        if (this.$refs.selectControl) {
+          if (event.identifiers[0]) {
+            let id = event.identifiers[0].data.id ? event.identifiers[0].data.id :
+              event.identifiers[0].data.group;
+            this.$refs.selectControl.changeActiveByName(id);
+          } else
             this.$refs.selectControl.removeActive();
-          this.$emit("scaffold-selected", event.identifiers);
         }
-        else if (event.eventType == 2)
-          this.$emit("scaffold-highlighted", event.identifiers);
+        this.$emit("scaffold-selected", event.identifiers);
+      }
+      else if (event.eventType == 2)
+        this.$emit("scaffold-highlighted", event.identifiers);
+    },
+    getCoordinatesOfSelected: function() {
+      if (this.selectedObject) {
+        return this.$module.scene.getObjectsScreenXY([this.selectedObject]);
+      }
+      return undefined;
     },
     timeChange: function(event) {
       if (event != this.sceneData.currentTime) this.$module.updateTime(event);
     },
     objectSelected: function(object) {
       if (object !== this.selectedObject) {
-        if (object)
-          this.$module.setSelectedByObjects([object.morph], true);
-        else
-          this.$module.setSelectedByObjects([], true);
         this.selectedObject = object;
+        if (object)
+          this.$module.setSelectedByZincObject(object, true);
+        else
+          this.$module.setSelectedByZincObject(undefined, true);
       }
     },
     play: function(flag) {
@@ -92,7 +104,11 @@ export default {
       default: false
     },
     url: String,
-    showColourPicker: Boolean
+    showColourPicker: Boolean,
+    displayUI: {
+      type: Boolean,
+      default: true
+    },
   },
   data: function() {
     return {
@@ -131,6 +147,7 @@ export default {
       );
     }
     this.$module.initialiseRenderer(this.$refs.display);
+    
   }
 };
 </script>
