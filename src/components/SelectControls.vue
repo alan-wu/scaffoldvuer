@@ -159,6 +159,9 @@ export default {
     }
     this.module.addOrganPartAddedCallback(this.organsAdded);
     this.module.graphicsHighlight.selectColour = 0x444444;
+  },
+  destroyed: function() {
+    this.sortedPrimitiveGroups = undefined;
   }
 };
 </script>

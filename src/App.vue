@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <div v-if="displayUI">
+      <p>{{ selectedCoordinates }}</p>
       <button v-on:click="autoTumble()">Auto Tumble</button>
       <button v-on:click="onClick('rat')">Rat</button>
       <button v-on:click="onClick('mouse')">Mouse</button>
@@ -56,7 +57,6 @@ export default {
     },
     onSelected: function(data) {
       console.log(data);
-      console.log(this.$refs.scaffold.getCoordinatesOfSelected());
     },
     onClick: function(species) {
       if (species == "rat") {
@@ -66,7 +66,6 @@ export default {
       }
     },
     parseInput: function() {
-      console.log(this.input)
       if (this.input.includes("N:package:")) {
         let requestURL = "/services/bts/getInfo";
         axios.get(requestURL, {
@@ -84,7 +83,6 @@ export default {
           // always executed
         });
       } else {
-        console.log(this.input)
         this.url = this.input;
       }
     }
@@ -94,7 +92,8 @@ export default {
       url: undefined,
       input: undefined,
       traditional: false,
-      displayUI: true
+      displayUI: true,
+      selectedCoordinates: undefined
     };
   },
   beforeMount: function() {
@@ -106,6 +105,9 @@ export default {
     } else {
       this.input = "https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json";
     }
+  },
+  mounted: function() {
+    this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
   },
   watch: {
     input: function() {

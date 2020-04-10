@@ -81,6 +81,9 @@ export default {
       }
       return undefined;
     },
+    getDynamicSelectedCoordinates: function() {
+      return this.$module.selectedScreenCoordinates;
+    },
     timeChange: function(event) {
       if (event != this.sceneData.currentTime) this.$module.updateTime(event);
     },
@@ -90,7 +93,7 @@ export default {
         if (object)
           this.$module.setSelectedByZincObject(object, true);
         else
-          this.$module.setSelectedByZincObject(undefined, true);
+          this.$module.setSelectedByObjects([], true);
       }
     },
     play: function(flag) {
@@ -148,6 +151,10 @@ export default {
     }
     this.$module.initialiseRenderer(this.$refs.display);
     
+  },
+  destroyed: function() {
+    console.log("destroy")
+    console.log(this.$module)
   }
 };
 </script>
