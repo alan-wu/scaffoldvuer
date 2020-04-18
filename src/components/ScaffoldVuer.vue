@@ -23,6 +23,14 @@
             @input="timeChange($event)"
           ></el-slider>
         </div>
+        <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
+          @click="zoomIn()" size="mini"></el-button>
+        <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
+          @click="zoomOut()" size="mini"></el-button>
+        <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
+          @click="resetView()" size="mini"></el-button>
+
+        
       </div>
     </div>
   </div>
@@ -60,6 +68,21 @@ export default {
     this.$module = new OrgansViewer();
   },
   methods: {
+    resetView: function() {
+      if (this.$module.scene) {
+        this.$module.scene.resetView();
+      }
+    },
+    zoomIn: function() {
+      if (this.$module.scene) {
+        this.$module.scene.changeZoomByScrollRateUnit(-1);
+      }
+    },
+    zoomOut: function() {
+      if (this.$module.scene) {
+        this.$module.scene.changeZoomByScrollRateUnit(1);
+      }
+    },
     eventNotifierCallback: function(event) {
       if (event.eventType == 1) {
         if (this.$refs.selectControl) {
@@ -153,8 +176,8 @@ export default {
     
   },
   destroyed: function() {
-    console.log("destroy")
-    console.log(this.$module)
+    this.$module.destroy();
+    this.$module = undefined;
   }
 };
 </script>
@@ -176,6 +199,30 @@ export default {
   bottom: 40px;
 }
 
+.zoomIn{
+  top:95px;
+  right:20px;
+  position: absolute;
+
+}
+
+.zoomOut{
+  top:134px;
+  right:20px;
+  position: absolute;
+}
+
+.icon-button {
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
+  border: solid 1px #ffffff;
+  background-color: #ffffff;
+}
+
+.resetView {
+  bottom:79px;
+  right:45%;
+  position: absolute;
+}
 </style>
 
 <style scoped src="../styles/purple/button.css">
