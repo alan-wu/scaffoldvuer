@@ -1,7 +1,7 @@
 <template>
   <div class="scaffold-container">
     <div id="organsDisplayArea" style="height:100%;width:100%;" ref="display"></div>
-    <div v-if="displayUI && !isTransitioning">
+    <div v-show="displayUI && !isTransitioning">
       <TraditionalControls v-if="traditional" :module="$module" :showColourPicker="showColourPicker" />
       <SelectControls v-else :module="$module" @object-selected="objectSelected" ref="selectControl"/>
       <OpacityControls v-if="traditional == false" :target="selectedObject"/>
