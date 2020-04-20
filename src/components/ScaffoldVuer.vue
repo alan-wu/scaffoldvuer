@@ -1,37 +1,35 @@
 <template>
   <div class="scaffold-container">
-    <div style="height:100%;width:100%;position:relative">
-      <div id="organsDisplayArea" style="height:100%;width:100%;" ref="display"></div>
-      <div v-if="displayUI">
-        <TraditionalControls v-if="traditional" :module="$module" :showColourPicker="showColourPicker" />
-        <SelectControls v-else :module="$module" @object-selected="objectSelected" ref="selectControl"/>
-        <OpacityControls v-if="traditional == false" :target="selectedObject"/>
-        <div class="timeSlider" v-if="sceneData.timeVarying">
-          <el-button
-            type="success"
-            v-if="isPlaying"
-            @click="play(false)"
-            icon="el-icon-video-pause"
-            round
-          >Pause</el-button>
-          <el-button type="success" v-else @click="play(true)" icon="el-icon-video-play" round>Play</el-button>
-          <el-slider
-            :min="0"
-            :max="100"
-            :value="sceneData.currentTime"
-            :step="0.1"
-            @input="timeChange($event)"
-          ></el-slider>
-        </div>
-        <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
-          @click="zoomIn()" size="mini"></el-button>
-        <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
-          @click="zoomOut()" size="mini"></el-button>
-        <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
-          @click="resetView()" size="mini"></el-button>
-
-        
+    <div id="organsDisplayArea" style="height:100%;width:100%;" ref="display"></div>
+    <div v-if="displayUI && !isTransitioning">
+      <TraditionalControls v-if="traditional" :module="$module" :showColourPicker="showColourPicker" />
+      <SelectControls v-else :module="$module" @object-selected="objectSelected" ref="selectControl"/>
+      <OpacityControls v-if="traditional == false" :target="selectedObject"/>
+      <div class="timeSlider" v-if="sceneData.timeVarying">
+        <el-button
+          v-if="isPlaying"
+          @click="play(false)"
+          icon="el-icon-video-pause"
+          round
+        >Pause</el-button>
+        <el-button v-else @click="play(true)" icon="el-icon-video-play" round>Play</el-button>
+        <el-slider
+          :min="0"
+          :max="100"
+          :value="sceneData.currentTime"
+          :step="0.1"
+          @input="timeChange($event)"
+        ></el-slider>
       </div>
+      <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
+        @click="zoomIn()" size="mini"></el-button>
+      <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
+        @click="zoomOut()" size="mini"></el-button>
+      <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
+        @click="resetView()" size="mini"></el-button>
+      <el-button icon="el-icon-refresh" circle class="freeSpin icon-button"
+        @click="freeSpin()" size="mini"></el-button>
+    
     </div>
   </div>
 </template>
@@ -81,6 +79,20 @@ export default {
     zoomOut: function() {
       if (this.$module.scene) {
         this.$module.scene.changeZoomByScrollRateUnit(1);
+      }
+    },
+    stopFreeSpin: function() {
+      let cameracontrol = this.$module.scene.getZincCameraControls();
+      cameracontrol.stopAutoTumble();
+      this.isTransitioning = false;
+    },
+    freeSpin: function() {
+      if (this.$module.scene) {
+        let cameracontrol = this.$module.scene.getZincCameraControls();
+        this.isTransitioning = true;
+        cameracontrol.enableAutoTumble();
+        cameracontrol.autoTumble([1.0, 0.0], Math.PI, true);
+        setTimeout(this.stopFreeSpin, 4000);
       }
     },
     eventNotifierCallback: function(event) {
@@ -141,7 +153,8 @@ export default {
       sceneData: this.$module.sceneData,
       isPlaying: false,
       step: 0.1,
-      selectedObject: undefined
+      selectedObject: undefined,
+      isTransitioning: false
     };
   },
   watch: {
@@ -188,6 +201,7 @@ export default {
 .scaffold-container {
   height: 100%;
   width: 100%;
+  position:relative;
 }
 
 .timeSlider {
@@ -220,7 +234,13 @@ export default {
 
 .resetView {
   bottom:79px;
-  right:45%;
+  right:42%;
+  position: absolute;
+}
+
+.freeSpin {
+  bottom:79px;
+  right:56%;
   position: absolute;
 }
 </style>
