@@ -39,7 +39,7 @@ const alignToObject = function(cameracontrol, scene) {
 
 const tumble = function(cameracontrol) {
   cameracontrol.enableAutoTumble();
-  cameracontrol.autoTumble([1.0, 0.0], 0.02, true);
+  cameracontrol.autoTumble([1.0, 0.0], Math.PI / 2, true);
 }
 
 export default {
@@ -53,7 +53,7 @@ export default {
       this.displayUI = false;
       let scene = this.$refs.scaffold.$module.scene;
       tumble(cameracontrol);
-      setTimeout(function(){ alignToObject(cameracontrol, scene) }, 10000);
+      setTimeout(function(){ alignToObject(cameracontrol, scene) }, 8000);
     },
     onSelected: function(data) {
       console.log(data);

@@ -1,29 +1,35 @@
 <template>
   <div class="scaffold-container">
-    <div style="height:100%;width:100%;position:relative">
-      <div id="organsDisplayArea" style="height:100%;width:100%;" ref="display"></div>
-      <div v-if="displayUI">
-        <TraditionalControls v-if="traditional" :module="$module" :showColourPicker="showColourPicker" />
-        <SelectControls v-else :module="$module" @object-selected="objectSelected" ref="selectControl"/>
-        <OpacityControls v-if="traditional == false" :target="selectedObject"/>
-        <div class="timeSlider" v-if="sceneData.timeVarying">
-          <el-button
-            type="success"
-            v-if="isPlaying"
-            @click="play(false)"
-            icon="el-icon-video-pause"
-            round
-          >Pause</el-button>
-          <el-button type="success" v-else @click="play(true)" icon="el-icon-video-play" round>Play</el-button>
-          <el-slider
-            :min="0"
-            :max="100"
-            :value="sceneData.currentTime"
-            :step="0.1"
-            @input="timeChange($event)"
-          ></el-slider>
-        </div>
+    <div id="organsDisplayArea" style="height:100%;width:100%;" ref="display"></div>
+    <div v-show="displayUI && !isTransitioning">
+      <TraditionalControls v-if="traditional" :module="$module" :showColourPicker="showColourPicker" />
+      <SelectControls v-else :module="$module" @object-selected="objectSelected" ref="selectControl"/>
+      <OpacityControls v-if="traditional == false" :target="selectedObject"/>
+      <div class="timeSlider" v-if="sceneData.timeVarying">
+        <el-button
+          v-if="isPlaying"
+          @click="play(false)"
+          icon="el-icon-video-pause"
+          round
+        >Pause</el-button>
+        <el-button v-else @click="play(true)" icon="el-icon-video-play" round>Play</el-button>
+        <el-slider
+          :min="0"
+          :max="100"
+          :value="sceneData.currentTime"
+          :step="0.1"
+          @input="timeChange($event)"
+        ></el-slider>
       </div>
+      <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
+        @click="zoomIn()" size="mini"></el-button>
+      <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
+        @click="zoomOut()" size="mini"></el-button>
+      <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
+        @click="resetView()" size="mini"></el-button>
+      <el-button icon="el-icon-refresh" circle class="freeSpin icon-button"
+        @click="freeSpin()" size="mini"></el-button>
+    
     </div>
   </div>
 </template>
@@ -49,6 +55,9 @@ const OrgansViewer = require("physiomeportal/src/modules/organsRenderer")
 const EventNotifier = require("physiomeportal/src/utilities/eventNotifier")
   .EventNotifier;
 
+/**
+ * A vue component of the scaffold viewer.
+ */
 export default {
   name: "ScaffoldVuer",
   components: {
@@ -60,6 +69,58 @@ export default {
     this.$module = new OrgansViewer();
   },
   methods: {
+    /**
+     * Function to reset the view to default.
+     * Also called when the associated button is pressed.
+     */
+    resetView: function() {
+      if (this.$module.scene) {
+        this.$module.scene.resetView();
+      }
+    },
+    /**
+     * Function to zoom in.
+     * Also called when the associated button is pressed.
+     */
+    zoomIn: function() {
+      if (this.$module.scene) {
+        this.$module.scene.changeZoomByScrollRateUnit(-1);
+      }
+    },
+    /**
+      * Function to zoom out.
+      * Also called when the associated button is pressed.
+      */
+    zoomOut: function() {
+      if (this.$module.scene) {
+        this.$module.scene.changeZoomByScrollRateUnit(1);
+      }
+    },
+    /**
+     * Function used to stop the free spin 
+     */
+    stopFreeSpin: function() {
+      let cameracontrol = this.$module.scene.getZincCameraControls();
+      cameracontrol.stopAutoTumble();
+      this.isTransitioning = false;
+    },
+    /**
+     * Function used to rotate the scene.
+     * Also called when the associated button is pressed.
+     */
+    freeSpin: function() {
+      if (this.$module.scene) {
+        let cameracontrol = this.$module.scene.getZincCameraControls();
+        this.isTransitioning = true;
+        cameracontrol.enableAutoTumble();
+        cameracontrol.autoTumble([1.0, 0.0], Math.PI, true);
+        setTimeout(this.stopFreeSpin, 4000);
+      }
+    },
+    /**
+     * Callback when a region is selected/highlighted.
+     * It will also update other controls.
+     */
     eventNotifierCallback: function(event) {
       if (event.eventType == 1) {
         if (this.$refs.selectControl) {
@@ -75,18 +136,33 @@ export default {
       else if (event.eventType == 2)
         this.$emit("scaffold-highlighted", event.identifiers);
     },
+    /**
+     * Get the coordinates of the current selected region.
+     */
     getCoordinatesOfSelected: function() {
       if (this.selectedObject) {
         return this.$module.scene.getObjectsScreenXY([this.selectedObject]);
       }
       return undefined;
     },
+    /**
+     * Return an object containing the window coordinates of the 
+     * current selected region which will be updated after each render
+     * loop.
+     */
     getDynamicSelectedCoordinates: function() {
       return this.$module.selectedScreenCoordinates;
     },
+    /**
+     * Callback when time is changed through the UI.
+     */
     timeChange: function(event) {
       if (event != this.sceneData.currentTime) this.$module.updateTime(event);
     },
+    /**
+     * Set the selected zinc object
+     * @param {object} object Zinc object 
+     */
     objectSelected: function(object) {
       if (object !== this.selectedObject) {
         this.selectedObject = object;
@@ -96,18 +172,37 @@ export default {
           this.$module.setSelectedByObjects([], true);
       }
     },
+    /**
+     * Start the animation.
+     * @param {object} object Zinc object 
+     */
     play: function(flag) {
       this.$module.playAnimation(flag);
       this.isPlaying = flag;
     }
   },
   props: { 
+    /**
+     * Enable traditional control
+     */
     traditional: {
       type: Boolean,
       default: false
     },
+    /**
+     * URL of the zincjs metadata.
+     */
     url: String,
-    showColourPicker: Boolean,
+    /**
+     * Show the colour control of set to true.
+     */
+    showColourPicker: {
+      type: Boolean,
+      default: false
+    },
+    /**
+     * Flag to show/hide the UI.
+     */
     displayUI: {
       type: Boolean,
       default: true
@@ -118,7 +213,11 @@ export default {
       sceneData: this.$module.sceneData,
       isPlaying: false,
       step: 0.1,
-      selectedObject: undefined
+      selectedObject: undefined,
+      /**
+       * This is set when scene is transitioning.
+       */
+      isTransitioning: false
     };
   },
   watch: {
@@ -153,8 +252,8 @@ export default {
     
   },
   destroyed: function() {
-    console.log("destroy")
-    console.log(this.$module)
+    this.$module.destroy();
+    this.$module = undefined;
   }
 };
 </script>
@@ -165,6 +264,7 @@ export default {
 .scaffold-container {
   height: 100%;
   width: 100%;
+  position:relative;
 }
 
 .timeSlider {
@@ -176,6 +276,36 @@ export default {
   bottom: 40px;
 }
 
+.zoomIn{
+  top:95px;
+  right:20px;
+  position: absolute;
+
+}
+
+.zoomOut{
+  top:134px;
+  right:20px;
+  position: absolute;
+}
+
+.icon-button {
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
+  border: solid 1px #ffffff;
+  background-color: #ffffff;
+}
+
+.resetView {
+  bottom:79px;
+  right:42%;
+  position: absolute;
+}
+
+.freeSpin {
+  bottom:79px;
+  right:56%;
+  position: absolute;
+}
 </style>
 
 <style scoped src="../styles/purple/button.css">
