@@ -6,7 +6,6 @@
       multiple
       placeholder="Region"
       @change="handleChange"
-      @remove-tag="tagRemoved"
     >
       <el-option v-for="item in sortedPrimitiveGroups" :key="item" :label="item" :value="item"></el-option>
     </el-select>
@@ -24,6 +23,8 @@ Vue.use(Option);
 Vue.use(Select);
 var orderBy = require("lodash/orderBy");
 var uniq = require("lodash/uniq");
+const differenceWith = require("lodash/differenceWith");
+const isEqual = require("lodash/isEqual");
 
 /**
  * A vue component for toggling visibility of various regions.
@@ -86,6 +87,7 @@ export default {
     clear: function() {
       this.sortedPrimitiveGroups = [];
       this.checkedItems = [];
+      this.previousSelection = [];
       this.$emit("object-selected", undefined);
     },
     getFirstZincObjectWithGroupName: function(scene, name) {
@@ -116,18 +118,28 @@ export default {
      * This will toggle on the selected items and add callback
      * on them.
      */
-    handleChange: function() {
-      for (let i = 0; i < this.checkedItems.length; i++)
-        this.module.changeOrganPartsVisibility(this.checkedItems[i], true);
-      this.$nextTick(() => {
-        const tags = Array.prototype.slice.call(
-          this.$refs.select.querySelectorAll(".el-select__tags-text")
-        );
-        this.addTagsEventListener(tags);
-      });
+    handleChange: function(changed) {
+      if (this.checkedItems.length > this.previousSelection.length ) {
+        for (let i = 0; i < this.checkedItems.length; i++)
+          this.module.changeOrganPartsVisibility(this.checkedItems[i], true);
+          this.$nextTick(() => {
+            const tags = Array.prototype.slice.call(
+              this.$refs.select.querySelectorAll(".el-select__tags-text")
+          );
+          this.addTagsEventListener(tags);
+        });
+      } else {
+        let diff = differenceWith(this.previousSelection,
+          this.checkedItems, isEqual);
+        for (let i = 0; i < diff.length; i++) {
+          this.tagRemoved(diff[i]);
+        }
+      }
+      this.previousSelection = changed;
     },
     /**
-     * Callback when a tag is remove which turns a region invisible.
+     * Called when a tag is removed which turns a region invisible.
+     * See @handlChange
      */
     tagRemoved: function(removedValue) {
       this.module.changeOrganPartsVisibility(removedValue, false);
@@ -140,7 +152,8 @@ export default {
   data: function() {
     return {
       checkedItems: [],
-      sortedPrimitiveGroups: []
+      sortedPrimitiveGroups: [],
+      previousSelection: []
     };
   },
   watch: {
