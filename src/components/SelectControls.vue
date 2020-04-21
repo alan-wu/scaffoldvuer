@@ -25,14 +25,23 @@ Vue.use(Select);
 var orderBy = require("lodash/orderBy");
 var uniq = require("lodash/uniq");
 
+/**
+ * A vue component for toggling visibility of various regions.
+ */
 export default {
   name: "SelectControls",
   methods: {
+    /**
+     * This is called when a new organ is read into the scene.
+     */
     organsAdded: function(name) {
       let tmpArray = uniq(this.sortedPrimitiveGroups.concat([name]));
       this.sortedPrimitiveGroups = orderBy(tmpArray);
       this.module.changeOrganPartsVisibility(name, false);
     },
+    /**
+     * Use the element information make select a region.
+     */
     changeActiveByElement: function(e) {
       if (this.activeRegion.name !== e.innerText) {
         if (this.activeRegion.element)
@@ -47,6 +56,9 @@ export default {
         if (activeObject) this.$emit("object-selected", activeObject);
       }
     },
+    /**
+     * Select a region by its name.
+     */
     changeActiveByName: function(name) {
       const tags = Array.prototype.slice.call(
         this.$refs.select.querySelectorAll(".el-select__tags-text")
@@ -58,6 +70,9 @@ export default {
         }
       }
     },
+    /**
+     * Unselect the current selected region.
+     */
     removeActive: function() {
       if (this.activeRegion.element)
         this.activeRegion.element.classList.remove("activeTag");
@@ -65,6 +80,9 @@ export default {
       this.activeRegion.name = "";
       this.$emit("object-selected", undefined);
     },
+    /**
+     * Reset the controls.
+     */
     clear: function() {
       this.sortedPrimitiveGroups = [];
       this.checkedItems = [];
@@ -81,6 +99,7 @@ export default {
       if (array.length > 0) return array[0];
       return undefined;
     },
+    
     tagsOnClicked: function(e) {
       if (this.$refs.elSelect.visible === false)
         e.stopPropagation();
@@ -92,6 +111,11 @@ export default {
         tag.addEventListener("click", this.tagsOnClicked);
       });
     },
+    /**
+     * Callback when changes is made on the active list.
+     * This will toggle on the selected items and add callback
+     * on them.
+     */
     handleChange: function() {
       for (let i = 0; i < this.checkedItems.length; i++)
         this.module.changeOrganPartsVisibility(this.checkedItems[i], true);
@@ -102,6 +126,9 @@ export default {
         this.addTagsEventListener(tags);
       });
     },
+    /**
+     * Callback when a tag is remove which turns a region invisible.
+     */
     tagRemoved: function(removedValue) {
       this.module.changeOrganPartsVisibility(removedValue, false);
       if (this.activeRegion.name === removedValue) {

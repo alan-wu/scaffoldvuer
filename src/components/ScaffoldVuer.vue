@@ -55,6 +55,9 @@ const OrgansViewer = require("physiomeportal/src/modules/organsRenderer")
 const EventNotifier = require("physiomeportal/src/utilities/eventNotifier")
   .EventNotifier;
 
+/**
+ * A vue component of the scaffold viewer.
+ */
 export default {
   name: "ScaffoldVuer",
   components: {
@@ -66,26 +69,45 @@ export default {
     this.$module = new OrgansViewer();
   },
   methods: {
+    /**
+     * Function to reset the view to default.
+     * Also called when the associated button is pressed.
+     */
     resetView: function() {
       if (this.$module.scene) {
         this.$module.scene.resetView();
       }
     },
+    /**
+     * Function to zoom in.
+     * Also called when the associated button is pressed.
+     */
     zoomIn: function() {
       if (this.$module.scene) {
         this.$module.scene.changeZoomByScrollRateUnit(-1);
       }
     },
+    /**
+      * Function to zoom out.
+      * Also called when the associated button is pressed.
+      */
     zoomOut: function() {
       if (this.$module.scene) {
         this.$module.scene.changeZoomByScrollRateUnit(1);
       }
     },
+    /**
+     * Function used to stop the free spin 
+     */
     stopFreeSpin: function() {
       let cameracontrol = this.$module.scene.getZincCameraControls();
       cameracontrol.stopAutoTumble();
       this.isTransitioning = false;
     },
+    /**
+     * Function used to rotate the scene.
+     * Also called when the associated button is pressed.
+     */
     freeSpin: function() {
       if (this.$module.scene) {
         let cameracontrol = this.$module.scene.getZincCameraControls();
@@ -95,6 +117,10 @@ export default {
         setTimeout(this.stopFreeSpin, 4000);
       }
     },
+    /**
+     * Callback when a region is selected/highlighted.
+     * It will also update other controls.
+     */
     eventNotifierCallback: function(event) {
       if (event.eventType == 1) {
         if (this.$refs.selectControl) {
@@ -110,18 +136,33 @@ export default {
       else if (event.eventType == 2)
         this.$emit("scaffold-highlighted", event.identifiers);
     },
+    /**
+     * Get the coordinates of the current selected region.
+     */
     getCoordinatesOfSelected: function() {
       if (this.selectedObject) {
         return this.$module.scene.getObjectsScreenXY([this.selectedObject]);
       }
       return undefined;
     },
+    /**
+     * Return an object containing the window coordinates of the 
+     * current selected region which will be updated after each render
+     * loop.
+     */
     getDynamicSelectedCoordinates: function() {
       return this.$module.selectedScreenCoordinates;
     },
+    /**
+     * Callback when time is changed through the UI.
+     */
     timeChange: function(event) {
       if (event != this.sceneData.currentTime) this.$module.updateTime(event);
     },
+    /**
+     * Set the selected zinc object
+     * @param {object} object Zinc object 
+     */
     objectSelected: function(object) {
       if (object !== this.selectedObject) {
         this.selectedObject = object;
@@ -131,18 +172,37 @@ export default {
           this.$module.setSelectedByObjects([], true);
       }
     },
+    /**
+     * Start the animation.
+     * @param {object} object Zinc object 
+     */
     play: function(flag) {
       this.$module.playAnimation(flag);
       this.isPlaying = flag;
     }
   },
   props: { 
+    /**
+     * Enable traditional control
+     */
     traditional: {
       type: Boolean,
       default: false
     },
+    /**
+     * URL of the zincjs metadata.
+     */
     url: String,
-    showColourPicker: Boolean,
+    /**
+     * Show the colour control of set to true.
+     */
+    showColourPicker: {
+      type: Boolean,
+      default: false
+    },
+    /**
+     * Flag to show/hide the UI.
+     */
     displayUI: {
       type: Boolean,
       default: true
@@ -154,6 +214,9 @@ export default {
       isPlaying: false,
       step: 0.1,
       selectedObject: undefined,
+      /**
+       * This is set when scene is transitioning.
+       */
       isTransitioning: false
     };
   },
