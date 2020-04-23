@@ -37,6 +37,9 @@ Vue.use(Icon);
 Vue.use(Main);
 Vue.use(Slider);
 
+/**
+ * A component to control the opacity of the target object.
+ */
 export default {
   name: "OpacityControls",
   methods: {
@@ -45,7 +48,12 @@ export default {
       return this.displayString;
     }
   },
-  props: { target: Object },
+  props: { 
+    /**
+     * The opacity of this object will be controlled here.
+     */
+    target: Object
+  },
   data: function() {
     return {
       displayString: "100%",
@@ -135,4 +143,3 @@ export default {
 </style>
 <style scoped src="../styles/purple/slider.css">
 </style>
-
