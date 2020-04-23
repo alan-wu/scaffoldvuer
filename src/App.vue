@@ -66,7 +66,10 @@ export default {
       }
     },
     parseInput: function() {
-      if (this.input.includes("N:package:")) {
+      if (this.input.includes("discover/scaffold/N:package:")) {
+        let requestURL = "/services/bts/" + this.input;
+        this.url = requestURL;
+      } else if (this.input.includes("N:package:")) {
         let requestURL = "/services/bts/getInfo";
         axios.get(requestURL, {
           params: {
