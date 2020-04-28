@@ -1,6 +1,6 @@
 <template>
   <div class="opacity-control" ref="control" v-if="material!=undefined">
-    <el-container class="container">
+    <el-container class="opacity-container">
       <el-header height="37px" class="header">
         <div>Opacity</div>
         <i class="el-icon-arrow-right icon"></i>
@@ -126,7 +126,7 @@ export default {
   right: 0px;
 }
 
-.container {
+.opacity-container {
   width: 224px;
   height: 93px;
   border-radius: 4px;
