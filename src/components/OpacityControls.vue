@@ -1,6 +1,6 @@
 <template>
   <div class="opacity-control" ref="control" v-if="material!=undefined">
-    <el-container class="container">
+    <el-container class="opacity-container">
       <el-header height="37px" class="header">
         <div>Opacity</div>
         <i class="el-icon-arrow-right icon"></i>
@@ -37,6 +37,9 @@ Vue.use(Icon);
 Vue.use(Main);
 Vue.use(Slider);
 
+/**
+ * A component to control the opacity of the target object.
+ */
 export default {
   name: "OpacityControls",
   methods: {
@@ -45,7 +48,12 @@ export default {
       return this.displayString;
     }
   },
-  props: { target: Object },
+  props: { 
+    /**
+     * The opacity of this object will be controlled here.
+     */
+    target: Object
+  },
   data: function() {
     return {
       displayString: "100%",
@@ -118,7 +126,7 @@ export default {
   right: 0px;
 }
 
-.container {
+.opacity-container {
   width: 224px;
   height: 93px;
   border-radius: 4px;
@@ -135,4 +143,3 @@ export default {
 </style>
 <style scoped src="../styles/purple/slider.css">
 </style>
-

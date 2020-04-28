@@ -6,7 +6,6 @@
       multiple
       placeholder="Region"
       @change="handleChange"
-      @remove-tag="tagRemoved"
     >
       <el-option v-for="item in sortedPrimitiveGroups" :key="item" :label="item" :value="item"></el-option>
     </el-select>
@@ -24,6 +23,8 @@ Vue.use(Option);
 Vue.use(Select);
 var orderBy = require("lodash/orderBy");
 var uniq = require("lodash/uniq");
+const differenceWith = require("lodash/differenceWith");
+const isEqual = require("lodash/isEqual");
 
 /**
  * A vue component for toggling visibility of various regions.
@@ -42,19 +43,33 @@ export default {
     /**
      * Use the element information make select a region.
      */
-    changeActiveByElement: function(e) {
-      if (this.activeRegion.name !== e.innerText) {
-        if (this.activeRegion.element)
-          this.activeRegion.element.classList.remove("activeTag");
-        this.activeRegion.element = e.parentNode;
-        this.activeRegion.element.classList.add("activeTag");
-        this.activeRegion.name = e.innerText;
-        let activeObject = this.getFirstZincObjectWithGroupName(
+    changeStatusByElement: function(e, targetRegion, tag, callbackName) {
+      if (targetRegion.name !== e.innerText) {
+        if (targetRegion.element)
+          targetRegion.element.classList.remove(tag);
+        targetRegion.element = e.parentNode;
+        targetRegion.element.classList.add(tag);
+        targetRegion.name = e.innerText;
+        let targetObject = this.getFirstZincObjectWithGroupName(
           this.module.scene,
-          this.activeRegion.name
+          targetRegion.name
         );
-        if (activeObject) this.$emit("object-selected", activeObject);
+        if (targetObject) this.$emit(callbackName, targetObject);
       }
+    },
+    /**
+     * Use the element information make select a region.
+     */
+    changeActiveByElement: function(e) {
+      this.changeStatusByElement(e, this.activeRegion,
+        "activeTag", "object-selected");
+    },
+    /**
+     * Use the element information make select a region.
+     */
+    changeHoverByElement: function(e) {
+      this.changeStatusByElement(e, this.hoverRegion,
+        "hoverTag", "object-hovered");
     },
     /**
      * Select a region by its name.
@@ -70,15 +85,39 @@ export default {
         }
       }
     },
+   /**
+     * Hover a region by its name.
+     */
+    changeHoverByName: function(name) {
+      const tags = Array.prototype.slice.call(
+        this.$refs.select.querySelectorAll(".el-select__tags-text")
+      );
+      for (let i = 0; i < tags.length; i++) {
+        if (tags[i].innerText == name) {
+          this.changeHoverByElement(tags[i]);
+          return;
+        }
+      }
+    },
+    removeTag: function(targetRegion, tagToBeRemoved) {
+      if (targetRegion.element)
+        targetRegion.element.classList.remove(tagToBeRemoved);
+      targetRegion.element = undefined;
+      targetRegion.name = "";
+    },
     /**
      * Unselect the current selected region.
      */
     removeActive: function() {
-      if (this.activeRegion.element)
-        this.activeRegion.element.classList.remove("activeTag");
-      this.activeRegion.element = undefined;
-      this.activeRegion.name = "";
+      this.removeTag(this.activeRegion, "activeTag");
       this.$emit("object-selected", undefined);
+    },
+    /**
+     * Unselect the current hover region.
+     */
+    removeHover: function() {
+      this.removeTag(this.hoverRegion, "hoverTag");
+      this.$emit("object-hovered", undefined);
     },
     /**
      * Reset the controls.
@@ -86,6 +125,7 @@ export default {
     clear: function() {
       this.sortedPrimitiveGroups = [];
       this.checkedItems = [];
+      this.previousSelection = [];
       this.$emit("object-selected", undefined);
     },
     getFirstZincObjectWithGroupName: function(scene, name) {
@@ -99,16 +139,19 @@ export default {
       if (array.length > 0) return array[0];
       return undefined;
     },
-    
     tagsOnClicked: function(e) {
       if (this.$refs.elSelect.visible === false)
         e.stopPropagation();
       this.changeActiveByElement(e.srcElement);
-      
+    },
+    tagsOnMouseOver: function(e) {
+      e.stopPropagation();
+      this.changeHoverByElement(e.srcElement);
     },
     addTagsEventListener: function(tags) {
       tags.forEach(tag => {
         tag.addEventListener("click", this.tagsOnClicked);
+        tag.addEventListener("mouseover", this.tagsOnMouseOver);
       });
     },
     /**
@@ -116,23 +159,36 @@ export default {
      * This will toggle on the selected items and add callback
      * on them.
      */
-    handleChange: function() {
-      for (let i = 0; i < this.checkedItems.length; i++)
-        this.module.changeOrganPartsVisibility(this.checkedItems[i], true);
-      this.$nextTick(() => {
-        const tags = Array.prototype.slice.call(
-          this.$refs.select.querySelectorAll(".el-select__tags-text")
-        );
-        this.addTagsEventListener(tags);
-      });
+    handleChange: function(changed) {
+      if (this.checkedItems.length > this.previousSelection.length ) {
+        for (let i = 0; i < this.checkedItems.length; i++)
+          this.module.changeOrganPartsVisibility(this.checkedItems[i], true);
+          this.$nextTick(() => {
+            const tags = Array.prototype.slice.call(
+              this.$refs.select.querySelectorAll(".el-select__tags-text")
+          );
+          this.addTagsEventListener(tags);
+        });
+      } else {
+        let diff = differenceWith(this.previousSelection,
+          this.checkedItems, isEqual);
+        for (let i = 0; i < diff.length; i++) {
+          this.tagRemoved(diff[i]);
+        }
+      }
+      this.previousSelection = changed;
     },
     /**
-     * Callback when a tag is remove which turns a region invisible.
+     * Called when a tag is removed which turns a region invisible.
+     * See @handlChange
      */
     tagRemoved: function(removedValue) {
       this.module.changeOrganPartsVisibility(removedValue, false);
       if (this.activeRegion.name === removedValue) {
         this.removeActive();
+      }
+      if (this.hoverRegion.name === removedValue) {
+        this.removeHover();
       }
     }
   },
@@ -140,7 +196,8 @@ export default {
   data: function() {
     return {
       checkedItems: [],
-      sortedPrimitiveGroups: []
+      sortedPrimitiveGroups: [],
+      previousSelection: []
     };
   },
   watch: {
@@ -171,6 +228,7 @@ export default {
   },
   created: function() {
     this.activeRegion = { element: undefined, name: "" };
+    this.hoverRegion = { element: undefined, name: "" };
     let tmpArray = this.module.sceneData.geometries.concat(
       this.module.sceneData.lines
     );
@@ -213,6 +271,10 @@ export default {
 
 >>> .activeTag {
   background-color: #ccc !important;
+}
+
+>>> .hoverTag {
+  background-color: #ddd !important;
 }
 
 >>> .el-tag.el-tag--info {

@@ -3,16 +3,18 @@
     <div id="organsDisplayArea" style="height:100%;width:100%;" ref="display"></div>
     <div v-show="displayUI && !isTransitioning">
       <TraditionalControls v-if="traditional" :module="$module" :showColourPicker="showColourPicker" />
-      <SelectControls v-else :module="$module" @object-selected="objectSelected" ref="selectControl"/>
+      <SelectControls v-else :module="$module" @object-selected="objectSelected" 
+        @object-hovered="objectHovered" ref="selectControl"/>
       <OpacityControls v-if="traditional == false" :target="selectedObject"/>
       <div class="timeSlider" v-if="sceneData.timeVarying">
         <el-button
           v-if="isPlaying"
           @click="play(false)"
           icon="el-icon-video-pause"
-          round
-        >Pause</el-button>
-        <el-button v-else @click="play(true)" icon="el-icon-video-play" round>Play</el-button>
+          size="mini"
+          circle
+        ></el-button>
+        <el-button v-else @click="play(true)" size="mini" icon="el-icon-video-play" circle></el-button>
         <el-slider
           :min="0"
           :max="100"
@@ -133,8 +135,17 @@ export default {
         }
         this.$emit("scaffold-selected", event.identifiers);
       }
-      else if (event.eventType == 2)
+      else if (event.eventType == 2) {
+        if (this.$refs.selectControl) {
+          if (event.identifiers[0]) {
+            let id = event.identifiers[0].data.id ? event.identifiers[0].data.id :
+              event.identifiers[0].data.group;
+            this.$refs.selectControl.changeHoverByName(id);
+          } else
+            this.$refs.selectControl.removeHover();
+        }
         this.$emit("scaffold-highlighted", event.identifiers);
+      }
     },
     /**
      * Get the coordinates of the current selected region.
@@ -170,6 +181,19 @@ export default {
           this.$module.setSelectedByZincObject(object, true);
         else
           this.$module.setSelectedByObjects([], true);
+      }
+    },
+    /**
+     * Set the highlighted zinc object
+     * @param {object} object Zinc object 
+     */
+    objectHovered: function(object) {
+      if (object !== this.hoveredObject) {
+        this.hoveredObject = object;
+        if (object)
+          this.$module.setHighlightedByZincObject(object, true);
+        else
+          this.$module.setHighlightedByObjects([], true);
       }
     },
     /**
@@ -214,6 +238,7 @@ export default {
       isPlaying: false,
       step: 0.1,
       selectedObject: undefined,
+      hoveredObject: undefined,
       /**
        * This is set when scene is transitioning.
        */
@@ -249,7 +274,7 @@ export default {
       );
     }
     this.$module.initialiseRenderer(this.$refs.display);
-    
+    this.$module.toolTip = undefined;
   },
   destroyed: function() {
     this.$module.destroy();
@@ -297,13 +322,13 @@ export default {
 
 .resetView {
   bottom:79px;
-  right:42%;
+  left:calc(50% + 27.5px);
   position: absolute;
 }
 
 .freeSpin {
   bottom:79px;
-  right:56%;
+  right:calc(50% + 27.5px);
   position: absolute;
 }
 </style>
