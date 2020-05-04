@@ -27,8 +27,6 @@
         @click="zoomIn()" size="mini"></el-button>
       <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
         @click="zoomOut()" size="mini"></el-button>
-      <el-button icon="el-icon-refresh" circle class="freeSpin icon-button"
-        @click="freeSpin()" size="mini"></el-button>
       <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
         @click="resetView()" size="mini"></el-button>
     </div>
@@ -325,11 +323,6 @@ export default {
   background-color: #ffffff;
 }
 
-.freeSpin {
-  bottom:79px;
-  right:50%;
-  position: absolute;
-}
 </style>
 
 <style scoped src="../styles/purple/button.css">
