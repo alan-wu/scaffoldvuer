@@ -5,6 +5,7 @@
       v-model="checkedItems"
       multiple
       placeholder="Region"
+      :popper-append-to-body="appendToBody"
       @change="handleChange"
     >
       <el-option v-for="item in sortedPrimitiveGroups" :key="item" :label="item" :value="item"></el-option>
@@ -197,7 +198,8 @@ export default {
     return {
       checkedItems: [],
       sortedPrimitiveGroups: [],
-      previousSelection: []
+      previousSelection: [],
+      appendToBody: false
     };
   },
   watch: {
