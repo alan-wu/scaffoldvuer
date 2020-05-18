@@ -37,9 +37,20 @@ export default {
      * This is called when a new organ is read into the scene.
      */
     organsAdded: function(name) {
-      let tmpArray = uniq(this.sortedPrimitiveGroups.concat([name]));
-      this.sortedPrimitiveGroups = orderBy(tmpArray);
-      this.module.changeOrganPartsVisibility(name, false);
+      if (name && name != "") {
+        let tmpArray = uniq(this.sortedPrimitiveGroups.concat([name]));
+        this.sortedPrimitiveGroups = orderBy(tmpArray);
+        const index = this.sortedPrimitiveGroups.indexOf(undefined);
+        if (index > -1) {
+          this.sortedPrimitiveGroups.splice(index, 1);
+        }
+        if (this.displayAtStartUp) {
+          this.checkedItems = this.sortedPrimitiveGroups.slice();
+          this.addTagsEventListenerNextTick();
+        } else {
+          this.module.changeOrganPartsVisibility(name, false);
+        }
+      }
     },
     /**
      * Use the element information make select a region.
@@ -82,6 +93,7 @@ export default {
       for (let i = 0; i < tags.length; i++) {
         if (tags[i].innerText == name) {
           this.changeActiveByElement(tags[i]);
+          this.removeHover();
           return;
         }
       }
@@ -155,6 +167,14 @@ export default {
         tag.addEventListener("mouseover", this.tagsOnMouseOver);
       });
     },
+    addTagsEventListenerNextTick: function() {
+      this.$nextTick(() => {
+        const tags = Array.prototype.slice.call(
+          this.$refs.select.querySelectorAll(".el-select__tags-text")
+        );
+        this.addTagsEventListener(tags);
+      });
+    },
     /**
      * Callback when changes is made on the active list.
      * This will toggle on the selected items and add callback
@@ -164,12 +184,7 @@ export default {
       if (this.checkedItems.length > this.previousSelection.length ) {
         for (let i = 0; i < this.checkedItems.length; i++)
           this.module.changeOrganPartsVisibility(this.checkedItems[i], true);
-          this.$nextTick(() => {
-            const tags = Array.prototype.slice.call(
-              this.$refs.select.querySelectorAll(".el-select__tags-text")
-          );
-          this.addTagsEventListener(tags);
-        });
+        this.addTagsEventListenerNextTick();
       } else {
         let diff = differenceWith(this.previousSelection,
           this.checkedItems, isEqual);
@@ -193,7 +208,16 @@ export default {
       }
     }
   },
-  props: { module: Object },
+  props: { 
+    module: Object,
+      /**
+     * Display all graphics at start
+     */
+    displayAtStartUp: {
+      type: Boolean,
+      default: true
+    },
+  },
   data: function() {
     return {
       checkedItems: [],
@@ -237,12 +261,17 @@ export default {
     tmpArray = tmpArray.concat(this.module.sceneData.glyphsets);
     tmpArray = uniq(tmpArray.concat(this.module.sceneData.pointset));
     this.sortedPrimitiveGroups = orderBy(tmpArray);
-    for (let i = 0; i < this.sortedPrimitiveGroups.length; i++) {
-      if (this.sortedPrimitiveGroups[i])
-        this.module.changeOrganPartsVisibility(
-          this.sortedPrimitiveGroups[i],
-          false
-        );
+    if (this.displayAtStartUp) {
+      this.checkedItems = this.sortedPrimitiveGroups.slice();
+      this.addTagsEventListenerNextTick();
+    } else {
+      for (let i = 0; i < this.sortedPrimitiveGroups.length; i++) {
+        if (this.sortedPrimitiveGroups[i])
+          this.module.changeOrganPartsVisibility(
+            this.sortedPrimitiveGroups[i],
+            false
+          );
+      }
     }
     this.module.addOrganPartAddedCallback(this.organsAdded);
     this.module.graphicsHighlight.selectColour = 0x444444;
