@@ -4,7 +4,7 @@
     <div v-show="displayUI && !isTransitioning">
       <TraditionalControls v-if="traditional" :module="$module" :showColourPicker="showColourPicker" />
       <SelectControls v-else :module="$module" @object-selected="objectSelected" 
-        @object-hovered="objectHovered" ref="selectControl"/>
+        @object-hovered="objectHovered" :displayAtStartUp="displayAtStartUp" ref="selectControl"/>
       <OpacityControls v-if="traditional == false" :target="selectedObject"/>
       <div class="timeSlider" v-if="sceneData.timeVarying">
         <el-button
@@ -127,8 +127,9 @@ export default {
             let id = event.identifiers[0].data.id ? event.identifiers[0].data.id :
               event.identifiers[0].data.group;
             this.$refs.selectControl.changeActiveByName(id);
-          } else
+          } else {
             this.$refs.selectControl.removeActive();
+          }
         }
         this.$emit("scaffold-selected", event.identifiers);
       }
@@ -228,6 +229,13 @@ export default {
       type: Boolean,
       default: true
     },
+    /**
+     * Display all graphics at start
+     */
+    displayAtStartUp: {
+      type: Boolean,
+      default: true
+    },
   },
   data: function() {
     return {
@@ -306,13 +314,13 @@ export default {
 }
 
 .zoomOut{
-  top:90px;
+  top:101px;
   right:20px;
   position: absolute;
 }
 
 .resetView {
-  top:129px;
+  top:151px;
   right:20px;
   position: absolute;
 }
