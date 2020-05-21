@@ -54,6 +54,7 @@ const OrgansViewer = require("physiomeportal/src/modules/organsRenderer")
 const EventNotifier = require("physiomeportal/src/utilities/eventNotifier")
   .EventNotifier;
 
+
 /**
  * A vue component of the scaffold viewer.
  */
@@ -68,6 +69,26 @@ export default {
     this.$module = new OrgansViewer();
   },
   methods: {
+    captureScreenshotCallback: function() {
+      //Remove the callback, only needs to happen once
+      this.$module.zincRenderer.removePostRenderCallbackFunction(this.captureID);
+      let screenshot = this.$module.zincRenderer.getThreeJSRenderer().domElement.toDataURL("image/png");
+      let hrefElement = document.createElement('a');
+      document.body.append(hrefElement);
+      if (!this.captureFilename)
+        hrefElement.download = `screenshot.png`;
+      else
+        hrefElement.download = this.captureFilename;
+      hrefElement.href = screenshot;
+      hrefElement.click();
+      hrefElement.remove();
+    },
+    captureScreenshot: function(filename) {
+      // Capture a screenshot, it should be done immediately after a render
+      this.captureFilename = filename;
+      this.captureID = this.$module.zincRenderer.addPostRenderCallbackFunction(
+        this.captureScreenshotCallback);
+    },
     /**
      * Function to reset the view to default.
      * Also called when the associated button is pressed.
