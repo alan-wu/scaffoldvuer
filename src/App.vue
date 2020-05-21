@@ -2,10 +2,12 @@
   <div id="app">
     <div v-if="displayUI">
       <p>{{ selectedCoordinates }}</p>
-      <button v-on:click="autoTumble()">Auto Tumble</button>
-      <button v-on:click="onClick('rat')">Rat</button>
-      <button v-on:click="onClick('mouse')">Mouse</button>
-      <input v-model="input" style="width:80%;padding-left: 15px;">
+      <el-button @click="screenCapture()" size="mini">Capture</el-button>
+      <el-button @click="autoTumble()" size="mini">Tumble</el-button>
+      <el-button @click="onClick('rat')" size="mini">Rat</el-button>
+      <el-button @click="onClick('mouse')" size="mini">Mouse</el-button>
+      <el-input type="textarea" autosize placeholder="Please input"
+        v-model="input" style="padding-left:20px;width:70%;" />
     </div>
     <ScaffoldVuer :displayUI="displayUI" :traditional="traditional"
       :url="url" ref="scaffold" @scaffold-selected="onSelected" 
@@ -16,6 +18,16 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import ScaffoldVuer from './components/ScaffoldVuer.vue'
+import Vue from "vue";
+import {
+  Button,
+  Input
+} from "element-ui";
+import lang from "element-ui/lib/locale/lang/en";
+import locale from "element-ui/lib/locale";
+locale.use(lang);
+Vue.use(Button);
+Vue.use(Input);
 const axios = require('axios').default;
 
 const alignToObject = function(cameracontrol, scene) {
@@ -48,6 +60,9 @@ export default {
     ScaffoldVuer
   },
   methods: {
+    screenCapture: function() {
+      this.$refs.scaffold.captureScreenshot("capture.png");
+    },
     autoTumble: function() {
       let cameracontrol = this.$refs.scaffold.$module.scene.getZincCameraControls();
       this.displayUI = false;
