@@ -1,6 +1,6 @@
 <template>
   <div class="scaffold-container">
-    <div id="organsDisplayArea" style="height:100%;width:100%;" ref="display"></div>
+    <div id="organsDisplayArea" tabindex="-1" style="height:100%;width:100%;" ref="display" @keydown.66="backgroundChangeCallback"></div>
     <div v-show="displayUI && !isTransitioning">
       <TraditionalControls v-if="traditional" :module="$module" :showColourPicker="showColourPicker" />
       <SelectControls v-else :module="$module" @object-selected="objectSelected" 
@@ -69,6 +69,15 @@ export default {
     this.$module = new OrgansViewer();
   },
   methods: {
+    backgroundChangeCallback: function() {
+      //When b is pressed
+      ++this.currentBackground;
+      if (this.currentBackground >= this.availableBackground.length )
+        this.currentBackground = 0;
+      this.$module.zincRenderer.getThreeJSRenderer().
+        setClearColor(this.availableBackground[this.currentBackground], 1 );
+
+    },
     captureScreenshotCallback: function() {
       //Remove the callback, only needs to happen once
       this.$module.zincRenderer.removePostRenderCallbackFunction(this.captureID);
@@ -257,6 +266,10 @@ export default {
       type: Boolean,
       default: true
     },
+    backgroundToggle: {
+      type: Boolean,
+      default: false
+    },
   },
   data: function() {
     return {
@@ -268,7 +281,9 @@ export default {
       /**
        * This is set when scene is transitioning.
        */
-      isTransitioning: false
+      isTransitioning: false,
+      currentBackground: 0,
+      availableBackground: ['white', 'black', 'lightskyblue'],
     };
   },
   watch: {
@@ -312,6 +327,11 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 
+#organsDisplayArea:focus {
+    outline: none !important;
+    border:0px;
+}
+
 .scaffold-container {
   height: 100%;
   width: 100%;
@@ -350,6 +370,10 @@ export default {
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
   border: solid 1px #ffffff;
   background-color: #ffffff;
+}
+
+>>> .el-slider__bar {
+  background-color: #8300bf;
 }
 
 </style>
