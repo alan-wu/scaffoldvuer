@@ -82,12 +82,13 @@ export default {
   methods: {
     backgroundChangeCallback: function() {
       //When b is pressed
-      ++this.currentBackground;
-      if (this.currentBackground >= this.availableBackground.length )
-        this.currentBackground = 0;
-      this.$module.zincRenderer.getThreeJSRenderer().
-        setClearColor(this.availableBackground[this.currentBackground], 1 );
-
+      if (this.backgroundToggle) {
+        ++this.currentBackground;
+        if (this.currentBackground >= this.availableBackground.length )
+          this.currentBackground = 0;
+        this.$module.zincRenderer.getThreeJSRenderer().
+          setClearColor(this.availableBackground[this.currentBackground], 1 );
+      }
     },
     captureScreenshotCallback: function() {
       //Remove the callback, only needs to happen once
