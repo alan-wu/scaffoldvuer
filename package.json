@@ -23,7 +23,7 @@
     "query-string": "^6.11.1",
     "vue": "^2.6.10",
     "vue-drag-resize": "^1.3.2",
-    "zincjs": "^0.33.12"
+    "zincjs": "^0.33.13"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.0.0",
