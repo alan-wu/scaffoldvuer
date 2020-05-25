@@ -46,6 +46,7 @@ export default {
         }
         if (this.displayAtStartUp) {
           this.checkedItems = this.sortedPrimitiveGroups.slice();
+          this.previousSelection = this.checkedItems.slice();
           this.addTagsEventListenerNextTick();
         } else {
           this.module.changeOrganPartsVisibility(name, false);
@@ -263,6 +264,7 @@ export default {
     this.sortedPrimitiveGroups = orderBy(tmpArray);
     if (this.displayAtStartUp) {
       this.checkedItems = this.sortedPrimitiveGroups.slice();
+      this.previousSelection = this.checkedItems.slice();
       this.addTagsEventListenerNextTick();
     } else {
       for (let i = 0; i < this.sortedPrimitiveGroups.length; i++) {

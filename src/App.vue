@@ -10,7 +10,7 @@
         v-model="input" style="padding-left:20px;width:70%;" />
     </div>
     <ScaffoldVuer :displayUI="displayUI" :traditional="traditional"
-      :url="url" ref="scaffold" @scaffold-selected="onSelected" 
+      :url="url" ref="scaffold" @scaffold-selected="onSelected" :backgroundToggle=true
       showColourPicker/>
   </div>
 </template>
