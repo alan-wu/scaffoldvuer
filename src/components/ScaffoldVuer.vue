@@ -7,14 +7,19 @@
         @object-hovered="objectHovered" :displayAtStartUp="displayAtStartUp" ref="selectControl"/>
       <OpacityControls v-if="traditional == false" :target="selectedObject"/>
       <div class="timeSlider" v-if="sceneData.timeVarying">
+        <el-row>
+          <el-col :span="1">
         <el-button
           v-if="isPlaying"
           @click="play(false)"
           icon="el-icon-video-pause"
           size="mini"
           circle
+          class="video-button icon-button"
         ></el-button>
-        <el-button v-else @click="play(true)" size="mini" icon="el-icon-video-play" circle></el-button>
+        <el-button v-else @click="play(true)" size="mini" icon="el-icon-video-play" circle class="video-button icon-button"></el-button>
+        </el-col>
+        <el-col :span="23">
         <el-slider
           :min="0"
           :max="100"
@@ -22,6 +27,8 @@
           :step="0.1"
           @input="timeChange($event)"
         ></el-slider>
+        </el-col>
+        </el-row>
       </div>
       <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
         @click="zoomIn()" size="mini"></el-button>
@@ -41,12 +48,16 @@ import SelectControls from './SelectControls';
 import TraditionalControls from './TraditionalControls';
 import {
   Button,
+  Col,
+  Row,
   Slider
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 locale.use(lang);
 Vue.use(Button);
+Vue.use(Col);
+Vue.use(Row);
 Vue.use(Slider);
 
 const OrgansViewer = require("physiomeportal/src/modules/organsRenderer")
@@ -370,6 +381,10 @@ export default {
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
   border: solid 1px #ffffff;
   background-color: #ffffff;
+}
+
+.video-button {
+  padding-top:5px;
 }
 
 >>> .el-slider__bar {
