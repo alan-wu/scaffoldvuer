@@ -8,26 +8,26 @@
       <OpacityControls v-if="traditional == false" :target="selectedObject"/>
       <div class="timeSlider" v-if="sceneData.timeVarying">
         <el-row>
-          <el-col :span="1">
-        <el-button
-          v-if="isPlaying"
-          @click="play(false)"
-          icon="el-icon-video-pause"
-          size="mini"
-          circle
-          class="video-button icon-button"
-        ></el-button>
-        <el-button v-else @click="play(true)" size="mini" icon="el-icon-video-play" circle class="video-button icon-button"></el-button>
-        </el-col>
-        <el-col :span="23">
-        <el-slider
-          :min="0"
-          :max="100"
-          :value="sceneData.currentTime"
-          :step="0.1"
-          @input="timeChange($event)"
-        ></el-slider>
-        </el-col>
+          <el-col :span="2" :offset="4">
+            <el-button
+              v-if="isPlaying"
+              @click="play(false)"
+              icon="el-icon-video-pause"
+              size="mini"
+              circle
+              class="video-button icon-button"
+            ></el-button>
+            <el-button v-else @click="play(true)" size="mini" icon="el-icon-video-play" circle class="video-button icon-button"></el-button>
+          </el-col>
+          <el-col :span="14">
+            <el-slider
+              :min="0"
+              :max="100"
+              :value="sceneData.currentTime"
+              :step="0.1"
+              @input="timeChange($event)"
+            ></el-slider>
+          </el-col>
         </el-row>
       </div>
       <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
@@ -356,7 +356,7 @@ export default {
   left: 2.5%;
   height: 48px;
   width: 95%;
-  bottom: 40px;
+  bottom: 20px;
 }
 
 .zoomIn{
