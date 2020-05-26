@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/scaffoldvuer",
-  "version": "0.1.27",
+  "version": "0.1.28",
   "main": "./dist/scaffoldvuer.common.js",
   "files": [
     "dist/*",
