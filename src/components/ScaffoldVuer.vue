@@ -2,10 +2,11 @@
   <div class="scaffold-container">
     <div id="organsDisplayArea" tabindex="-1" style="height:100%;width:100%;" ref="display" @keydown.66="backgroundChangeCallback"></div>
     <div v-show="displayUI && !isTransitioning">
-      <TraditionalControls v-if="traditional" :module="$module" :showColourPicker="showColourPicker" />
+      <TraditionalControls v-if="traditional" :module="$module" @object-selected="objectSelected" 
+        @object-hovered="objectHovered" :showColourPicker="showColourPicker" ref="traditionalControl"/>
       <SelectControls v-else :module="$module" @object-selected="objectSelected" 
         @object-hovered="objectHovered" :displayAtStartUp="displayAtStartUp" ref="selectControl"/>
-      <OpacityControls v-if="traditional == false" :target="selectedObject"/>
+      <OpacityControls :target="selectedObject"/>
       <div class="timeSlider" v-if="sceneData.timeVarying">
         <el-row>
           <el-col :span="2" :offset="4">
@@ -164,25 +165,25 @@ export default {
      */
     eventNotifierCallback: function(event) {
       if (event.eventType == 1) {
-        if (this.$refs.selectControl) {
+        if (this.controls) {
           if (event.identifiers[0]) {
             let id = event.identifiers[0].data.id ? event.identifiers[0].data.id :
               event.identifiers[0].data.group;
-            this.$refs.selectControl.changeActiveByName(id);
+            this.controls.changeActiveByName(id);
           } else {
-            this.$refs.selectControl.removeActive();
+            this.controls.removeActive();
           }
         }
         this.$emit("scaffold-selected", event.identifiers);
       }
       else if (event.eventType == 2) {
-        if (this.$refs.selectControl) {
+        if (this.controls) {
           if (event.identifiers[0]) {
             let id = event.identifiers[0].data.id ? event.identifiers[0].data.id :
               event.identifiers[0].data.group;
-            this.$refs.selectControl.changeHoverByName(id);
+            this.controls.changeHoverByName(id);
           } else
-            this.$refs.selectControl.removeHover();
+            this.controls.removeHover();
         }
         this.$emit("scaffold-highlighted", event.identifiers);
       }
@@ -296,13 +297,14 @@ export default {
       isTransitioning: false,
       currentBackground: 0,
       availableBackground: ['white', 'black', 'lightskyblue'],
+      controls: undefined
     };
   },
   watch: {
     url: function(newValue) {
       if (newValue) {
-        if (this.$refs.selectControl)
-          this.$refs.selectControl.clear();
+        if (this.controls)
+          this.controls.clear();
         this.$module.loadOrgansFromURL(
           newValue,
           undefined,
@@ -311,6 +313,12 @@ export default {
           undefined
         );
       }
+    },
+    traditional: function (value) {
+      if (value)
+        this.controls = this.refs.traditionalControl;
+      else
+        this.controls = this.refs.selectControl;
     }
   },
   mounted: function() {
@@ -328,6 +336,10 @@ export default {
     }
     this.$module.initialiseRenderer(this.$refs.display);
     this.$module.toolTip = undefined;
+    if (this.traditional)
+      this.controls = this.$refs.traditionalControl;
+    else
+      this.controls = this.$refs.selectControl;
   },
   destroyed: function() {
     this.$module.destroy();

@@ -1,180 +1,209 @@
 <template>
-  <div class="check-list">
-    <div class="control-menu" ref="control-menu" @click="toggleControl">
-      <div class="bar1"></div>
-      <div class="bar2"></div>
-      <div class="bar3"></div>
-    </div>
-    <div :style="toggleStyle">
-      <el-row style="margin-bottom:10px;">
-        <el-button type="primary" @click="viewAll" round>View all</el-button>
+  <div class="traditional-container">
+    <el-checkbox-group v-model="checkedItems" size="small">
+      <el-row v-for="item in sortedPrimitiveGroups" :key="item" :label="item">
+        <div class="checkbox-container">
+          <el-color-picker
+            style="margin-top:3px;"
+            :class="{ 'show-picker' : showColourPicker }"
+            :value="getColour(item)"
+            size="small"
+            :popper-class="myPopperClass"
+          ></el-color-picker>
+          <el-checkbox
+            class="my-checkbox"
+            @click.native="itemClicked(item, $event)"
+            style="margin-top:3px;"
+            :label="item"
+            @change="visibilityToggle(item, $event)"
+            :checked="true"
+            border
+            @mouseover.native="checkboxHover(item)"
+            :class="{ activeItem: activeRegion === item, 
+              hoverItem: hoverRegion === item  }"
+          >{{item}}</el-checkbox>
+        </div>
       </el-row>
-      <el-collapse v-model="activeCollapseItems">
-        <el-collapse-item
-          v-for="(group, type) in primitivesList"
-          :title="type"
-          :key="type"
-          :name="type"
-        >
-          <el-checkbox-group v-model="group.checkbox" size="small">
-            <el-row v-for="item in group.sorted" :key="item">
-              <div style="display: flex;justify-content: space-between;">
-                <el-checkbox
-                  style="margin-top:3px;"
-                  :label="item"
-                  @change="visibilityToggle(item, $event, type)"
-                  :checked="true"
-                  border
-                  @mouseover.native="checkboxHover(item)"
-                >{{item}}</el-checkbox>
-                <el-color-picker
-                  v-if="showColourPicker&&colour(type, item)"
-                  style="margin-top:3px;"
-                  :value="colour(type, item)"
-                  @change="colourChanged(type, item, $event)"
-                  size="small"
-                ></el-color-picker>
-              </div>
-            </el-row>
-          </el-checkbox-group>
-        </el-collapse-item>
-      </el-collapse>
-    </div>
+    </el-checkbox-group>
   </div>
 </template>
 
 <script>
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
-import {
-  Button,
-  Checkbox,
-  CheckboxGroup,
-  ColorPicker,
-  Collapse,
-  CollapseItem,
-  Row
-} from "element-ui";
+import { Checkbox, CheckboxGroup, ColorPicker, Row } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
-var orderBy = require("lodash/orderBy");
+const orderBy = require("lodash/orderBy");
+const uniq = require("lodash/uniq");
 locale.use(lang);
-Vue.use(Button);
 Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
 Vue.use(ColorPicker);
-Vue.use(Collapse);
-Vue.use(CollapseItem);
 Vue.use(Row);
-
-const getPrimitivesListWithGroupName = function(scene, type, name) {
-  let array = [];
-  if (type == "Surfaces") array = scene.findGeometriesWithGroupName(name);
-  else if (type == "Lines") array = scene.findLinesWithGroupName(name);
-  else if (type == "Glyphsets") array = scene.findGlyphsetsWithGroupName(name);
-  else if (type == "Pointsets") array = scene.findPointsetsWithGroupName(name);
-  return array;
-};
 
 export default {
   name: "TraditionalControls",
   methods: {
-    toggleControl: function() {
-      this.$refs["control-menu"].classList.toggle("change");
-      if (this.toggleStyle.visibility == "hidden") {
-        this.toggleStyle.visibility = "visible";
-        this.toggleStyle.opacity = 1.0;
-      }
-      else {
-        this.toggleStyle.opacity = 0.0;
-        this.toggleStyle.visibility = "hidden";
+    /**
+     * This is called when a new organ is read into the scene.
+     */
+    organsAdded: function(name) {
+      if (name && name != "") {
+        let tmpArray = uniq(this.sortedPrimitiveGroups.concat([name]));
+        this.sortedPrimitiveGroups = orderBy(tmpArray);
+        const index = this.sortedPrimitiveGroups.indexOf(undefined);
+        if (index > -1) {
+          this.sortedPrimitiveGroups.splice(index, 1);
+        }
       }
     },
-    checkboxHover: function(item) {
-      this.module.setHighlightedByGroupName(item);
+    /**
+     * Select a region by its name.
+     */
+    changeActiveByName: function(name) {
+      let targetObject = this.getFirstZincObjectWithGroupName(name);
+      if (targetObject) {
+        this.activeRegion = name;
+        this.$emit("object-selected", targetObject);
+      }
+      this.removeHover();
+    },
+    /**
+      * Hover a region by its name.
+    */
+    changeHoverByName: function(name) {
+      let targetObject = this.getFirstZincObjectWithGroupName(name);
+      if (targetObject)  {
+        this.hoverRegion = name;
+        this.$emit("object-hovered", targetObject);
+      }
+    },
+    /**
+     * Unselect the current selected region.
+     */
+    removeActive: function() {
+      this.activeRegion = ""
+      this.$emit("object-selected", undefined);
+    },
+    /**
+     * Unselect the current hover region.
+     */
+    removeHover: function() {
+      this.hoverRegion = "";
+      this.$emit("object-hovered", undefined);
+    },
+    /**
+     * Reset the controls.
+     */
+    clear: function() {
+      this.sortedPrimitiveGroups = [];
+      this.checkedItems = [];
+      this.activeRegion = "";
+      this.hoverRegion = "";
+      this.$emit("object-selected", undefined);
+    },
+    getFirstZincObjectWithGroupName: function(name) {
+      if (this.module && this.module.scene) {
+        let array = this.module.scene.findGeometriesWithGroupName(name);
+        if (array.length > 0) return array[0];
+        array = this.module.scene.findGlyphsetsWithGroupName(name);
+        if (array.length > 0) return array[0];
+        array = this.module.scene.findLinesWithGroupName(name);
+        if (array.length > 0) return array[0];
+        array = this.module.scene.findPointsetsWithGroupName(name);
+        if (array.length > 0) return array[0];
+      }
+      return undefined;
+    },
+    getColour: function(name) {
+      let graphic = this.getFirstZincObjectWithGroupName(name);
+      if (graphic) {
+        let hex = graphic.getColourHex();
+        if (hex) 
+          return "#" + hex;
+      }
+      return "#FFFFFF";
+    },
+    checkboxHover: function(name) {
+      this.changeHoverByName(name);
+    },
+    itemClicked: function(name, event) {
+      if (!(event.target.classList.contains("el-checkbox__inner") ||
+        event.target.classList.contains("el-checkbox__original"))) {
+        this.changeActiveByName(name);
+        event.preventDefault();
+      }
     },
     viewAll: function() {
       this.module.viewAll();
     },
-    visibilityToggle: function(item, event, type) {
-      let typeName = type;
-      if (typeName == "Surfaces") typeName = "Geometries";
-      this.module.changeOrganPartsVisibility(
-        item,
-        event,
-        typeName.toLowerCase()
-      );
-    },
-    colourChanged: function(type, name, colour) {
-      let array = getPrimitivesListWithGroupName(
-        this.module.scene,
-        type,
-        name
-      );
-      let hexString = colour.replace("#", "0x");
-      array.forEach(object => object.setColourHex(hexString));
-      this.lastColourChanged = name;
-    },
-    colour: function(type, name) {
-      let array = getPrimitivesListWithGroupName(
-        this.module.scene,
-        type,
-        name
-      );
-      if (array.length > 0) return "#" + array[0].getColourHex();
-      return undefined;
+    visibilityToggle: function(item, event) {
+      this.module.changeOrganPartsVisibility(item, event);
+      if (event == false) {
+        if (this.activeRegion.name === item) {
+          this.removeActive();
+        }
+        if (this.hoverRegion.name === item) {
+          this.removeHover();
+        }
+      }
     }
   },
   props: { module: Object, showColourPicker: Boolean },
   data: function() {
     return {
-      activeCollapseItems: [],
-      toggleStyle: {visibility:"hidden", opacity:0, transition: "visibility  0s, opacity 0.5s"},
-      primitivesList: {
-        Surfaces: {
-          checkbox: [],
-          primitives: this.module.sceneData.geometries,
-          sorted: []
-        },
-        Lines: {
-          checkbox: [],
-          primitives: this.module.sceneData.lines,
-          sorted: []
-        },
-        Glyphsets: {
-          checkbox: [],
-          primitives: this.module.sceneData.glyphsets,
-          sorted: []
-        },
-        Pointsets: {
-          checkbox: [],
-          primitives: this.module.sceneData.pointsets,
-          sorted: []
-        }
-      }
+      checkedItems: [],
+      sortedPrimitiveGroups: [],
+      activeRegion: "",
+      hoverRegion: "",
+      myPopperClass: "hide-scaffold-colour-popup",
     };
   },
   watch: {
-    "primitivesList.Surfaces.primitives": function() {
-      this.primitivesList.Surfaces.sorted = orderBy(
-        this.primitivesList.Surfaces.primitives
+    "module.sceneData.geometries": function() {
+      let tmpArray = uniq(
+        this.sortedPrimitiveGroups.concat(this.module.sceneData.geometries)
       );
+      this.sortedPrimitiveGroups = orderBy(tmpArray);
     },
-    "primitivesList.Lines.primitives": function() {
-      this.primitivesList.Lines.sorted = orderBy(
-        this.primitivesList.Lines.primitives
+    "module.sceneData.lines": function() {
+      let tmpArray = uniq(
+        this.sortedPrimitiveGroups.concat(this.module.sceneData.lines)
       );
+      this.sortedPrimitiveGroups = orderBy(tmpArray);
     },
-    "primitivesList.Glyphsets.primitives": function() {
-      this.primitivesList.Glyphsets.sorted = orderBy(
-        this.primitivesList.Glyphsets.primitives
+    "module.sceneData.glyphsets": function() {
+      let tmpArray = uniq(
+        this.sortedPrimitiveGroups.concat(this.module.sceneData.glyphsets)
       );
+      this.sortedPrimitiveGroups = orderBy(tmpArray);
     },
-    "primitivesList.Pointsets.primitives": function() {
-      this.primitivesList.Pointsets.sorted = orderBy(
-        this.primitivesList.Pointsets.primitives
+    "module.sceneData.pointsets": function() {
+      let tmpArray = uniq(
+        this.sortedPrimitiveGroups.concat(this.module.sceneData.pointset)
       );
+      this.sortedPrimitiveGroups = orderBy(tmpArray);
+    },
+    myPopperClass: function() {
+      if (this.showColourPicker)
+        this.myPopperClass = "showPicker";
+      else
+        this.myPopperClass = "hide-scaffold-colour-popup";
     }
+  },
+  created: function() {
+    let tmpArray = this.module.sceneData.geometries.concat(
+      this.module.sceneData.lines
+    );
+    tmpArray = tmpArray.concat(this.module.sceneData.glyphsets);
+    tmpArray = uniq(tmpArray.concat(this.module.sceneData.pointset));
+    this.sortedPrimitiveGroups = orderBy(tmpArray);
+    this.module.addOrganPartAddedCallback(this.organsAdded);
+    this.module.graphicsHighlight.selectColour = 0x444444;
+  },
+  destroyed: function() {
+    this.sortedPrimitiveGroups = undefined;
   }
 };
 </script>
@@ -182,57 +211,62 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 
-.check-list {
+.checkbox-container { 
+  display: flex;
+  cursor: pointer;
+}
+
+.my-checkbox:hover {
+  background-color: #ddd!important;
+}
+
+.traditional-container {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  height: calc(100% - 20px);
+  top: 54px;
+  left: 17px;
+  height: calc(100% - 74px);
   text-align: left;
   overflow: auto;
 }
 
-.control-menu {
-  display: inline-block;
-  cursor: pointer;
+>>> .el-checkbox__input.is-checked .el-checkbox__inner {
+  background-color: #8300bf;
+  border-color:  #8300bf;
 }
 
-.bar1,
-.bar2,
-.bar3 {
-  width: 35px;
-  height: 5px;
-  background-color: #333;
-  margin: 6px 0;
-  transition: 0.4s;
+>>> .el-checkbox__label {
+  color:  #8300bf !important;
 }
 
-.change .bar1 {
-  -webkit-transform: rotate(-45deg) translate(-9px, 6px);
-  transform: rotate(-45deg) translate(-9px, 6px);
+
+
+.activeItem {
+  background-color: #bbb !important;
 }
 
-.change .bar2 {
-  opacity: 0;
+.hoverItem {
+  background-color: #eee !important;
 }
 
-.change .bar3 {
-  -webkit-transform: rotate(45deg) translate(-8px, -8px);
-  transform: rotate(45deg) translate(-8px, -8px);
+>>> .el-color-picker__icon.el-icon-arrow-down {
+  display:none;
+}
+
+>>> .show-picker .el-color-picker__icon.el-icon-arrow-down {
+  display:block;
 }
 </style>
 
-<style scoped src="../styles/purple/button.css">
+<style>
+.hide-scaffold-colour-popup {
+  display:none;
+}
 </style>
+
+
 <style scoped src="../styles/purple/checkbox.css">
 </style>
 <style scoped src="../styles/purple/checkbox-group.css">
 </style>
 <style scoped src="../styles/purple/color-picker.css">
 </style>
-<style scoped src="../styles/purple/collapse.css">
-</style>
-<style scoped src="../styles/purple/collapse-item.css">
-</style>
-<style scoped src="../styles/purple/row.css">
-</style>
-

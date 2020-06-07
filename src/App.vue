@@ -11,7 +11,7 @@
     </div>
     <ScaffoldVuer :displayUI="displayUI" :traditional="traditional"
       :url="url" ref="scaffold" @scaffold-selected="onSelected" :backgroundToggle=true
-      showColourPicker/>
+      />
   </div>
 </template>
 
@@ -109,7 +109,7 @@ export default {
     return {
       url: undefined,
       input: undefined,
-      traditional: false,
+      traditional: true,
       displayUI: true,
       selectedCoordinates: undefined
     };
