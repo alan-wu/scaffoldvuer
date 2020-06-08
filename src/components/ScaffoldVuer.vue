@@ -31,12 +31,26 @@
           </el-col>
         </el-row>
       </div>
-      <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
-        @click="zoomIn()" size="mini"></el-button>
-      <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
-        @click="zoomOut()" size="mini"></el-button>
-      <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
-        @click="resetView()" size="mini"></el-button>
+      <el-popover content="Zoom In" placement="left" 
+        :appendToBody="tooltipAppendToBody" trigger="hover" popper-class="scaffold-popper">
+        <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
+          @click="zoomIn()" size="mini" slot="reference"></el-button>
+      </el-popover>
+      <el-popover content="Zoom Out" placement="left"
+        :appendToBody="tooltipAppendToBody" trigger="hover" popper-class="scaffold-popper">
+        <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
+        @click="zoomOut()" size="mini" slot="reference"></el-button>
+      </el-popover>
+      <el-popover content="Reset to default view" placement="left"
+        :appendToBody="tooltipAppendToBody" trigger="hover" popper-class="scaffold-popper">
+        <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
+          @click="resetView()" size="mini" slot="reference"></el-button>
+      </el-popover>
+      <el-popover content="Change background Color" placement="left"
+        :appendToBody="tooltipAppendToBody" trigger="hover" popper-class="scaffold-popper">
+        <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
+          @click="backgroundChangeCallback()" size="mini" slot="reference"></el-button>
+      </el-popover>
     </div>
   </div>
 </template>
@@ -51,7 +65,9 @@ import {
   Button,
   Col,
   Row,
-  Slider
+  Slider,
+  Tooltip,
+  Popover
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
@@ -60,6 +76,8 @@ Vue.use(Button);
 Vue.use(Col);
 Vue.use(Row);
 Vue.use(Slider);
+Vue.use(Tooltip);
+Vue.use(Popover);
 
 const OrgansViewer = require("physiomeportal/src/modules/organsRenderer")
   .OrgansViewer;
@@ -297,7 +315,8 @@ export default {
       isTransitioning: false,
       currentBackground: 0,
       availableBackground: ['white', 'black', 'lightskyblue'],
-      controls: undefined
+      controls: undefined,
+      tooltipAppendToBody: false,
     };
   },
   watch: {
@@ -390,6 +409,12 @@ export default {
   position: absolute;
 }
 
+.backgroundColour {
+  top:201px;
+  right:20px;
+  position: absolute;
+}
+
 .icon-button {
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
   border: solid 1px #ffffff;
@@ -398,6 +423,11 @@ export default {
 
 .video-button {
   padding-top:5px;
+}
+
+>>> .scaffold-popper {
+  padding:9px 10px;
+  min-width:100px;
 }
 
 >>> .el-slider__bar {

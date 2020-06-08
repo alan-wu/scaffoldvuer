@@ -84,7 +84,7 @@ export default {
 <style scoped>
 .opacity-control {
   position: absolute;
-  top: 205px;
+  top: 255px;
   right: 20px;
   text-align: left;
 }
