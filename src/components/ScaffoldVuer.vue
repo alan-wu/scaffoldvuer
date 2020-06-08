@@ -41,7 +41,7 @@
         <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
         @click="zoomOut()" size="mini" slot="reference"></el-button>
       </el-popover>
-      <el-popover content="Reset to default view" placement="left"
+      <el-popover content="Reset view" placement="left"
         :appendToBody="tooltipAppendToBody" trigger="hover" popper-class="scaffold-popper">
         <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
           @click="resetView()" size="mini" slot="reference"></el-button>
@@ -394,7 +394,6 @@ export default {
   top:51px;
   right:20px;
   position: absolute;
-
 }
 
 .zoomOut{
@@ -427,7 +426,8 @@ export default {
 
 >>> .scaffold-popper {
   padding:9px 10px;
-  min-width:100px;
+  min-width:150px;
+  font-size:12px;
 }
 
 >>> .el-slider__bar {

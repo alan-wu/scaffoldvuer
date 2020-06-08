@@ -238,8 +238,6 @@ export default {
   color:  #8300bf !important;
 }
 
-
-
 .activeItem {
   background-color: #bbb !important;
 }
