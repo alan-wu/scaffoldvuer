@@ -66,7 +66,6 @@ import {
   Col,
   Row,
   Slider,
-  Tooltip,
   Popover
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
@@ -76,7 +75,6 @@ Vue.use(Button);
 Vue.use(Col);
 Vue.use(Row);
 Vue.use(Slider);
-Vue.use(Tooltip);
 Vue.use(Popover);
 
 const OrgansViewer = require("physiomeportal/src/modules/organsRenderer")
