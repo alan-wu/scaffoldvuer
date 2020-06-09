@@ -1,10 +1,13 @@
 <template>
   <div class="traditional-container">
-    <el-checkbox-group v-model="checkedItems" size="small">
+    <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" 
+      @change="handleCheckAllChange">Display all regions</el-checkbox>
+    <el-checkbox-group v-model="checkedItems" size="small"
+      @change="handleCheckedItemsChange">
       <el-row v-for="item in sortedPrimitiveGroups" :key="item" :label="item">
         <div class="checkbox-container">
           <el-color-picker
-            style="margin-top:3px;"
+            style="margin-top:3px;display:inline-block;"
             :class="{ 'show-picker' : showColourPicker }"
             :value="getColour(item)"
             size="small"
@@ -135,16 +138,29 @@ export default {
         event.preventDefault();
       }
     },
+    handleCheckedItemsChange: function(value) {
+      let checkedCount = value.length;
+      this.checkAll = checkedCount === this.sortedPrimitiveGroups.length;
+      this.isIndeterminate = checkedCount > 0 && checkedCount < this.sortedPrimitiveGroups.length;
+    },
+    handleCheckAllChange(val) {
+      this.checkedItems = val ? this.sortedPrimitiveGroups : [];
+      this.isIndeterminate = false;
+      for (let i = 0; i < this.sortedPrimitiveGroups.length; i++) {
+        this.visibilityToggle(
+          this.sortedPrimitiveGroups[i], this.checkAll);
+      }      
+    },
     viewAll: function() {
       this.module.viewAll();
     },
     visibilityToggle: function(item, event) {
       this.module.changeOrganPartsVisibility(item, event);
       if (event == false) {
-        if (this.activeRegion.name === item) {
+        if (this.activeRegion === item) {
           this.removeActive();
         }
-        if (this.hoverRegion.name === item) {
+        if (this.hoverRegion === item) {
           this.removeHover();
         }
       }
@@ -153,6 +169,8 @@ export default {
   props: { module: Object, showColourPicker: Boolean },
   data: function() {
     return {
+      checkAll: true,
+      isIndeterminate: false,
       checkedItems: [],
       sortedPrimitiveGroups: [],
       activeRegion: "",
@@ -216,17 +234,19 @@ export default {
   cursor: pointer;
 }
 
-.my-checkbox:hover {
-  background-color: #ddd!important;
-}
-
 .traditional-container {
   position: absolute;
   top: 54px;
   left: 17px;
-  height: calc(100% - 74px);
+  max-height: calc(100% - 74px);
   text-align: left;
   overflow: auto;
+}
+
+>>> .el-checkbox__input.is-indeterminate .el-checkbox__inner
+{
+  background-color: #8300bf;
+  border-color:  #8300bf;
 }
 
 >>> .el-checkbox__input.is-checked .el-checkbox__inner {
