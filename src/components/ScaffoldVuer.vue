@@ -2,10 +2,11 @@
   <div class="scaffold-container">
     <div id="organsDisplayArea" tabindex="-1" style="height:100%;width:100%;" ref="display" @keydown.66="backgroundChangeCallback"></div>
     <div v-show="displayUI && !isTransitioning">
-      <TraditionalControls v-if="traditional" :module="$module" :showColourPicker="showColourPicker" />
+      <TraditionalControls v-if="traditional" :module="$module" @object-selected="objectSelected" 
+        @object-hovered="objectHovered" :showColourPicker="showColourPicker" ref="traditionalControl"/>
       <SelectControls v-else :module="$module" @object-selected="objectSelected" 
         @object-hovered="objectHovered" :displayAtStartUp="displayAtStartUp" ref="selectControl"/>
-      <OpacityControls v-if="traditional == false" :target="selectedObject"/>
+      <OpacityControls :target="selectedObject"/>
       <div class="timeSlider" v-if="sceneData.timeVarying">
         <el-row>
           <el-col :span="2" :offset="4">
@@ -30,12 +31,26 @@
           </el-col>
         </el-row>
       </div>
-      <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
-        @click="zoomIn()" size="mini"></el-button>
-      <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
-        @click="zoomOut()" size="mini"></el-button>
-      <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
-        @click="resetView()" size="mini"></el-button>
+      <el-popover content="Zoom In" placement="left" 
+        :appendToBody="tooltipAppendToBody" trigger="hover" popper-class="scaffold-popper">
+        <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
+          @click="zoomIn()" size="mini" slot="reference"></el-button>
+      </el-popover>
+      <el-popover content="Zoom Out" placement="left"
+        :appendToBody="tooltipAppendToBody" trigger="hover" popper-class="scaffold-popper">
+        <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
+        @click="zoomOut()" size="mini" slot="reference"></el-button>
+      </el-popover>
+      <el-popover content="Reset view" placement="left"
+        :appendToBody="tooltipAppendToBody" trigger="hover" popper-class="scaffold-popper">
+        <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
+          @click="resetView()" size="mini" slot="reference"></el-button>
+      </el-popover>
+      <el-popover content="Change background Color" placement="left"
+        :appendToBody="tooltipAppendToBody" trigger="hover" popper-class="scaffold-popper">
+        <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
+          @click="backgroundChangeCallback()" size="mini" slot="reference"></el-button>
+      </el-popover>
     </div>
   </div>
 </template>
@@ -50,7 +65,8 @@ import {
   Button,
   Col,
   Row,
-  Slider
+  Slider,
+  Popover
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
@@ -59,6 +75,7 @@ Vue.use(Button);
 Vue.use(Col);
 Vue.use(Row);
 Vue.use(Slider);
+Vue.use(Popover);
 
 const OrgansViewer = require("physiomeportal/src/modules/organsRenderer")
   .OrgansViewer;
@@ -164,25 +181,25 @@ export default {
      */
     eventNotifierCallback: function(event) {
       if (event.eventType == 1) {
-        if (this.$refs.selectControl) {
+        if (this.controls) {
           if (event.identifiers[0]) {
             let id = event.identifiers[0].data.id ? event.identifiers[0].data.id :
               event.identifiers[0].data.group;
-            this.$refs.selectControl.changeActiveByName(id);
+            this.controls.changeActiveByName(id);
           } else {
-            this.$refs.selectControl.removeActive();
+            this.controls.removeActive();
           }
         }
         this.$emit("scaffold-selected", event.identifiers);
       }
       else if (event.eventType == 2) {
-        if (this.$refs.selectControl) {
+        if (this.controls) {
           if (event.identifiers[0]) {
             let id = event.identifiers[0].data.id ? event.identifiers[0].data.id :
               event.identifiers[0].data.group;
-            this.$refs.selectControl.changeHoverByName(id);
+            this.controls.changeHoverByName(id);
           } else
-            this.$refs.selectControl.removeHover();
+            this.controls.removeHover();
         }
         this.$emit("scaffold-highlighted", event.identifiers);
       }
@@ -296,13 +313,15 @@ export default {
       isTransitioning: false,
       currentBackground: 0,
       availableBackground: ['white', 'black', 'lightskyblue'],
+      controls: undefined,
+      tooltipAppendToBody: false,
     };
   },
   watch: {
     url: function(newValue) {
       if (newValue) {
-        if (this.$refs.selectControl)
-          this.$refs.selectControl.clear();
+        if (this.controls)
+          this.controls.clear();
         this.$module.loadOrgansFromURL(
           newValue,
           undefined,
@@ -311,6 +330,12 @@ export default {
           undefined
         );
       }
+    },
+    traditional: function (value) {
+      if (value)
+        this.controls = this.refs.traditionalControl;
+      else
+        this.controls = this.refs.selectControl;
     }
   },
   mounted: function() {
@@ -328,6 +353,10 @@ export default {
     }
     this.$module.initialiseRenderer(this.$refs.display);
     this.$module.toolTip = undefined;
+    if (this.traditional)
+      this.controls = this.$refs.traditionalControl;
+    else
+      this.controls = this.$refs.selectControl;
   },
   destroyed: function() {
     this.$module.destroy();
@@ -363,7 +392,6 @@ export default {
   top:51px;
   right:20px;
   position: absolute;
-
 }
 
 .zoomOut{
@@ -378,6 +406,12 @@ export default {
   position: absolute;
 }
 
+.backgroundColour {
+  top:201px;
+  right:20px;
+  position: absolute;
+}
+
 .icon-button {
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
   border: solid 1px #ffffff;
@@ -386,6 +420,12 @@ export default {
 
 .video-button {
   padding-top:5px;
+}
+
+>>> .scaffold-popper {
+  padding:9px 10px;
+  min-width:150px;
+  font-size:12px;
 }
 
 >>> .el-slider__bar {
