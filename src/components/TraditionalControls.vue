@@ -262,6 +262,11 @@ export default {
   background-color: #bbb !important;
 }
 
+.my-checkbox {
+  background-color: #fff;
+  width:100%;
+}
+
 .hoverItem {
   background-color: #eee !important;
 }
