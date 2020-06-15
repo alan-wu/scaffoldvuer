@@ -32,24 +32,24 @@
         </el-row>
       </div>
       <el-popover content="Zoom In" placement="left" 
-        :appendToBody="tooltipAppendToBody" trigger="hover" popper-class="scaffold-popper">
+        :appendToBody=false trigger="manual" popper-class="scaffold-popper" v-model="hoverVisabilities[0].value">
         <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
-          @click="zoomIn()" size="mini" slot="reference"></el-button>
+          @click="zoomIn()" size="mini" slot="reference" @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"></el-button>
       </el-popover>
       <el-popover content="Zoom Out" placement="left"
-        :appendToBody="tooltipAppendToBody" trigger="hover" popper-class="scaffold-popper">
+        :appendToBody=false trigger="manual" popper-class="scaffold-popper" v-model="hoverVisabilities[1].value">
         <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
-        @click="zoomOut()" size="mini" slot="reference"></el-button>
+        @click="zoomOut()" size="mini" slot="reference" @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"></el-button>
       </el-popover>
       <el-popover content="Reset view" placement="left"
-        :appendToBody="tooltipAppendToBody" trigger="hover" popper-class="scaffold-popper">
+        :appendToBody=false trigger="manual" popper-class="scaffold-popper" v-model="hoverVisabilities[2].value">
         <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
-          @click="resetView()" size="mini" slot="reference"></el-button>
+          @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
       </el-popover>
-      <el-popover content="Change background Color" placement="left"
-        :appendToBody="tooltipAppendToBody" trigger="hover" popper-class="scaffold-popper">
+      <el-popover content="Change background color" placement="left"
+        :appendToBody=false trigger="manual" popper-class="scaffold-popper" v-model="hoverVisabilities[3].value">
         <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
-          @click="backgroundChangeCallback()" size="mini" slot="reference"></el-button>
+          @click="backgroundChangeCallback()" size="mini" slot="reference" @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"></el-button>
       </el-popover>
     </div>
   </div>
@@ -260,7 +260,30 @@ export default {
     play: function(flag) {
       this.$module.playAnimation(flag);
       this.isPlaying = flag;
-    }
+    },
+    setHelpMode: function(helpMode){
+      if (helpMode){
+        this.inHelp = true;
+        this.hoverVisabilities.forEach( (item) =>{
+          item.value = true;
+        });
+      } else {
+        this.inHelp = false;
+        this.hoverVisabilities.forEach( (item) =>{
+          item.value = false;
+        });
+      }
+    },
+    showToolitip: function(tooltipNumber){
+      if (!this.inHelp){
+        this.hoverVisabilities[tooltipNumber].value = true;
+      }
+    },
+    hideToolitip: function(tooltipNumber){
+      if (!this.inHelp){
+        this.hoverVisabilities[tooltipNumber].value = false;
+      }
+    },
   },
   props: { 
     /**
@@ -299,6 +322,10 @@ export default {
       type: Boolean,
       default: false
     },
+    helpMode: {
+      type: Boolean,
+      default: false
+    }
   },
   data: function() {
     return {
@@ -315,6 +342,8 @@ export default {
       availableBackground: ['white', 'black', 'lightskyblue'],
       controls: undefined,
       tooltipAppendToBody: false,
+      hoverVisabilities: [{value: false}, {value: false}, {value: false}, {value: false}],
+      inHelp: false,
     };
   },
   watch: {
@@ -336,6 +365,9 @@ export default {
         this.controls = this.refs.traditionalControl;
       else
         this.controls = this.refs.selectControl;
+    },
+    helpMode: function(val){
+      this.setHelpMode(val);
     }
   },
   mounted: function() {
@@ -426,10 +458,16 @@ export default {
   padding:9px 10px;
   min-width:150px;
   font-size:12px;
+    color: #fff;
+  background-color: #8300bf;  
 }
 
 >>> .el-slider__bar {
   background-color: #8300bf;
+}
+
+>>> .scaffold-popper .popper__arrow::after{
+  border-left-color: #8300bf !important;
 }
 
 </style>
