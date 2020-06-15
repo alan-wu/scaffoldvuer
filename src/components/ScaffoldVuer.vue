@@ -2,12 +2,18 @@
   <div class="scaffold-container">
     <div id="organsDisplayArea" tabindex="-1" style="height:100%;width:100%;" ref="display" @keydown.66="backgroundChangeCallback"></div>
     <div v-show="displayUI && !isTransitioning">
-      <TraditionalControls v-if="traditional" :module="$module" @object-selected="objectSelected" 
+      <el-popover content="Change Regiom Visibility" placement="right"
+        :appendToBody=false trigger="manual" popper-class="scaffold-popper right-popper" v-model="hoverVisabilities[5].value" ref="checkBoxPopover">
+     </el-popover>
+      <TraditionalControls v-if="traditional" v-popover:checkBoxPopover :helpMode="helpMode" :module="$module" @object-selected="objectSelected" 
         @object-hovered="objectHovered" :showColourPicker="showColourPicker" ref="traditionalControl"/>
       <SelectControls v-else :module="$module" @object-selected="objectSelected" 
         @object-hovered="objectHovered" :displayAtStartUp="displayAtStartUp" ref="selectControl"/>
       <OpacityControls :target="selectedObject"/>
-      <div class="timeSlider" v-if="sceneData.timeVarying">
+      <el-popover v-if="sceneData.timeVarying" content="Move the slider to animate the region" placement="top"
+        :appendToBody=false trigger="manual" popper-class="scaffold-popper top-popper" v-model="hoverVisabilities[4].value" ref="sliderPopover">
+     </el-popover>
+      <div class="timeSlider" v-popover:sliderPopover v-if="sceneData.timeVarying">
         <el-row>
           <el-col :span="2" :offset="4">
             <el-button
@@ -32,22 +38,22 @@
         </el-row>
       </div>
       <el-popover content="Zoom In" placement="left" 
-        :appendToBody=false trigger="manual" popper-class="scaffold-popper" v-model="hoverVisabilities[0].value">
+        :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[0].value">
         <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
           @click="zoomIn()" size="mini" slot="reference" @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"></el-button>
       </el-popover>
       <el-popover content="Zoom Out" placement="left"
-        :appendToBody=false trigger="manual" popper-class="scaffold-popper" v-model="hoverVisabilities[1].value">
+        :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[1].value">
         <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
         @click="zoomOut()" size="mini" slot="reference" @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"></el-button>
       </el-popover>
       <el-popover content="Reset view" placement="left"
-        :appendToBody=false trigger="manual" popper-class="scaffold-popper" v-model="hoverVisabilities[2].value">
+        :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[2].value">
         <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
           @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
       </el-popover>
       <el-popover content="Change background color" placement="left"
-        :appendToBody=false trigger="manual" popper-class="scaffold-popper" v-model="hoverVisabilities[3].value">
+        :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[3].value">
         <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
           @click="backgroundChangeCallback()" size="mini" slot="reference" @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"></el-button>
       </el-popover>
@@ -342,7 +348,8 @@ export default {
       availableBackground: ['white', 'black', 'lightskyblue'],
       controls: undefined,
       tooltipAppendToBody: false,
-      hoverVisabilities: [{value: false}, {value: false}, {value: false}, {value: false}],
+      hoverVisabilities: [{value: false}, {value: false}, {value: false},
+        {value: false}, {value: false},{value: false}],
       inHelp: false,
     };
   },
@@ -466,8 +473,16 @@ export default {
   background-color: #8300bf;
 }
 
->>> .scaffold-popper .popper__arrow::after{
+>>> .scaffold-popper.left-popper .popper__arrow::after{
   border-left-color: #8300bf !important;
+}
+
+>>> .scaffold-popper.right-popper .popper__arrow::after{
+  border-right-color: #8300bf !important;
+}
+
+>>> .scaffold-popper.top-popper .popper__arrow::after{
+  border-top-color: #8300bf !important;
 }
 
 </style>
