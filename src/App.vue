@@ -2,6 +2,7 @@
   <div id="app">
     <div v-if="displayUI">
       <p>{{ selectedCoordinates }}</p>
+      <el-button @click="helpMode = !helpMode">Help Mode</el-button>
       <el-button @click="screenCapture()" size="mini">Capture</el-button>
       <el-button @click="autoTumble()" size="mini">Tumble</el-button>
       <el-button @click="onClick('rat')" size="mini">Rat</el-button>
@@ -11,6 +12,7 @@
     </div>
     <ScaffoldVuer :displayUI="displayUI" :traditional="traditional"
       :url="url" ref="scaffold" @scaffold-selected="onSelected" :backgroundToggle=true
+      :helpMode="helpMode"
       />
   </div>
 </template>
@@ -111,7 +113,8 @@ export default {
       input: undefined,
       traditional: true,
       displayUI: true,
-      selectedCoordinates: undefined
+      selectedCoordinates: undefined,
+      helpMode: false
     };
   },
   beforeMount: function() {
@@ -130,7 +133,8 @@ export default {
   watch: {
     input: function() {
       this.parseInput();
-    }
+    },
+
   }
 }
 </script>
