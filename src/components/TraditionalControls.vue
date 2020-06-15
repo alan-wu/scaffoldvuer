@@ -54,11 +54,12 @@ export default {
     organsAdded: function(name) {
       if (name && name != "") {
         let tmpArray = uniq(this.sortedPrimitiveGroups.concat([name]));
-        this.sortedPrimitiveGroups = orderBy(tmpArray);
-        const index = this.sortedPrimitiveGroups.indexOf(undefined);
+        tmpArray = orderBy(tmpArray);
+        const index = tmpArray.indexOf(undefined);
         if (index > -1) {
-          this.sortedPrimitiveGroups.splice(index, 1);
+          tmpArray.splice(index, 1);
         }
+        this.sortedPrimitiveGroups = tmpArray;
       }
     },
     /**
@@ -238,7 +239,7 @@ export default {
   position: absolute;
   top: 54px;
   left: 17px;
-  max-height: calc(100% - 74px);
+  max-height: calc(100% - 154px);
   text-align: left;
   overflow: auto;
 }
