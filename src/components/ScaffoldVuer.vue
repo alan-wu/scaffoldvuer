@@ -2,7 +2,7 @@
   <div class="scaffold-container">
     <div id="organsDisplayArea" tabindex="-1" style="height:100%;width:100%;" ref="display" @keydown.66="backgroundChangeCallback"></div>
     <div v-show="displayUI && !isTransitioning">
-      <el-popover content="Change Regiom Visibility" placement="right"
+      <el-popover content="Change Region Visibility" placement="right"
         :appendToBody=false trigger="manual" popper-class="scaffold-popper right-popper" v-model="hoverVisabilities[5].value" ref="checkBoxPopover">
      </el-popover>
       <TraditionalControls v-if="traditional" v-popover:checkBoxPopover :helpMode="helpMode" :module="$module" @object-selected="objectSelected" 
