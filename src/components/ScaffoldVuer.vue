@@ -1,8 +1,12 @@
 <template>
-  <div class="scaffold-container">
+  <div class="scaffold-container"
+      v-loading="loading"
+      element-loading-text="Loading..."
+      element-loading-spinner="el-icon-loading"
+      element-loading-background="rgba(0, 0, 0, 0.3)">>
     <div id="organsDisplayArea" tabindex="-1" style="height:100%;width:100%;" ref="display" @keydown.66="backgroundChangeCallback"></div>
     <div v-show="displayUI && !isTransitioning">
-      <el-popover content="Change Region Visibility" placement="right"
+      <el-popover content="Change region visibility" placement="right"
         :appendToBody=false trigger="manual" popper-class="scaffold-popper right-popper" v-model="hoverVisabilities[5].value" ref="checkBoxPopover">
      </el-popover>
       <TraditionalControls v-if="traditional" v-popover:checkBoxPopover :helpMode="helpMode" :module="$module" @object-selected="objectSelected" 
@@ -37,12 +41,12 @@
           </el-col>
         </el-row>
       </div>
-      <el-popover content="Zoom In" placement="left" 
+      <el-popover content="Zoom in" placement="left" 
         :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[0].value">
         <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
           @click="zoomIn()" size="mini" slot="reference" @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"></el-button>
       </el-popover>
-      <el-popover content="Zoom Out" placement="left"
+      <el-popover content="Zoom out" placement="left"
         :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[1].value">
         <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
         @click="zoomOut()" size="mini" slot="reference" @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"></el-button>
@@ -70,6 +74,7 @@ import TraditionalControls from './TraditionalControls';
 import {
   Button,
   Col,
+  Loading,
   Row,
   Slider,
   Popover
@@ -79,6 +84,7 @@ import locale from "element-ui/lib/locale";
 locale.use(lang);
 Vue.use(Button);
 Vue.use(Col);
+Vue.use(Loading.directive);
 Vue.use(Row);
 Vue.use(Slider);
 Vue.use(Popover);
@@ -103,6 +109,12 @@ export default {
     this.$module = new OrgansViewer();
   },
   methods: {
+    /**
+     * This is called when a new organ is read into the scene.
+     */
+    organsAdded: function() {
+      this.loading = false;
+    },
     backgroundChangeCallback: function() {
       //When b is pressed
       if (this.backgroundToggle) {
@@ -331,7 +343,7 @@ export default {
     helpMode: {
       type: Boolean,
       default: false
-    }
+    },
   },
   data: function() {
     return {
@@ -351,6 +363,7 @@ export default {
       hoverVisabilities: [{value: false}, {value: false}, {value: false},
         {value: false}, {value: false},{value: false}],
       inHelp: false,
+      loading: false,
     };
   },
   watch: {
@@ -358,6 +371,7 @@ export default {
       if (newValue) {
         if (this.controls)
           this.controls.clear();
+        this.loading = true;
         this.$module.loadOrgansFromURL(
           newValue,
           undefined,
@@ -382,6 +396,7 @@ export default {
     eventNotifier.subscribe(this, this.eventNotifierCallback);
     this.$module.addNotifier(eventNotifier);
     if (this.url) {
+      this.loading = true;
       this.$module.loadOrgansFromURL(
         this.url,
         undefined,
@@ -390,6 +405,7 @@ export default {
         undefined
       );
     }
+    this.$module.addOrganPartAddedCallback(this.organsAdded);
     this.$module.initialiseRenderer(this.$refs.display);
     this.$module.toolTip = undefined;
     if (this.traditional)
@@ -465,7 +481,7 @@ export default {
   padding:9px 10px;
   min-width:150px;
   font-size:12px;
-    color: #fff;
+  color: #fff;
   background-color: #8300bf;  
 }
 
@@ -485,9 +501,17 @@ export default {
   border-top-color: #8300bf !important;
 }
 
+>>>.el-loading-spinner i{
+  color: #8300bf;  
+}
+>>>.el-loading-spinner .el-loading-text {
+  color: #8300bf; 
+}
 </style>
 
 <style scoped src="../styles/purple/button.css">
 </style>
 <style scoped src="../styles/purple/slider.css">
+</style>
+<style scoped src="../styles/purple/loading.css">
 </style>
