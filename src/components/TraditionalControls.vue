@@ -54,7 +54,12 @@ export default {
     organsAdded: function(name) {
       if (name && name != "") {
         let tmpArray = uniq(this.sortedPrimitiveGroups.concat([name]));
-        this.sortedPrimitiveGroups = orderBy(tmpArray);
+        tmpArray = orderBy(tmpArray);
+        const index = tmpArray.indexOf(undefined);
+        if (index > -1) {
+          tmpArray.splice(index, 1);
+        }
+        this.sortedPrimitiveGroups = tmpArray;
       }
     },
     /**
