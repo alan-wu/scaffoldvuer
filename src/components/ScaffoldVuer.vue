@@ -3,7 +3,7 @@
       v-loading="loading"
       element-loading-text="Loading..."
       element-loading-spinner="el-icon-loading"
-      element-loading-background="rgba(0, 0, 0, 0.3)">>
+      element-loading-background="rgba(0, 0, 0, 0.3)">
     <div id="organsDisplayArea" tabindex="-1" style="height:100%;width:100%;" ref="display" @keydown.66="backgroundChangeCallback"></div>
     <div v-show="displayUI && !isTransitioning">
       <el-popover content="Change region visibility" placement="right"
