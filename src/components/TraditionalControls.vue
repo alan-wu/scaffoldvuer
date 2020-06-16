@@ -54,12 +54,7 @@ export default {
     organsAdded: function(name) {
       if (name && name != "") {
         let tmpArray = uniq(this.sortedPrimitiveGroups.concat([name]));
-        tmpArray = orderBy(tmpArray);
-        const index = tmpArray.indexOf(undefined);
-        if (index > -1) {
-          tmpArray.splice(index, 1);
-        }
-        this.sortedPrimitiveGroups = tmpArray;
+        this.sortedPrimitiveGroups = orderBy(tmpArray);
       }
     },
     /**
@@ -180,30 +175,6 @@ export default {
     };
   },
   watch: {
-    "module.sceneData.geometries": function() {
-      let tmpArray = uniq(
-        this.sortedPrimitiveGroups.concat(this.module.sceneData.geometries)
-      );
-      this.sortedPrimitiveGroups = orderBy(tmpArray);
-    },
-    "module.sceneData.lines": function() {
-      let tmpArray = uniq(
-        this.sortedPrimitiveGroups.concat(this.module.sceneData.lines)
-      );
-      this.sortedPrimitiveGroups = orderBy(tmpArray);
-    },
-    "module.sceneData.glyphsets": function() {
-      let tmpArray = uniq(
-        this.sortedPrimitiveGroups.concat(this.module.sceneData.glyphsets)
-      );
-      this.sortedPrimitiveGroups = orderBy(tmpArray);
-    },
-    "module.sceneData.pointsets": function() {
-      let tmpArray = uniq(
-        this.sortedPrimitiveGroups.concat(this.module.sceneData.pointset)
-      );
-      this.sortedPrimitiveGroups = orderBy(tmpArray);
-    },
     myPopperClass: function() {
       if (this.showColourPicker)
         this.myPopperClass = "showPicker";
