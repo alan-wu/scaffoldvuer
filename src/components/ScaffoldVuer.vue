@@ -151,7 +151,7 @@ export default {
      */
     resetView: function() {
       if (this.$module.scene) {
-        this.$module.scene.resetView();
+        this.$module.scene.viewAll();
       }
     },
     /**
