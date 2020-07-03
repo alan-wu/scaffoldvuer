@@ -294,12 +294,13 @@ export default {
     },
     showToolitip: function(tooltipNumber){
       if (!this.inHelp){
-        this.hoverVisabilities[tooltipNumber].value = true;
+        this.tooltipWait = setTimeout( ()=>{this.hoverVisabilities[tooltipNumber].value = true}, 1000);
       }
     },
     hideToolitip: function(tooltipNumber){
       if (!this.inHelp){
         this.hoverVisabilities[tooltipNumber].value = false;
+        clearTimeout(this.tooltipWait);
       }
     },
   },
