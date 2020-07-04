@@ -6,6 +6,11 @@
       element-loading-background="rgba(0, 0, 0, 0.3)">
     <div id="organsDisplayArea" tabindex="-1" style="height:100%;width:100%;" ref="display" @keydown.66="backgroundChangeCallback"></div>
     <div v-show="displayUI && !isTransitioning">
+      <el-popover v-if="displayWarning" :content="warningMessage" placement="right"
+        :appendToBody=false trigger="manual" popper-class="warning-popper right-popper" v-model="hoverVisabilities[6].value"
+        ref="warningPopover">
+      </el-popover>
+      <i class="el-icon-warning warning-icon" v-if="displayWarning" @mouseover="showToolitip(6)" @mouseout="hideToolitip(6)" v-popover:warningPopover></i>
       <el-popover content="Change region visibility" placement="right"
         :appendToBody=false trigger="manual" popper-class="scaffold-popper right-popper" v-model="hoverVisabilities[5].value" ref="checkBoxPopover">
      </el-popover>
@@ -151,7 +156,7 @@ export default {
      */
     resetView: function() {
       if (this.$module.scene) {
-        this.$module.scene.resetView();
+        this.$module.scene.viewAll();
       }
     },
     /**
@@ -294,7 +299,8 @@ export default {
     },
     showToolitip: function(tooltipNumber){
       if (!this.inHelp){
-        this.tooltipWait = setTimeout( ()=>{this.hoverVisabilities[tooltipNumber].value = true}, 1000);
+        this.tooltipWait = setTimeout( ()=>{
+          this.hoverVisabilities[tooltipNumber].value = true}, 500);
       }
     },
     hideToolitip: function(tooltipNumber){
@@ -345,6 +351,14 @@ export default {
       type: Boolean,
       default: false
     },
+    displayWarning: {
+      type: Boolean,
+      default: true
+    },
+    warningMessage: {
+      type: String,
+      default: "Beta feature - under active development"
+    }
   },
   data: function() {
     return {
@@ -362,7 +376,7 @@ export default {
       controls: undefined,
       tooltipAppendToBody: false,
       hoverVisabilities: [{value: false}, {value: false}, {value: false},
-        {value: false}, {value: false},{value: false}],
+        {value: false}, {value: false},{value: false}, {value: false}],
       inHelp: false,
       loading: false,
     };
@@ -423,6 +437,28 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
+.warning-icon {
+  position: absolute;
+  top: 15px;
+  left: 37px;
+  text-align: left;
+  font-size: 25px;
+  color: #d70000;
+}
+.warning-icon:hover {
+  cursor: pointer;
+}
+>>> .warning-popper {
+  padding:9px 10px;
+  min-width:150px;
+  font-size:12px;
+  color: #fff;
+  background-color: #d70000;
+}
+>>> .warning-popper.right-popper .popper__arrow::after{
+  border-right-color: #d70000 !important;
+}
 
 #organsDisplayArea:focus {
     outline: none !important;

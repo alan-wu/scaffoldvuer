@@ -34,7 +34,6 @@ const axios = require('axios').default;
 
 const alignToObject = function(cameracontrol, scene) {
   var object = scene.findGeometriesWithGroupName("Endocardium of left atrium")[0];
-  console.log(object)
   const boundingBox = object.getBoundingBox();
   if (boundingBox) {
     const radius = boundingBox.min.distanceTo(boundingBox.max)/2.0;

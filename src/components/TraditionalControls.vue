@@ -67,7 +67,7 @@ export default {
      */
     changeActiveByName: function(name) {
       let targetObject = this.getFirstZincObjectWithGroupName(name);
-      if (targetObject) {
+      if (targetObject && targetObject.getVisibility()) {
         this.activeRegion = name;
         this.$emit("object-selected", targetObject);
       }
