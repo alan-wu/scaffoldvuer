@@ -1,6 +1,6 @@
 <template>
   <div class="traditional-container">
-    <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" 
+    <el-checkbox v-if="sortedPrimitiveGroups.length > 1" :indeterminate="isIndeterminate" v-model="checkAll" 
       @change="handleCheckAllChange">Display all regions</el-checkbox>
     <el-checkbox-group v-model="checkedItems" size="small"
       @change="handleCheckedItemsChange">
