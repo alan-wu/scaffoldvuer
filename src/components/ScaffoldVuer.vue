@@ -10,7 +10,11 @@
         :appendToBody=false trigger="manual" popper-class="warning-popper right-popper" v-model="hoverVisabilities[6].value"
         ref="warningPopover">
       </el-popover>
-      <i class="el-icon-warning warning-icon" v-if="displayWarning" @mouseover="showToolitip(6)" @mouseout="hideToolitip(6)" v-popover:warningPopover></i>
+      <i class="el-icon-warning warning-icon" v-if="displayWarning" 
+        @mouseover="showToolitip(6)" @mouseout="hideToolitip(6)"
+        v-popover:warningPopover>
+        <span class="warning-text">Beta</span>
+      </i>
       <el-popover content="Change region visibility" placement="right"
         :appendToBody=false trigger="manual" popper-class="scaffold-popper right-popper" v-model="hoverVisabilities[5].value" ref="checkBoxPopover">
      </el-popover>
@@ -448,6 +452,10 @@ export default {
 }
 .warning-icon:hover {
   cursor: pointer;
+}
+.warning-text{
+  font-size: 15px;
+  vertical-align:5px;
 }
 >>> .warning-popper {
   padding:9px 10px;
