@@ -408,6 +408,11 @@ export default {
     },
     helpMode: function(val){
       this.setHelpMode(val);
+    },
+    sceneData:{
+      handler:  function(scene){
+        this.$emit('current-time', scene.currentTime);
+      }, deep: true
     }
   },
   mounted: function() {
