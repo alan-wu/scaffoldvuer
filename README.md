@@ -1,7 +1,14 @@
-# scaffoldvuer
+# Scaffoldvuer
 
-This project aims to wrap the OrganViwer in the PhysiomePortal project into a vue compoinent.
+This project aims to provide high-level 3D physiological models viewing capability.
 
+
+## Scaffoldvuer on NPM
+
+Scaffoldvuer is available on npm and can be installed into your project with the following command:
+```bash
+npm i @abi-software/scaffoldvuer
+```
 
 ## Project setup
 ```
@@ -39,4 +46,25 @@ sample callback.
   }
 ```
 
-The following example showcases ScaffoldVuer in action: https://github.com/ABI-Software/PortalVueComponentExample.
+## Project setup from Github
+
+The source code is available from Github, it can be found here: https://github.com/ABI-Software/scaffoldvuer .
+
+### Clone the respositroy
+```bash
+git clone https://github.com/ABI-Software/scaffoldvuer.git
+```
+
+### Setup
+```bash
+npm install
+```
+
+### Compiles and minifies for production
+```bash
+npm run build-bundle
+```
+
+## Example
+The following example showcases ScaffoldVuer in action: https://mapcore-demo.org/current/scaffoldvuer/
+
