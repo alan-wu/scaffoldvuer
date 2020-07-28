@@ -65,6 +65,12 @@ npm install
 npm run build-bundle
 ```
 
+### Run the sample application
+```bash
+npm run serve
+```
+
+
 ## Example
 The following example showcases ScaffoldVuer in action: https://mapcore-demo.org/current/scaffoldvuer/
 
