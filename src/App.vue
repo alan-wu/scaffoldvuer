@@ -12,7 +12,7 @@
     </div>
     <ScaffoldVuer :displayUI="displayUI" :traditional="traditional"
       :url="url" ref="scaffold" @scaffold-selected="onSelected" :backgroundToggle=true
-      :helpMode="helpMode"
+      :helpMode="helpMode" :displayMarkers="displayMarkers"
       />
   </div>
 </template>
@@ -113,7 +113,8 @@ export default {
       traditional: true,
       displayUI: true,
       selectedCoordinates: undefined,
-      helpMode: false
+      helpMode: false,
+      displayMarkers: true
     };
   },
   beforeMount: function() {

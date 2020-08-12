@@ -362,6 +362,10 @@ export default {
     warningMessage: {
       type: String,
       default: "Beta feature - under active development"
+    },
+    displayMarkers: {
+      type: Boolean,
+      default: true
     }
   },
   data: function() {
@@ -398,6 +402,7 @@ export default {
           "scene",
           undefined
         );
+        this.$module.scene.displayMarkers = this.displayMarkers;
       }
     },
     traditional: function (value) {
@@ -408,6 +413,9 @@ export default {
     },
     helpMode: function(val){
       this.setHelpMode(val);
+    },
+    displayMarkers: function(val) {
+      this.$module.scene.displayMarkers = val;
     }
   },
   mounted: function() {
@@ -423,6 +431,7 @@ export default {
         "Overlay",
         undefined
       );
+      this.$module.scene.displayMarkers = this.displayMarkers;
     }
     this.$module.addOrganPartAddedCallback(this.organsAdded);
     this.$module.initialiseRenderer(this.$refs.display);
