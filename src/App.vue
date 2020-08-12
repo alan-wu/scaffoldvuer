@@ -2,6 +2,7 @@
   <div id="app">
     <div v-if="displayUI">
       <p>{{ selectedCoordinates }}</p>
+      <p v-if="currentTime!==0">time emited is: {{currentTime.toFixed(2)}}</p>
       <el-button @click="helpMode = !helpMode">Help Mode</el-button>
       <el-button @click="screenCapture()" size="mini">Capture</el-button>
       <el-button @click="autoTumble()" size="mini">Tumble</el-button>
@@ -11,8 +12,8 @@
         v-model="input" style="padding-left:20px;width:70%;" />
     </div>
     <ScaffoldVuer :displayUI="displayUI" :traditional="traditional"
-      :url="url" ref="scaffold" @scaffold-selected="onSelected" :backgroundToggle=true
-      :helpMode="helpMode"
+      :url="url" ref="scaffold" @scaffold-selected="onSelected" :backgroundToggle=true 
+      :helpMode="helpMode" @current-time="updateCurrentTime"
       />
   </div>
 </template>
@@ -104,6 +105,9 @@ export default {
       } else {
         this.url = this.input;
       }
+    },
+    updateCurrentTime: function(val){
+      this.currentTime = val;
     }
   },
   data: function() {
@@ -113,7 +117,8 @@ export default {
       traditional: true,
       displayUI: true,
       selectedCoordinates: undefined,
-      helpMode: false
+      helpMode: false,
+      currentTime: 0
     };
   },
   beforeMount: function() {
