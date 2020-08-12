@@ -252,7 +252,8 @@ export default {
      * Callback when time is changed through the UI.
      */
     timeChange: function(event) {
-      if (event != this.sceneData.currentTime) this.$module.updateTime(event);
+      if (event != this.sceneData.currentTime)
+        this.$module.updateTime(event);
     },
     /**
      * Set the selected zinc object
@@ -362,6 +363,10 @@ export default {
     warningMessage: {
       type: String,
       default: "Beta feature - under active development"
+    },
+    displayMarkers: {
+      type: Boolean,
+      default: true
     }
   },
   data: function() {
@@ -398,6 +403,7 @@ export default {
           "scene",
           undefined
         );
+        this.$module.scene.displayMarkers = this.displayMarkers;
       }
     },
     traditional: function (value) {
@@ -409,8 +415,11 @@ export default {
     helpMode: function(val){
       this.setHelpMode(val);
     },
-    "sceneData.currentTime": function(scene){
-        this.$emit('current-time', scene.currentTime);
+    displayMarkers: function(val) {
+      this.$module.scene.displayMarkers = val;
+    },
+    "sceneData.currentTime": function(){
+        this.$emit('timeChanged', this.sceneData.currentTime);
     }
   },
   mounted: function() {
@@ -426,6 +435,7 @@ export default {
         "Overlay",
         undefined
       );
+      this.$module.scene.displayMarkers = this.displayMarkers;
     }
     this.$module.addOrganPartAddedCallback(this.organsAdded);
     this.$module.initialiseRenderer(this.$refs.display);

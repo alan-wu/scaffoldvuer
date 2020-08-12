@@ -12,8 +12,8 @@
         v-model="input" style="padding-left:20px;width:70%;" />
     </div>
     <ScaffoldVuer :displayUI="displayUI" :traditional="traditional"
-      :url="url" ref="scaffold" @scaffold-selected="onSelected" :backgroundToggle=true 
-      :helpMode="helpMode" @current-time="updateCurrentTime"
+      :url="url" ref="scaffold" @scaffold-selected="onSelected" :backgroundToggle=true
+      :helpMode="helpMode" :displayMarkers="displayMarkers" @timeChanged="updateCurrentTime"
       />
   </div>
 </template>
@@ -118,6 +118,7 @@ export default {
       displayUI: true,
       selectedCoordinates: undefined,
       helpMode: false,
+      displayMarkers: true,
       currentTime: 0
     };
   },
