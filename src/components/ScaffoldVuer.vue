@@ -252,7 +252,8 @@ export default {
      * Callback when time is changed through the UI.
      */
     timeChange: function(event) {
-      if (event != this.sceneData.currentTime) this.$module.updateTime(event);
+      if (event != this.sceneData.currentTime)
+        this.$module.updateTime(event);
     },
     /**
      * Set the selected zinc object
@@ -416,6 +417,9 @@ export default {
     },
     displayMarkers: function(val) {
       this.$module.scene.displayMarkers = val;
+    },
+    "sceneData.currentTime": function(){
+        this.$emit('current-time', this.sceneData.currentTime);
     }
   },
   mounted: function() {
