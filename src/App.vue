@@ -13,7 +13,7 @@
     </div>
     <ScaffoldVuer :displayUI="displayUI" :traditional="traditional"
       :url="url" ref="scaffold" @scaffold-selected="onSelected" :backgroundToggle=true
-      :helpMode="helpMode" :displayMarkers="displayMarkers" @current-time="updateCurrentTime"
+      :helpMode="helpMode" :displayMarkers="displayMarkers" @timeChanged="updateCurrentTime"
       />
   </div>
 </template>

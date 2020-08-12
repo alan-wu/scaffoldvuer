@@ -419,7 +419,7 @@ export default {
       this.$module.scene.displayMarkers = val;
     },
     "sceneData.currentTime": function(){
-        this.$emit('current-time', this.sceneData.currentTime);
+        this.$emit('timeChanged', this.sceneData.currentTime);
     }
   },
   mounted: function() {
