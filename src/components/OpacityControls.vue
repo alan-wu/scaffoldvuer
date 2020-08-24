@@ -11,9 +11,9 @@
           <span class="display">{{displayString}}</span>
           <el-slider
             class="my-slider"
-            :step="step"
-            :min="min"
-            :max="max"
+            :step=0.01
+            :min=0
+            :max=1
             v-model="material.opacity"
             :format-tooltip="formatTooltip"
             :show-tooltip=false
@@ -46,30 +46,21 @@ export default {
     formatTooltip(val) {
       this.displayString = Math.floor(100 * val + 0.5) + "%";
       return this.displayString;
-    }
-  },
-  props: { 
-    /**
-     * The opacity of this object will be controlled here.
-     */
-    target: Object
+    },
+    setObject(object) {
+      if (object && (!object.isGlyphset))
+        this.material = object.morph.material;
+      else 
+        this.material = undefined;
+    },
   },
   data: function() {
     return {
       displayString: "100%",
       material: undefined,
-      step: 0.01,
-      min: 0,
-      max: 1
     };
   },
   watch: {
-    target: function() {
-      if (this.target && (!this.target.isGlyphset))
-        this.material = this.target.morph.material;
-      else 
-        this.material = undefined;
-    },
     "material.opacity": function() {
       if (this.material) {
         if (this.material.opacity != 1) this.material.transparent = true;

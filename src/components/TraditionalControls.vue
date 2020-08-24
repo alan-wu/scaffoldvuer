@@ -1,9 +1,12 @@
 <template>
   <div class="traditional-container">
-    <el-checkbox v-if="sortedPrimitiveGroups.length > 1" :indeterminate="isIndeterminate" v-model="checkAll" 
-      @change="handleCheckAllChange">Display all regions</el-checkbox>
-    <el-checkbox-group v-model="checkedItems" size="small"
-      @change="handleCheckedItemsChange">
+    <el-checkbox
+      v-if="sortedPrimitiveGroups.length > 1"
+      :indeterminate="isIndeterminate"
+      v-model="checkAll"
+      @change="handleCheckAllChange"
+    >Display all regions</el-checkbox>
+    <el-checkbox-group v-model="checkedItems" size="small" @change="handleCheckedItemsChange">
       <el-row v-for="item in sortedPrimitiveGroups" :key="item" :label="item">
         <div class="checkbox-container">
           <el-color-picker
@@ -74,11 +77,11 @@ export default {
       this.removeHover();
     },
     /**
-      * Hover a region by its name.
-    */
+     * Hover a region by its name.
+     */
     changeHoverByName: function(name) {
       let targetObject = this.getFirstZincObjectWithGroupName(name);
-      if (targetObject)  {
+      if (targetObject) {
         this.hoverRegion = name;
         this.$emit("object-hovered", targetObject);
       }
@@ -87,7 +90,7 @@ export default {
      * Unselect the current selected region.
      */
     removeActive: function() {
-      this.activeRegion = ""
+      this.activeRegion = "";
       this.$emit("object-selected", undefined);
     },
     /**
@@ -124,8 +127,7 @@ export default {
       let graphic = this.getFirstZincObjectWithGroupName(name);
       if (graphic) {
         let hex = graphic.getColourHex();
-        if (hex) 
-          return "#" + hex;
+        if (hex) return "#" + hex;
       }
       return "#FFFFFF";
     },
@@ -133,8 +135,12 @@ export default {
       this.changeHoverByName(name);
     },
     itemClicked: function(name, event) {
-      if (!(event.target.classList.contains("el-checkbox__inner") ||
-        event.target.classList.contains("el-checkbox__original"))) {
+      if (
+        !(
+          event.target.classList.contains("el-checkbox__inner") ||
+          event.target.classList.contains("el-checkbox__original")
+        )
+      ) {
         this.changeActiveByName(name);
         event.preventDefault();
       }
@@ -142,15 +148,15 @@ export default {
     handleCheckedItemsChange: function(value) {
       let checkedCount = value.length;
       this.checkAll = checkedCount === this.sortedPrimitiveGroups.length;
-      this.isIndeterminate = checkedCount > 0 && checkedCount < this.sortedPrimitiveGroups.length;
+      this.isIndeterminate =
+        checkedCount > 0 && checkedCount < this.sortedPrimitiveGroups.length;
     },
     handleCheckAllChange(val) {
       this.checkedItems = val ? this.sortedPrimitiveGroups : [];
       this.isIndeterminate = false;
       for (let i = 0; i < this.sortedPrimitiveGroups.length; i++) {
-        this.visibilityToggle(
-          this.sortedPrimitiveGroups[i], this.checkAll);
-      }      
+        this.visibilityToggle(this.sortedPrimitiveGroups[i], this.checkAll);
+      }
     },
     viewAll: function() {
       this.module.viewAll();
@@ -176,15 +182,13 @@ export default {
       sortedPrimitiveGroups: [],
       activeRegion: "",
       hoverRegion: "",
-      myPopperClass: "hide-scaffold-colour-popup",
+      myPopperClass: "hide-scaffold-colour-popup"
     };
   },
   watch: {
     myPopperClass: function() {
-      if (this.showColourPicker)
-        this.myPopperClass = "showPicker";
-      else
-        this.myPopperClass = "hide-scaffold-colour-popup";
+      if (this.showColourPicker) this.myPopperClass = "showPicker";
+      else this.myPopperClass = "hide-scaffold-colour-popup";
     }
   },
   created: function() {
@@ -205,8 +209,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
-.checkbox-container { 
+.checkbox-container {
   display: flex;
   cursor: pointer;
 }
@@ -220,19 +223,18 @@ export default {
   overflow: auto;
 }
 
->>> .el-checkbox__input.is-indeterminate .el-checkbox__inner
-{
+>>> .el-checkbox__input.is-indeterminate .el-checkbox__inner {
   background-color: #8300bf;
-  border-color:  #8300bf;
+  border-color: #8300bf;
 }
 
 >>> .el-checkbox__input.is-checked .el-checkbox__inner {
   background-color: #8300bf;
-  border-color:  #8300bf;
+  border-color: #8300bf;
 }
 
 >>> .el-checkbox__label {
-  color:  #8300bf !important;
+  color: #8300bf !important;
 }
 
 .activeItem {
@@ -241,7 +243,7 @@ export default {
 
 .my-checkbox {
   background-color: #fff;
-  width:100%;
+  width: 100%;
 }
 
 .hoverItem {
@@ -249,17 +251,17 @@ export default {
 }
 
 >>> .el-color-picker__icon.el-icon-arrow-down {
-  display:none;
+  display: none;
 }
 
 >>> .show-picker .el-color-picker__icon.el-icon-arrow-down {
-  display:block;
+  display: block;
 }
 </style>
 
 <style>
 .hide-scaffold-colour-popup {
-  display:none;
+  display: none;
 }
 </style>
 
