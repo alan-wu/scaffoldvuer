@@ -11,11 +11,33 @@
       class="popover"
       >
       <div class="options-container">
-        <p>{{ selectedCoordinates }}</p>
-        <p v-if="currentTime!==0">time emited is: {{currentTime.toFixed(2)}}</p>
-        <el-button @click="helpMode = !helpMode" size="mini">Help Mode</el-button>
-        <el-button @click="screenCapture()" size="mini">Capture</el-button>
-        <el-button @click="autoTumble()" size="mini">Tumble</el-button>
+        <el-row :gutter="20">
+          <p>{{ selectedCoordinates }}</p>
+        </el-row>
+        <el-row :gutter="20">
+          <p v-if="currentTime!==0">time emited is: {{currentTime.toFixed(2)}}</p>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="6" :offset="3">
+            <el-switch class="app-switch" 
+              active-text="Markers"
+              active-color="#8300bf"
+              v-model="displayMarkers">
+            </el-switch>
+          </el-col>
+          <el-col :span="6" :offset="3">
+            <el-switch class="app-switch"
+              active-text="Minimap"
+              active-color="#8300bf"
+              v-model="displayMinimap">
+            </el-switch>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-button @click="helpMode = !helpMode" size="mini">Help Mode</el-button>
+          <el-button @click="screenCapture()" size="mini">Capture</el-button>
+          <el-button @click="autoTumble()" size="mini">Tumble</el-button>
+        </el-row>
         <el-input type="textarea" autosize placeholder="Please input"
           v-model="input" style="padding-left:5%;width:90%;" />
       </div>
@@ -30,17 +52,23 @@ import ScaffoldVuer from './components/ScaffoldVuer.vue'
 import Vue from "vue";
 import {
   Button,
+  Col,
   Icon,
   Input,
-  Popover
+  Popover,
+  Row,
+  Switch
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 locale.use(lang);
 Vue.use(Button);
+Vue.use(Col);
 Vue.use(Icon);
 Vue.use(Input);
 Vue.use(Popover);
+Vue.use(Row);
+Vue.use(Switch);
 const axios = require('axios').default;
 
 const alignToObject = function(cameracontrol, scene) {
@@ -58,7 +86,6 @@ const alignToObject = function(cameracontrol, scene) {
     cameracontrol.enableCameraTransition();
   }
   setTimeout(function(){ tumble(cameracontrol) }, 2000);
-
 }
 
 const tumble = function(cameracontrol) {
@@ -184,4 +211,24 @@ text-align: center;
   top:0px;
   position:absolute;
 }
+
+.app-switch .el-switch__label.is-active span{
+  color: #8300bf
+}
+
+.el-row {
+  margin-bottom: 5px;
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+</style>
+
+<style scoped src="./styles/purple/button.css">
+</style>
+<style scoped src="./styles/purple/icon.css">
+</style>
+<style scoped src="./styles/purple/input.css">
+</style>
+<style scoped src="./styles/purple/popover.css">
 </style>
