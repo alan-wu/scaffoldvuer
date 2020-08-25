@@ -22,7 +22,7 @@
         @object-hovered="objectHovered" :showColourPicker="showColourPicker" ref="traditionalControl"/>
       <SelectControls v-else :module="$module" @object-selected="objectSelected" 
         @object-hovered="objectHovered" :displayAtStartUp="displayAtStartUp" ref="selectControl"/>
-      <OpacityControls :target="selectedObject"/>
+      <OpacityControls ref="opacityControl"/>
       <el-popover v-if="sceneData.timeVarying" content="Move the slider to animate the region" placement="top"
         :appendToBody=false trigger="manual" popper-class="scaffold-popper top-popper" v-model="hoverVisabilities[4].value" ref="sliderPopover">
      </el-popover>
@@ -116,6 +116,11 @@ export default {
   },
   beforeCreate: function() {
     this.$module = new OrgansViewer();
+    this.selectedObject = undefined;
+    this.hoveredObject = undefined;
+    this.controls = undefined;
+    this.currentBackground = 0;
+    this.availableBackground = ['white', 'black', 'lightskyblue'];
   },
   methods: {
     /**
@@ -262,6 +267,7 @@ export default {
     objectSelected: function(object) {
       if (object !== this.selectedObject) {
         this.selectedObject = object;
+        this.$refs.opacityControl.setObject(this.selectedObject);
         if (object)
           this.$module.setSelectedByZincObject(object, true);
         else
@@ -367,22 +373,27 @@ export default {
     displayMarkers: {
       type: Boolean,
       default: true
-    }
+    },
+    displayMinimap: {
+      type: Boolean,
+      default: false
+    },
+    minimapSettings: {
+      x_offset: 16,
+      y_offset: 16,
+      width: 128,
+      height: 128,
+      align: "top-left"
+    },
   },
   data: function() {
     return {
       sceneData: this.$module.sceneData,
       isPlaying: false,
-      step: 0.1,
-      selectedObject: undefined,
-      hoveredObject: undefined,
       /**
        * This is set when scene is transitioning.
        */
       isTransitioning: false,
-      currentBackground: 0,
-      availableBackground: ['white', 'black', 'lightskyblue'],
-      controls: undefined,
       tooltipAppendToBody: false,
       hoverVisabilities: [{value: false}, {value: false}, {value: false},
         {value: false}, {value: false},{value: false}, {value: false}],
@@ -404,6 +415,8 @@ export default {
           undefined
         );
         this.$module.scene.displayMarkers = this.displayMarkers;
+        this.$module.scene.displayMinimap = this.displayMinimap;
+        this.$module.scene.minimapScissor = this.minimapSettings;
       }
     },
     traditional: function (value) {
@@ -417,6 +430,9 @@ export default {
     },
     displayMarkers: function(val) {
       this.$module.scene.displayMarkers = val;
+    },
+    displayMinimap: function(val) {
+      this.$module.scene.displayMinimap = val;
     },
     "sceneData.currentTime": function(){
         this.$emit('timeChanged', this.sceneData.currentTime);
@@ -436,6 +452,8 @@ export default {
         undefined
       );
       this.$module.scene.displayMarkers = this.displayMarkers;
+      this.$module.scene.displayMinimap = this.displayMinimap;
+      this.$module.scene.minimapScissor = this.minimapSettings;
     }
     this.$module.addOrganPartAddedCallback(this.organsAdded);
     this.$module.initialiseRenderer(this.$refs.display);

@@ -1,20 +1,54 @@
 <template>
   <div id="app">
-    <div v-if="displayUI">
-      <p>{{ selectedCoordinates }}</p>
-      <p v-if="currentTime!==0">time emited is: {{currentTime.toFixed(2)}}</p>
-      <el-button @click="helpMode = !helpMode">Help Mode</el-button>
-      <el-button @click="screenCapture()" size="mini">Capture</el-button>
-      <el-button @click="autoTumble()" size="mini">Tumble</el-button>
-      <el-button @click="onClick('rat')" size="mini">Rat</el-button>
-      <el-button @click="onClick('mouse')" size="mini">Mouse</el-button>
-      <el-input type="textarea" autosize placeholder="Please input"
-        v-model="input" style="padding-left:20px;width:70%;" />
-    </div>
-    <ScaffoldVuer :displayUI="displayUI" :traditional="traditional"
+    <ScaffoldVuer class="vuer" :displayUI="displayUI" :traditional="traditional"
       :url="url" ref="scaffold" @scaffold-selected="onSelected" :backgroundToggle=true
-      :helpMode="helpMode" :displayMarkers="displayMarkers" @timeChanged="updateCurrentTime"
-      />
+      :helpMode="helpMode" :displayMinimap="displayMinimap" :displayMarkers="displayMarkers" :minimapSettings="minimapSettings" @timeChanged="updateCurrentTime"
+    />
+    <el-popover
+      placement="bottom"
+      trigger="click"
+      width=500
+      class="popover"
+      >
+      <div class="options-container">
+        <el-row :gutter="20">
+          <p>{{ selectedCoordinates }}</p>
+        </el-row>
+        <el-row :gutter="20">
+          <p v-if="currentTime!==0">time emited is: {{currentTime.toFixed(2)}}</p>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="6" :offset="2">
+            <el-switch class="app-switch" 
+              active-text="Markers"
+              active-color="#8300bf"
+              v-model="displayMarkers">
+            </el-switch>
+          </el-col>
+          <el-col :span="6" :offset="2">
+            <el-switch class="app-switch"
+              active-text="Minimap"
+              active-color="#8300bf"
+              v-model="displayMinimap">
+            </el-switch>
+          </el-col>
+          <el-col :span="6" :offset="2">
+            <el-switch class="app-switch"
+              active-text="Tumble"
+              active-color="#8300bf"
+              v-model="tumbleOn">
+            </el-switch>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-button @click="helpMode = !helpMode" size="mini">Help Mode</el-button>
+          <el-button @click="screenCapture()" size="mini">Capture</el-button>
+        </el-row>
+        <el-input type="textarea" autosize placeholder="Please input"
+          v-model="input" style="padding-left:5%;width:90%;" />
+      </div>
+      <el-button icon="el-icon-setting" slot="reference">Options</el-button>
+    </el-popover>
   </div>
 </template>
 
@@ -24,15 +58,25 @@ import ScaffoldVuer from './components/ScaffoldVuer.vue'
 import Vue from "vue";
 import {
   Button,
-  Input
+  Col,
+  Icon,
+  Input,
+  Popover,
+  Row,
+  Switch
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 locale.use(lang);
 Vue.use(Button);
+Vue.use(Col);
+Vue.use(Icon);
 Vue.use(Input);
+Vue.use(Popover);
+Vue.use(Row);
+Vue.use(Switch);
 const axios = require('axios').default;
-
+/*
 const alignToObject = function(cameracontrol, scene) {
   var object = scene.findGeometriesWithGroupName("Endocardium of left atrium")[0];
   const boundingBox = object.getBoundingBox();
@@ -48,14 +92,13 @@ const alignToObject = function(cameracontrol, scene) {
     cameracontrol.enableCameraTransition();
   }
   setTimeout(function(){ tumble(cameracontrol) }, 2000);
-
 }
 
 const tumble = function(cameracontrol) {
   cameracontrol.enableAutoTumble();
   cameracontrol.autoTumble([1.0, 0.0], Math.PI / 2, true);
 }
-
+*/
 export default {
   name: 'app',
   components: {
@@ -65,22 +108,19 @@ export default {
     screenCapture: function() {
       this.$refs.scaffold.captureScreenshot("capture.png");
     },
-    autoTumble: function() {
+    autoTumble: function(flag) {
       let cameracontrol = this.$refs.scaffold.$module.scene.getZincCameraControls();
-      this.displayUI = false;
-      let scene = this.$refs.scaffold.$module.scene;
-      tumble(cameracontrol);
-      setTimeout(function(){ alignToObject(cameracontrol, scene) }, 8000);
+      if (flag) {
+        this.displayUI = false;
+        cameracontrol.enableAutoTumble();
+        cameracontrol.autoTumble([1.0, 0.0], Math.PI / 2, true);
+      } else {
+        this.displayUI = true;
+        cameracontrol.stopAutoTumble();
+      }
     },
     onSelected: function(data) {
       console.log(data);
-    },
-    onClick: function(species) {
-      if (species == "rat") {
-        this.input = "https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json";
-      } else if (species == "mouse") {
-        this.input = "https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/27_Feb_2020/mouse_heart/mouse_heart_1.json";
-      }
     },
     parseInput: function() {
       if (this.input.includes("discover/scaffold/N:package:")) {
@@ -119,13 +159,21 @@ export default {
       selectedCoordinates: undefined,
       helpMode: false,
       displayMarkers: true,
-      currentTime: 0
+      currentTime: 0,
+      displayMinimap: true,
+      tumbleOn: false,
+      minimapSettings: {
+        x_offset: 16,
+        y_offset: 16,
+        width: 128,
+        height: 128,
+        align: "bottom-right"
+      },
     };
   },
   beforeMount: function() {
     const queryString = require('query-string');
     const parsed = queryString.parse(location.search);
-    console.log(parsed)
     if (parsed.url) {
       this.input= parsed.url;
     } else {
@@ -139,7 +187,9 @@ export default {
     input: function() {
       this.parseInput();
     },
-
+    tumbleOn: function(val) {
+      this.autoTumble(val);
+    }
   }
 }
 </script>
@@ -159,4 +209,39 @@ export default {
 body {
   margin: 0px;
 }
+
+.options-container{
+text-align: center;
+}
+
+.vuer {
+  position:absolute;
+  width:100%;
+  height:100%;
+}
+
+.popover{
+  top:0px;
+  position:absolute;
+}
+
+.app-switch .el-switch__label.is-active span{
+  color: #8300bf
+}
+
+.el-row {
+  margin-bottom: 5px;
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+</style>
+
+<style scoped src="./styles/purple/button.css">
+</style>
+<style scoped src="./styles/purple/icon.css">
+</style>
+<style scoped src="./styles/purple/input.css">
+</style>
+<style scoped src="./styles/purple/popover.css">
 </style>
