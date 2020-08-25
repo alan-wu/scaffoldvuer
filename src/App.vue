@@ -18,25 +18,31 @@
           <p v-if="currentTime!==0">time emited is: {{currentTime.toFixed(2)}}</p>
         </el-row>
         <el-row :gutter="20">
-          <el-col :span="6" :offset="3">
+          <el-col :span="6" :offset="2">
             <el-switch class="app-switch" 
               active-text="Markers"
               active-color="#8300bf"
               v-model="displayMarkers">
             </el-switch>
           </el-col>
-          <el-col :span="6" :offset="3">
+          <el-col :span="6" :offset="2">
             <el-switch class="app-switch"
               active-text="Minimap"
               active-color="#8300bf"
               v-model="displayMinimap">
             </el-switch>
           </el-col>
+          <el-col :span="6" :offset="2">
+            <el-switch class="app-switch"
+              active-text="Tumble"
+              active-color="#8300bf"
+              v-model="tumbleOn">
+            </el-switch>
+          </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-button @click="helpMode = !helpMode" size="mini">Help Mode</el-button>
           <el-button @click="screenCapture()" size="mini">Capture</el-button>
-          <el-button @click="autoTumble()" size="mini">Tumble</el-button>
         </el-row>
         <el-input type="textarea" autosize placeholder="Please input"
           v-model="input" style="padding-left:5%;width:90%;" />
@@ -70,7 +76,7 @@ Vue.use(Popover);
 Vue.use(Row);
 Vue.use(Switch);
 const axios = require('axios').default;
-
+/*
 const alignToObject = function(cameracontrol, scene) {
   var object = scene.findGeometriesWithGroupName("Endocardium of left atrium")[0];
   const boundingBox = object.getBoundingBox();
@@ -92,7 +98,7 @@ const tumble = function(cameracontrol) {
   cameracontrol.enableAutoTumble();
   cameracontrol.autoTumble([1.0, 0.0], Math.PI / 2, true);
 }
-
+*/
 export default {
   name: 'app',
   components: {
@@ -102,12 +108,16 @@ export default {
     screenCapture: function() {
       this.$refs.scaffold.captureScreenshot("capture.png");
     },
-    autoTumble: function() {
+    autoTumble: function(flag) {
       let cameracontrol = this.$refs.scaffold.$module.scene.getZincCameraControls();
-      this.displayUI = false;
-      let scene = this.$refs.scaffold.$module.scene;
-      tumble(cameracontrol);
-      setTimeout(function(){ alignToObject(cameracontrol, scene) }, 8000);
+      if (flag) {
+        this.displayUI = false;
+        cameracontrol.enableAutoTumble();
+        cameracontrol.autoTumble([1.0, 0.0], Math.PI / 2, true);
+      } else {
+        this.displayUI = true;
+        cameracontrol.stopAutoTumble();
+      }
     },
     onSelected: function(data) {
       console.log(data);
@@ -151,6 +161,7 @@ export default {
       displayMarkers: true,
       currentTime: 0,
       displayMinimap: true,
+      tumbleOn: false,
       minimapSettings: {
         x_offset: 16,
         y_offset: 16,
@@ -176,7 +187,9 @@ export default {
     input: function() {
       this.parseInput();
     },
-
+    tumbleOn: function(val) {
+      this.autoTumble(val);
+    }
   }
 }
 </script>
