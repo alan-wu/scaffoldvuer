@@ -21,6 +21,7 @@
           <el-col :span="6" :offset="2">
             <el-switch class="app-switch" 
               active-text="Markers"
+              active-icon-class="el-icon-location"
               active-color="#8300bf"
               v-model="displayMarkers">
             </el-switch>
@@ -28,6 +29,7 @@
           <el-col :span="6" :offset="2">
             <el-switch class="app-switch"
               active-text="Minimap"
+              active-icon-class="el-icon-discover"
               active-color="#8300bf"
               v-model="displayMinimap">
             </el-switch>
@@ -49,12 +51,23 @@
       </div>
       <el-button icon="el-icon-setting" slot="reference">Options</el-button>
     </el-popover>
+    <el-popover
+      placement="bottom"
+      trigger="click"
+      width=800
+      class="models-popover"
+      >
+      <ModelsTable @viewModelClicked="viewModelClicked">
+      </ModelsTable>
+      <el-button icon="el-icon-folder-opened" slot="reference">Models</el-button>
+    </el-popover>
   </div>
 </template>
 
 <script>
 /* eslint-disable no-alert, no-console */
 import ScaffoldVuer from './components/ScaffoldVuer.vue'
+import ModelsTable from './components/ModelsTable.vue'
 import Vue from "vue";
 import {
   Button,
@@ -76,7 +89,7 @@ Vue.use(Popover);
 Vue.use(Row);
 Vue.use(Switch);
 const axios = require('axios').default;
-/*
+/*GOOGLE_SERVICE_SCAFFOLDVUER_EMAIL
 const alignToObject = function(cameracontrol, scene) {
   var object = scene.findGeometriesWithGroupName("Endocardium of left atrium")[0];
   const boundingBox = object.getBoundingBox();
@@ -102,9 +115,13 @@ const tumble = function(cameracontrol) {
 export default {
   name: 'app',
   components: {
-    ScaffoldVuer
+    ScaffoldVuer,
+    ModelsTable
   },
   methods: {
+    viewModelClicked: function(location) {
+      this.input = location;
+    },
     screenCapture: function() {
       this.$refs.scaffold.captureScreenshot("capture.png");
     },
@@ -221,7 +238,8 @@ text-align: center;
 }
 
 .popover{
-  top:0px;
+  top:5px;
+  right:10PX;
   position:absolute;
 }
 
@@ -235,6 +253,12 @@ text-align: center;
     margin-bottom: 0;
   }
 }
+
+.models-popover {
+  top:5px;
+  position:absolute;
+}
+
 </style>
 
 <style scoped src="./styles/purple/button.css">
