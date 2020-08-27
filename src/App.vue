@@ -9,6 +9,7 @@
       trigger="click"
       width=500
       class="popover"
+      :appendToBody=false
       >
       <div class="options-container">
         <el-row :gutter="20">
@@ -56,6 +57,8 @@
       trigger="click"
       width=800
       class="models-popover"
+      popper-class="table-popover"
+      :appendToBody=false
       >
       <ModelsTable @viewModelClicked="viewModelClicked">
       </ModelsTable>
@@ -259,6 +262,9 @@ text-align: center;
   position:absolute;
 }
 
+.table-popover {
+  opacity: 0.9;
+}
 </style>
 
 <style scoped src="./styles/purple/button.css">
