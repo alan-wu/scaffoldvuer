@@ -92,7 +92,7 @@ Vue.use(Popover);
 Vue.use(Row);
 Vue.use(Switch);
 const axios = require('axios').default;
-/*GOOGLE_SERVICE_SCAFFOLDVUER_EMAIL
+/*
 const alignToObject = function(cameracontrol, scene) {
   var object = scene.findGeometriesWithGroupName("Endocardium of left atrium")[0];
   const boundingBox = object.getBoundingBox();
@@ -224,6 +224,7 @@ export default {
   height:100%;
   width: 100%;
   position:absolute;
+  overflow:hidden;
 }
 
 body {
