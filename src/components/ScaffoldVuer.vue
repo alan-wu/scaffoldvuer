@@ -320,6 +320,12 @@ export default {
         clearTimeout(this.tooltipWait);
       }
     },
+    updateMinimapScissor: function() {
+      Object.keys(this.minimapSettings).forEach(key => {
+        this.$module.scene.minimapScissor[key] = this.minimapSettings[key];
+      });
+      this.$module.scene.minimapScissor.updateRequired = true;
+    }
   },
   props: { 
     /**
@@ -383,7 +389,8 @@ export default {
       y_offset: 16,
       width: 128,
       height: 128,
-      align: "top-left"
+      align: "top-left",
+
     },
   },
   data: function() {
@@ -416,7 +423,7 @@ export default {
         );
         this.$module.scene.displayMarkers = this.displayMarkers;
         this.$module.scene.displayMinimap = this.displayMinimap;
-        this.$module.scene.minimapScissor = this.minimapSettings;
+        this.updateMinimapScissor();
       }
     },
     traditional: function (value) {
@@ -436,6 +443,12 @@ export default {
     },
     "sceneData.currentTime": function(){
         this.$emit('timeChanged', this.sceneData.currentTime);
+    },
+    minimapSettings: {
+     deep: true,
+     handler() {
+       this.updateMinimapScissor();
+     }
     }
   },
   mounted: function() {
@@ -453,7 +466,7 @@ export default {
       );
       this.$module.scene.displayMarkers = this.displayMarkers;
       this.$module.scene.displayMinimap = this.displayMinimap;
-      this.$module.scene.minimapScissor = this.minimapSettings;
+      this.updateMinimapScissor();
     }
     this.$module.addOrganPartAddedCallback(this.organsAdded);
     this.$module.initialiseRenderer(this.$refs.display);
