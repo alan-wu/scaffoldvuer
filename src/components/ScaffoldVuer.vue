@@ -445,10 +445,9 @@ export default {
         this.$emit('timeChanged', this.sceneData.currentTime);
     },
     minimapSettings: {
-     deep: true,
-     handler() {
-       this.updateMinimapScissor();
-     }
+      immediate: true,
+      deep: true,
+      handler: "updateMinimapScissor"
     }
   },
   mounted: function() {

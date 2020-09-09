@@ -13,6 +13,7 @@
             style="margin-top:3px;display:inline-block;"
             :class="{ 'show-picker' : showColourPicker }"
             :value="getColour(item)"
+            @change="setColour(item, $event)"
             size="small"
             :popper-class="myPopperClass"
           ></el-color-picker>
@@ -131,6 +132,13 @@ export default {
       }
       return "#FFFFFF";
     },
+    setColour: function(name, value) {
+      let graphic = this.getFirstZincObjectWithGroupName(name);
+      if (graphic) {
+        let hexString = value.replace("#", "0x");
+        graphic.setColourHex(hexString);
+      }
+    },
     checkboxHover: function(name) {
       this.changeHoverByName(name);
     },
@@ -186,9 +194,12 @@ export default {
     };
   },
   watch: {
-    myPopperClass: function() {
-      if (this.showColourPicker) this.myPopperClass = "showPicker";
-      else this.myPopperClass = "hide-scaffold-colour-popup";
+    showColourPicker: {
+      immediate: true,
+      handler: function() {
+        if (this.showColourPicker) this.myPopperClass = "showPicker";
+        else this.myPopperClass = "hide-scaffold-colour-popup";
+      }
     }
   },
   created: function() {
