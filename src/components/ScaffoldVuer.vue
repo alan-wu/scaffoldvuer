@@ -136,7 +136,8 @@ export default {
     /**
      * This is called when Change background colour button 
      * is pressed an causes the background colour to be changed
-     * to one of the three preset colour: white, black and aqua. 
+     * to one of the three preset colour: white, black and
+     * lightskyblue. 
      */
     backgroundChangeCallback: function() {
       ++this.currentBackground;
@@ -166,6 +167,8 @@ export default {
     /**
      * Function for capturing a screenshot of the current rendering.
      * 
+     * @param {String} filename filename given to the screenshot.
+     * 
      * @public
      */
     captureScreenshot: function(filename) {
@@ -176,6 +179,8 @@ export default {
     /**
      * Function to reset the view to default.
      * Also called when the associated button is pressed.
+     * 
+     * @public
      */
     resetView: function() {
       if (this.$module.scene) {
@@ -185,6 +190,8 @@ export default {
     /**
      * Function to zoom in.
      * Also called when the associated button is pressed.
+     * 
+     * @public
      */
     zoomIn: function() {
       if (this.$module.scene) {
@@ -194,6 +201,8 @@ export default {
     /**
       * Function to zoom out.
       * Also called when the associated button is pressed.
+      * 
+      * @public
       */
     zoomOut: function() {
       if (this.$module.scene) {
@@ -454,11 +463,16 @@ export default {
      * Settings for minimap position, size and alignment.
      */
     minimapSettings: {
-      x_offset: 16,
-      y_offset: 16,
-      width: 128,
-      height: 128,
-      align: "top-left",
+      type: Object,
+      default: function () {
+        return {
+          x_offset: 16,
+          y_offset: 16,
+          width: 128,
+          height: 128,
+          align: "top-left",
+        }
+      }
     }
   },
   data: function() {

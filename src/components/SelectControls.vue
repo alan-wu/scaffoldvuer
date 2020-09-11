@@ -124,6 +124,11 @@ export default {
      */
     removeActive: function() {
       this.removeTag(this.activeRegion, "activeTag");
+      /**
+       * Triggers when an item has been selected.
+       *
+       * @property {object} target selected object.
+       */
       this.$emit("object-selected", undefined);
     },
     /**
@@ -131,6 +136,11 @@ export default {
      */
     removeHover: function() {
       this.removeTag(this.hoverRegion, "hoverTag");
+      /**
+       * Triggers when an item has been hovered over.
+       *
+       * @property {object} target hovered object.
+       */
       this.$emit("object-hovered", undefined);
     },
     /**
@@ -209,7 +219,10 @@ export default {
       }
     }
   },
-  props: { 
+  props: {
+    /**
+     * @ignore
+     */
     module: Object,
       /**
      * Display all graphics at start

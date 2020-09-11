@@ -74,7 +74,7 @@ export default {
       if (targetObject && targetObject.getVisibility()) {
         this.activeRegion = name;
         /**
-         * Triggers when an object has been selected on the ui.
+         * Triggers when an item has been selected.
          *
          * @property {object} target selected object.
          */
@@ -89,6 +89,11 @@ export default {
       let targetObject = this.getFirstZincObjectWithGroupName(name);
       if (targetObject) {
         this.hoverRegion = name;
+        /**
+         * Triggers when an item has been hovered over.
+         *
+         * @property {object} target hovered object.
+         */
         this.$emit("object-hovered", targetObject);
       }
     },
@@ -186,7 +191,15 @@ export default {
       }
     }
   },
-  props: { module: Object, showColourPicker: Boolean },
+  props: { 
+    /**
+     * @ignore
+     */
+    module: Object,
+    /**
+     * Enable/disable colour picker
+     */
+    showColourPicker: Boolean },
   data: function() {
     return {
       checkAll: true,
