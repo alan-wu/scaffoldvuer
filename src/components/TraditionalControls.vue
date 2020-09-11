@@ -73,6 +73,11 @@ export default {
       let targetObject = this.getFirstZincObjectWithGroupName(name);
       if (targetObject && targetObject.getVisibility()) {
         this.activeRegion = name;
+        /**
+         * Triggers when an object has been selected on the ui.
+         *
+         * @property {object} target selected object.
+         */
         this.$emit("object-selected", targetObject);
       }
       this.removeHover();

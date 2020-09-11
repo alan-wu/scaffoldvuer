@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <ScaffoldVuer class="vuer" :displayUI="displayUI" :traditional="traditional"
-      :url="url" ref="scaffold" @scaffold-selected="onSelected" :backgroundToggle=true
+      :url="url" ref="scaffold" @scaffold-selected="onSelected"
       :helpMode="helpMode" :displayMinimap="displayMinimap" 
       :displayMarkers="displayMarkers" :minimapSettings="minimapSettings"
       :showColourPicker="showColourPicker" @timeChanged="updateCurrentTime"

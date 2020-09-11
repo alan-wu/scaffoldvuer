@@ -106,6 +106,10 @@ const EventNotifier = require("physiomeportal/src/utilities/eventNotifier")
 
 /**
  * A vue component of the scaffold viewer.
+ * 
+ * @requires ./OpacityControls.vue
+ * @requires ./SelectControls.vue
+ * @requires ./TraditionalControls.vue
  */
 export default {
   name: "ScaffoldVuer",
@@ -129,16 +133,22 @@ export default {
     organsAdded: function() {
       this.loading = false;
     },
+    /**
+     * This is called when Change background colour button 
+     * is pressed an causes the background colour to be changed
+     * to one of the three preset colour: white, black and aqua. 
+     */
     backgroundChangeCallback: function() {
-      //When b is pressed
-      if (this.backgroundToggle) {
-        ++this.currentBackground;
-        if (this.currentBackground >= this.availableBackground.length )
-          this.currentBackground = 0;
-        this.$module.zincRenderer.getThreeJSRenderer().
-          setClearColor(this.availableBackground[this.currentBackground], 1 );
-      }
+      ++this.currentBackground;
+      if (this.currentBackground >= this.availableBackground.length )
+        this.currentBackground = 0;
+      this.$module.zincRenderer.getThreeJSRenderer().
+        setClearColor(this.availableBackground[this.currentBackground], 1 );
     },
+    /**
+     * This is called by captueeScreenshot and after the last render
+     * loop, it download a screenshot of the current scene with no UI. 
+     */
     captureScreenshotCallback: function() {
       //Remove the callback, only needs to happen once
       this.$module.zincRenderer.removePostRenderCallbackFunction(this.captureID);
@@ -153,8 +163,12 @@ export default {
       hrefElement.click();
       hrefElement.remove();
     },
+    /**
+     * Function for capturing a screenshot of the current rendering.
+     * 
+     * @public
+     */
     captureScreenshot: function(filename) {
-      // Capture a screenshot, it should be done immediately after a render
       this.captureFilename = filename;
       this.captureID = this.$module.zincRenderer.addPostRenderCallbackFunction(
         this.captureScreenshotCallback);
@@ -188,6 +202,8 @@ export default {
     },
     /**
      * Function used to stop the free spin 
+     * 
+     * @public
      */
     stopFreeSpin: function() {
       let cameracontrol = this.$module.scene.getZincCameraControls();
@@ -197,6 +213,8 @@ export default {
     /**
      * Function used to rotate the scene.
      * Also called when the associated button is pressed.
+     * 
+     * @public
      */
     freeSpin: function() {
       if (this.$module.scene) {
@@ -222,6 +240,12 @@ export default {
             this.controls.removeActive();
           }
         }
+        /**
+         * Triggers when an object has been selected
+         *
+         * @property {array} identifiers array of identifiers 
+         * of selected object.
+         */
         this.$emit("scaffold-selected", event.identifiers);
       }
       else if (event.eventType == 2) {
@@ -233,11 +257,19 @@ export default {
           } else
             this.controls.removeHover();
         }
+        /**
+         * Triggers when an object has been highlighted
+         *
+         * @property {array} identifiers array of identifiers 
+         * of highlighted object.
+         */
         this.$emit("scaffold-highlighted", event.identifiers);
       }
     },
     /**
      * Get the coordinates of the current selected region.
+     * 
+     * @public
      */
     getCoordinatesOfSelected: function() {
       if (this.selectedObject) {
@@ -249,6 +281,8 @@ export default {
      * Return an object containing the window coordinates of the 
      * current selected region which will be updated after each render
      * loop.
+     * 
+     * @public
      */
     getDynamicSelectedCoordinates: function() {
       return this.$module.selectedScreenCoordinates;
@@ -262,6 +296,7 @@ export default {
     },
     /**
      * Set the selected zinc object
+     * 
      * @param {object} object Zinc object 
      */
     objectSelected: function(object) {
@@ -276,6 +311,7 @@ export default {
     },
     /**
      * Set the highlighted zinc object
+     * 
      * @param {object} object Zinc object 
      */
     objectHovered: function(object) {
@@ -289,12 +325,16 @@ export default {
     },
     /**
      * Start the animation.
+     * 
      * @param {object} object Zinc object 
      */
     play: function(flag) {
       this.$module.playAnimation(flag);
       this.isPlaying = flag;
     },
+    /**
+     * Function to toggle on/off overlay help.
+     */
     setHelpMode: function(helpMode){
       if (helpMode){
         this.inHelp = true;
@@ -308,18 +348,29 @@ export default {
         });
       }
     },
+    /**
+     * This is called when mouse cursor enters supported elements
+     * with help tootltips.
+     */
     showToolitip: function(tooltipNumber){
       if (!this.inHelp){
         this.tooltipWait = setTimeout( ()=>{
           this.hoverVisabilities[tooltipNumber].value = true}, 500);
       }
     },
+    /**
+     * This is called when mouse cursor exits supported element..
+     */
     hideToolitip: function(tooltipNumber){
       if (!this.inHelp){
         this.hoverVisabilities[tooltipNumber].value = false;
         clearTimeout(this.tooltipWait);
       }
     },
+    /**
+     * Called when minimap settings has changed. Pass the
+     * parameters to ZincJS and marked it for update.
+     */
     updateMinimapScissor: function() {
       Object.keys(this.minimapSettings).forEach(key => {
         this.$module.scene.minimapScissor[key] = this.minimapSettings[key];
@@ -329,11 +380,12 @@ export default {
   },
   props: { 
     /**
-     * Enable traditional control
+     * Enable traditional control. Select control will be
+     * used instead if set to false.
      */
     traditional: {
       type: Boolean,
-      default: false
+      default: true
     },
     /**
      * URL of the zincjs metadata.
@@ -354,44 +406,60 @@ export default {
       default: true
     },
     /**
-     * Display all graphics at start
+     * Display all graphics at start.
+     * 
+     * This setting only works when traditional is set to false.
      */
     displayAtStartUp: {
       type: Boolean,
       default: true
     },
-    backgroundToggle: {
-      type: Boolean,
-      default: false
-    },
+    /**
+     * Use for toggling the help tooltips.
+     */
     helpMode: {
       type: Boolean,
       default: false
     },
+    /**
+     * Use for show/display beta warning icon.
+     */
     displayWarning: {
       type: Boolean,
       default: true
     },
+    /**
+     * Warning message for the hovered over text
+     * on the warning icon.
+     */
     warningMessage: {
       type: String,
       default: "Beta feature - under active development"
     },
+    /**
+     * Show/hide pickable markers for regions.
+     */
     displayMarkers: {
       type: Boolean,
       default: true
     },
+    /**
+     * Show/hide minimap.
+     */
     displayMinimap: {
       type: Boolean,
       default: false
     },
+    /**
+     * Settings for minimap position, size and alignment.
+     */
     minimapSettings: {
       x_offset: 16,
       y_offset: 16,
       width: 128,
       height: 128,
       align: "top-left",
-
-    },
+    }
   },
   data: function() {
     return {
@@ -406,6 +474,7 @@ export default {
         {value: false}, {value: false},{value: false}, {value: false}],
       inHelp: false,
       loading: false,
+      duration: 3000
     };
   },
   watch: {
@@ -442,10 +511,18 @@ export default {
       this.$module.scene.displayMinimap = val;
     },
     "sceneData.currentTime": function(){
-        this.$emit('timeChanged', this.sceneData.currentTime);
+      /**
+       * Triggers when scene time changes.
+       *
+       * @property {number} time Current build-in time of scene.
+       * of selected object.
+       */
+      this.$emit('timeChanged', this.sceneData.currentTime);
+    },
+    duration: function() {
+      this.$module.scene.setDuration(this.duration);
     },
     minimapSettings: {
-      immediate: true,
       deep: true,
       handler: "updateMinimapScissor"
     }
