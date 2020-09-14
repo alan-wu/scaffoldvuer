@@ -45,6 +45,7 @@ sample callback.
     }
   }
 ```
+A more in depth API reference can be found here: https://abi-software.github.io/scaffoldvuer/ .
 
 ## Project setup from Github
 
