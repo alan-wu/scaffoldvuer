@@ -13,6 +13,7 @@
             style="margin-top:3px;display:inline-block;"
             :class="{ 'show-picker' : showColourPicker }"
             :value="getColour(item)"
+            @change="setColour(item, $event)"
             size="small"
             :popper-class="myPopperClass"
           ></el-color-picker>
@@ -48,6 +49,9 @@ Vue.use(CheckboxGroup);
 Vue.use(ColorPicker);
 Vue.use(Row);
 
+/**
+ * A vue component for toggling visibility of various regions.
+ */
 export default {
   name: "TraditionalControls",
   methods: {
@@ -72,6 +76,11 @@ export default {
       let targetObject = this.getFirstZincObjectWithGroupName(name);
       if (targetObject && targetObject.getVisibility()) {
         this.activeRegion = name;
+        /**
+         * Triggers when an item has been selected.
+         *
+         * @property {object} target selected object.
+         */
         this.$emit("object-selected", targetObject);
       }
       this.removeHover();
@@ -83,6 +92,11 @@ export default {
       let targetObject = this.getFirstZincObjectWithGroupName(name);
       if (targetObject) {
         this.hoverRegion = name;
+        /**
+         * Triggers when an item has been hovered over.
+         *
+         * @property {object} target hovered object.
+         */
         this.$emit("object-hovered", targetObject);
       }
     },
@@ -131,6 +145,13 @@ export default {
       }
       return "#FFFFFF";
     },
+    setColour: function(name, value) {
+      let graphic = this.getFirstZincObjectWithGroupName(name);
+      if (graphic) {
+        let hexString = value.replace("#", "0x");
+        graphic.setColourHex(hexString);
+      }
+    },
     checkboxHover: function(name) {
       this.changeHoverByName(name);
     },
@@ -173,7 +194,15 @@ export default {
       }
     }
   },
-  props: { module: Object, showColourPicker: Boolean },
+  props: { 
+    /**
+     * @ignore
+     */
+    module: Object,
+    /**
+     * Enable/disable colour picker
+     */
+    showColourPicker: Boolean },
   data: function() {
     return {
       checkAll: true,
@@ -186,9 +215,12 @@ export default {
     };
   },
   watch: {
-    myPopperClass: function() {
-      if (this.showColourPicker) this.myPopperClass = "showPicker";
-      else this.myPopperClass = "hide-scaffold-colour-popup";
+    showColourPicker: {
+      immediate: true,
+      handler: function() {
+        if (this.showColourPicker) this.myPopperClass = "showPicker";
+        else this.myPopperClass = "hide-scaffold-colour-popup";
+      }
     }
   },
   created: function() {

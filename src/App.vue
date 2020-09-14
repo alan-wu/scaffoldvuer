@@ -1,8 +1,10 @@
 <template>
   <div id="app">
     <ScaffoldVuer class="vuer" :displayUI="displayUI" :traditional="traditional"
-      :url="url" ref="scaffold" @scaffold-selected="onSelected" :backgroundToggle=true
-      :helpMode="helpMode" :displayMinimap="displayMinimap" :displayMarkers="displayMarkers" :minimapSettings="minimapSettings" @timeChanged="updateCurrentTime"
+      :url="url" ref="scaffold" @scaffold-selected="onSelected"
+      :helpMode="helpMode" :displayMinimap="displayMinimap" 
+      :displayMarkers="displayMarkers" :minimapSettings="minimapSettings"
+      :showColourPicker="showColourPicker" @timeChanged="updateCurrentTime"
     />
     <el-popover
       placement="bottom"
@@ -182,6 +184,7 @@ export default {
       currentTime: 0,
       displayMinimap: true,
       tumbleOn: false,
+      showColourPicker: true,
       minimapSettings: {
         x_offset: 16,
         y_offset: 16,
