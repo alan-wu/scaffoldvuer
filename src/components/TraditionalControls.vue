@@ -49,6 +49,9 @@ Vue.use(CheckboxGroup);
 Vue.use(ColorPicker);
 Vue.use(Row);
 
+/**
+ * A vue component for toggling visibility of various regions.
+ */
 export default {
   name: "TraditionalControls",
   methods: {

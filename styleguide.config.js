@@ -1,6 +1,6 @@
 module.exports = {
 	// set your styleguidist configuration here
-	title: 'Default Style Guide',
+	title: 'Scaffoldvuer API reference',
 	 components: 'src/components/ScaffoldVuer.vue',
 	// defaultExample: true,
 	// sections: [
@@ -12,5 +12,11 @@ module.exports = {
 	// webpackConfig: {
 	//   // custom config goes here
 	// },
-	exampleMode: 'expand'
+  exampleMode: 'expand',
+  copyCodeButton: true,
+  ribbon: {
+    url: 'https://github.com/ABI-Software/scaffoldvuer',
+    text: 'Github Page'
+  },
+  styleguideDir: 'docs'
 }

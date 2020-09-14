@@ -1,6 +1,11 @@
 {
   "name": "@abi-software/scaffoldvuer",
   "version": "0.1.40",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ABI-Software/scaffoldvuer.git"
+  },
   "scripts": {
     "serve": "vue-cli-service serve --port 8081",
     "lint": "vue-cli-service lint",
