@@ -24,9 +24,20 @@ npm run build-bundle
 Install the package in your vue app project with the following command "npm i @abi-software/scaffoldvuer".
 Import the package in your script as followed:
 ```javascript
-import '@abi-software/scaffoldvuer';
+import { ScaffoldVuer } from '@abi-software/scaffoldvuer';
 import '@abi-software/scaffoldvuer/dist/scaffoldvuer.css';
 ```
+Local registration in vue component:
+```javascript
+export default {
+  ...
+  components: {
+    ScaffoldVuer,
+  }
+  ...
+}
+```
+
 
 The codes above register the ScaffoldVuer component in the global scope.
 You can now use the ScaffoldVuer in your vue template as followed:
