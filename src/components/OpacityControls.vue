@@ -48,7 +48,7 @@ export default {
       return this.displayString;
     },
     setObject(object) {
-      if (object && (!object.isGlyphset))
+      if (object)
         this.material = object.morph.material;
       else 
         this.material = undefined;
