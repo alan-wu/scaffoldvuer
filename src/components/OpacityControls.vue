@@ -50,8 +50,9 @@ export default {
     setObject(object) {
       if (object)
         this.material = object.morph.material;
-      else 
+      else
         this.material = undefined;
+      this._zincobject = object;
     },
   },
   data: function() {
@@ -63,10 +64,12 @@ export default {
   watch: {
     "material.opacity": function() {
       if (this.material) {
-        if (this.material.opacity != 1) this.material.transparent = true;
-        else this.material.transparent = false;
+        this._zincobject.setAlpha(this.material.opacity);
       }
     }
+  },
+  mounted: function() {
+    this._zincobject = undefined;
   }
 };
 </script>
