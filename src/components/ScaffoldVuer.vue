@@ -385,7 +385,49 @@ export default {
         this.$module.scene.minimapScissor[key] = this.minimapSettings[key];
       });
       this.$module.scene.minimapScissor.updateRequired = true;
-    }
+    },
+    setViewportCallback: function(viewport) {
+      return () => {
+        this.$module.scene.getZincCameraControls().setCurrentCameraSettings(
+          viewport);
+        this.$module.unsetFinishDownloadCallback();
+      }
+    },
+    /**
+     * Function used for getting the current states of the scene. This exported states 
+     * can be imported using the importStates method.
+     * 
+     * @public
+     */
+    exportStates: function() {
+      let states = {
+        url: this.currentURL,
+        viewport: undefined
+      };
+      if (this.$module.scene) {
+        let zincCameraControls = this.$module.scene.getZincCameraControls();
+        states.viewport = zincCameraControls.getCurrentViewport();
+      }
+      return states;
+    },
+    /**
+     * Function used for importing the states of the scene. This exported states 
+     * can be imported using the read states method.
+     * 
+     * @public
+     */
+    importStates: function(states) {
+      if (states.url && states.url !== this.currentURL) {
+        this.currentURL = states.url;
+        if (states.viewport) {
+          this.$module.setFinishDownloadCallback(
+            this.setViewportCallback(states.viewport));
+        }
+      } else if (states.viewport) {
+        this.$module.scene.getZincCameraControls().setCurrentCameraSettings(
+          states.viewport);
+      }
+    },
   },
   props: { 
     /**
@@ -488,11 +530,15 @@ export default {
         {value: false}, {value: false},{value: false}, {value: false}],
       inHelp: false,
       loading: false,
-      duration: 3000
+      duration: 3000,
+      currentURL: undefined
     };
   },
   watch: {
     url: function(newValue) {
+      this.currentURL = newValue;
+    },
+    currentURL: function(newValue) {
       if (newValue) {
         if (this.controls)
           this.controls.clear();
@@ -546,17 +592,7 @@ export default {
     eventNotifier.subscribe(this, this.eventNotifierCallback);
     this.$module.addNotifier(eventNotifier);
     if (this.url) {
-      this.loading = true;
-      this.$module.loadOrgansFromURL(
-        this.url,
-        undefined,
-        undefined,
-        "Overlay",
-        undefined
-      );
-      this.$module.scene.displayMarkers = this.displayMarkers;
-      this.$module.scene.displayMinimap = this.displayMinimap;
-      this.updateMinimapScissor();
+      this.currentURL = this.url;
     }
     this.$module.addOrganPartAddedCallback(this.organsAdded);
     this.$module.initialiseRenderer(this.$refs.display);

@@ -28,7 +28,7 @@
     "element-ui": "^2.13.0",
     "google-spreadsheet": "^3.0.13",
     "lodash": "^4.17.19",
-    "physiomeportal": "^0.4.23",
+    "physiomeportal": "^0.4.24",
     "query-string": "^6.11.1",
     "vue": "^2.6.10",
     "vue-drag-resize": "^1.3.2",

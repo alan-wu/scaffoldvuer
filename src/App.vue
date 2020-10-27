@@ -49,6 +49,10 @@
           <el-button @click="helpMode = !helpMode" size="mini">Help Mode</el-button>
           <el-button @click="screenCapture()" size="mini">Capture</el-button>
         </el-row>
+        <el-row :gutter="20">
+          <el-button @click="saveSettings()" size="mini">Save Settings</el-button>
+          <el-button @click="restoreSettings()" size="mini">Restore Settings</el-button>
+        </el-row>
         <el-input type="textarea" autosize placeholder="Please input"
           v-model="input" style="padding-left:5%;width:90%;" />
       </div>
@@ -124,11 +128,21 @@ export default {
     ModelsTable
   },
   methods: {
+    saveSettings: function() {
+      this._sceneSettings.push(this.$refs.scaffold.exportStates());
+    },
+    restoreSettings: function() {
+      if (this._sceneSettings.length > 0)
+        this.$refs.scaffold.importStates(this._sceneSettings.pop());
+    },
     viewModelClicked: function(location) {
       this.input = location;
     },
     screenCapture: function() {
       this.$refs.scaffold.captureScreenshot("capture.png");
+    },
+    getStates: function() {
+      console.log(this.$refs.scaffold.getStates());
     },
     autoTumble: function(flag) {
       let cameracontrol = this.$refs.scaffold.$module.scene.getZincCameraControls();
@@ -204,6 +218,7 @@ export default {
     }
   },
   mounted: function() {
+    this._sceneSettings = [];
     this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
   },
   watch: {
@@ -219,7 +234,7 @@ export default {
 
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'Avenir', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
