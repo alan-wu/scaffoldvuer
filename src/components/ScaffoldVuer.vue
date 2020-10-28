@@ -399,7 +399,7 @@ export default {
      * 
      * @public
      */
-    exportStates: function() {
+    getState: function() {
       let states = {
         url: this.currentURL,
         viewport: undefined
@@ -416,7 +416,7 @@ export default {
      * 
      * @public
      */
-    importStates: function(states) {
+    setState: function(states) {
       if (states.url && states.url !== this.currentURL) {
         this.currentURL = states.url;
         if (states.viewport) {

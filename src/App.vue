@@ -129,20 +129,17 @@ export default {
   },
   methods: {
     saveSettings: function() {
-      this._sceneSettings.push(this.$refs.scaffold.exportStates());
+      this._sceneSettings.push(this.$refs.scaffold.getState());
     },
     restoreSettings: function() {
       if (this._sceneSettings.length > 0)
-        this.$refs.scaffold.importStates(this._sceneSettings.pop());
+        this.$refs.scaffold.setState(this._sceneSettings.pop());
     },
     viewModelClicked: function(location) {
       this.input = location;
     },
     screenCapture: function() {
       this.$refs.scaffold.captureScreenshot("capture.png");
-    },
-    getStates: function() {
-      console.log(this.$refs.scaffold.getStates());
     },
     autoTumble: function(flag) {
       let cameracontrol = this.$refs.scaffold.$module.scene.getZincCameraControls();
