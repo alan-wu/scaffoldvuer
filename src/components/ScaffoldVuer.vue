@@ -400,15 +400,15 @@ export default {
      * @public
      */
     getState: function() {
-      let states = {
+      let state = {
         url: this.currentURL,
         viewport: undefined
       };
       if (this.$module.scene) {
         let zincCameraControls = this.$module.scene.getZincCameraControls();
-        states.viewport = zincCameraControls.getCurrentViewport();
+        state.viewport = zincCameraControls.getCurrentViewport();
       }
-      return states;
+      return state;
     },
     /**
      * Function used for importing the states of the scene. This exported states 
@@ -416,16 +416,16 @@ export default {
      * 
      * @public
      */
-    setState: function(states) {
-      if (states.url && states.url !== this.currentURL) {
-        this.currentURL = states.url;
-        if (states.viewport) {
+    setState: function(state) {
+      if (state.url && state.url !== this.currentURL) {
+        this.currentURL = state.url;
+        if (state.viewport) {
           this.$module.setFinishDownloadCallback(
-            this.setViewportCallback(states.viewport));
+            this.setViewportCallback(state.viewport));
         }
-      } else if (states.viewport) {
+      } else if (state.viewport) {
         this.$module.scene.getZincCameraControls().setCurrentCameraSettings(
-          states.viewport);
+          state.viewport);
       }
     },
   },
