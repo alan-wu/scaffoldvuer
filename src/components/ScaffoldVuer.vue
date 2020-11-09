@@ -124,6 +124,7 @@ export default {
     this.hoveredObject = undefined;
     this.controls = undefined;
     this.currentBackground = 0;
+    this._currentURL = undefined;
     this.availableBackground = ['white', 'black', 'lightskyblue'];
   },
   methods: {
@@ -401,7 +402,7 @@ export default {
      */
     getState: function() {
       let state = {
-        url: this.currentURL,
+        url: this._currentURL,
         viewport: undefined
       };
       if (this.$module.scene) {
@@ -417,17 +418,43 @@ export default {
      * @public
      */
     setState: function(state) {
-      if (state.url && state.url !== this.currentURL) {
-        this.currentURL = state.url;
-        if (state.viewport) {
-          this.$module.setFinishDownloadCallback(
-            this.setViewportCallback(state.viewport));
+      if (state) {
+        if (state.url && state.url !== this._currentURL) {
+          this.setURL(state.url);
+          if (state.viewport) {
+            this.$module.setFinishDownloadCallback(
+              this.setViewportCallback(state.viewport));
+          }
+        } else if (state.viewport) {
+          this.$module.scene.getZincCameraControls().setCurrentCameraSettings(
+            state.viewport);
         }
-      } else if (state.viewport) {
-        this.$module.scene.getZincCameraControls().setCurrentCameraSettings(
-          state.viewport);
       }
     },
+    /**
+     * Function used for reading in new scaffold metadata. This function will ignore
+     * the state prop and read in the new url.
+     * 
+     * @public
+     */
+    setURL: function(newValue) {
+      if (newValue != this._currentURL) {
+        this._currentURL = newValue;
+        if (this.controls)
+          this.controls.clear();
+        this.loading = true;
+        this.$module.loadOrgansFromURL(
+          newValue,
+          undefined,
+          undefined,
+          "scene",
+          undefined
+        );
+        this.$module.scene.displayMarkers = this.displayMarkers;
+        this.$module.scene.displayMinimap = this.displayMinimap;
+        this.updateMinimapScissor();
+      }
+    }
   },
   props: { 
     /**
@@ -439,7 +466,10 @@ export default {
       default: true
     },
     /**
-     * URL of the zincjs metadata.
+     * URL of the zincjs metadata. This value will be ignored if a valid
+     * state prop is also provided.
+     * If the url needs to be updated with state present, please use
+     * the setURL method.
      */
     url: String,
     /**
@@ -515,7 +545,14 @@ export default {
           align: "top-left",
         }
       }
-    }
+    },
+    /**
+     * State containing state of the scaffold.
+     */
+    state: {
+      type: Object,
+      default: undefined,
+    },
   },
   data: function() {
     return {
@@ -531,29 +568,22 @@ export default {
       inHelp: false,
       loading: false,
       duration: 3000,
-      currentURL: undefined
     };
   },
   watch: {
-    url: function(newValue) {
-      this.currentURL = newValue;
+    url: {
+      handler: function(newValue) {
+        if (this.state === undefined)
+          this.setURL(newValue);
+      },
+      immediate: true
     },
-    currentURL: function(newValue) {
-      if (newValue) {
-        if (this.controls)
-          this.controls.clear();
-        this.loading = true;
-        this.$module.loadOrgansFromURL(
-          newValue,
-          undefined,
-          undefined,
-          "scene",
-          undefined
-        );
-        this.$module.scene.displayMarkers = this.displayMarkers;
-        this.$module.scene.displayMinimap = this.displayMinimap;
-        this.updateMinimapScissor();
-      }
+    state: {
+      handler: function(state) {
+        this.setState(state);
+      },
+      immediate: true,
+      deep: true,
     },
     traditional: function (value) {
       if (value)
@@ -591,9 +621,6 @@ export default {
     let eventNotifier = new EventNotifier();
     eventNotifier.subscribe(this, this.eventNotifierCallback);
     this.$module.addNotifier(eventNotifier);
-    if (this.url) {
-      this.currentURL = this.url;
-    }
     this.$module.addOrganPartAddedCallback(this.organsAdded);
     this.$module.initialiseRenderer(this.$refs.display);
     this.$module.toolTip = undefined;

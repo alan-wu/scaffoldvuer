@@ -159,6 +159,7 @@ export default {
       if (this.input.includes("discover/scaffold/N:package:")) {
         let requestURL = "/services/bts/" + this.input;
         this.url = requestURL;
+        this.$refs.scaffold.setURL(this.url);
       } else if (this.input.includes("N:package:")) {
         let requestURL = "/services/bts/getInfo";
         axios.get(requestURL, {
@@ -168,6 +169,7 @@ export default {
         })
         .then(response => {
           this.url = "/services/bts/scaffold/" + response.data.collectionId + "/" + response.data.fileName;
+          this.$refs.scaffold.setURL(this.url);
         })
         .catch(error => {
           console.log(error);
@@ -177,6 +179,7 @@ export default {
         });
       } else {
         this.url = this.input;
+        this.$refs.scaffold.setURL(this.url);
       }
     },
     updateCurrentTime: function(val){
