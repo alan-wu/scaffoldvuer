@@ -420,11 +420,11 @@ export default {
     setState: function(state) {
       if (state) {
         if (state.url && state.url !== this._currentURL) {
-          this.setURL(state.url);
           if (state.viewport) {
             this.$module.setFinishDownloadCallback(
               this.setViewportCallback(state.viewport));
           }
+          this.setURL(state.url);
         } else if (state.viewport) {
           this.$module.scene.getZincCameraControls().setCurrentCameraSettings(
             state.viewport);
