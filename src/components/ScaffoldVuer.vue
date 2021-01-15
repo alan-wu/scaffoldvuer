@@ -124,6 +124,7 @@ export default {
     this.hoveredObject = undefined;
     this.controls = undefined;
     this.currentBackground = 0;
+    this._currentURL = undefined;
     this.availableBackground = ['white', 'black', 'lightskyblue'];
   },
   methods: {
@@ -385,6 +386,74 @@ export default {
         this.$module.scene.minimapScissor[key] = this.minimapSettings[key];
       });
       this.$module.scene.minimapScissor.updateRequired = true;
+    },
+    setViewportCallback: function(viewport) {
+      return () => {
+        this.$module.scene.getZincCameraControls().setCurrentCameraSettings(
+          viewport);
+        this.$module.unsetFinishDownloadCallback();
+      }
+    },
+    /**
+     * Function used for getting the current states of the scene. This exported states 
+     * can be imported using the importStates method.
+     * 
+     * @public
+     */
+    getState: function() {
+      let state = {
+        url: this._currentURL,
+        viewport: undefined
+      };
+      if (this.$module.scene) {
+        let zincCameraControls = this.$module.scene.getZincCameraControls();
+        state.viewport = zincCameraControls.getCurrentViewport();
+      }
+      return state;
+    },
+    /**
+     * Function used for importing the states of the scene. This exported states 
+     * can be imported using the read states method.
+     * 
+     * @public
+     */
+    setState: function(state) {
+      if (state) {
+        if (state.url && state.url !== this._currentURL) {
+          if (state.viewport) {
+            this.$module.setFinishDownloadCallback(
+              this.setViewportCallback(state.viewport));
+          }
+          this.setURL(state.url);
+        } else if (state.viewport) {
+          this.$module.scene.getZincCameraControls().setCurrentCameraSettings(
+            state.viewport);
+        }
+      }
+    },
+    /**
+     * Function used for reading in new scaffold metadata. This function will ignore
+     * the state prop and read in the new url.
+     * 
+     * @public
+     */
+    setURL: function(newValue) {
+      if (newValue != this._currentURL) {
+        this._currentURL = newValue;
+        if (this.controls)
+          this.controls.clear();
+        this.loading = true;
+        this.$module.loadOrgansFromURL(
+          newValue,
+          undefined,
+          undefined,
+          "scene",
+          undefined
+        );
+        this.$module.scene.displayMarkers = this.displayMarkers;
+        this.$module.scene.displayMinimap = this.displayMinimap;
+        this.updateMinimapScissor();
+      }
     }
   },
   props: { 
@@ -397,7 +466,10 @@ export default {
       default: true
     },
     /**
-     * URL of the zincjs metadata.
+     * URL of the zincjs metadata. This value will be ignored if a valid
+     * state prop is also provided.
+     * If the url needs to be updated with state present, please use
+     * the setURL method.
      */
     url: String,
     /**
@@ -473,7 +545,14 @@ export default {
           align: "top-left",
         }
       }
-    }
+    },
+    /**
+     * State containing state of the scaffold.
+     */
+    state: {
+      type: Object,
+      default: undefined,
+    },
   },
   data: function() {
     return {
@@ -488,26 +567,23 @@ export default {
         {value: false}, {value: false},{value: false}, {value: false}],
       inHelp: false,
       loading: false,
-      duration: 3000
+      duration: 3000,
     };
   },
   watch: {
-    url: function(newValue) {
-      if (newValue) {
-        if (this.controls)
-          this.controls.clear();
-        this.loading = true;
-        this.$module.loadOrgansFromURL(
-          newValue,
-          undefined,
-          undefined,
-          "scene",
-          undefined
-        );
-        this.$module.scene.displayMarkers = this.displayMarkers;
-        this.$module.scene.displayMinimap = this.displayMinimap;
-        this.updateMinimapScissor();
-      }
+    url: {
+      handler: function(newValue) {
+        if (this.state === undefined)
+          this.setURL(newValue);
+      },
+      immediate: true
+    },
+    state: {
+      handler: function(state) {
+        this.setState(state);
+      },
+      immediate: true,
+      deep: true,
     },
     traditional: function (value) {
       if (value)
@@ -545,19 +621,6 @@ export default {
     let eventNotifier = new EventNotifier();
     eventNotifier.subscribe(this, this.eventNotifierCallback);
     this.$module.addNotifier(eventNotifier);
-    if (this.url) {
-      this.loading = true;
-      this.$module.loadOrgansFromURL(
-        this.url,
-        undefined,
-        undefined,
-        "Overlay",
-        undefined
-      );
-      this.$module.scene.displayMarkers = this.displayMarkers;
-      this.$module.scene.displayMinimap = this.displayMinimap;
-      this.updateMinimapScissor();
-    }
     this.$module.addOrganPartAddedCallback(this.organsAdded);
     this.$module.initialiseRenderer(this.$refs.display);
     this.$module.toolTip = undefined;

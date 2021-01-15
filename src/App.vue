@@ -49,6 +49,10 @@
           <el-button @click="helpMode = !helpMode" size="mini">Help Mode</el-button>
           <el-button @click="screenCapture()" size="mini">Capture</el-button>
         </el-row>
+        <el-row :gutter="20">
+          <el-button @click="saveSettings()" size="mini">Save Settings</el-button>
+          <el-button @click="restoreSettings()" size="mini">Restore Settings</el-button>
+        </el-row>
         <el-input type="textarea" autosize placeholder="Please input"
           v-model="input" style="padding-left:5%;width:90%;" />
       </div>
@@ -124,6 +128,13 @@ export default {
     ModelsTable
   },
   methods: {
+    saveSettings: function() {
+      this._sceneSettings.push(this.$refs.scaffold.getState());
+    },
+    restoreSettings: function() {
+      if (this._sceneSettings.length > 0)
+        this.$refs.scaffold.setState(this._sceneSettings.pop());
+    },
     viewModelClicked: function(location) {
       this.input = location;
     },
@@ -148,6 +159,7 @@ export default {
       if (this.input.includes("discover/scaffold/N:package:")) {
         let requestURL = "/services/bts/" + this.input;
         this.url = requestURL;
+        this.$refs.scaffold.setURL(this.url);
       } else if (this.input.includes("N:package:")) {
         let requestURL = "/services/bts/getInfo";
         axios.get(requestURL, {
@@ -157,6 +169,7 @@ export default {
         })
         .then(response => {
           this.url = "/services/bts/scaffold/" + response.data.collectionId + "/" + response.data.fileName;
+          this.$refs.scaffold.setURL(this.url);
         })
         .catch(error => {
           console.log(error);
@@ -166,6 +179,7 @@ export default {
         });
       } else {
         this.url = this.input;
+        this.$refs.scaffold.setURL(this.url);
       }
     },
     updateCurrentTime: function(val){
@@ -204,6 +218,7 @@ export default {
     }
   },
   mounted: function() {
+    this._sceneSettings = [];
     this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
   },
   watch: {
@@ -219,7 +234,7 @@ export default {
 
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'Avenir', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
