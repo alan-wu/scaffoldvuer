@@ -17,7 +17,7 @@
       </i>
       <el-popover content="Change region visibility" placement="right"
         :appendToBody=false trigger="manual" popper-class="scaffold-popper right-popper" v-model="hoverVisabilities[5].value" ref="checkBoxPopover">
-     </el-popover>
+      </el-popover>
       <TraditionalControls v-if="traditional" v-popover:checkBoxPopover :helpMode="helpMode" :module="$module" @object-selected="objectSelected" 
         @object-hovered="objectHovered" :showColourPicker="showColourPicker" ref="traditionalControl"/>
       <SelectControls v-else :module="$module" @object-selected="objectSelected" 
@@ -720,11 +720,13 @@ export default {
 }
 
 >>> .scaffold-popper {
-  padding:9px 10px;
-  min-width:150px;
+  padding: 6px 4px;
   font-size:12px;
-  color: #fff;
-  background-color: #8300bf;  
+  color: rgb(48, 49, 51);
+  background-color: #f3ecf6;
+  border: 1px solid rgb(131, 0, 191);
+  white-space: nowrap;
+  min-width: unset; 
 }
 
 >>> .el-slider__bar {

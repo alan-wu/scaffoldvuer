@@ -1,36 +1,41 @@
 <template>
   <div class="traditional-container">
-    <el-checkbox
-      v-if="sortedPrimitiveGroups.length > 1"
-      :indeterminate="isIndeterminate"
-      v-model="checkAll"
-      @change="handleCheckAllChange"
-    >Display all regions</el-checkbox>
-    <el-checkbox-group v-model="checkedItems" size="small" @change="handleCheckedItemsChange">
-      <el-row v-for="item in sortedPrimitiveGroups" :key="item" :label="item">
-        <div class="checkbox-container">
-          <el-color-picker
-            style="margin-top:3px;display:inline-block;"
-            :class="{ 'show-picker' : showColourPicker }"
-            :value="getColour(item)"
-            @change="setColour(item, $event)"
-            size="small"
-            :popper-class="myPopperClass"
-          ></el-color-picker>
-          <el-checkbox
-            class="my-checkbox"
-            @click.native="itemClicked(item, $event)"
-            style="margin-top:3px;"
-            :label="item"
-            @change="visibilityToggle(item, $event)"
-            :checked="true"
-            border
-            @mouseover.native="checkboxHover(item)"
-            :class="{ activeItem: activeRegion === item, 
-              hoverItem: hoverRegion === item  }"
-          >{{item}}</el-checkbox>
+    <el-row>
+      <el-col :span="12">
+        <div class="regions-display-text">
+          Regions
         </div>
-      </el-row>
+      </el-col>
+      <el-col :span="12">
+        <el-checkbox class="all-checkbox" :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">Display all</el-checkbox>
+      </el-col>         
+    </el-row>
+    <el-checkbox-group v-model="checkedItems" size="small" 
+      class="checkbox-group" @change="handleCheckedItemsChange">
+      <div class="checkbox-group-inner">
+        <el-row v-for="item in sortedPrimitiveGroups" :key="item" :label="item">
+          <div class="checkbox-container">
+
+            <el-checkbox
+              class="my-checkbox"
+              @click.native="itemClicked(item, $event)"
+              :label="item"
+              @change="visibilityToggle(item, $event)"
+              :checked="true"
+              @mouseover.native="checkboxHover(item)"
+              :class="{ activeItem: activeRegion === item, 
+              hoverItem: hoverRegion === item  }">          
+              <el-color-picker
+                :class="{ 'show-picker' : showColourPicker }"
+                :value="getColour(item)"
+                @change="setColour(item, $event)"
+                size="small"
+                :popper-class="myPopperClass"/>
+                {{item}}
+              </el-checkbox>
+          </div>
+        </el-row>
+      </div>
     </el-checkbox-group>
   </div>
 </template>
@@ -248,11 +253,51 @@ export default {
 
 .traditional-container {
   position: absolute;
-  top: 54px;
-  left: 17px;
+  bottom: 16px;
+  left: 16px;
   max-height: calc(100% - 154px);
   text-align: left;
   overflow: auto;
+}
+
+.regions-display-text {
+  width: 59px;
+  height: 20px;
+  color: rgb(48, 49, 51);
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 20px;
+  margin-left: 8px;
+}
+
+.all-checkbox {
+  float: right;
+}
+
+.checkbox-group {
+  width: 260px;
+  border: 1px solid rgb(144, 147, 153);
+  border-radius: 4px;
+  background: #ffffff;
+  margin-top:6px;
+}
+
+.checkbox-group-inner {
+  padding:18px;
+}
+
+>>> .el-color-picker {
+  height:16px!important;
+  top:3px;
+}
+
+>>> .el-color-picker__trigger {
+  margin-left: 8px;
+  margin-right: 8px;
+  padding: 0px;
+  height:16px;
+  width:16px;
+  border:0px;
 }
 
 >>> .el-checkbox__input.is-indeterminate .el-checkbox__inner {
@@ -265,8 +310,17 @@ export default {
   border-color: #8300bf;
 }
 
+>>> .el-color-picker__color {
+  border: 1px solid #8300bf;
+}
+
 >>> .el-checkbox__label {
-  color: #8300bf !important;
+  padding-left:5px;
+  color: rgb(131, 0, 191)!important;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0px;
+  line-height: 14px;
 }
 
 .activeItem {
