@@ -23,12 +23,22 @@
       <SelectControls v-else :module="$module" @object-selected="objectSelected" 
         @object-hovered="objectHovered" :displayAtStartUp="displayAtStartUp" ref="selectControl"/>
       <OpacityControls ref="opacityControl"/>
+      <el-popover content="Change background color" placement="right"
+        :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[3].value">
+        <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
+          @click="backgroundChangeCallback()" size="mini" slot="reference" @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"></el-button>
+      </el-popover>
       <el-popover v-if="sceneData.timeVarying" content="Move the slider to animate the region" placement="top"
         :appendToBody=false trigger="manual" popper-class="scaffold-popper top-popper" v-model="hoverVisabilities[4].value" ref="sliderPopover">
      </el-popover>
-      <div class="timeSlider" v-popover:sliderPopover v-if="sceneData.timeVarying">
+      <div class="time-slider" v-popover:sliderPopover v-if="sceneData.timeVarying">
         <el-row>
-          <el-col :span="2" :offset="4">
+          <div class="slider-display-text">
+            Animate scaffold
+          </div>
+        </el-row>
+        <el-row class="slider-control">
+          <el-col :span="2" offset="1">
             <el-button
               v-if="isPlaying"
               @click="play(false)"
@@ -39,7 +49,7 @@
             ></el-button>
             <el-button v-else @click="play(true)" size="mini" icon="el-icon-video-play" circle class="video-button icon-button"></el-button>
           </el-col>
-          <el-col :span="14">
+          <el-col :offset="2" :span="17">
             <el-slider
               :min="0"
               :max="100"
@@ -50,26 +60,23 @@
           </el-col>
         </el-row>
       </div>
-      <el-popover content="Zoom in" placement="left" 
-        :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[0].value">
-        <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
-          @click="zoomIn()" size="mini" slot="reference" @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"></el-button>
-      </el-popover>
-      <el-popover content="Zoom out" placement="left"
-        :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[1].value">
-        <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
-        @click="zoomOut()" size="mini" slot="reference" @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"></el-button>
-      </el-popover>
-      <el-popover content="Reset view" placement="left"
-        :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[2].value">
-        <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
-          @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
-      </el-popover>
-      <el-popover content="Change background color" placement="left"
-        :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[3].value">
-        <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
-          @click="backgroundChangeCallback()" size="mini" slot="reference" @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"></el-button>
-      </el-popover>
+      <div class="bottom-right-control">
+        <el-popover content="Zoom in" placement="left"
+          :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[0].value">
+          <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
+            @click="zoomIn()" size="mini" slot="reference" @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"></el-button>
+        </el-popover>
+        <el-popover content="Zoom out" placement="left"
+          :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[1].value">
+          <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
+          @click="zoomOut()" size="mini" slot="reference" @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"></el-button>
+        </el-popover>
+        <el-popover content="Reset view" placement="left"
+          :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[2].value">
+          <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
+            @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
+        </el-popover>
+      </div>
     </div>
   </div>
 </template>
@@ -103,7 +110,6 @@ const OrgansViewer = require("physiomeportal/src/modules/organsRenderer")
 const EventNotifier = require("physiomeportal/src/utilities/eventNotifier")
   .EventNotifier;
 
-
 /**
  * A vue component of the scaffold viewer.
  * 
@@ -136,7 +142,7 @@ export default {
     },
     /**
      * This is called when Change background colour button 
-     * is pressed an causes the background colour to be changed
+     * is pressed an causes the backgrouColornd colour to be changed
      * to one of the three preset colour: white, black and
      * lightskyblue. 
      */
@@ -542,7 +548,7 @@ export default {
           y_offset: 16,
           width: 128,
           height: 128,
-          align: "top-left",
+          align: "top-right",
         }
       }
     },
@@ -676,36 +682,39 @@ export default {
   position:relative;
 }
 
-.timeSlider {
-  text-align: center;
+.time-slider {
+  text-align: left;
   position: absolute;
-  left: 2.5%;
-  height: 48px;
-  width: 95%;
-  bottom: 20px;
+  left: 33%;
+  height: 64px;
+  width: 50%;
+  bottom: 16px;
 }
 
-.zoomIn{
-  top:51px;
-  right:20px;
-  position: absolute;
+.slider-display-text {
+  height: 20px;
+  color: rgb(48, 49, 51);
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 20px;
+}
+
+.slider-control {
+  border: 1px solid rgb(144, 147, 153);
+  border-radius: 4px;
 }
 
 .zoomOut{
-  top:101px;
-  right:20px;
-  position: absolute;
+  padding-left: 8px;
 }
 
 .resetView {
-  top:151px;
-  right:20px;
-  position: absolute;
+  padding-left: 8px;
 }
 
 .backgroundColour {
-  top:201px;
-  right:20px;
+  bottom: 16px;
+  left:288px;
   position: absolute;
 }
 
@@ -715,8 +724,14 @@ export default {
   background-color: #ffffff;
 }
 
+.bottom-right-control {
+  position:absolute;
+  right:16px;
+  bottom:16px;
+}
+
 .video-button {
-  padding-top:5px;
+  margin-top:4px!important;
 }
 
 >>> .scaffold-popper {
