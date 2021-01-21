@@ -4,6 +4,7 @@
       element-loading-text="Loading..."
       element-loading-spinner="el-icon-loading"
       element-loading-background="rgba(0, 0, 0, 0.3)">
+    <SvgSprite/>
     <div id="organsDisplayArea" tabindex="-1" style="height:100%;width:100%;" ref="display" @keydown.66="backgroundChangeCallback"></div>
     <div v-show="displayUI && !isTransitioning">
       <el-popover v-if="displayWarning" :content="warningMessage" placement="right"
@@ -24,9 +25,9 @@
         @object-hovered="objectHovered" :displayAtStartUp="displayAtStartUp" ref="selectControl"/>
       <OpacityControls ref="opacityControl"/>
       <el-popover content="Change background color" placement="right"
-        :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[3].value">
-        <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
-          @click="backgroundChangeCallback()" size="mini" slot="reference" @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"></el-button>
+        :appendToBody=false trigger="manual" popper-class="scaffold-popper right-popper" v-model="hoverVisabilities[3].value">
+        <SvgIcon icon="changeBckgd" class="icon-button background-colour" slot="reference" @click.native="backgroundChangeCallback()"
+          @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"/>
       </el-popover>
       <el-popover v-if="sceneData.timeVarying" content="Move the slider to animate the region" placement="top"
         :appendToBody=false trigger="manual" popper-class="scaffold-popper top-popper" v-model="hoverVisabilities[4].value" ref="sliderPopover">
@@ -39,15 +40,8 @@
         </el-row>
         <el-row class="slider-control">
           <el-col :span="2" offset="1">
-            <el-button
-              v-if="isPlaying"
-              @click="play(false)"
-              icon="el-icon-video-pause"
-              size="mini"
-              circle
-              class="video-button icon-button"
-            ></el-button>
-            <el-button v-else @click="play(true)" size="mini" icon="el-icon-video-play" circle class="video-button icon-button"></el-button>
+            <SvgIcon v-if="isPlaying" icon="pause" class="icon-button video-button" @click.native="play(false)"/>
+            <SvgIcon v-else @click.native="play(true)" icon="play" class="video-button icon-button"/>
           </el-col>
           <el-col :offset="1" :span="19">
             <el-slider
@@ -64,18 +58,18 @@
       <div class="bottom-right-control">
         <el-popover content="Zoom in" placement="left"
           :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[0].value">
-          <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
-            @click="zoomIn()" size="mini" slot="reference" @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"></el-button>
+          <SvgIcon icon="zoomIn" class="icon-button zoomIn" slot="reference" @click.native="zoomIn()"
+            @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"/>
         </el-popover>
         <el-popover content="Zoom out" placement="left"
           :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[1].value">
-          <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
-          @click="zoomOut()" size="mini" slot="reference" @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"></el-button>
+          <SvgIcon icon="zoomOut" class="icon-button zoomOut" slot="reference" @click.native="zoomOut()"
+            @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"/>
         </el-popover>
         <el-popover content="Reset view" placement="left"
           :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[2].value">
-          <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
-            @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
+          <SvgIcon icon="resetZoom" class="icon-button resetView" slot="reference" @click.native="resetView()"
+            @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"/>
         </el-popover>
       </div>
     </div>
@@ -88,6 +82,8 @@ import Vue from "vue";
 import OpacityControls from './OpacityControls';
 import SelectControls from './SelectControls';
 import TraditionalControls from './TraditionalControls';
+import { SvgIcon, SvgSprite} from '@abi-software/svg-sprite'
+
 import {
   Button,
   Col,
@@ -123,6 +119,8 @@ export default {
   components: {
     OpacityControls,
     SelectControls,
+    SvgIcon,
+    SvgSprite,
     TraditionalControls
   },
   beforeCreate: function() {
@@ -652,7 +650,7 @@ export default {
   left: 37px;
   text-align: left;
   font-size: 25px;
-  color: #d70000;
+  color: #ff8400;
 }
 .warning-icon:hover {
   cursor: pointer;
@@ -666,10 +664,10 @@ export default {
   min-width:150px;
   font-size:12px;
   color: #fff;
-  background-color: #d70000;
+  background-color: #ff8400;
 }
 >>> .warning-popper.right-popper .popper__arrow::after{
-  border-right-color: #d70000 !important;
+  border-right-color: #ff8400 !important;
 }
 
 #organsDisplayArea:focus {
@@ -698,6 +696,7 @@ export default {
   font-size: 14px;
   font-weight: normal;
   line-height: 20px;
+  padding-left:8px;
 }
 
 .slider-control {
@@ -723,16 +722,20 @@ export default {
   padding-left: 8px;
 }
 
-.backgroundColour {
+.background-colour {
   bottom: 16px;
   left:288px;
   position: absolute;
+
 }
 
 .icon-button {
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
-  border: solid 1px #ffffff;
-  background-color: #ffffff;
+  height:24px!important;
+  width:24px!important;
+  color: #8300bf;
+}
+.icon-button:hover {
+  cursor:pointer;
 }
 
 .bottom-right-control {
@@ -742,7 +745,7 @@ export default {
 }
 
 .video-button {
-  margin-top:4px!important;
+  margin-top:7px!important;
 }
 
 >>> .scaffold-popper {
@@ -781,6 +784,7 @@ export default {
 >>>.el-loading-spinner .el-loading-text {
   color: #8300bf; 
 }
+
 </style>
 
 <style scoped src="../styles/purple/button.css">
@@ -788,4 +792,6 @@ export default {
 <style scoped src="../styles/purple/slider.css">
 </style>
 <style scoped src="../styles/purple/loading.css">
+</style>
+<style scoped src="@abi-software/svg-sprite/dist/svg-sprite.css">
 </style>
