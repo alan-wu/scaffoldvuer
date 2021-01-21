@@ -31,7 +31,7 @@
       <el-popover v-if="sceneData.timeVarying" content="Move the slider to animate the region" placement="top"
         :appendToBody=false trigger="manual" popper-class="scaffold-popper top-popper" v-model="hoverVisabilities[4].value" ref="sliderPopover">
      </el-popover>
-      <div class="time-slider" v-popover:sliderPopover v-if="sceneData.timeVarying">
+      <div class="time-slider-container" v-popover:sliderPopover v-if="sceneData.timeVarying">
         <el-row>
           <div class="slider-display-text">
             Animate scaffold
@@ -55,6 +55,7 @@
               :max="100"
               :value="sceneData.currentTime"
               :step="0.1"
+              tooltip-class="time-slider"
               @input="timeChange($event)"
             ></el-slider>
           </el-col>
@@ -682,7 +683,7 @@ export default {
   position:relative;
 }
 
-.time-slider {
+.time-slider-container {
   text-align: left;
   position: absolute;
   left: 33%;
@@ -702,6 +703,16 @@ export default {
 .slider-control {
   border: 1px solid rgb(144, 147, 153);
   border-radius: 4px;
+}
+
+.time-slider {
+  padding: 6px 4px;
+  font-size:12px;
+  color: rgb(48, 49, 51);
+  background-color: #f3ecf6;
+  border: 1px solid rgb(131, 0, 191);
+  white-space: nowrap;
+  min-width: unset; 
 }
 
 .zoomOut{
@@ -742,6 +753,10 @@ export default {
   border: 1px solid rgb(131, 0, 191);
   white-space: nowrap;
   min-width: unset; 
+}
+
+>>> .el-slider__button {
+  border: 2px solid #8300bf;
 }
 
 >>> .el-slider__bar {
