@@ -257,7 +257,7 @@ export default {
   left: 16px;
   max-height: calc(100% - 154px);
   text-align: left;
-  overflow: auto;
+  overflow: none;
 }
 
 .regions-display-text {
@@ -284,6 +284,19 @@ export default {
 
 .checkbox-group-inner {
   padding:18px;
+  max-height:240px;
+  overflow:auto;
+  scrollbar-color: #c0c4cc rgba(1,1,1,0);
+  scrollbar-width: thin;
+}
+
+.checkbox-group-inner::-webkit-scrollbar {
+  width:4px;
+}
+
+.checkbox-group-inner::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  box-shadow: inset 0 0 6px #c0c4cc; 
 }
 
 >>> .el-color-picker {
