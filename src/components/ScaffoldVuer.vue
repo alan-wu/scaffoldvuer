@@ -49,7 +49,7 @@
             ></el-button>
             <el-button v-else @click="play(true)" size="mini" icon="el-icon-video-play" circle class="video-button icon-button"></el-button>
           </el-col>
-          <el-col :offset="2" :span="17">
+          <el-col :offset="1" :span="19">
             <el-slider
               :min="0"
               :max="100"
