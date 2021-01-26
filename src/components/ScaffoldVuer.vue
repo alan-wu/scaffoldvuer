@@ -20,13 +20,14 @@
         :appendToBody=false trigger="manual" popper-class="scaffold-popper right-popper" v-model="hoverVisabilities[5].value" ref="checkBoxPopover">
       </el-popover>
       <TraditionalControls v-if="traditional" v-popover:checkBoxPopover :helpMode="helpMode" :module="$module" @object-selected="objectSelected" 
-        @object-hovered="objectHovered" :showColourPicker="showColourPicker" ref="traditionalControl"/>
+        @object-hovered="objectHovered" @drawer-toggled="drawerToggled" :showColourPicker="showColourPicker" ref="traditionalControl"/>
       <SelectControls v-else :module="$module" @object-selected="objectSelected" 
         @object-hovered="objectHovered" :displayAtStartUp="displayAtStartUp" ref="selectControl"/>
       <OpacityControls ref="opacityControl"/>
       <el-popover content="Change background color" placement="right"
         :appendToBody=false trigger="manual" popper-class="scaffold-popper right-popper" v-model="hoverVisabilities[3].value">
         <SvgIcon icon="changeBckgd" class="icon-button background-colour" slot="reference" @click.native="backgroundChangeCallback()"
+          :class="{ open: drawerOpen, close: !drawerOpen }"
           @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"/>
       </el-popover>
       <el-popover v-if="sceneData.timeVarying" content="Move the slider to animate the region" placement="top"
@@ -459,7 +460,15 @@ export default {
         this.$module.scene.displayMinimap = this.displayMinimap;
         this.updateMinimapScissor();
       }
-    }
+    },
+    /**
+     * Callback when drawer is toggled.
+     * 
+     */
+    drawerToggled: function (flag) {
+      console.log(flag)
+      this.drawerOpen = flag;
+    },
   },
   props: { 
     /**
@@ -573,6 +582,7 @@ export default {
       inHelp: false,
       loading: false,
       duration: 3000,
+      drawerOpen: true,
     };
   },
   watch: {
@@ -724,9 +734,14 @@ export default {
 
 .background-colour {
   bottom: 16px;
-  left:288px;
   position: absolute;
-
+  transition: all 1s ease;
+}
+.background-colour.open {
+  left: 310px;
+}
+.background-colour.close {
+  left: 12px;
 }
 
 .icon-button {
