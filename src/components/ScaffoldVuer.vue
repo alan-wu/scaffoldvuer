@@ -4,7 +4,7 @@
       element-loading-text="Loading..."
       element-loading-spinner="el-icon-loading"
       element-loading-background="rgba(0, 0, 0, 0.3)">
-    <SvgSprite/>
+    <SvgSpriteColor/>
     <div id="organsDisplayArea" tabindex="-1" style="height:100%;width:100%;" ref="display" @keydown.66="backgroundChangeCallback"></div>
     <div v-show="displayUI && !isTransitioning">
       <el-popover v-if="displayWarning" :content="warningMessage" placement="right"
@@ -82,7 +82,7 @@ import Vue from "vue";
 import OpacityControls from './OpacityControls';
 import SelectControls from './SelectControls';
 import TraditionalControls from './TraditionalControls';
-import { SvgIcon, SvgSprite} from '@abi-software/svg-sprite'
+import { SvgIcon, SvgSpriteColor} from '@abi-software/svg-sprite'
 
 import {
   Button,
@@ -120,7 +120,7 @@ export default {
     OpacityControls,
     SelectControls,
     SvgIcon,
-    SvgSprite,
+    SvgSpriteColor,
     TraditionalControls
   },
   beforeCreate: function() {
@@ -732,8 +732,8 @@ export default {
 .icon-button {
   height:24px!important;
   width:24px!important;
-  color: #8300bf;
 }
+
 .icon-button:hover {
   cursor:pointer;
 }
@@ -792,6 +792,4 @@ export default {
 <style scoped src="../styles/purple/slider.css">
 </style>
 <style scoped src="../styles/purple/loading.css">
-</style>
-<style scoped src="@abi-software/svg-sprite/dist/svg-sprite.css">
 </style>

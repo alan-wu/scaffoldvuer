@@ -22,7 +22,7 @@
     "*.js"
   ],
   "dependencies": {
-    "@abi-software/svg-sprite": "^0.1.4",
+    "@abi-software/svg-sprite": "^0.1.10",
     "axios": "^0.21.1",
     "core-js": "^3.3.2",
     "current-script-polyfill": "^1.0.0",
