@@ -62,13 +62,13 @@
           <SvgIcon icon="zoomIn" class="icon-button zoomIn" slot="reference" @click.native="zoomIn()"
             @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"/>
         </el-popover>
-        <el-popover content="Zoom out" placement="left"
-          :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[1].value">
+        <el-popover content="Zoom out" placement="top-end"
+          :appendToBody=false trigger="manual" :offset="50" popper-class="scaffold-popper popper-zoomout" v-model="hoverVisabilities[1].value">
           <SvgIcon icon="zoomOut" class="icon-button zoomOut" slot="reference" @click.native="zoomOut()"
             @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"/>
         </el-popover>
-        <el-popover content="Reset view" placement="left"
-          :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[2].value">
+        <el-popover content="Reset view" placement="top"
+          :appendToBody=false trigger="manual" popper-class="scaffold-popper" v-model="hoverVisabilities[2].value">
           <SvgIcon icon="resetZoom" class="icon-button resetView" slot="reference" @click.native="resetView()"
             @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"/>
         </el-popover>
@@ -791,6 +791,20 @@ export default {
 
 >>> .scaffold-popper.top-popper .popper__arrow::after{
   border-top-color: #8300bf !important;
+}
+
+>>>.el-popper[x-placement^="top"] .popper__arrow::after {
+  border-top-color:#8300bf !important;
+  border-left-color:transparent !important;
+  border-right-color:transparent !important;
+}
+
+>>>.popper-zoomout {
+  left:-31px!important;
+}
+
+>>>.popper-zoomout .popper__arrow{
+  left:48px!important;
 }
 
 >>>.el-loading-spinner i{
