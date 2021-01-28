@@ -24,12 +24,6 @@
       <SelectControls v-else :module="$module" @object-selected="objectSelected" 
         @object-hovered="objectHovered" :displayAtStartUp="displayAtStartUp" ref="selectControl"/>
       <OpacityControls ref="opacityControl"/>
-      <el-popover content="Change background color" placement="right"
-        :appendToBody=false trigger="manual" popper-class="scaffold-popper right-popper" v-model="hoverVisabilities[3].value">
-        <SvgIcon icon="changeBckgd" class="icon-button background-colour" slot="reference" @click.native="backgroundChangeCallback()"
-          :class="{ open: drawerOpen, close: !drawerOpen }"
-          @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"/>
-      </el-popover>
       <el-popover v-if="sceneData.timeVarying" content="Move the slider to animate the region" placement="top"
         :appendToBody=false trigger="manual" popper-class="scaffold-popper top-popper" v-model="hoverVisabilities[4].value" ref="sliderPopover">
      </el-popover>
@@ -73,6 +67,28 @@
             @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"/>
         </el-popover>
       </div>
+      <el-popover
+        ref="backgroundPopover"
+        placement="top-start"
+        width="128"
+        :appendToBody=false
+        trigger="click"
+        popper-class="background-popper">
+        <el-row class="backgroundText">
+          Change background
+        </el-row>
+        <el-row class="backgroundChooser" >
+          <div v-for="item in availableBackground" :key="item" 
+            :class="['backgroundChoice', item, item == currentBackground ? 'active' :'']" 
+            @click="backgroundChangeCallback(item)"/>
+        </el-row>
+      </el-popover>
+      <el-popover content="Change background color" placement="right"
+        :appendToBody=false trigger="manual" popper-class="scaffold-popper right-popper" v-model="hoverVisabilities[3].value">
+        <SvgIcon v-popover:backgroundPopover icon="changeBckgd" class="icon-button background-colour" slot="reference"
+          :class="{ open: drawerOpen, close: !drawerOpen }"
+          @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"/>
+      </el-popover>
     </div>
   </div>
 </template>
@@ -129,7 +145,7 @@ export default {
     this.selectedObject = undefined;
     this.hoveredObject = undefined;
     this.controls = undefined;
-    this.currentBackground = 0;
+    this.currentBackground = 'white';
     this._currentURL = undefined;
     this.availableBackground = ['white', 'black', 'lightskyblue'];
   },
@@ -146,12 +162,10 @@ export default {
      * to one of the three preset colour: white, black and
      * lightskyblue. 
      */
-    backgroundChangeCallback: function() {
-      ++this.currentBackground;
-      if (this.currentBackground >= this.availableBackground.length )
-        this.currentBackground = 0;
+    backgroundChangeCallback: function(colour) {
+      this.currentBackground = colour;
       this.$module.zincRenderer.getThreeJSRenderer().
-        setClearColor(this.availableBackground[this.currentBackground], 1 );
+        setClearColor(this.currentBackground, 1 );
     },
     /**
      * This is called by captueeScreenshot and after the last render
@@ -583,6 +597,8 @@ export default {
       loading: false,
       duration: 3000,
       drawerOpen: true,
+      currentBackground:'white',
+      availableBackground: ['white', 'lightskyblue', 'black'],
     };
   },
   watch: {
@@ -738,10 +754,47 @@ export default {
   transition: all 1s ease;
 }
 .background-colour.open {
-  left: 310px;
+  left: 322px;
 }
 .background-colour.close {
-  left: 12px;
+  left: 24px;
+}
+
+
+.backgroundText {
+  color: rgb(48, 49, 51);
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 20px;
+}
+
+.backgroundChooser {
+  display: flex;
+  margin-top:16px;
+}
+
+.backgroundChoice {
+  width:20px;
+  height:20px;
+  border: 1px solid rgb(144, 147, 153);
+  margin-left:20px;
+}
+.backgroundChoice.active {
+  border:2px solid #8300bf;
+}
+.backgroundChoice:hover {
+  cursor: pointer;
+}
+
+.backgroundChoice.white {
+  background-color: white;
+  margin-left:10px;
+}
+.backgroundChoice.black {
+  background-color: black;
+}
+.backgroundChoice.lightskyblue {
+  background-color: lightskyblue;
 }
 
 .icon-button {
