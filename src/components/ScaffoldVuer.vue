@@ -57,7 +57,7 @@
             @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"/>
         </el-popover>
         <el-popover content="Zoom out" placement="top-end"
-          :appendToBody=false trigger="manual" :offset="50" popper-class="scaffold-popper popper-zoomout" v-model="hoverVisabilities[1].value">
+          :appendToBody=false trigger="manual" popper-class="scaffold-popper popper-zoomout" v-model="hoverVisabilities[1].value">
           <SvgIcon icon="zoomOut" class="icon-button zoomOut" slot="reference" @click.native="zoomOut()"
             @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"/>
         </el-popover>
@@ -754,6 +754,10 @@ export default {
   font-weight: normal;
   line-height: 20px;
   padding-left:8px;
+  text-shadow: -1px -1px  #fff,
+    1px -1px #fff,
+    -1px 1px #fff,
+    1px -1px #fff;
 }
 
 .slider-control {
@@ -900,11 +904,11 @@ export default {
 }
 
 >>>.popper-zoomout {
-  left:-31px!important;
+  left:-21px!important;
 }
 
 >>>.popper-zoomout .popper__arrow{
-  left:48px!important;
+  left:53px!important;
 }
 
 >>>.el-loading-spinner i{
