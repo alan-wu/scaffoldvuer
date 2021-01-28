@@ -3,7 +3,8 @@
       v-loading="loading"
       element-loading-text="Loading..."
       element-loading-spinner="el-icon-loading"
-      element-loading-background="rgba(0, 0, 0, 0.3)">
+      element-loading-background="rgba(0, 0, 0, 0.3)"
+      ref="scaffoldContainer">
     <SvgSpriteColor/>
     <div id="organsDisplayArea" tabindex="-1" style="height:100%;width:100%;" ref="display" @keydown.66="backgroundChangeCallback"></div>
     <div v-show="displayUI && !isTransitioning">
@@ -27,27 +28,26 @@
       <el-popover v-if="sceneData.timeVarying" content="Move the slider to animate the region" placement="top"
         :appendToBody=false trigger="manual" popper-class="scaffold-popper top-popper" v-model="hoverVisabilities[4].value" ref="sliderPopover">
      </el-popover>
-      <div class="time-slider-container" v-popover:sliderPopover v-if="sceneData.timeVarying">
+      <div class="time-slider-container" 
+        :class="[ minimisedSlider ? 'minimised' : '', sliderPosition]" 
+        v-popover:sliderPopover v-if="sceneData.timeVarying">
         <el-row>
           <div class="slider-display-text">
             Animate scaffold
           </div>
         </el-row>
         <el-row class="slider-control">
-          <el-col :span="2" offset="1">
-            <SvgIcon v-if="isPlaying" icon="pause" class="icon-button video-button" @click.native="play(false)"/>
-            <SvgIcon v-else @click.native="play(true)" icon="play" class="video-button icon-button"/>
-          </el-col>
-          <el-col :offset="1" :span="19">
+          <SvgIcon v-if="isPlaying" icon="pause" class="icon-button video-button" @click.native="play(false)"/>
+          <SvgIcon v-else @click.native="play(true)" icon="play" class="video-button icon-button"/>
             <el-slider
               :min="0"
               :max="100"
               :value="sceneData.currentTime"
               :step="0.1"
               tooltip-class="time-slider"
+              class="slider"
               @input="timeChange($event)"
             ></el-slider>
-          </el-col>
         </el-row>
       </div>
       <div class="bottom-right-control">
@@ -480,8 +480,21 @@ export default {
      * 
      */
     drawerToggled: function (flag) {
-      console.log(flag)
       this.drawerOpen = flag;
+      this.adjustLayout();
+    },
+    /**
+     * Callback using ResizeObserver.
+    
+     */
+    adjustLayout: function() {
+      let width = this.$refs.scaffoldContainer.clientWidth;
+      this.minimisedSlider = (width < 812);
+      if (this.minimisedSlider) {
+        this.sliderPosition = this.drawerOpen ? 'right' : 'left';
+      } else {
+        this.sliderPosition = "";
+      }
     },
   },
   props: { 
@@ -599,6 +612,8 @@ export default {
       drawerOpen: true,
       currentBackground:'white',
       availableBackground: ['white', 'lightskyblue', 'black'],
+      minimisedSlider: false,
+      sliderPosition: ""
     };
   },
   watch: {
@@ -659,8 +674,11 @@ export default {
       this.controls = this.$refs.traditionalControl;
     else
       this.controls = this.$refs.selectControl;
+    this.ro = new ResizeObserver(this.adjustLayout).observe(
+      this.$refs.scaffoldContainer);
   },
   destroyed: function() {
+    this.ro.disconnect();
     this.$module.destroy();
     this.$module = undefined;
   }
@@ -710,10 +728,23 @@ export default {
 .time-slider-container {
   text-align: left;
   position: absolute;
-  left: 33%;
+  right: 155px;
   height: 64px;
-  width: 50%;
+  width: calc(100% - 530px );
   bottom: 16px;
+  transition: all 1s ease;
+  outline: none;
+}
+.time-slider-container.minimised {
+  width: calc(40%);
+}
+.time-slider-container.left {
+  right: 155px;
+  width: calc(100% - 250px );
+}
+.time-slider-container.right {
+  right: 8px;
+  bottom: 54px;
 }
 
 .slider-display-text {
@@ -726,6 +757,7 @@ export default {
 }
 
 .slider-control {
+  display: flex;
   border: 1px solid rgb(144, 147, 153);
   border-radius: 4px;
 }
@@ -738,6 +770,11 @@ export default {
   border: 1px solid rgb(131, 0, 191);
   white-space: nowrap;
   min-width: unset; 
+}
+
+.slider {
+  margin-left:30px;
+  width: calc(100% - 88px);
 }
 
 .zoomOut{
@@ -822,6 +859,7 @@ export default {
 }
 
 .video-button {
+  margin-left:12px;
   margin-top:7px!important;
 }
 
