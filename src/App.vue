@@ -201,10 +201,10 @@ export default {
       showColourPicker: true,
       minimapSettings: {
         x_offset: 16,
-        y_offset: 16,
+        y_offset: 50,
         width: 128,
         height: 128,
-        align: "bottom-right"
+        align: "top-right"
       },
     };
   },
@@ -234,7 +234,7 @@ export default {
 
 <style>
 #app {
-  font-family: 'Avenir', Arial, sans-serif;
+  font-family: 'Asap', 'Avenir', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

@@ -3,7 +3,9 @@
       v-loading="loading"
       element-loading-text="Loading..."
       element-loading-spinner="el-icon-loading"
-      element-loading-background="rgba(0, 0, 0, 0.3)">
+      element-loading-background="rgba(0, 0, 0, 0.3)"
+      ref="scaffoldContainer">
+    <SvgSpriteColor/>
     <div id="organsDisplayArea" tabindex="-1" style="height:100%;width:100%;" ref="display" @keydown.66="backgroundChangeCallback"></div>
     <div v-show="displayUI && !isTransitioning">
       <el-popover v-if="displayWarning" :content="warningMessage" placement="right"
@@ -17,58 +19,75 @@
       </i>
       <el-popover content="Change region visibility" placement="right"
         :appendToBody=false trigger="manual" popper-class="scaffold-popper right-popper" v-model="hoverVisabilities[5].value" ref="checkBoxPopover">
-     </el-popover>
+      </el-popover>
       <TraditionalControls v-if="traditional" v-popover:checkBoxPopover :helpMode="helpMode" :module="$module" @object-selected="objectSelected" 
-        @object-hovered="objectHovered" :showColourPicker="showColourPicker" ref="traditionalControl"/>
+        @object-hovered="objectHovered" @drawer-toggled="drawerToggled" :showColourPicker="showColourPicker" ref="traditionalControl"/>
       <SelectControls v-else :module="$module" @object-selected="objectSelected" 
         @object-hovered="objectHovered" :displayAtStartUp="displayAtStartUp" ref="selectControl"/>
       <OpacityControls ref="opacityControl"/>
       <el-popover v-if="sceneData.timeVarying" content="Move the slider to animate the region" placement="top"
         :appendToBody=false trigger="manual" popper-class="scaffold-popper top-popper" v-model="hoverVisabilities[4].value" ref="sliderPopover">
      </el-popover>
-      <div class="timeSlider" v-popover:sliderPopover v-if="sceneData.timeVarying">
+      <div class="time-slider-container" 
+        :class="[ minimisedSlider ? 'minimised' : '', sliderPosition]" 
+        v-popover:sliderPopover v-if="sceneData.timeVarying">
         <el-row>
-          <el-col :span="2" :offset="4">
-            <el-button
-              v-if="isPlaying"
-              @click="play(false)"
-              icon="el-icon-video-pause"
-              size="mini"
-              circle
-              class="video-button icon-button"
-            ></el-button>
-            <el-button v-else @click="play(true)" size="mini" icon="el-icon-video-play" circle class="video-button icon-button"></el-button>
-          </el-col>
-          <el-col :span="14">
+          <div class="slider-display-text">
+            Animate scaffold
+          </div>
+        </el-row>
+        <el-row class="slider-control">
+          <SvgIcon v-if="isPlaying" icon="pause" class="icon-button video-button" @click.native="play(false)"/>
+          <SvgIcon v-else @click.native="play(true)" icon="play" class="video-button icon-button"/>
             <el-slider
               :min="0"
               :max="100"
               :value="sceneData.currentTime"
               :step="0.1"
+              tooltip-class="time-slider"
+              class="slider"
               @input="timeChange($event)"
             ></el-slider>
-          </el-col>
         </el-row>
       </div>
-      <el-popover content="Zoom in" placement="left" 
-        :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[0].value">
-        <el-button icon="el-icon-plus" circle class="zoomIn icon-button" 
-          @click="zoomIn()" size="mini" slot="reference" @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"></el-button>
+      <div class="bottom-right-control">
+        <el-popover content="Zoom in" placement="left"
+          :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[0].value">
+          <SvgIcon icon="zoomIn" class="icon-button zoomIn" slot="reference" @click.native="zoomIn()"
+            @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"/>
+        </el-popover>
+        <el-popover content="Zoom out" placement="top-end"
+          :appendToBody=false trigger="manual" popper-class="scaffold-popper popper-zoomout" v-model="hoverVisabilities[1].value">
+          <SvgIcon icon="zoomOut" class="icon-button zoomOut" slot="reference" @click.native="zoomOut()"
+            @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"/>
+        </el-popover>
+        <el-popover content="Reset" placement="top"
+          :appendToBody=false trigger="manual" popper-class="scaffold-popper" v-model="hoverVisabilities[2].value">
+          <SvgIcon icon="resetZoom" class="icon-button resetView" slot="reference" @click.native="resetView()"
+            @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"/>
+        </el-popover>
+      </div>
+      <el-popover
+        ref="backgroundPopover"
+        placement="top-start"
+        width="128"
+        :appendToBody=false
+        trigger="click"
+        popper-class="background-popper">
+        <el-row class="backgroundText">
+          Change background
+        </el-row>
+        <el-row class="backgroundChooser" >
+          <div v-for="item in availableBackground" :key="item" 
+            :class="['backgroundChoice', item, item == currentBackground ? 'active' :'']" 
+            @click="backgroundChangeCallback(item)"/>
+        </el-row>
       </el-popover>
-      <el-popover content="Zoom out" placement="left"
-        :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[1].value">
-        <el-button icon="el-icon-minus" circle class="zoomOut icon-button"
-        @click="zoomOut()" size="mini" slot="reference" @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"></el-button>
-      </el-popover>
-      <el-popover content="Reset view" placement="left"
-        :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[2].value">
-        <el-button icon="el-icon-refresh-right" circle class="resetView icon-button"
-          @click="resetView()" size="mini" slot="reference" @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"></el-button>
-      </el-popover>
-      <el-popover content="Change background color" placement="left"
-        :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[3].value">
-        <el-button icon="el-icon-s-platform" circle class="backgroundColour icon-button"
-          @click="backgroundChangeCallback()" size="mini" slot="reference" @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"></el-button>
+      <el-popover content="Change background color" placement="right"
+        :appendToBody=false trigger="manual" popper-class="scaffold-popper right-popper" v-model="hoverVisabilities[3].value">
+        <SvgIcon v-popover:backgroundPopover icon="changeBckgd" class="icon-button background-colour" slot="reference"
+          :class="{ open: drawerOpen, close: !drawerOpen }"
+          @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"/>
       </el-popover>
     </div>
   </div>
@@ -80,6 +99,8 @@ import Vue from "vue";
 import OpacityControls from './OpacityControls';
 import SelectControls from './SelectControls';
 import TraditionalControls from './TraditionalControls';
+import { SvgIcon, SvgSpriteColor} from '@abi-software/svg-sprite'
+
 import {
   Button,
   Col,
@@ -103,7 +124,6 @@ const OrgansViewer = require("physiomeportal/src/modules/organsRenderer")
 const EventNotifier = require("physiomeportal/src/utilities/eventNotifier")
   .EventNotifier;
 
-
 /**
  * A vue component of the scaffold viewer.
  * 
@@ -116,6 +136,8 @@ export default {
   components: {
     OpacityControls,
     SelectControls,
+    SvgIcon,
+    SvgSpriteColor,
     TraditionalControls
   },
   beforeCreate: function() {
@@ -123,7 +145,7 @@ export default {
     this.selectedObject = undefined;
     this.hoveredObject = undefined;
     this.controls = undefined;
-    this.currentBackground = 0;
+    this.currentBackground = 'white';
     this._currentURL = undefined;
     this.availableBackground = ['white', 'black', 'lightskyblue'];
   },
@@ -136,16 +158,14 @@ export default {
     },
     /**
      * This is called when Change background colour button 
-     * is pressed an causes the background colour to be changed
+     * is pressed an causes the backgrouColornd colour to be changed
      * to one of the three preset colour: white, black and
      * lightskyblue. 
      */
-    backgroundChangeCallback: function() {
-      ++this.currentBackground;
-      if (this.currentBackground >= this.availableBackground.length )
-        this.currentBackground = 0;
+    backgroundChangeCallback: function(colour) {
+      this.currentBackground = colour;
       this.$module.zincRenderer.getThreeJSRenderer().
-        setClearColor(this.availableBackground[this.currentBackground], 1 );
+        setClearColor(this.currentBackground, 1 );
     },
     /**
      * This is called by captueeScreenshot and after the last render
@@ -454,7 +474,28 @@ export default {
         this.$module.scene.displayMinimap = this.displayMinimap;
         this.updateMinimapScissor();
       }
-    }
+    },
+    /**
+     * Callback when drawer is toggled.
+     * 
+     */
+    drawerToggled: function (flag) {
+      this.drawerOpen = flag;
+      this.adjustLayout();
+    },
+    /**
+     * Callback using ResizeObserver.
+    
+     */
+    adjustLayout: function() {
+      let width = this.$refs.scaffoldContainer.clientWidth;
+      this.minimisedSlider = (width < 812);
+      if (this.minimisedSlider) {
+        this.sliderPosition = this.drawerOpen ? 'right' : 'left';
+      } else {
+        this.sliderPosition = "";
+      }
+    },
   },
   props: { 
     /**
@@ -542,7 +583,7 @@ export default {
           y_offset: 16,
           width: 128,
           height: 128,
-          align: "top-left",
+          align: "top-right",
         }
       }
     },
@@ -568,6 +609,11 @@ export default {
       inHelp: false,
       loading: false,
       duration: 3000,
+      drawerOpen: true,
+      currentBackground:'white',
+      availableBackground: ['white', 'lightskyblue', 'black'],
+      minimisedSlider: false,
+      sliderPosition: ""
     };
   },
   watch: {
@@ -628,8 +674,11 @@ export default {
       this.controls = this.$refs.traditionalControl;
     else
       this.controls = this.$refs.selectControl;
+    this.ro = new ResizeObserver(this.adjustLayout).observe(
+      this.$refs.scaffoldContainer);
   },
   destroyed: function() {
+    this.ro.disconnect();
     this.$module.destroy();
     this.$module = undefined;
   }
@@ -645,7 +694,7 @@ export default {
   left: 37px;
   text-align: left;
   font-size: 25px;
-  color: #d70000;
+  color: #ff8400;
 }
 .warning-icon:hover {
   cursor: pointer;
@@ -659,10 +708,10 @@ export default {
   min-width:150px;
   font-size:12px;
   color: #fff;
-  background-color: #d70000;
+  background-color: #ff8400;
 }
 >>> .warning-popper.right-popper .popper__arrow::after{
-  border-right-color: #d70000 !important;
+  border-right-color: #ff8400 !important;
 }
 
 #organsDisplayArea:focus {
@@ -676,55 +725,160 @@ export default {
   position:relative;
 }
 
-.timeSlider {
-  text-align: center;
+.time-slider-container {
+  text-align: left;
   position: absolute;
-  left: 2.5%;
-  height: 48px;
-  width: 95%;
-  bottom: 20px;
+  right: 155px;
+  height: 64px;
+  width: calc(100% - 530px );
+  bottom: 16px;
+  transition: all 1s ease;
+  outline: none;
+}
+.time-slider-container.minimised {
+  width: calc(40%);
+}
+.time-slider-container.left {
+  right: 155px;
+  width: calc(100% - 250px );
+}
+.time-slider-container.right {
+  right: 8px;
+  bottom: 54px;
 }
 
-.zoomIn{
-  top:51px;
-  right:20px;
-  position: absolute;
+.slider-display-text {
+  height: 20px;
+  color: rgb(48, 49, 51);
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 20px;
+  padding-left:8px;
+  text-shadow: -1px -1px  #fff,
+    1px -1px #fff,
+    -1px 1px #fff,
+    1px -1px #fff;
+}
+
+.slider-control {
+  display: flex;
+  border: 1px solid rgb(144, 147, 153);
+  border-radius: 4px;
+}
+
+.time-slider {
+  padding: 6px 4px;
+  font-size:12px;
+  color: rgb(48, 49, 51);
+  background-color: #f3ecf6;
+  border: 1px solid rgb(131, 0, 191);
+  white-space: nowrap;
+  min-width: unset; 
+}
+
+.slider {
+  margin-left:30px;
+  width: calc(100% - 88px);
 }
 
 .zoomOut{
-  top:101px;
-  right:20px;
-  position: absolute;
+  padding-left: 8px;
 }
 
 .resetView {
-  top:151px;
-  right:20px;
-  position: absolute;
+  padding-left: 8px;
 }
 
-.backgroundColour {
-  top:201px;
-  right:20px;
+>>> .background-popper {
+  padding: 5px 12px;
+  background-color: #ffffff;
+  border: 1px solid rgb(131, 0, 191);
+  box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
+  height: 72px;
+  width: 128px;
+  min-width:128px;
+}
+
+.background-colour {
+  bottom: 16px;
   position: absolute;
+  transition: all 1s ease;
+}
+.background-colour.open {
+  left: 322px;
+}
+.background-colour.close {
+  left: 24px;
+}
+
+.backgroundText {
+  color: rgb(48, 49, 51);
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 20px;
+}
+
+.backgroundChooser {
+  display: flex;
+  margin-top:16px;
+}
+
+.backgroundChoice {
+  width:20px;
+  height:20px;
+  border: 1px solid rgb(144, 147, 153);
+  margin-left:20px;
+}
+.backgroundChoice.active {
+  border:2px solid #8300bf;
+}
+.backgroundChoice:hover {
+  cursor: pointer;
+}
+
+.backgroundChoice.white {
+  background-color: white;
+  margin-left:10px;
+}
+.backgroundChoice.black {
+  background-color: black;
+}
+.backgroundChoice.lightskyblue {
+  background-color: lightskyblue;
 }
 
 .icon-button {
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
-  border: solid 1px #ffffff;
-  background-color: #ffffff;
+  height:24px!important;
+  width:24px!important;
+}
+
+.icon-button:hover {
+  cursor:pointer;
+}
+
+.bottom-right-control {
+  position:absolute;
+  right:16px;
+  bottom:16px;
 }
 
 .video-button {
-  padding-top:5px;
+  margin-left:12px;
+  margin-top:7px!important;
 }
 
 >>> .scaffold-popper {
-  padding:9px 10px;
-  min-width:150px;
+  padding: 6px 4px;
   font-size:12px;
-  color: #fff;
-  background-color: #8300bf;  
+  color: rgb(48, 49, 51);
+  background-color: #f3ecf6;
+  border: 1px solid rgb(131, 0, 191);
+  white-space: nowrap;
+  min-width: unset; 
+}
+
+>>> .el-slider__button {
+  border: 2px solid #8300bf;
 }
 
 >>> .el-slider__bar {
@@ -743,12 +897,27 @@ export default {
   border-top-color: #8300bf !important;
 }
 
+>>>.el-popper[x-placement^="top"] .popper__arrow::after {
+  border-top-color:#8300bf !important;
+  border-left-color:transparent !important;
+  border-right-color:transparent !important;
+}
+
+>>>.popper-zoomout {
+  left:-21px!important;
+}
+
+>>>.popper-zoomout .popper__arrow{
+  left:53px!important;
+}
+
 >>>.el-loading-spinner i{
   color: #8300bf;  
 }
 >>>.el-loading-spinner .el-loading-text {
   color: #8300bf; 
 }
+
 </style>
 
 <style scoped src="../styles/purple/button.css">
