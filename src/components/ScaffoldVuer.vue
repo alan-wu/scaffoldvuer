@@ -748,6 +748,16 @@ export default {
   padding-left: 8px;
 }
 
+>>> .background-popper {
+  padding: 5px 12px;
+  background-color: #ffffff;
+  border: 1px solid rgb(131, 0, 191);
+  box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
+  height: 72px;
+  width: 128px;
+  min-width:128px;
+}
+
 .background-colour {
   bottom: 16px;
   position: absolute;
@@ -759,7 +769,6 @@ export default {
 .background-colour.close {
   left: 24px;
 }
-
 
 .backgroundText {
   color: rgb(48, 49, 51);
