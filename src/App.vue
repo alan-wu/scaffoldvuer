@@ -5,6 +5,7 @@
       :helpMode="helpMode" :displayMinimap="displayMinimap" 
       :displayMarkers="displayMarkers" :minimapSettings="minimapSettings"
       :showColourPicker="showColourPicker" @timeChanged="updateCurrentTime"
+      :render="render"
     />
     <el-popover
       placement="bottom"
@@ -52,6 +53,15 @@
         <el-row :gutter="20">
           <el-button @click="saveSettings()" size="mini">Save Settings</el-button>
           <el-button @click="restoreSettings()" size="mini">Restore Settings</el-button>
+        </el-row>
+        <el-row :gutter="20">
+          <el-row :gutter="20">
+            <el-switch class="app-switch" 
+              active-text="Rendering"
+              active-color="#8300bf"
+              v-model="render">
+            </el-switch>
+        </el-row>
         </el-row>
         <el-input type="textarea" autosize placeholder="Please input"
           v-model="input" style="padding-left:5%;width:90%;" />
@@ -206,6 +216,7 @@ export default {
         height: 128,
         align: "top-right"
       },
+      render: true,
     };
   },
   beforeMount: function() {

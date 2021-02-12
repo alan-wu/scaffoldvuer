@@ -160,7 +160,7 @@ export default {
      * This is called when Change background colour button 
      * is pressed an causes the backgrouColornd colour to be changed
      * to one of the three preset colour: white, black and
-     * lightskyblue. 
+     * lightskyblue.
      */
     backgroundChangeCallback: function(colour) {
       this.currentBackground = colour;
@@ -496,6 +496,15 @@ export default {
         this.sliderPosition = "";
       }
     },
+    toggleRendering: function(flag) {
+      if (this.$module.zincRenderer) {
+        if (flag) {
+          this.$module.zincRenderer.animate();
+        } else {
+          this.$module.zincRenderer.stopAnimate();
+        }
+      }
+    },
   },
   props: { 
     /**
@@ -585,7 +594,7 @@ export default {
           height: 128,
           align: "top-right",
         }
-      }
+      },
     },
     /**
      * State containing state of the scaffold.
@@ -593,6 +602,13 @@ export default {
     state: {
       type: Object,
       default: undefined,
+    },
+    /**
+    * Settings for turning on/off rendering
+    */
+    render: {
+      type: Boolean,
+      default: true
     },
   },
   data: function() {
@@ -661,6 +677,9 @@ export default {
     minimapSettings: {
       deep: true,
       handler: "updateMinimapScissor"
+    },
+    render: function(val) {
+      this.toggleRendering(val);
     }
   },
   mounted: function() {
@@ -669,6 +688,7 @@ export default {
     this.$module.addNotifier(eventNotifier);
     this.$module.addOrganPartAddedCallback(this.organsAdded);
     this.$module.initialiseRenderer(this.$refs.display);
+    this.toggleRendering(this.render);
     this.$module.toolTip = undefined;
     if (this.traditional)
       this.controls = this.$refs.traditionalControl;
@@ -677,8 +697,9 @@ export default {
     this.ro = new ResizeObserver(this.adjustLayout).observe(
       this.$refs.scaffoldContainer);
   },
-  destroyed: function() {
-    this.ro.disconnect();
+  beforeDestroy: function() {
+    if (this.ro)
+      this.ro.disconnect();
     this.$module.destroy();
     this.$module = undefined;
   }
