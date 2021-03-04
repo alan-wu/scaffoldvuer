@@ -906,25 +906,20 @@ export default {
   background-color: #8300bf;
 }
 
->>> .scaffold-popper.left-popper .popper__arrow::after{
+>>> .scaffold-popper.left-popper .popper__arrow{
   border-left-color: #8300bf !important;
 }
 
->>> .scaffold-popper.right-popper .popper__arrow::after{
+>>> .scaffold-popper.right-popper .popper__arrow{
   border-right-color: #8300bf !important;
 }
 
->>> .scaffold-popper.top-popper .popper__arrow::after{
-  border-top-color: #8300bf !important;
-}
-
->>>.el-popper[x-placement^="top"] .popper__arrow::after {
+>>>.el-popper[x-placement^="top"] .popper__arrow {
   border-top-color:#8300bf !important;
-  border-left-color:transparent !important;
-  border-right-color:transparent !important;
 }
 
 >>>.popper-zoomout {
+  padding-right:13px;
   left:-21px!important;
 }
 
