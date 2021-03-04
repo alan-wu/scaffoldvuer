@@ -910,12 +910,24 @@ export default {
   border-left-color: #8300bf !important;
 }
 
+>>> .scaffold-popper.left-popper .popper__arrow:after{
+  border-left-color: #f3ecf6 !important;
+}
+
 >>> .scaffold-popper.right-popper .popper__arrow{
   border-right-color: #8300bf !important;
 }
 
+>>> .scaffold-popper.right-popper .popper__arrow:after{
+  border-right-color: #f3ecf6 !important;
+}
+
 >>>.el-popper[x-placement^="top"] .popper__arrow {
   border-top-color:#8300bf !important;
+}
+
+>>> .scaffold-popper.[x-placement^="top"] .popper__arrow:after{
+  border-top-color: #f3ecf6 !important;
 }
 
 >>>.popper-zoomout {
