@@ -922,11 +922,11 @@ export default {
   border-right-color: #f3ecf6 !important;
 }
 
->>>.el-popper[x-placement^="top"] .popper__arrow {
+>>>.scaffold-popper.el-popper[x-placement^="top"] .popper__arrow {
   border-top-color:#8300bf !important;
 }
 
->>> .scaffold-popper.[x-placement^="top"] .popper__arrow:after{
+>>> .scaffold-popper.el-popper[x-placement^="top"] .popper__arrow:after{
   border-top-color: #f3ecf6 !important;
 }
 
