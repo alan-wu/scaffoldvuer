@@ -31,24 +31,59 @@
       <div class="time-slider-container" 
         :class="[ minimisedSlider ? 'minimised' : '', sliderPosition]" 
         v-popover:sliderPopover v-if="sceneData.timeVarying">
-        <el-row>
-          <div class="slider-display-text">
-            Animate scaffold
-          </div>
-        </el-row>
-        <el-row class="slider-control">
-          <SvgIcon v-if="isPlaying" icon="pause" class="icon-button video-button" @click.native="play(false)"/>
-          <SvgIcon v-else @click.native="play(true)" icon="play" class="video-button icon-button"/>
-            <el-slider
-              :min="0"
-              :max="100"
-              :value="sceneData.currentTime"
-              :step="0.1"
-              tooltip-class="time-slider"
-              class="slider"
-              @input="timeChange($event)"
-            ></el-slider>
-        </el-row>
+        <el-tabs type="card">
+          <el-tab-pane label="Animate scaffold">
+            <el-row class="tab-content">
+              <SvgIcon v-if="isPlaying" icon="pause" class="icon-button video-button" @click.native="play(false)"/>
+              <SvgIcon v-else @click.native="play(true)" icon="play" class="video-button icon-button"/>
+                <el-slider
+                  :min="0"
+                  :max="timeMax"
+                  :value="sceneData.currentTime / 100 * timeMax"
+                  :step="0.1"
+                  tooltip-class="time-slider-tooltip"
+                  class="slider"
+                  :format-tooltip="formatTooltip"
+                  :marks="timeStamps"
+                  @input="timeChange($event)"
+                ></el-slider>
+            </el-row>
+          </el-tab-pane>
+          <el-tab-pane label="Animation data">
+              <el-row class="tab-content">
+                <div class="animation-data">
+                  Original duration:
+                  <div class="purple">
+                    {{ orginalDuration }}
+                  </div>
+                </div>
+                <div class="animation-data">
+                  Animation duration:
+                  <div class="purple">
+                    {{ animateDuration }}
+                  </div>
+                </div>
+                <div class="animation-data">
+                  Playback speed
+                  <el-select
+                    :popper-append-to-body=true
+                    :value="currentSpeed"
+                    placeholder="Select"
+                    class="select-box"
+                    popper-class="scaffold_viewer_dropdown"
+                    @change="speedChanged($event)"
+                  >
+                    <el-option
+                      v-for="item in playSpeed"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    />
+                  </el-select>
+                </div>
+              </el-row>
+            </el-tab-pane>
+        </el-tabs>
       </div>
       <div class="bottom-right-control">
         <el-popover content="Zoom in" placement="left"
@@ -105,9 +140,12 @@ import {
   Button,
   Col,
   Loading,
+  Popover,
   Row,
+  Select,
   Slider,
-  Popover
+  TabPane,
+  Tabs
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
@@ -115,9 +153,13 @@ locale.use(lang);
 Vue.use(Button);
 Vue.use(Col);
 Vue.use(Loading.directive);
-Vue.use(Row);
-Vue.use(Slider);
 Vue.use(Popover);
+Vue.use(Row);
+Vue.use(Select);
+Vue.use(Slider);
+Vue.use(TabPane);
+Vue.use(Tabs);
+
 
 const OrgansViewer = require("physiomeportal/src/modules/organsRenderer")
   .OrgansViewer;
@@ -157,7 +199,7 @@ export default {
       this.loading = false;
     },
     /**
-     * This is called when Change background colour button 
+     * This is called when Change backgspeedround colour button 
      * is pressed an causes the backgrouColornd colour to be changed
      * to one of the three preset colour: white, black and
      * lightskyblue.
@@ -197,6 +239,12 @@ export default {
       this.captureID = this.$module.zincRenderer.addPostRenderCallbackFunction(
         this.captureScreenshotCallback);
     },
+    formatTooltip(val) {
+      if (this.timeMax >= 1000) {
+        return val ? (val/1000).toFixed(2) + " s": "0 s";
+      }
+      return val ? val.toFixed(2) + " ms": "0 ms";
+    },
     /**
      * Function to reset the view to default.
      * Also called when the associated button is pressed.
@@ -216,7 +264,7 @@ export default {
      */
     zoomIn: function() {
       if (this.$module.scene) {
-        this.$module.scene.changeZoomByScrollRateUnit(-1);
+       this.changeZoomByScrollRateUnit(-1);
       }
     },
     /**
@@ -229,6 +277,15 @@ export default {
       if (this.$module.scene) {
         this.$module.scene.changeZoomByScrollRateUnit(1);
       }
+    },
+    /**
+      * Function to change the current play speed.
+      * 
+      * @public
+      */
+    speedChanged: function(speed) {
+      this.currentSpeed = speed;
+      this.$module.setPlayRate(this.defaultRate * this.currentSpeed);
     },
     /**
      * Function used to stop the free spin 
@@ -298,7 +355,7 @@ export default {
     },
     /**
      * Get the coordinates of the current selected region.
-     * 
+     *
      * @public
      */
     getCoordinatesOfSelected: function() {
@@ -321,8 +378,9 @@ export default {
      * Callback when time is changed through the UI.
      */
     timeChange: function(event) {
-      if (event != this.sceneData.currentTime)
-        this.$module.updateTime(event);
+      let normalizedTime = event / this.timeMax * 100;
+      if (normalizedTime != this.sceneData.currentTime)
+        this.$module.updateTime(normalizedTime);
     },
     /**
      * Set the selected zinc object
@@ -407,10 +465,32 @@ export default {
       });
       this.$module.scene.minimapScissor.updateRequired = true;
     },
-    setViewportCallback: function(viewport) {
+    updateSettingsfromScene: function() {
+      this.currentSpeed = 1;
+      this.$module.setPlayRate(this.defaultRate);
+      this.orginalDuration = this.$module.scene.getMetadataTag(
+        "OriginalDuration");
+      this.animateDuration = this.$module.scene.getMetadataTag(
+        "Duration");
+      let timeStamps = this.$module.scene.getMetadataTag(
+        "TimeStamps");
+      this.timeStamps = {};
+      for (const key in timeStamps) {
+        this.timeStamps[timeStamps[key]] = key;
+      }
+      this.timeMax = this.$module.scene.getDuration();
+    },
+    setURLFinishCallback: function() {
+      return () => {
+        this.updateSettingsfromScene();
+        this.$module.unsetFinishDownloadCallback();
+      }
+    },
+    setStateFinishCallback: function(viewport) {
       return () => {
         this.$module.scene.getZincCameraControls().setCurrentCameraSettings(
           viewport);
+        this.updateSettingsfromScene();
         this.$module.unsetFinishDownloadCallback();
       }
     },
@@ -442,7 +522,7 @@ export default {
         if (state.url && state.url !== this._currentURL) {
           if (state.viewport) {
             this.$module.setFinishDownloadCallback(
-              this.setViewportCallback(state.viewport));
+              this.setStateFinishCallback(state.viewport));
           }
           this.setURL(state.url);
         } else if (state.viewport) {
@@ -463,6 +543,8 @@ export default {
         if (this.controls)
           this.controls.clear();
         this.loading = true;
+        this.$module.setFinishDownloadCallback(
+          this.setURLFinishCallback());
         this.$module.loadOrgansFromURL(
           newValue,
           undefined,
@@ -503,6 +585,11 @@ export default {
         } else {
           this.$module.zincRenderer.stopAnimate();
         }
+      }
+    },
+    forceResize: function() {
+      if (this.$module.zincRenderer) {
+        this.$module.zincRenderer.onWindowResize();
       }
     },
   },
@@ -629,7 +716,32 @@ export default {
       currentBackground:'white',
       availableBackground: ['white', 'lightskyblue', 'black'],
       minimisedSlider: false,
-      sliderPosition: ""
+      sliderPosition: "",
+      timeMax: 100,
+      orginalDuration: "75mins",
+      animateDuration: "75secs",
+      playSpeed: [{
+          value: 0.1,
+          label: '0.1x'
+        }, {
+          value: 0.5,
+          label: '0.5x'
+        }, {
+          value: 1,
+          label: '1x'
+        }, {
+          value: 2,
+          label: '2x'
+        }, {
+          value: 5,
+          label: '5x'
+        }, {
+          value: 10,
+          label: '10x'
+        }
+      ],
+      currentSpeed: 1,
+      timeStamps: { }
     };
   },
   watch: {
@@ -696,6 +808,7 @@ export default {
       this.controls = this.$refs.selectControl;
     this.ro = new ResizeObserver(this.adjustLayout).observe(
       this.$refs.scaffoldContainer);
+    this.defaultRate = this.$module.getPlayRate();
   },
   beforeDestroy: function() {
     if (this.ro)
@@ -750,7 +863,6 @@ export default {
   text-align: left;
   position: absolute;
   right: 155px;
-  height: 64px;
   width: calc(100% - 530px );
   bottom: 16px;
   transition: all 1s ease;
@@ -781,25 +893,52 @@ export default {
     1px -1px #fff;
 }
 
-.slider-control {
+.tab-content {
   display: flex;
-  border: 1px solid rgb(144, 147, 153);
-  border-radius: 4px;
+  height:34px;
+  padding-top:8px;
+  font-size:14px;
 }
 
-.time-slider {
-  padding: 6px 4px;
-  font-size:12px;
-  color: rgb(48, 49, 51);
-  background-color: #f3ecf6;
-  border: 1px solid rgb(131, 0, 191);
-  white-space: nowrap;
-  min-width: unset; 
+.tab-content >>> .el-slider__marks-text {
+  margin-top: 12px;
+  margin-left: 8px;
+  font-size: 10px;
+}
+
+.tab-content >>> .el-slider__stop {
+  width:10px;
+  height:10px;
+}
+
+.animation-data {
+  margin-left: 8px;
+  line-height:26px;
+  display:flex;
+}
+
+.animation-data :not(:first-child) {
+  margin-left:8px;
+}
+
+.animation-data .purple{
+  padding-left:2px;
+  color: #8300bf;
 }
 
 .slider {
   margin-left:30px;
   width: calc(100% - 88px);
+  margin-top:-7px;
+}
+
+.slider >>> .el-slider__runway {
+  height: 10px;
+  margin: 14px 0;
+}
+
+.slider >>> .el-slider__button-wrapper {
+  top: -13px;
 }
 
 .zoomOut{
@@ -884,8 +1023,42 @@ export default {
 }
 
 .video-button {
-  margin-left:12px;
-  margin-top:7px!important;
+  margin-left:8px;
+}
+
+.time-slider-container >>>.el-tabs__header {
+  margin: 0px;
+  border-bottom: 1px solid rgb(144, 147, 153);
+}
+
+.time-slider-container >>> .el-tabs__content {
+  border-left: 1px solid rgb(144, 147, 153);
+  border-bottom: 1px solid rgb(144, 147, 153);
+  border-right: 1px solid rgb(144, 147, 153);
+  border-radius: 0px 0px 4px 4px;
+}
+
+.time-slider-container >>> .el-tabs--card>.el-tabs__header .el-tabs__nav {
+  border: 1px solid rgb(144, 147, 153);
+  border-bottom: none;
+  border-radius: 4px 4px 0px 0px;
+}
+.time-slider-container >>> .el-tabs--card>.el-tabs__header .el-tabs__item:first-child {
+  border-left: none;
+}
+
+.time-slider-container >>> .el-tabs--card>.el-tabs__header .el-tabs__item {
+  border-left: 1px solid rgb(144, 147, 153);
+}
+
+.time-slider-container >>> .el-tabs__item {
+  height: 24px;
+  line-height:24px;
+  padding: 0 8px!important;
+}
+
+.time-slider-container >>> .el-tabs__item.is-active {
+  color: rgb(48, 49, 51);
 }
 
 >>> .scaffold-popper {
@@ -904,6 +1077,7 @@ export default {
 
 >>> .el-slider__bar {
   background-color: #8300bf;
+  height: 10px;
 }
 
 >>> .scaffold-popper.left-popper .popper__arrow{
@@ -946,11 +1120,62 @@ export default {
   color: #8300bf; 
 }
 
+>>>.el-tabs__item:hover {
+  color: #8300bf;
+}
+
+
+.select-box {
+  width: 57px;
+  border-radius: 4px;
+  border: 1px solid rgb(144, 147, 153);
+  background-color: var(--white);
+  font-weight: 500;
+  color: rgb(48, 49, 51);
+  margin-left: 8px;
+}
+
+.select-box >>> .el-input__inner {
+  color: rgb(131, 0, 191);
+  height: 23px;
+  padding-left: 8px;
+  padding-right: 8px;
+  border:none;
+}
+
+.select-box >>> .el-input__icon {
+  line-height:26px;
+}
+
 </style>
 
 <style scoped src="../styles/purple/button.css">
 </style>
+<style scoped src="../styles/purple/select.css">
+</style>
 <style scoped src="../styles/purple/slider.css">
 </style>
 <style scoped src="../styles/purple/loading.css">
+</style>
+<style scoped src="../styles/purple/tabs.css">
+</style>
+<style scoped src="../styles/purple/tab-pane.css">
+</style>
+<style>
+.time-slider-tooltip {
+  padding: 6px 4px!important;
+  font-size:12px!important;
+  color: rgb(48, 49, 51)!important;
+  background-color: #f3ecf6!important;
+  border: 1px solid rgb(131, 0, 191)!important;
+  white-space: nowrap!important;
+  min-width: unset!important; 
+}
+
+.scaffold_viewer_dropdown >>> .el-select-dropdown__item {
+  white-space: nowrap;
+  text-align: left;
+}
+
+
 </style>
