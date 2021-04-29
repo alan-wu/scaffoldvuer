@@ -241,7 +241,11 @@ export default {
     },
     formatTooltip(val) {
       if (this.timeMax >= 1000) {
-        return val ? (val/1000).toFixed(2) + " s": "0 s";
+        if (val) {
+          let sec = ((val % 60000)/1000).toFixed(2) + "s";
+          let min = val > 60000 ? (val/60000).toFixed(0) + "m ": "";
+          return min + sec;
+        }
       }
       return val ? val.toFixed(2) + " ms": "0 ms";
     },
