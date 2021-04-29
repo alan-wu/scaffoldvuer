@@ -1040,19 +1040,26 @@ export default {
   border-bottom: 1px solid rgb(144, 147, 153);
   border-right: 1px solid rgb(144, 147, 153);
   border-radius: 0px 0px 4px 4px;
+  background-color: white;
 }
 
 .time-slider-container >>> .el-tabs--card>.el-tabs__header .el-tabs__nav {
   border: 1px solid rgb(144, 147, 153);
   border-bottom: none;
   border-radius: 4px 4px 0px 0px;
+  background-color: white;
 }
 .time-slider-container >>> .el-tabs--card>.el-tabs__header .el-tabs__item:first-child {
   border-left: none;
 }
 
 .time-slider-container >>> .el-tabs--card>.el-tabs__header .el-tabs__item {
+  border-bottom: 1px solid;
   border-left: 1px solid rgb(144, 147, 153);
+}
+
+.time-slider-container >>> .el-tabs--card>.el-tabs__header .el-tabs__item.is-active {
+  border-bottom: 1px solid white;
 }
 
 .time-slider-container >>> .el-tabs__item {
