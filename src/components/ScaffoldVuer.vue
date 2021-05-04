@@ -1,128 +1,233 @@
 <template>
-  <div class="scaffold-container"
-      v-loading="loading"
-      element-loading-text="Loading..."
-      element-loading-spinner="el-icon-loading"
-      element-loading-background="rgba(0, 0, 0, 0.3)"
-      ref="scaffoldContainer">
-    <SvgSpriteColor/>
-    <div id="organsDisplayArea" tabindex="-1" style="height:100%;width:100%;" ref="display" @keydown.66="backgroundChangeCallback"></div>
+  <div
+    class="scaffold-container"
+    v-loading="loading"
+    element-loading-text="Loading..."
+    element-loading-spinner="el-icon-loading"
+    element-loading-background="rgba(0, 0, 0, 0.3)"
+    ref="scaffoldContainer"
+  >
+    <SvgSpriteColor />
+    <div
+      id="organsDisplayArea"
+      tabindex="-1"
+      style="height:100%;width:100%;"
+      ref="display"
+      @keydown.66="backgroundChangeCallback"
+    ></div>
     <div v-show="displayUI && !isTransitioning">
-      <el-popover v-if="displayWarning" :content="warningMessage" placement="right"
-        :appendToBody=false trigger="manual" popper-class="warning-popper right-popper" v-model="hoverVisabilities[6].value"
-        ref="warningPopover">
-      </el-popover>
-      <i class="el-icon-warning warning-icon" v-if="displayWarning" 
-        @mouseover="showToolitip(6)" @mouseout="hideToolitip(6)"
-        v-popover:warningPopover>
+      <el-popover
+        v-if="displayWarning"
+        :content="warningMessage"
+        placement="right"
+        :appendToBody="false"
+        trigger="manual"
+        popper-class="warning-popper right-popper"
+        v-model="hoverVisabilities[6].value"
+        ref="warningPopover"
+      ></el-popover>
+      <i
+        class="el-icon-warning warning-icon"
+        v-if="displayWarning"
+        @mouseover="showToolitip(6)"
+        @mouseout="hideToolitip(6)"
+        v-popover:warningPopover
+      >
         <span class="warning-text">Beta</span>
       </i>
-      <el-popover content="Change region visibility" placement="right"
-        :appendToBody=false trigger="manual" popper-class="scaffold-popper right-popper" v-model="hoverVisabilities[5].value" ref="checkBoxPopover">
-      </el-popover>
-      <TraditionalControls v-if="traditional" v-popover:checkBoxPopover :helpMode="helpMode" :module="$module" @object-selected="objectSelected" 
-        @object-hovered="objectHovered" @drawer-toggled="drawerToggled" :showColourPicker="showColourPicker" ref="traditionalControl"/>
-      <SelectControls v-else :module="$module" @object-selected="objectSelected" 
-        @object-hovered="objectHovered" :displayAtStartUp="displayAtStartUp" ref="selectControl"/>
-      <OpacityControls ref="opacityControl"/>
-      <el-popover v-if="sceneData.timeVarying" content="Move the slider to animate the region" placement="top"
-        :appendToBody=false trigger="manual" popper-class="scaffold-popper top-popper" v-model="hoverVisabilities[4].value" ref="sliderPopover">
-     </el-popover>
-      <div class="time-slider-container" 
-        :class="[ minimisedSlider ? 'minimised' : '', sliderPosition]" 
-        v-popover:sliderPopover v-if="sceneData.timeVarying">
+      <el-popover
+        content="Change region visibility"
+        placement="right"
+        :appendToBody="false"
+        trigger="manual"
+        popper-class="scaffold-popper right-popper"
+        v-model="hoverVisabilities[5].value"
+        ref="checkBoxPopover"
+      ></el-popover>
+      <TraditionalControls
+        v-if="traditional"
+        v-popover:checkBoxPopover
+        :helpMode="helpMode"
+        :module="$module"
+        @object-selected="objectSelected"
+        @object-hovered="objectHovered"
+        @drawer-toggled="drawerToggled"
+        :showColourPicker="showColourPicker"
+        ref="traditionalControl"
+      />
+      <SelectControls
+        v-else
+        :module="$module"
+        @object-selected="objectSelected"
+        @object-hovered="objectHovered"
+        :displayAtStartUp="displayAtStartUp"
+        ref="selectControl"
+      />
+      <OpacityControls ref="opacityControl" />
+      <el-popover
+        v-if="sceneData.timeVarying"
+        content="Move the slider to animate the region"
+        placement="top"
+        :appendToBody="false"
+        trigger="manual"
+        popper-class="scaffold-popper top-popper"
+        v-model="hoverVisabilities[4].value"
+        ref="sliderPopover"
+      ></el-popover>
+      <div
+        class="time-slider-container"
+        :class="[ minimisedSlider ? 'minimised' : '', sliderPosition]"
+        v-popover:sliderPopover
+        v-if="sceneData.timeVarying"
+      >
         <el-tabs type="card">
           <el-tab-pane label="Animate scaffold">
             <el-row class="tab-content">
-              <SvgIcon v-if="isPlaying" icon="pause" class="icon-button video-button" @click.native="play(false)"/>
-              <SvgIcon v-else @click.native="play(true)" icon="play" class="video-button icon-button"/>
-                <el-slider
-                  :min="0"
-                  :max="timeMax"
-                  :value="sceneData.currentTime / 100 * timeMax"
-                  :step="0.1"
-                  tooltip-class="time-slider-tooltip"
-                  class="slider"
-                  :format-tooltip="formatTooltip"
-                  :marks="timeStamps"
-                  @input="timeChange($event)"
-                ></el-slider>
+              <SvgIcon
+                v-if="isPlaying"
+                icon="pause"
+                class="icon-button video-button"
+                @click.native="play(false)"
+              />
+              <SvgIcon
+                v-else
+                @click.native="play(true)"
+                icon="play"
+                class="video-button icon-button"
+              />
+              <el-slider
+                :min="0"
+                :max="timeMax"
+                :value="sceneData.currentTime / 100 * timeMax"
+                :step="0.1"
+                tooltip-class="time-slider-tooltip"
+                class="slider"
+                :format-tooltip="formatTooltip"
+                :marks="timeStamps"
+                @input="timeChange($event)"
+              ></el-slider>
             </el-row>
           </el-tab-pane>
           <el-tab-pane label="Animation data">
-              <el-row class="tab-content">
-                <div class="animation-data">
-                  Original duration:
-                  <div class="purple">
-                    {{ orginalDuration }}
-                  </div>
-                </div>
-                <div class="animation-data">
-                  Animation duration:
-                  <div class="purple">
-                    {{ animateDuration }}
-                  </div>
-                </div>
-                <div class="animation-data">
-                  Playback speed
-                  <el-select
-                    :popper-append-to-body=true
-                    :value="currentSpeed"
-                    placeholder="Select"
-                    class="select-box"
-                    popper-class="scaffold_viewer_dropdown"
-                    @change="speedChanged($event)"
-                  >
-                    <el-option
-                      v-for="item in playSpeed"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    />
-                  </el-select>
-                </div>
-              </el-row>
-            </el-tab-pane>
+            <el-row class="tab-content">
+              <div class="animation-data">
+                Original duration:
+                <div class="purple">{{ orginalDuration }}</div>
+              </div>
+              <div class="animation-data">
+                Animation duration:
+                <div class="purple">{{ animateDuration }}</div>
+              </div>
+              <div class="animation-data">
+                Playback speed
+                <el-select
+                  :popper-append-to-body="true"
+                  :value="currentSpeed"
+                  placeholder="Select"
+                  class="select-box"
+                  popper-class="scaffold_viewer_dropdown"
+                  @change="speedChanged($event)"
+                >
+                  <el-option
+                    v-for="item in playSpeed"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
+              </div>
+            </el-row>
+          </el-tab-pane>
         </el-tabs>
       </div>
       <div class="bottom-right-control">
-        <el-popover content="Zoom in" placement="left"
-          :appendToBody=false trigger="manual" popper-class="scaffold-popper left-popper" v-model="hoverVisabilities[0].value">
-          <SvgIcon icon="zoomIn" class="icon-button zoomIn" slot="reference" @click.native="zoomIn()"
-            @mouseover.native="showToolitip(0)" @mouseout.native="hideToolitip(0)"/>
+        <el-popover
+          content="Zoom in"
+          placement="left"
+          :appendToBody="false"
+          trigger="manual"
+          popper-class="scaffold-popper left-popper"
+          v-model="hoverVisabilities[0].value"
+        >
+          <SvgIcon
+            icon="zoomIn"
+            class="icon-button zoomIn"
+            slot="reference"
+            @click.native="zoomIn()"
+            @mouseover.native="showToolitip(0)"
+            @mouseout.native="hideToolitip(0)"
+          />
         </el-popover>
-        <el-popover content="Zoom out" placement="top-end"
-          :appendToBody=false trigger="manual" popper-class="scaffold-popper popper-zoomout" v-model="hoverVisabilities[1].value">
-          <SvgIcon icon="zoomOut" class="icon-button zoomOut" slot="reference" @click.native="zoomOut()"
-            @mouseover.native="showToolitip(1)" @mouseout.native="hideToolitip(1)"/>
+        <el-popover
+          content="Zoom out"
+          placement="top-end"
+          :appendToBody="false"
+          trigger="manual"
+          popper-class="scaffold-popper popper-zoomout"
+          v-model="hoverVisabilities[1].value"
+        >
+          <SvgIcon
+            icon="zoomOut"
+            class="icon-button zoomOut"
+            slot="reference"
+            @click.native="zoomOut()"
+            @mouseover.native="showToolitip(1)"
+            @mouseout.native="hideToolitip(1)"
+          />
         </el-popover>
-        <el-popover content="Reset" placement="top"
-          :appendToBody=false trigger="manual" popper-class="scaffold-popper" v-model="hoverVisabilities[2].value">
-          <SvgIcon icon="resetZoom" class="icon-button resetView" slot="reference" @click.native="resetView()"
-            @mouseover.native="showToolitip(2)" @mouseout.native="hideToolitip(2)"/>
+        <el-popover
+          content="Reset"
+          placement="top"
+          :appendToBody="false"
+          trigger="manual"
+          popper-class="scaffold-popper"
+          v-model="hoverVisabilities[2].value"
+        >
+          <SvgIcon
+            icon="resetZoom"
+            class="icon-button resetView"
+            slot="reference"
+            @click.native="resetView()"
+            @mouseover.native="showToolitip(2)"
+            @mouseout.native="hideToolitip(2)"
+          />
         </el-popover>
       </div>
       <el-popover
         ref="backgroundPopover"
         placement="top-start"
         width="128"
-        :appendToBody=false
+        :appendToBody="false"
         trigger="click"
-        popper-class="background-popper">
-        <el-row class="backgroundText">
-          Change background
-        </el-row>
-        <el-row class="backgroundChooser" >
-          <div v-for="item in availableBackground" :key="item" 
-            :class="['backgroundChoice', item, item == currentBackground ? 'active' :'']" 
-            @click="backgroundChangeCallback(item)"/>
+        popper-class="background-popper"
+      >
+        <el-row class="backgroundText">Change background</el-row>
+        <el-row class="backgroundChooser">
+          <div
+            v-for="item in availableBackground"
+            :key="item"
+            :class="['backgroundChoice', item, item == currentBackground ? 'active' :'']"
+            @click="backgroundChangeCallback(item)"
+          />
         </el-row>
       </el-popover>
-      <el-popover content="Change background color" placement="right"
-        :appendToBody=false trigger="manual" popper-class="scaffold-popper right-popper" v-model="hoverVisabilities[3].value">
-        <SvgIcon v-popover:backgroundPopover icon="changeBckgd" class="icon-button background-colour" slot="reference"
+      <el-popover
+        content="Change background color"
+        placement="right"
+        :appendToBody="false"
+        trigger="manual"
+        popper-class="scaffold-popper right-popper"
+        v-model="hoverVisabilities[3].value"
+      >
+        <SvgIcon
+          v-popover:backgroundPopover
+          icon="changeBckgd"
+          class="icon-button background-colour"
+          slot="reference"
           :class="{ open: drawerOpen, close: !drawerOpen }"
-          @mouseover.native="showToolitip(3)" @mouseout.native="hideToolitip(3)"/>
+          @mouseover.native="showToolitip(3)"
+          @mouseout.native="hideToolitip(3)"
+        />
       </el-popover>
     </div>
   </div>
@@ -131,10 +236,10 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
-import OpacityControls from './OpacityControls';
-import SelectControls from './SelectControls';
-import TraditionalControls from './TraditionalControls';
-import { SvgIcon, SvgSpriteColor} from '@abi-software/svg-sprite'
+import OpacityControls from "./OpacityControls";
+import SelectControls from "./SelectControls";
+import TraditionalControls from "./TraditionalControls";
+import { SvgIcon, SvgSpriteColor } from "@abi-software/svg-sprite";
 
 import {
   Button,
@@ -160,7 +265,6 @@ Vue.use(Slider);
 Vue.use(TabPane);
 Vue.use(Tabs);
 
-
 const OrgansViewer = require("physiomeportal/src/modules/organsRenderer")
   .OrgansViewer;
 const EventNotifier = require("physiomeportal/src/utilities/eventNotifier")
@@ -168,7 +272,7 @@ const EventNotifier = require("physiomeportal/src/utilities/eventNotifier")
 
 /**
  * A vue component of the scaffold viewer.
- * 
+ *
  * @requires ./OpacityControls.vue
  * @requires ./SelectControls.vue
  * @requires ./TraditionalControls.vue
@@ -187,9 +291,9 @@ export default {
     this.selectedObject = undefined;
     this.hoveredObject = undefined;
     this.controls = undefined;
-    this.currentBackground = 'white';
+    this.currentBackground = "white";
     this._currentURL = undefined;
-    this.availableBackground = ['white', 'black', 'lightskyblue'];
+    this.availableBackground = ["white", "black", "lightskyblue"];
   },
   methods: {
     /**
@@ -199,60 +303,64 @@ export default {
       this.loading = false;
     },
     /**
-     * This is called when Change backgspeedround colour button 
+     * This is called when Change backgspeedround colour button
      * is pressed an causes the backgrouColornd colour to be changed
      * to one of the three preset colour: white, black and
      * lightskyblue.
      */
     backgroundChangeCallback: function(colour) {
       this.currentBackground = colour;
-      this.$module.zincRenderer.getThreeJSRenderer().
-        setClearColor(this.currentBackground, 1 );
+      this.$module.zincRenderer
+        .getThreeJSRenderer()
+        .setClearColor(this.currentBackground, 1);
     },
     /**
      * This is called by captueeScreenshot and after the last render
-     * loop, it download a screenshot of the current scene with no UI. 
+     * loop, it download a screenshot of the current scene with no UI.
      */
     captureScreenshotCallback: function() {
       //Remove the callback, only needs to happen once
-      this.$module.zincRenderer.removePostRenderCallbackFunction(this.captureID);
-      let screenshot = this.$module.zincRenderer.getThreeJSRenderer().domElement.toDataURL("image/png");
-      let hrefElement = document.createElement('a');
+      this.$module.zincRenderer.removePostRenderCallbackFunction(
+        this.captureID
+      );
+      let screenshot = this.$module.zincRenderer
+        .getThreeJSRenderer()
+        .domElement.toDataURL("image/png");
+      let hrefElement = document.createElement("a");
       document.body.append(hrefElement);
-      if (!this.captureFilename)
-        hrefElement.download = `screenshot.png`;
-      else
-        hrefElement.download = this.captureFilename;
+      if (!this.captureFilename) hrefElement.download = `screenshot.png`;
+      else hrefElement.download = this.captureFilename;
       hrefElement.href = screenshot;
       hrefElement.click();
       hrefElement.remove();
     },
     /**
      * Function for capturing a screenshot of the current rendering.
-     * 
+     *
      * @param {String} filename filename given to the screenshot.
-     * 
+     *
      * @public
      */
     captureScreenshot: function(filename) {
       this.captureFilename = filename;
       this.captureID = this.$module.zincRenderer.addPostRenderCallbackFunction(
-        this.captureScreenshotCallback);
+        this.captureScreenshotCallback
+      );
     },
     formatTooltip(val) {
       if (this.timeMax >= 1000) {
         if (val) {
-          let sec = ((val % 60000)/1000).toFixed(2) + "s";
-          let min = val > 60000 ? (val/60000).toFixed(0) + "m ": "";
+          let sec = ((val % 60000) / 1000).toFixed(2) + "s";
+          let min = val > 60000 ? (val / 60000).toFixed(0) + "m " : "";
           return min + sec;
         }
       }
-      return val ? val.toFixed(2) + " ms": "0 ms";
+      return val ? val.toFixed(2) + " ms" : "0 ms";
     },
     /**
      * Function to reset the view to default.
      * Also called when the associated button is pressed.
-     * 
+     *
      * @public
      */
     resetView: function() {
@@ -263,37 +371,37 @@ export default {
     /**
      * Function to zoom in.
      * Also called when the associated button is pressed.
-     * 
+     *
      * @public
      */
     zoomIn: function() {
       if (this.$module.scene) {
-       this.changeZoomByScrollRateUnit(-1);
+        this.changeZoomByScrollRateUnit(-1);
       }
     },
     /**
-      * Function to zoom out.
-      * Also called when the associated button is pressed.
-      * 
-      * @public
-      */
+     * Function to zoom out.
+     * Also called when the associated button is pressed.
+     *
+     * @public
+     */
     zoomOut: function() {
       if (this.$module.scene) {
         this.$module.scene.changeZoomByScrollRateUnit(1);
       }
     },
     /**
-      * Function to change the current play speed.
-      * 
-      * @public
-      */
+     * Function to change the current play speed.
+     *
+     * @public
+     */
     speedChanged: function(speed) {
       this.currentSpeed = speed;
       this.$module.setPlayRate(this.defaultRate * this.currentSpeed);
     },
     /**
-     * Function used to stop the free spin 
-     * 
+     * Function used to stop the free spin
+     *
      * @public
      */
     stopFreeSpin: function() {
@@ -304,7 +412,7 @@ export default {
     /**
      * Function used to rotate the scene.
      * Also called when the associated button is pressed.
-     * 
+     *
      * @public
      */
     freeSpin: function() {
@@ -324,8 +432,9 @@ export default {
       if (event.eventType == 1) {
         if (this.controls) {
           if (event.identifiers[0]) {
-            let id = event.identifiers[0].data.id ? event.identifiers[0].data.id :
-              event.identifiers[0].data.group;
+            let id = event.identifiers[0].data.id
+              ? event.identifiers[0].data.id
+              : event.identifiers[0].data.group;
             this.controls.changeActiveByName(id);
           } else {
             this.controls.removeActive();
@@ -334,24 +443,23 @@ export default {
         /**
          * Triggers when an object has been selected
          *
-         * @property {array} identifiers array of identifiers 
+         * @property {array} identifiers array of identifiers
          * of selected object.
          */
         this.$emit("scaffold-selected", event.identifiers);
-      }
-      else if (event.eventType == 2) {
+      } else if (event.eventType == 2) {
         if (this.controls) {
           if (event.identifiers[0]) {
-            let id = event.identifiers[0].data.id ? event.identifiers[0].data.id :
-              event.identifiers[0].data.group;
+            let id = event.identifiers[0].data.id
+              ? event.identifiers[0].data.id
+              : event.identifiers[0].data.group;
             this.controls.changeHoverByName(id);
-          } else
-            this.controls.removeHover();
+          } else this.controls.removeHover();
         }
         /**
          * Triggers when an object has been highlighted
          *
-         * @property {array} identifiers array of identifiers 
+         * @property {array} identifiers array of identifiers
          * of highlighted object.
          */
         this.$emit("scaffold-highlighted", event.identifiers);
@@ -369,10 +477,10 @@ export default {
       return undefined;
     },
     /**
-     * Return an object containing the window coordinates of the 
+     * Return an object containing the window coordinates of the
      * current selected region which will be updated after each render
      * loop.
-     * 
+     *
      * @public
      */
     getDynamicSelectedCoordinates: function() {
@@ -382,43 +490,39 @@ export default {
      * Callback when time is changed through the UI.
      */
     timeChange: function(event) {
-      let normalizedTime = event / this.timeMax * 100;
+      let normalizedTime = (event / this.timeMax) * 100;
       if (normalizedTime != this.sceneData.currentTime)
         this.$module.updateTime(normalizedTime);
     },
     /**
      * Set the selected zinc object
-     * 
-     * @param {object} object Zinc object 
+     *
+     * @param {object} object Zinc object
      */
     objectSelected: function(object) {
       if (object !== this.selectedObject) {
         this.selectedObject = object;
         this.$refs.opacityControl.setObject(this.selectedObject);
-        if (object)
-          this.$module.setSelectedByZincObject(object, true);
-        else
-          this.$module.setSelectedByObjects([], true);
+        if (object) this.$module.setSelectedByZincObject(object, true);
+        else this.$module.setSelectedByObjects([], true);
       }
     },
     /**
      * Set the highlighted zinc object
-     * 
-     * @param {object} object Zinc object 
+     *
+     * @param {object} object Zinc object
      */
     objectHovered: function(object) {
       if (object !== this.hoveredObject) {
         this.hoveredObject = object;
-        if (object)
-          this.$module.setHighlightedByZincObject(object, true);
-        else
-          this.$module.setHighlightedByObjects([], true);
+        if (object) this.$module.setHighlightedByZincObject(object, true);
+        else this.$module.setHighlightedByObjects([], true);
       }
     },
     /**
      * Start the animation.
-     * 
-     * @param {object} object Zinc object 
+     *
+     * @param {object} object Zinc object
      */
     play: function(flag) {
       this.$module.playAnimation(flag);
@@ -427,15 +531,15 @@ export default {
     /**
      * Function to toggle on/off overlay help.
      */
-    setHelpMode: function(helpMode){
-      if (helpMode){
+    setHelpMode: function(helpMode) {
+      if (helpMode) {
         this.inHelp = true;
-        this.hoverVisabilities.forEach( (item) =>{
+        this.hoverVisabilities.forEach(item => {
           item.value = true;
         });
       } else {
         this.inHelp = false;
-        this.hoverVisabilities.forEach( (item) =>{
+        this.hoverVisabilities.forEach(item => {
           item.value = false;
         });
       }
@@ -444,17 +548,18 @@ export default {
      * This is called when mouse cursor enters supported elements
      * with help tootltips.
      */
-    showToolitip: function(tooltipNumber){
-      if (!this.inHelp){
-        this.tooltipWait = setTimeout( ()=>{
-          this.hoverVisabilities[tooltipNumber].value = true}, 500);
+    showToolitip: function(tooltipNumber) {
+      if (!this.inHelp) {
+        this.tooltipWait = setTimeout(() => {
+          this.hoverVisabilities[tooltipNumber].value = true;
+        }, 500);
       }
     },
     /**
      * This is called when mouse cursor exits supported element..
      */
-    hideToolitip: function(tooltipNumber){
-      if (!this.inHelp){
+    hideToolitip: function(tooltipNumber) {
+      if (!this.inHelp) {
         this.hoverVisabilities[tooltipNumber].value = false;
         clearTimeout(this.tooltipWait);
       }
@@ -473,11 +578,10 @@ export default {
       this.currentSpeed = 1;
       this.$module.setPlayRate(this.defaultRate);
       this.orginalDuration = this.$module.scene.getMetadataTag(
-        "OriginalDuration");
-      this.animateDuration = this.$module.scene.getMetadataTag(
-        "Duration");
-      let timeStamps = this.$module.scene.getMetadataTag(
-        "TimeStamps");
+        "OriginalDuration"
+      );
+      this.animateDuration = this.$module.scene.getMetadataTag("Duration");
+      let timeStamps = this.$module.scene.getMetadataTag("TimeStamps");
       this.timeStamps = {};
       for (const key in timeStamps) {
         this.timeStamps[timeStamps[key]] = key;
@@ -488,20 +592,21 @@ export default {
       return () => {
         this.updateSettingsfromScene();
         this.$module.unsetFinishDownloadCallback();
-      }
+      };
     },
     setStateFinishCallback: function(viewport) {
       return () => {
-        this.$module.scene.getZincCameraControls().setCurrentCameraSettings(
-          viewport);
+        this.$module.scene
+          .getZincCameraControls()
+          .setCurrentCameraSettings(viewport);
         this.updateSettingsfromScene();
         this.$module.unsetFinishDownloadCallback();
-      }
+      };
     },
     /**
-     * Function used for getting the current states of the scene. This exported states 
+     * Function used for getting the current states of the scene. This exported states
      * can be imported using the importStates method.
-     * 
+     *
      * @public
      */
     getState: function() {
@@ -516,9 +621,9 @@ export default {
       return state;
     },
     /**
-     * Function used for importing the states of the scene. This exported states 
+     * Function used for importing the states of the scene. This exported states
      * can be imported using the read states method.
-     * 
+     *
      * @public
      */
     setState: function(state) {
@@ -526,29 +631,29 @@ export default {
         if (state.url && state.url !== this._currentURL) {
           if (state.viewport) {
             this.$module.setFinishDownloadCallback(
-              this.setStateFinishCallback(state.viewport));
+              this.setStateFinishCallback(state.viewport)
+            );
           }
           this.setURL(state.url);
         } else if (state.viewport) {
-          this.$module.scene.getZincCameraControls().setCurrentCameraSettings(
-            state.viewport);
+          this.$module.scene
+            .getZincCameraControls()
+            .setCurrentCameraSettings(state.viewport);
         }
       }
     },
     /**
      * Function used for reading in new scaffold metadata. This function will ignore
      * the state prop and read in the new url.
-     * 
+     *
      * @public
      */
     setURL: function(newValue) {
       if (newValue != this._currentURL) {
         this._currentURL = newValue;
-        if (this.controls)
-          this.controls.clear();
+        if (this.controls) this.controls.clear();
         this.loading = true;
-        this.$module.setFinishDownloadCallback(
-          this.setURLFinishCallback());
+        this.$module.setFinishDownloadCallback(this.setURLFinishCallback());
         this.$module.loadOrgansFromURL(
           newValue,
           undefined,
@@ -563,9 +668,9 @@ export default {
     },
     /**
      * Callback when drawer is toggled.
-     * 
+     *
      */
-    drawerToggled: function (flag) {
+    drawerToggled: function(flag) {
       this.drawerOpen = flag;
       this.adjustLayout();
     },
@@ -575,9 +680,9 @@ export default {
      */
     adjustLayout: function() {
       let width = this.$refs.scaffoldContainer.clientWidth;
-      this.minimisedSlider = (width < 812);
+      this.minimisedSlider = width < 812;
       if (this.minimisedSlider) {
-        this.sliderPosition = this.drawerOpen ? 'right' : 'left';
+        this.sliderPosition = this.drawerOpen ? "right" : "left";
       } else {
         this.sliderPosition = "";
       }
@@ -595,9 +700,9 @@ export default {
       if (this.$module.zincRenderer) {
         this.$module.zincRenderer.onWindowResize();
       }
-    },
+    }
   },
-  props: { 
+  props: {
     /**
      * Enable traditional control. Select control will be
      * used instead if set to false.
@@ -629,7 +734,7 @@ export default {
     },
     /**
      * Display all graphics at start.
-     * 
+     *
      * This setting only works when traditional is set to false.
      */
     displayAtStartUp: {
@@ -677,30 +782,30 @@ export default {
      */
     minimapSettings: {
       type: Object,
-      default: function () {
+      default: function() {
         return {
           x_offset: 16,
           y_offset: 16,
           width: 128,
           height: 128,
-          align: "top-right",
-        }
-      },
+          align: "top-right"
+        };
+      }
     },
     /**
      * State containing state of the scaffold.
      */
     state: {
       type: Object,
-      default: undefined,
+      default: undefined
     },
     /**
-    * Settings for turning on/off rendering
-    */
+     * Settings for turning on/off rendering
+     */
     render: {
       type: Boolean,
       default: true
-    },
+    }
   },
   data: function() {
     return {
@@ -711,48 +816,60 @@ export default {
        */
       isTransitioning: false,
       tooltipAppendToBody: false,
-      hoverVisabilities: [{value: false}, {value: false}, {value: false},
-        {value: false}, {value: false},{value: false}, {value: false}],
+      hoverVisabilities: [
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false }
+      ],
       inHelp: false,
       loading: false,
       duration: 3000,
       drawerOpen: true,
-      currentBackground:'white',
-      availableBackground: ['white', 'lightskyblue', 'black'],
+      currentBackground: "white",
+      availableBackground: ["white", "lightskyblue", "black"],
       minimisedSlider: false,
       sliderPosition: "",
       timeMax: 100,
       orginalDuration: "75mins",
       animateDuration: "75secs",
-      playSpeed: [{
+      playSpeed: [
+        {
           value: 0.1,
-          label: '0.1x'
-        }, {
+          label: "0.1x"
+        },
+        {
           value: 0.5,
-          label: '0.5x'
-        }, {
+          label: "0.5x"
+        },
+        {
           value: 1,
-          label: '1x'
-        }, {
+          label: "1x"
+        },
+        {
           value: 2,
-          label: '2x'
-        }, {
+          label: "2x"
+        },
+        {
           value: 5,
-          label: '5x'
-        }, {
+          label: "5x"
+        },
+        {
           value: 10,
-          label: '10x'
+          label: "10x"
         }
       ],
       currentSpeed: 1,
-      timeStamps: { }
+      timeStamps: {}
     };
   },
   watch: {
     url: {
       handler: function(newValue) {
-        if (this.state === undefined)
-          this.setURL(newValue);
+        if (this.state === undefined) this.setURL(newValue);
       },
       immediate: true
     },
@@ -761,15 +878,13 @@ export default {
         this.setState(state);
       },
       immediate: true,
-      deep: true,
+      deep: true
     },
-    traditional: function (value) {
-      if (value)
-        this.controls = this.refs.traditionalControl;
-      else
-        this.controls = this.refs.selectControl;
+    traditional: function(value) {
+      if (value) this.controls = this.refs.traditionalControl;
+      else this.controls = this.refs.selectControl;
     },
-    helpMode: function(val){
+    helpMode: function(val) {
       this.setHelpMode(val);
     },
     displayMarkers: function(val) {
@@ -778,14 +893,14 @@ export default {
     displayMinimap: function(val) {
       this.$module.scene.displayMinimap = val;
     },
-    "sceneData.currentTime": function(){
+    "sceneData.currentTime": function() {
       /**
        * Triggers when scene time changes.
        *
        * @property {number} time Current build-in time of scene.
        * of selected object.
        */
-      this.$emit('timeChanged', this.sceneData.currentTime);
+      this.$emit("timeChanged", this.sceneData.currentTime);
     },
     duration: function() {
       this.$module.scene.setDuration(this.duration);
@@ -806,17 +921,15 @@ export default {
     this.$module.initialiseRenderer(this.$refs.display);
     this.toggleRendering(this.render);
     this.$module.toolTip = undefined;
-    if (this.traditional)
-      this.controls = this.$refs.traditionalControl;
-    else
-      this.controls = this.$refs.selectControl;
+    if (this.traditional) this.controls = this.$refs.traditionalControl;
+    else this.controls = this.$refs.selectControl;
     this.ro = new ResizeObserver(this.adjustLayout).observe(
-      this.$refs.scaffoldContainer);
+      this.$refs.scaffoldContainer
+    );
     this.defaultRate = this.$module.getPlayRate();
   },
   beforeDestroy: function() {
-    if (this.ro)
-      this.ro.disconnect();
+    if (this.ro) this.ro.disconnect();
     this.$module.destroy();
     this.$module = undefined;
   }
@@ -825,7 +938,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
 .warning-icon {
   position: absolute;
   top: 15px;
@@ -837,37 +949,37 @@ export default {
 .warning-icon:hover {
   cursor: pointer;
 }
-.warning-text{
+.warning-text {
   font-size: 15px;
-  vertical-align:5px;
+  vertical-align: 5px;
 }
 >>> .warning-popper {
-  padding:9px 10px;
-  min-width:150px;
-  font-size:12px;
+  padding: 9px 10px;
+  min-width: 150px;
+  font-size: 12px;
   color: #fff;
   background-color: #ff8400;
 }
->>> .warning-popper.right-popper .popper__arrow::after{
+>>> .warning-popper.right-popper .popper__arrow::after {
   border-right-color: #ff8400 !important;
 }
 
 #organsDisplayArea:focus {
-    outline: none !important;
-    border:0px;
+  outline: none !important;
+  border: 0px;
 }
 
 .scaffold-container {
   height: 100%;
   width: 100%;
-  position:relative;
+  position: relative;
 }
 
 .time-slider-container {
   text-align: left;
   position: absolute;
   right: 155px;
-  width: calc(100% - 530px );
+  width: calc(100% - 530px);
   bottom: 16px;
   transition: all 1s ease;
   outline: none;
@@ -877,7 +989,7 @@ export default {
 }
 .time-slider-container.left {
   right: 155px;
-  width: calc(100% - 250px );
+  width: calc(100% - 250px);
 }
 .time-slider-container.right {
   right: 8px;
@@ -890,18 +1002,15 @@ export default {
   font-size: 14px;
   font-weight: normal;
   line-height: 20px;
-  padding-left:8px;
-  text-shadow: -1px -1px  #fff,
-    1px -1px #fff,
-    -1px 1px #fff,
-    1px -1px #fff;
+  padding-left: 8px;
+  text-shadow: -1px -1px #fff, 1px -1px #fff, -1px 1px #fff, 1px -1px #fff;
 }
 
 .tab-content {
   display: flex;
-  height:34px;
-  padding-top:8px;
-  font-size:14px;
+  height: 34px;
+  padding-top: 8px;
+  font-size: 14px;
 }
 
 .tab-content >>> .el-slider__marks-text {
@@ -911,29 +1020,31 @@ export default {
 }
 
 .tab-content >>> .el-slider__stop {
-  width:10px;
-  height:10px;
+  width: 10px;
+  height: 10px;
+  top: -1px;
+  border: solid 1px #8300bf;
 }
 
 .animation-data {
   margin-left: 8px;
-  line-height:26px;
-  display:flex;
+  line-height: 26px;
+  display: flex;
 }
 
 .animation-data :not(:first-child) {
-  margin-left:8px;
+  margin-left: 8px;
 }
 
-.animation-data .purple{
-  padding-left:2px;
+.animation-data .purple {
+  padding-left: 2px;
   color: #8300bf;
 }
 
 .slider {
-  margin-left:30px;
+  margin-left: 30px;
   width: calc(100% - 88px);
-  margin-top:-7px;
+  margin-top: -7px;
 }
 
 .slider >>> .el-slider__runway {
@@ -945,7 +1056,7 @@ export default {
   top: -13px;
 }
 
-.zoomOut{
+.zoomOut {
   padding-left: 8px;
 }
 
@@ -960,7 +1071,7 @@ export default {
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
   height: 72px;
   width: 128px;
-  min-width:128px;
+  min-width: 128px;
 }
 
 .background-colour {
@@ -984,17 +1095,17 @@ export default {
 
 .backgroundChooser {
   display: flex;
-  margin-top:16px;
+  margin-top: 16px;
 }
 
 .backgroundChoice {
-  width:20px;
-  height:20px;
+  width: 20px;
+  height: 20px;
   border: 1px solid rgb(144, 147, 153);
-  margin-left:20px;
+  margin-left: 20px;
 }
 .backgroundChoice.active {
-  border:2px solid #8300bf;
+  border: 2px solid #8300bf;
 }
 .backgroundChoice:hover {
   cursor: pointer;
@@ -1002,7 +1113,7 @@ export default {
 
 .backgroundChoice.white {
   background-color: white;
-  margin-left:10px;
+  margin-left: 10px;
 }
 .backgroundChoice.black {
   background-color: black;
@@ -1012,25 +1123,25 @@ export default {
 }
 
 .icon-button {
-  height:24px!important;
-  width:24px!important;
+  height: 24px !important;
+  width: 24px !important;
 }
 
 .icon-button:hover {
-  cursor:pointer;
+  cursor: pointer;
 }
 
 .bottom-right-control {
-  position:absolute;
-  right:16px;
-  bottom:16px;
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
 }
 
 .video-button {
-  margin-left:8px;
+  margin-left: 8px;
 }
 
-.time-slider-container >>>.el-tabs__header {
+.time-slider-container >>> .el-tabs__header {
   margin: 0px;
   border-bottom: 1px solid rgb(144, 147, 153);
 }
@@ -1043,29 +1154,35 @@ export default {
   background-color: white;
 }
 
-.time-slider-container >>> .el-tabs--card>.el-tabs__header .el-tabs__nav {
+.time-slider-container >>> .el-tabs--card > .el-tabs__header .el-tabs__nav {
   border: 1px solid rgb(144, 147, 153);
   border-bottom: none;
   border-radius: 4px 4px 0px 0px;
   background-color: white;
 }
-.time-slider-container >>> .el-tabs--card>.el-tabs__header .el-tabs__item:first-child {
+.time-slider-container
+  >>> .el-tabs--card
+  > .el-tabs__header
+  .el-tabs__item:first-child {
   border-left: none;
 }
 
-.time-slider-container >>> .el-tabs--card>.el-tabs__header .el-tabs__item {
+.time-slider-container >>> .el-tabs--card > .el-tabs__header .el-tabs__item {
   border-bottom: 1px solid;
   border-left: 1px solid rgb(144, 147, 153);
 }
 
-.time-slider-container >>> .el-tabs--card>.el-tabs__header .el-tabs__item.is-active {
+.time-slider-container
+  >>> .el-tabs--card
+  > .el-tabs__header
+  .el-tabs__item.is-active {
   border-bottom: 1px solid white;
 }
 
 .time-slider-container >>> .el-tabs__item {
   height: 24px;
-  line-height:24px;
-  padding: 0 8px!important;
+  line-height: 24px;
+  padding: 0 8px !important;
 }
 
 .time-slider-container >>> .el-tabs__item.is-active {
@@ -1074,12 +1191,12 @@ export default {
 
 >>> .scaffold-popper {
   padding: 6px 4px;
-  font-size:12px;
+  font-size: 12px;
   color: rgb(48, 49, 51);
   background-color: #f3ecf6;
   border: 1px solid rgb(131, 0, 191);
   white-space: nowrap;
-  min-width: unset; 
+  min-width: unset;
 }
 
 >>> .el-slider__button {
@@ -1091,50 +1208,49 @@ export default {
   height: 10px;
 }
 
->>> .scaffold-popper.left-popper .popper__arrow{
+>>> .scaffold-popper.left-popper .popper__arrow {
   border-left-color: #8300bf !important;
 }
 
->>> .scaffold-popper.left-popper .popper__arrow:after{
+>>> .scaffold-popper.left-popper .popper__arrow:after {
   border-left-color: #f3ecf6 !important;
 }
 
->>> .scaffold-popper.right-popper .popper__arrow{
+>>> .scaffold-popper.right-popper .popper__arrow {
   border-right-color: #8300bf !important;
 }
 
->>> .scaffold-popper.right-popper .popper__arrow:after{
+>>> .scaffold-popper.right-popper .popper__arrow:after {
   border-right-color: #f3ecf6 !important;
 }
 
->>>.scaffold-popper.el-popper[x-placement^="top"] .popper__arrow {
-  border-top-color:#8300bf !important;
+>>> .scaffold-popper.el-popper[x-placement^="top"] .popper__arrow {
+  border-top-color: #8300bf !important;
 }
 
->>> .scaffold-popper.el-popper[x-placement^="top"] .popper__arrow:after{
+>>> .scaffold-popper.el-popper[x-placement^="top"] .popper__arrow:after {
   border-top-color: #f3ecf6 !important;
 }
 
->>>.popper-zoomout {
-  padding-right:13px;
-  left:-21px!important;
+>>> .popper-zoomout {
+  padding-right: 13px;
+  left: -21px !important;
 }
 
->>>.popper-zoomout .popper__arrow{
-  left:53px!important;
+>>> .popper-zoomout .popper__arrow {
+  left: 53px !important;
 }
 
->>>.el-loading-spinner i{
-  color: #8300bf;  
+>>> .el-loading-spinner i {
+  color: #8300bf;
 }
->>>.el-loading-spinner .el-loading-text {
-  color: #8300bf; 
-}
-
->>>.el-tabs__item:hover {
+>>> .el-loading-spinner .el-loading-text {
   color: #8300bf;
 }
 
+>>> .el-tabs__item:hover {
+  color: #8300bf;
+}
 
 .select-box {
   width: 57px;
@@ -1151,13 +1267,13 @@ export default {
   height: 23px;
   padding-left: 8px;
   padding-right: 8px;
-  border:none;
+  border: none;
+  font-family: "Asap", sans-serif;
 }
 
 .select-box >>> .el-input__icon {
-  line-height:26px;
+  line-height: 26px;
 }
-
 </style>
 
 <style scoped src="../styles/purple/button.css">
@@ -1174,19 +1290,19 @@ export default {
 </style>
 <style>
 .time-slider-tooltip {
-  padding: 6px 4px!important;
-  font-size:12px!important;
-  color: rgb(48, 49, 51)!important;
-  background-color: #f3ecf6!important;
-  border: 1px solid rgb(131, 0, 191)!important;
-  white-space: nowrap!important;
-  min-width: unset!important; 
+  padding: 6px 4px !important;
+  font-family: "Asap", sans-serif;
+  font-size: 12px !important;
+  color: rgb(48, 49, 51) !important;
+  background-color: #f3ecf6 !important;
+  border: 1px solid #8300bf !important;
+  white-space: nowrap !important;
+  min-width: unset !important;
 }
 
-.scaffold_viewer_dropdown >>> .el-select-dropdown__item {
+.scaffold_viewer_dropdown .el-select-dropdown__item {
   white-space: nowrap;
   text-align: left;
+  font-family: "Asap", sans-serif;
 }
-
-
 </style>
