@@ -288,6 +288,7 @@ export default {
   },
   beforeCreate: function() {
     this.$module = new OrgansViewer();
+    this.isReady = false;
     this.selectedObject = undefined;
     this.hoveredObject = undefined;
     this.controls = undefined;
@@ -588,19 +589,16 @@ export default {
       }
       this.timeMax = this.$module.scene.getDuration();
     },
-    setURLFinishCallback: function() {
+    setURLFinishCallback: function(viewport) {
       return () => {
+        if (viewport) {
+          this.$module.scene
+            .getZincCameraControls()
+            .setCurrentCameraSettings(this.state.viewport);
+        }
         this.updateSettingsfromScene();
         this.$module.unsetFinishDownloadCallback();
-      };
-    },
-    setStateFinishCallback: function(viewport) {
-      return () => {
-        this.$module.scene
-          .getZincCameraControls()
-          .setCurrentCameraSettings(viewport);
-        this.updateSettingsfromScene();
-        this.$module.unsetFinishDownloadCallback();
+        this.isReady = true;
       };
     },
     /**
@@ -631,14 +629,18 @@ export default {
         if (state.url && state.url !== this._currentURL) {
           if (state.viewport) {
             this.$module.setFinishDownloadCallback(
-              this.setStateFinishCallback(state.viewport)
-            );
+              this.setURLFinishCallback(state.viewport));
           }
           this.setURL(state.url);
         } else if (state.viewport) {
-          this.$module.scene
-            .getZincCameraControls()
-            .setCurrentCameraSettings(state.viewport);
+          if (this.isReady && this.$module.scene) {
+            this.$module.scene
+              .getZincCameraControls()
+              .setCurrentCameraSettings(state.viewport);
+          } else {
+            this.$module.setFinishDownloadCallback(
+              this.setURLFinishCallback(state.viewport));
+          }
         }
       }
     },
@@ -653,7 +655,8 @@ export default {
         this._currentURL = newValue;
         if (this.controls) this.controls.clear();
         this.loading = true;
-        this.$module.setFinishDownloadCallback(this.setURLFinishCallback());
+        this.isReady = false;
+        this.$module.setFinishDownloadCallback(this.setURLFinishCallback(undefined));
         this.$module.loadOrgansFromURL(
           newValue,
           undefined,
@@ -869,7 +872,8 @@ export default {
   watch: {
     url: {
       handler: function(newValue) {
-        if (this.state === undefined) this.setURL(newValue);
+        if (this.state === undefined || this.state.url === undefined)
+          this.setURL(newValue);
       },
       immediate: true
     },
