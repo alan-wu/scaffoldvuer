@@ -1276,8 +1276,13 @@ export default {
 }
 
 .select-box >>> .el-input__icon {
-  line-height: 26px;
+  line-height: 22px;
 }
+
+.select-box >>> .el-input {
+   line-height: 22px;
+}
+
 </style>
 
 <style scoped src="../styles/purple/button.css">
