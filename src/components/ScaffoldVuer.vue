@@ -627,11 +627,7 @@ export default {
     setState: function(state) {
       if (state) {
         if (state.url && state.url !== this._currentURL) {
-          if (state.viewport) {
-            this.$module.setFinishDownloadCallback(
-              this.setURLFinishCallback(state.viewport));
-          }
-          this.setURL(state.url);
+          this.setURLAndViewport(state.url, state.viewport);
         } else if (state.viewport) {
           if (this.isReady && this.$module.scene) {
             this.$module.scene
@@ -645,18 +641,20 @@ export default {
       }
     },
     /**
-     * Function used for reading in new scaffold metadata. This function will ignore
-     * the state prop and read in the new url.
+     * Function used for reading in new scaffold metadata and a custom
+     * viewport. This function will ignore the state prop and 
+     * read in the new url.
      *
      * @public
      */
-    setURL: function(newValue) {
+    setURLAndViewport: function(newValue, viewport) {
       if (newValue != this._currentURL) {
         this._currentURL = newValue;
         if (this.controls) this.controls.clear();
         this.loading = true;
         this.isReady = false;
-        this.$module.setFinishDownloadCallback(this.setURLFinishCallback(undefined));
+        this.$module.setFinishDownloadCallback(
+          this.setURLFinishCallback(viewport));
         this.$module.loadOrgansFromURL(
           newValue,
           undefined,
@@ -668,6 +666,15 @@ export default {
         this.$module.scene.displayMinimap = this.displayMinimap;
         this.updateMinimapScissor();
       }
+    },
+    /**
+     * Function used for reading in new scaffold metadata. This function will ignore
+     * the state prop and read in the new url.
+     *
+     * @public
+     */
+    setURL: function(newValue) {
+      this.setURLAndViewport(newValue, undefined);
     },
     /**
      * Callback when drawer is toggled.
