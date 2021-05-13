@@ -1,5 +1,7 @@
 <template>
   <div id="app">
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Asap:400,400i,500,600,700&display=swap">
     <ScaffoldVuer class="vuer" :displayUI="displayUI" :traditional="traditional"
       :url="url" ref="scaffold" @scaffold-selected="onSelected"
       :helpMode="helpMode" :displayMinimap="displayMinimap" 
@@ -245,7 +247,7 @@ export default {
 
 <style>
 #app {
-  font-family: 'Asap', 'Avenir', Arial, sans-serif;
+  font-family: "Asap",sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
