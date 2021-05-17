@@ -1321,6 +1321,7 @@ export default {
   padding-right: 8px;
   border: none;
   font-family: "Asap", sans-serif;
+  line-height:22px;
 }
 
 .select-box >>> .el-input__icon {
