@@ -411,6 +411,28 @@ export default {
       this.isTransitioning = false;
     },
     /**
+     * Focus on named region
+     */
+    viewRegion: function(name) {
+      if ((name && name != "") && this.$module.scene) {
+        let objects = this.$module.scene.findObjectsWithGroupName(name);
+        let box = this.$module.scene.getBoundingBoxOfZincObjects(objects);
+        if (box) {
+          this.$module.scene.viewAllWithBoundingBox(box);
+        }
+      }
+    },
+    setFocusedRegion: function(name) {
+      if (name) {
+        if (this.isReady) {
+          this.viewRegion(name);
+        } else {
+          this.$module.setFinishDownloadCallback(
+            this.setURLFinishCallback({region: name}));
+        }
+      }
+    },
+    /**
      * Function used to rotate the scene.
      * Also called when the associated button is pressed.
      *
@@ -589,12 +611,16 @@ export default {
       }
       this.timeMax = this.$module.scene.getDuration();
     },
-    setURLFinishCallback: function(viewport) {
+    setURLFinishCallback: function(options) {
       return () => {
-        if (viewport) {
-          this.$module.scene
-            .getZincCameraControls()
-            .setCurrentCameraSettings(this.state.viewport);
+        if (options) {
+          if (options.viewport) {
+            this.$module.scene
+              .getZincCameraControls()
+              .setCurrentCameraSettings(options.viewport);
+          } else if (options.region) {
+            this.viewRegion(options.region);
+          }
         }
         this.updateSettingsfromScene();
         this.$module.unsetFinishDownloadCallback();
@@ -635,7 +661,7 @@ export default {
               .setCurrentCameraSettings(state.viewport);
           } else {
             this.$module.setFinishDownloadCallback(
-              this.setURLFinishCallback(state.viewport));
+              this.setURLFinishCallback({viewport: state.viewport}));
           }
         }
       }
@@ -654,7 +680,7 @@ export default {
         this.loading = true;
         this.isReady = false;
         this.$module.setFinishDownloadCallback(
-          this.setURLFinishCallback(viewport));
+          this.setURLFinishCallback({viewport: viewport, region: this.region}));
         this.$module.loadOrgansFromURL(
           newValue,
           undefined,
@@ -810,6 +836,14 @@ export default {
       default: undefined
     },
     /**
+     * Name of the region to focus on, this option is ignored
+     * if state is also provided.
+     */
+    region: {
+      type: String,
+      default: ""
+    },
+    /**
      * Settings for turning on/off rendering
      */
     render: {
@@ -883,6 +917,13 @@ export default {
           this.setURL(newValue);
       },
       immediate: true
+    },
+    region: {
+      handler: function(region) {
+        if (!this.state)
+          this.setFocusedRegion(region);
+      },
+      immediate: true,
     },
     state: {
       handler: function(state) {
