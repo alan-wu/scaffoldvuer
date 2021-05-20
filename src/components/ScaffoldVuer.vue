@@ -637,6 +637,8 @@ export default {
           }
         }
         this.updateSettingsfromScene();
+        this.$module.updateTime(0.01);
+        this.$module.updateTime(0);
         this.$module.unsetFinishDownloadCallback();
         this.isReady = true;
       };
