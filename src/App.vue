@@ -19,6 +19,7 @@
       @timeChanged="updateCurrentTime"
       :render="render"
       :region="region"
+      :viewURL="viewURL"
     />
     <el-popover
       placement="bottom"
@@ -176,10 +177,12 @@ export default {
       }
     },
     onSelected: function(data) {
-      if (data[0].data.group)
+      if (data[0].data.group) {
+        delete this.$route.query["viewURL"];
         this.$router.replace({
           query: { ...this.$route.query, region: data[0].data.group }
         });
+      }
     },
     parseInput: function() {
       if (this.$route.query.url !== this.input)
@@ -200,6 +203,13 @@ export default {
       this.input = this.url;
       if (query.region) {
         this.region = query.region;
+      } else {
+        this.region = "";
+      }
+      if (query.viewURL) {
+        this.viewURL = query.viewURL;
+      } else {
+        this.viewURL = "";
       }
     }
   },
@@ -224,7 +234,8 @@ export default {
         align: "top-right"
       },
       render: true,
-      region: ""
+      region: "",
+      viewURL: ""
     };
   },
 

@@ -29,12 +29,12 @@
     "element-ui": "^2.13.0",
     "google-spreadsheet": "^3.1.15",
     "lodash": "^4.17.21",
-    "physiomeportal": "^0.4.25",
+    "physiomeportal": "^0.4.26",
     "query-string": "^6.11.1",
     "vue": "^2.6.10",
     "vue-drag-resize": "^1.3.2",
     "vue-router": "^3.5.1",
-    "zincjs": "^0.37.0"
+    "zincjs": "^0.38.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.0.0",

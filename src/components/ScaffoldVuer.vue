@@ -432,6 +432,17 @@ export default {
         }
       }
     },
+    updateViewURL: function(viewURL) {
+      if (viewURL) {
+        if (this.isReady) {
+            const url = new URL(viewURL, this.url);
+            this.$module.scene.loadViewURL(url);
+        } else {
+          this.$module.setFinishDownloadCallback(
+            this.setURLFinishCallback({viewURL: viewURL}));
+        }
+      }
+    },
     /**
      * Function used to rotate the scene.
      * Also called when the associated button is pressed.
@@ -618,11 +629,16 @@ export default {
             this.$module.scene
               .getZincCameraControls()
               .setCurrentCameraSettings(options.viewport);
-          } else if (options.region) {
+          } else if (options.viewURL && options.viewURL !== "") {
+            const url = new URL(options.viewURL, this.url);
+            this.$module.scene.loadViewURL(url);
+          } else if (options.region  && options.region !== "") {
             this.viewRegion(options.region);
           }
         }
         this.updateSettingsfromScene();
+        this.$module.updateTime(0.01);
+        this.$module.updateTime(0);
         this.$module.unsetFinishDownloadCallback();
         this.isReady = true;
       };
@@ -680,7 +696,8 @@ export default {
         this.loading = true;
         this.isReady = false;
         this.$module.setFinishDownloadCallback(
-          this.setURLFinishCallback({viewport: viewport, region: this.region}));
+          this.setURLFinishCallback({viewport: viewport, region: this.region,
+           viewURL: this.viewURL}));
         this.$module.loadOrgansFromURL(
           newValue,
           undefined,
@@ -836,10 +853,19 @@ export default {
       default: undefined
     },
     /**
-     * Name of the region to focus on, this option is ignored
-     * if state is also provided.
+     * Optional prop for the name of the region to focus on,
+     * this option is ignored if state or viewURL is also provided.
      */
     region: {
+      type: String,
+      default: ""
+    },
+    /**
+     * Optional prop for an URL of containing information of a viewport.
+     * This option is ignored if state is also provided.
+     * It will use the provided URL as base if a relative parth is provided.
+     */
+    viewURL: {
       type: String,
       default: ""
     },
@@ -878,8 +904,8 @@ export default {
       minimisedSlider: false,
       sliderPosition: "",
       timeMax: 100,
-      orginalDuration: "75mins",
-      animateDuration: "75secs",
+      orginalDuration: "",
+      animateDuration: "6secs",
       playSpeed: [
         {
           value: 0.1,
@@ -920,7 +946,7 @@ export default {
     },
     region: {
       handler: function(region) {
-        if (!this.state)
+        if (!(this.state || this.viewURL))
           this.setFocusedRegion(region);
       },
       immediate: true,
@@ -931,6 +957,12 @@ export default {
       },
       immediate: true,
       deep: true
+    },
+    viewURL: {
+      handler: function(viewURL) {
+        this.updateViewURL(viewURL);
+      },
+      immediate: true,
     },
     traditional: function(value) {
       if (value) this.controls = this.refs.traditionalControl;
@@ -1321,6 +1353,7 @@ export default {
   padding-right: 8px;
   border: none;
   font-family: "Asap", sans-serif;
+  line-height:22px;
 }
 
 .select-box >>> .el-input__icon {
