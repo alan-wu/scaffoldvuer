@@ -45,7 +45,6 @@
         ref="checkBoxPopover"
       ></el-popover>
       <TraditionalControls
-        v-if="traditional"
         v-popover:checkBoxPopover
         :helpMode="helpMode"
         :module="$module"
@@ -54,14 +53,6 @@
         @drawer-toggled="drawerToggled"
         :showColourPicker="showColourPicker"
         ref="traditionalControl"
-      />
-      <SelectControls
-        v-else
-        :module="$module"
-        @object-selected="objectSelected"
-        @object-hovered="objectHovered"
-        :displayAtStartUp="displayAtStartUp"
-        ref="selectControl"
       />
       <OpacityControls ref="opacityControl" />
       <el-popover
@@ -237,7 +228,6 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import OpacityControls from "./OpacityControls";
-import SelectControls from "./SelectControls";
 import TraditionalControls from "./TraditionalControls";
 import { SvgIcon, SvgSpriteColor } from "@abi-software/svg-sprite";
 
@@ -274,14 +264,12 @@ const EventNotifier = require("physiomeportal/src/utilities/eventNotifier")
  * A vue component of the scaffold viewer.
  *
  * @requires ./OpacityControls.vue
- * @requires ./SelectControls.vue
  * @requires ./TraditionalControls.vue
  */
 export default {
   name: "ScaffoldVuer",
   components: {
     OpacityControls,
-    SelectControls,
     SvgIcon,
     SvgSpriteColor,
     TraditionalControls
@@ -291,7 +279,6 @@ export default {
     this.isReady = false;
     this.selectedObject = undefined;
     this.hoveredObject = undefined;
-    this.controls = undefined;
     this.currentBackground = "white";
     this._currentURL = undefined;
     this.availableBackground = ["white", "black", "lightskyblue"];
@@ -635,6 +622,9 @@ export default {
           } else if (options.region  && options.region !== "") {
             this.viewRegion(options.region);
           }
+          if (options.visibility)
+            this.$refs.traditionalControl.setState(
+              options.visibility);
         }
         this.updateSettingsfromScene();
         this.$module.updateTime(0.01);
@@ -652,8 +642,11 @@ export default {
     getState: function() {
       let state = {
         url: this._currentURL,
-        viewport: undefined
+        viewport: undefined,
+        visibility: undefined
       };
+      if (this.$refs.traditionalControl)
+        state.visibility = this.$refs.traditionalControl.getState();
       if (this.$module.scene) {
         let zincCameraControls = this.$module.scene.getZincCameraControls();
         state.viewport = zincCameraControls.getCurrentViewport();
@@ -668,16 +661,23 @@ export default {
      */
     setState: function(state) {
       if (state) {
-        if (state.url && state.url !== this._currentURL) {
-          this.setURLAndViewport(state.url, state.viewport);
-        } else if (state.viewport) {
-          if (this.isReady && this.$module.scene) {
-            this.$module.scene
-              .getZincCameraControls()
-              .setCurrentCameraSettings(state.viewport);
-          } else {
-            this.$module.setFinishDownloadCallback(
-              this.setURLFinishCallback({viewport: state.viewport}));
+        if (state.url && (state.url !== this._currentURL)) {
+          this.setURLAndState(state.url, {viewport: state.viewport,
+            visibility: state.visibility});
+        } else {
+          if (state.viewport || state.visibility) {
+            if (this.isReady && this.$module.scene) {
+              if (state.viewport)
+                this.$module.scene
+                  .getZincCameraControls()
+                  .setCurrentCameraSettings(state.viewport);
+              if (state.visibility)
+                this.$refs.traditionalControl.setState(state.visibility);
+            } else {
+              this.$module.setFinishDownloadCallback(
+                this.setURLFinishCallback({viewport: state.viewport, 
+                visibility: state.visibility}));
+            }
           }
         }
       }
@@ -689,15 +689,19 @@ export default {
      *
      * @public
      */
-    setURLAndViewport: function(newValue, viewport) {
+    setURLAndState: function(newValue, state) {
       if (newValue != this._currentURL) {
+        let viewport = (state && state.viewport) ? state.viewport : undefined;
+        let visibility = (state && state.visibilitity) ? state.visibilitity : undefined;
         this._currentURL = newValue;
         if (this.controls) this.controls.clear();
         this.loading = true;
         this.isReady = false;
         this.$module.setFinishDownloadCallback(
           this.setURLFinishCallback({viewport: viewport, region: this.region,
-           viewURL: this.viewURL}));
+           viewURL: this.viewURL, visibility: visibility}));
+        if (this.$refs.traditionalControl)
+          this.$refs.traditionalControl.reset();
         this.$module.loadOrgansFromURL(
           newValue,
           undefined,
@@ -717,7 +721,7 @@ export default {
      * @public
      */
     setURL: function(newValue) {
-      this.setURLAndViewport(newValue, undefined);
+      this.setURLAndState(newValue, undefined);
     },
     /**
      * Callback when drawer is toggled.
@@ -756,14 +760,6 @@ export default {
     }
   },
   props: {
-    /**
-     * Enable traditional control. Select control will be
-     * used instead if set to false.
-     */
-    traditional: {
-      type: Boolean,
-      default: true
-    },
     /**
      * URL of the zincjs metadata. This value will be ignored if a valid
      * state prop is also provided.
@@ -964,10 +960,6 @@ export default {
       },
       immediate: true,
     },
-    traditional: function(value) {
-      if (value) this.controls = this.refs.traditionalControl;
-      else this.controls = this.refs.selectControl;
-    },
     helpMode: function(val) {
       this.setHelpMode(val);
     },
@@ -1005,8 +997,6 @@ export default {
     this.$module.initialiseRenderer(this.$refs.display);
     this.toggleRendering(this.render);
     this.$module.toolTip = undefined;
-    if (this.traditional) this.controls = this.$refs.traditionalControl;
-    else this.controls = this.$refs.selectControl;
     this.ro = new ResizeObserver(this.adjustLayout).observe(
       this.$refs.scaffoldContainer
     );
