@@ -142,6 +142,8 @@ export default {
     clear: function() {
       this.sortedPrimitiveGroups = [];
       this.checkedItems = [];
+      this.checkAll = true;
+      this.isIndeterminate = false;
       this.activeRegion = "";
       this.hoverRegion = "";
       this.$emit("object-selected", undefined);
@@ -188,9 +190,9 @@ export default {
         event.preventDefault();
       }
     },
-    handleCheckedItemsChange: function(value) {
+    handleCheckedItemsChange: function() {
       let unnamed = this.checkedItems.includes(undefined) ? true: false;
-      let checkedCount = value.length;
+      let checkedCount = this.checkedItems.length;
       if (unnamed)
         checkedCount--;
       this.checkAll = checkedCount === this.sortedPrimitiveGroups.length;
@@ -222,35 +224,31 @@ export default {
       this.drawerOpen = !this.drawerOpen;
       this.$emit("drawer-toggled", this.drawerOpen);
     },
-    reset: function() {
-      this.sortedPrimitiveGroups = [];
-    },
     getState: function() {
       if (this.checkAll) {
         return { checkAll: true };
       }
-      return { checkedItems: [...this.checkedItems] };
+      let checkedItems = [...this.checkedItems];
+      const index = checkedItems.indexOf(undefined);
+      if (index > -1) {
+        checkedItems.splice(index, 1);
+      }
+      return { checkedItems: checkedItems };
     },
     setState: function(state) {
       if (state) {
-        let unnamed = this.checkedItems.includes(undefined) ? true: false;
         if (state.checkAll) {
           this.checkedItems = [...this.sortedPrimitiveGroups];
-          if (unnamed) this.checkedItems.unshift(undefined);
           for (let i = 0; i < this.sortedPrimitiveGroups.length; i++) {
             this.module.changeOrganPartsVisibility(
               this.sortedPrimitiveGroups[i],
               true
             );
           }
-        } else if (state.checkedItems) {
-          let items = [...state.checkedItems];
-          let index = items.indexOf(null);
-          if (index !== -1) {
-            items[index] = undefined;
-          }
-          this.checkedItems = [...items];
+        } else if (state.checkedItems) { 
+          this.checkedItems = [...state.checkedItems];
           for (let i = 0; i < this.sortedPrimitiveGroups.length; i++) {
+
             let visible = this.checkedItems.includes(
               this.sortedPrimitiveGroups[i]);
             this.module.changeOrganPartsVisibility(
@@ -260,7 +258,7 @@ export default {
           }
         }
       }
-      this.handleCheckedItemsChange(this.checkedItems);
+      this.handleCheckedItemsChange();
     }
   },
   props: {

@@ -235,6 +235,7 @@ import {
   Button,
   Col,
   Loading,
+  Option,
   Popover,
   Row,
   Select,
@@ -248,6 +249,7 @@ locale.use(lang);
 Vue.use(Button);
 Vue.use(Col);
 Vue.use(Loading.directive);
+Vue.use(Option);
 Vue.use(Popover);
 Vue.use(Row);
 Vue.use(Select);
@@ -622,9 +624,13 @@ export default {
           } else if (options.region  && options.region !== "") {
             this.viewRegion(options.region);
           }
-          if (options.visibility)
-            this.$refs.traditionalControl.setState(
-              options.visibility);
+          if (options.visibility) {
+            // Some UIs may not be ready at this time.
+            this.$nextTick(() => {
+              this.$refs.traditionalControl.setState(
+                options.visibility);
+            })
+          }
         }
         this.updateSettingsfromScene();
         this.$module.updateTime(0.01);
@@ -692,16 +698,15 @@ export default {
     setURLAndState: function(newValue, state) {
       if (newValue != this._currentURL) {
         let viewport = (state && state.viewport) ? state.viewport : undefined;
-        let visibility = (state && state.visibilitity) ? state.visibilitity : undefined;
+        let visibility = (state && state.visibility) ? state.visibility : undefined;
         this._currentURL = newValue;
-        if (this.controls) this.controls.clear();
+        if (this.$refs.traditionalControl)
+          this.$refs.traditionalControl.clear();
         this.loading = true;
         this.isReady = false;
         this.$module.setFinishDownloadCallback(
           this.setURLFinishCallback({viewport: viewport, region: this.region,
            viewURL: this.viewURL, visibility: visibility}));
-        if (this.$refs.traditionalControl)
-          this.$refs.traditionalControl.reset();
         this.$module.loadOrgansFromURL(
           newValue,
           undefined,
