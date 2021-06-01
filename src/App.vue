@@ -7,7 +7,6 @@
     <ScaffoldVuer
       class="vuer"
       :displayUI="displayUI"
-      :traditional="traditional"
       :url="url"
       ref="scaffold"
       @scaffold-selected="onSelected"
@@ -177,7 +176,7 @@ export default {
       }
     },
     onSelected: function(data) {
-      if (data[0].data.group) {
+      if (data && data[0].data.group) {
         delete this.$route.query["viewURL"];
         this.$router.replace({
           query: { ...this.$route.query, region: data[0].data.group }
@@ -217,7 +216,6 @@ export default {
     return {
       url: undefined,
       input: undefined,
-      traditional: true,
       displayUI: true,
       selectedCoordinates: undefined,
       helpMode: false,

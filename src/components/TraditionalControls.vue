@@ -3,16 +3,23 @@
     <div class="traditional-container">
       <el-row>
         <el-col :span="12">
-          <div class="regions-display-text">
-            Regions
-          </div>
+          <div class="regions-display-text">Regions</div>
         </el-col>
         <el-col :span="12">
-          <el-checkbox class="all-checkbox" :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">Display all</el-checkbox>
-        </el-col>         
+          <el-checkbox
+            class="all-checkbox"
+            :indeterminate="isIndeterminate"
+            v-model="checkAll"
+            @change="handleCheckAllChange"
+          >Display all</el-checkbox>
+        </el-col>
       </el-row>
-      <el-checkbox-group v-model="checkedItems" size="small" 
-        class="checkbox-group" @change="handleCheckedItemsChange">
+      <el-checkbox-group
+        v-model="checkedItems"
+        size="small"
+        class="checkbox-group"
+        @change="handleCheckedItemsChange"
+      >
         <div class="checkbox-group-inner">
           <el-row v-for="item in sortedPrimitiveGroups" :key="item" :label="item">
             <div class="checkbox-container">
@@ -24,21 +31,27 @@
                 :checked="true"
                 @mouseover.native="checkboxHover(item)"
                 :class="{ activeItem: activeRegion === item, 
-                hoverItem: hoverRegion === item  }">          
+                hoverItem: hoverRegion === item  }"
+              >
                 <el-color-picker
                   :class="{ 'show-picker' : showColourPicker }"
                   :value="getColour(item)"
                   @change="setColour(item, $event)"
                   size="small"
-                  :popper-class="myPopperClass"/>
-                  {{item}}
-                </el-checkbox>
+                  :popper-class="myPopperClass"
+                />
+                {{item}}
+              </el-checkbox>
             </div>
           </el-row>
         </div>
       </el-checkbox-group>
     </div>
-    <div @click="toggleDrawer" class="drawer-button" :class="{ open: drawerOpen, close: !drawerOpen }">
+    <div
+      @click="toggleDrawer"
+      class="drawer-button"
+      :class="{ open: drawerOpen, close: !drawerOpen }"
+    >
       <i class="el-icon-arrow-left"></i>
     </div>
   </div>
@@ -129,6 +142,8 @@ export default {
     clear: function() {
       this.sortedPrimitiveGroups = [];
       this.checkedItems = [];
+      this.checkAll = true;
+      this.isIndeterminate = false;
       this.activeRegion = "";
       this.hoverRegion = "";
       this.$emit("object-selected", undefined);
@@ -175,14 +190,17 @@ export default {
         event.preventDefault();
       }
     },
-    handleCheckedItemsChange: function(value) {
-      let checkedCount = value.length;
+    handleCheckedItemsChange: function() {
+      let unnamed = this.checkedItems.includes(undefined) ? true: false;
+      let checkedCount = this.checkedItems.length;
+      if (unnamed)
+        checkedCount--;
       this.checkAll = checkedCount === this.sortedPrimitiveGroups.length;
       this.isIndeterminate =
         checkedCount > 0 && checkedCount < this.sortedPrimitiveGroups.length;
     },
     handleCheckAllChange(val) {
-      this.checkedItems = val ? this.sortedPrimitiveGroups : [];
+      this.checkedItems = val ? [...this.sortedPrimitiveGroups] : [];
       this.isIndeterminate = false;
       for (let i = 0; i < this.sortedPrimitiveGroups.length; i++) {
         this.visibilityToggle(this.sortedPrimitiveGroups[i], this.checkAll);
@@ -202,12 +220,48 @@ export default {
         }
       }
     },
-    toggleDrawer: function () {
+    toggleDrawer: function() {
       this.drawerOpen = !this.drawerOpen;
       this.$emit("drawer-toggled", this.drawerOpen);
     },
+    getState: function() {
+      if (this.checkAll) {
+        return { checkAll: true };
+      }
+      let checkedItems = [...this.checkedItems];
+      const index = checkedItems.indexOf(undefined);
+      if (index > -1) {
+        checkedItems.splice(index, 1);
+      }
+      return { checkedItems: checkedItems };
+    },
+    setState: function(state) {
+      if (state) {
+        if (state.checkAll) {
+          this.checkedItems = [...this.sortedPrimitiveGroups];
+          for (let i = 0; i < this.sortedPrimitiveGroups.length; i++) {
+            this.module.changeOrganPartsVisibility(
+              this.sortedPrimitiveGroups[i],
+              true
+            );
+          }
+        } else if (state.checkedItems) { 
+          this.checkedItems = [...state.checkedItems];
+          for (let i = 0; i < this.sortedPrimitiveGroups.length; i++) {
+
+            let visible = this.checkedItems.includes(
+              this.sortedPrimitiveGroups[i]);
+            this.module.changeOrganPartsVisibility(
+              this.sortedPrimitiveGroups[i],
+              visible
+            );
+          }
+        }
+      }
+      this.handleCheckedItemsChange();
+    }
   },
-  props: { 
+  props: {
     /**
      * @ignore
      */
@@ -215,7 +269,8 @@ export default {
     /**
      * Enable/disable colour picker
      */
-    showColourPicker: Boolean },
+    showColourPicker: Boolean
+  },
   data: function() {
     return {
       checkAll: true,
@@ -225,7 +280,7 @@ export default {
       activeRegion: "",
       hoverRegion: "",
       myPopperClass: "hide-scaffold-colour-popup",
-      drawerOpen: true,
+      drawerOpen: true
     };
   },
   watch: {
@@ -267,7 +322,7 @@ export default {
 }
 
 .traditional-location:focus {
-    outline: none;
+  outline: none;
 }
 
 .traditional-location.open {
@@ -285,9 +340,9 @@ export default {
   text-align: left;
   overflow: none;
   border: 1px solid rgb(220, 223, 230);
-  padding-top:7px;
-  padding-bottom:16px;
-  background:#ffffff;
+  padding-top: 7px;
+  padding-bottom: 16px;
+  background: #ffffff;
 }
 
 .regions-display-text {
@@ -309,39 +364,39 @@ export default {
   border: 1px solid rgb(144, 147, 153);
   border-radius: 4px;
   background: #ffffff;
-  margin-top:6px;
+  margin-top: 6px;
 }
 
 .checkbox-group-inner {
-  padding:18px;
-  max-height:240px;
+  padding: 18px;
+  max-height: 240px;
   min-height: 130px;
-  overflow:auto;
-  scrollbar-color: #c0c4cc rgba(1,1,1,0);
+  overflow: auto;
+  scrollbar-color: #c0c4cc rgba(1, 1, 1, 0);
   scrollbar-width: thin;
 }
 
 .checkbox-group-inner::-webkit-scrollbar {
-  width:4px;
+  width: 4px;
 }
 
 .checkbox-group-inner::-webkit-scrollbar-thumb {
   border-radius: 10px;
-  box-shadow: inset 0 0 6px #c0c4cc; 
+  box-shadow: inset 0 0 6px #c0c4cc;
 }
 
 >>> .el-color-picker {
-  height:16px!important;
-  top:3px;
+  height: 16px !important;
+  top: 3px;
 }
 
 >>> .el-color-picker__trigger {
   margin-left: 8px;
   margin-right: 8px;
   padding: 0px;
-  height:16px;
-  width:16px;
-  border:0px;
+  height: 16px;
+  width: 16px;
+  border: 0px;
 }
 
 >>> .el-checkbox__input.is-indeterminate .el-checkbox__inner {
@@ -359,8 +414,8 @@ export default {
 }
 
 >>> .el-checkbox__label {
-  padding-left:5px;
-  color: rgb(131, 0, 191)!important;
+  padding-left: 5px;
+  color: rgb(131, 0, 191) !important;
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0px;
@@ -388,17 +443,16 @@ export default {
   display: block;
 }
 
-
 >>> .my-drawer {
-  background: rgba(0,0,0,0);
+  background: rgba(0, 0, 0, 0);
   box-shadow: none;
 }
 
-.drawer >>> .el-drawer:focus{
-  outline:none;
+.drawer >>> .el-drawer:focus {
+  outline: none;
 }
 
-.open-drawer{
+.open-drawer {
   width: 20px;
   height: 40px;
   z-index: 8;
@@ -406,7 +460,7 @@ export default {
   left: 0px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
   border: solid 1px #e4e7ed;
-  background-color: #F7FAFF;
+  background-color: #f7faff;
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
@@ -418,27 +472,27 @@ export default {
   width: 20px;
   height: 40px;
   z-index: 8;
-  margin-top:calc(50% - 52px);
+  margin-top: calc(50% - 52px);
   border: solid 1px #e4e7ed;
   border-left: 0;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
   pointer-events: auto;
 }
 
-.drawer-button i{
-  margin-top:12px;
+.drawer-button i {
+  margin-top: 12px;
   color: #8300bf;
   transition-delay: 0.9s;
 }
 
-.drawer-button.open i{
+.drawer-button.open i {
   transform: rotate(0deg) scaleY(2.5);
 }
 
-.drawer-button.close i{
+.drawer-button.close i {
   transform: rotate(180deg) scaleY(2.5);
 }
 </style>
