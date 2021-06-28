@@ -1158,6 +1158,14 @@ export default {
   min-width: 128px;
 }
 
+>>> .background-popper.el-popper[x-placement^="top"] .popper__arrow {
+  border-top-color: #8300bf !important;
+}
+
+>>> .background-popper.el-popper[x-placement^="top"] .popper__arrow:after {
+  border-top-color: #fff !important;
+}
+
 .background-colour {
   bottom: 16px;
   position: absolute;
@@ -1281,7 +1289,6 @@ export default {
   border: 1px solid rgb(131, 0, 191);
   white-space: nowrap;
   min-width: unset;
-  pointer-events: none;
 }
 
 >>> .el-slider__button {
