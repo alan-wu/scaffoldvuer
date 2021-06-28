@@ -22,7 +22,7 @@
         placement="right"
         :appendToBody="false"
         trigger="manual"
-        popper-class="warning-popper right-popper"
+        popper-class="warning-popper right-popper non-selectable"
         v-model="hoverVisabilities[6].value"
         ref="warningPopover"
       ></el-popover>
@@ -40,7 +40,7 @@
         placement="right"
         :appendToBody="false"
         trigger="manual"
-        popper-class="scaffold-popper right-popper"
+        popper-class="scaffold-popper right-popper non-selectable"
         v-model="hoverVisabilities[5].value"
         ref="checkBoxPopover"
       ></el-popover>
@@ -61,7 +61,7 @@
         placement="top"
         :appendToBody="false"
         trigger="manual"
-        popper-class="scaffold-popper top-popper"
+        popper-class="scaffold-popper top-popper non-selectable"
         v-model="hoverVisabilities[4].value"
         ref="sliderPopover"
       ></el-popover>
@@ -137,7 +137,7 @@
           placement="left"
           :appendToBody="false"
           trigger="manual"
-          popper-class="scaffold-popper left-popper"
+          popper-class="scaffold-popper left-popper non-selectable"
           v-model="hoverVisabilities[0].value"
         >
           <SvgIcon
@@ -154,7 +154,7 @@
           placement="top-end"
           :appendToBody="false"
           trigger="manual"
-          popper-class="scaffold-popper popper-zoomout"
+          popper-class="scaffold-popper popper-zoomout non-selectable"
           v-model="hoverVisabilities[1].value"
         >
           <SvgIcon
@@ -171,7 +171,7 @@
           placement="top"
           :appendToBody="false"
           trigger="manual"
-          popper-class="scaffold-popper"
+          popper-class="scaffold-popper non-selectable"
           v-model="hoverVisabilities[2].value"
         >
           <SvgIcon
@@ -190,7 +190,7 @@
         width="128"
         :appendToBody="false"
         trigger="click"
-        popper-class="background-popper"
+        popper-class="background-popper non-selectable"
       >
         <el-row class="backgroundText">Change background</el-row>
         <el-row class="backgroundChooser">
@@ -207,7 +207,7 @@
         placement="right"
         :appendToBody="false"
         trigger="manual"
-        popper-class="scaffold-popper right-popper"
+        popper-class="scaffold-popper right-popper non-selectable"
         v-model="hoverVisabilities[3].value"
       >
         <SvgIcon
@@ -366,7 +366,7 @@ export default {
      */
     zoomIn: function() {
       if (this.$module.scene) {
-        this.changeZoomByScrollRateUnit(-1);
+        this.$module.scene.changeZoomByScrollRateUnit(-1);
       }
     },
     /**
@@ -1143,6 +1143,11 @@ export default {
   padding-left: 8px;
 }
 
+
+>>> .non-selectable{
+  user-select: none;
+}
+
 >>> .background-popper {
   padding: 5px 12px;
   background-color: #ffffff;
@@ -1151,6 +1156,14 @@ export default {
   height: 72px;
   width: 128px;
   min-width: 128px;
+}
+
+>>> .background-popper.el-popper[x-placement^="top"] .popper__arrow {
+  border-top-color: #8300bf !important;
+}
+
+>>> .background-popper.el-popper[x-placement^="top"] .popper__arrow:after {
+  border-top-color: #fff !important;
 }
 
 .background-colour {
