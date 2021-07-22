@@ -171,18 +171,17 @@
           />
         </el-popover>
         <el-popover
-          v-model="hoverVisabilities[2].value"
-          content="Reset"
           placement="top"
           :append-to-body="false"
           trigger="manual"
           popper-class="scaffold-popper non-selectable"
         >
+          <div>Fit to<br>window</div>
           <SvgIcon
             slot="reference"
-            icon="resetZoom"
-            class="icon-button resetView"
-            @click.native="resetView()"
+            icon="fitWindow"
+            class="icon-button fitWindow"
+            @click.native="fitWindow()"
             @mouseover.native="showToolitip(2)"
             @mouseout.native="hideToolitip(2)"
           />
@@ -610,7 +609,7 @@ export default {
      *
      * @public
      */
-    resetView: function() {
+    fitWindow: function() {
       if (this.$module.scene) {
         this.$module.scene.viewAll();
       }
@@ -1148,7 +1147,7 @@ export default {
   padding-left: 8px;
 }
 
-.resetView {
+.fitWindow {
   padding-left: 8px;
 }
 
@@ -1165,6 +1164,14 @@ export default {
   height: 72px;
   width: 128px;
   min-width: 128px;
+}
+
+>>> .background-popper.el-popper[x-placement^="top"] .popper__arrow {
+  border-top-color: #8300bf !important;
+}
+
+>>> .background-popper.el-popper[x-placement^="top"] .popper__arrow:after {
+  border-top-color: #fff !important;
 }
 
 .background-colour {
@@ -1327,7 +1334,7 @@ export default {
 }
 
 >>> .popper-zoomout {
-  padding-right: 13px;
+  padding-right: 11px;
   left: -21px !important;
 }
 
