@@ -1,5 +1,8 @@
 <template>
-  <div class="select-container" ref="select">
+  <div
+    ref="select"
+    class="select-container"
+  >
     <el-select
       ref="elSelect"
       v-model="checkedItems"
@@ -8,7 +11,12 @@
       :popper-append-to-body="appendToBody"
       @change="handleChange"
     >
-      <el-option v-for="item in sortedPrimitiveGroups" :key="item" :label="item" :value="item"></el-option>
+      <el-option
+        v-for="item in sortedPrimitiveGroups"
+        :key="item"
+        :label="item"
+        :value="item"
+      />
     </el-select>
   </div>
 </template>
@@ -32,6 +40,81 @@ const isEqual = require("lodash/isEqual");
  */
 export default {
   name: "SelectControls",
+  props: {
+    /**
+     * @ignore
+     */
+    module: Object,
+      /**
+     * Display all graphics at start
+     */
+    displayAtStartUp: {
+      type: Boolean,
+      default: true
+    },
+  },
+  data: function() {
+    return {
+      checkedItems: [],
+      sortedPrimitiveGroups: [],
+      previousSelection: [],
+      appendToBody: false
+    };
+  },
+  watch: {
+    "module.sceneData.geometries": function() {
+      let tmpArray = uniq(
+        this.sortedPrimitiveGroups.concat(this.module.sceneData.geometries)
+      );
+      this.sortedPrimitiveGroups = orderBy(tmpArray);
+    },
+    "module.sceneData.lines": function() {
+      let tmpArray = uniq(
+        this.sortedPrimitiveGroups.concat(this.module.sceneData.lines)
+      );
+      this.sortedPrimitiveGroups = orderBy(tmpArray);
+    },
+    "module.sceneData.glyphsets": function() {
+      let tmpArray = uniq(
+        this.sortedPrimitiveGroups.concat(this.module.sceneData.glyphsets)
+      );
+      this.sortedPrimitiveGroups = orderBy(tmpArray);
+    },
+    "module.sceneData.pointsets": function() {
+      let tmpArray = uniq(
+        this.sortedPrimitiveGroups.concat(this.module.sceneData.pointset)
+      );
+      this.sortedPrimitiveGroups = orderBy(tmpArray);
+    }
+  },
+  created: function() {
+    this.activeRegion = { element: undefined, name: "" };
+    this.hoverRegion = { element: undefined, name: "" };
+    let tmpArray = this.module.sceneData.geometries.concat(
+      this.module.sceneData.lines
+    );
+    tmpArray = tmpArray.concat(this.module.sceneData.glyphsets);
+    tmpArray = uniq(tmpArray.concat(this.module.sceneData.pointset));
+    this.sortedPrimitiveGroups = orderBy(tmpArray);
+    if (this.displayAtStartUp) {
+      this.checkedItems = this.sortedPrimitiveGroups.slice();
+      this.previousSelection = this.checkedItems.slice();
+      this.addTagsEventListenerNextTick();
+    } else {
+      for (let i = 0; i < this.sortedPrimitiveGroups.length; i++) {
+        if (this.sortedPrimitiveGroups[i])
+          this.module.changeOrganPartsVisibility(
+            this.sortedPrimitiveGroups[i],
+            false
+          );
+      }
+    }
+    this.module.addOrganPartAddedCallback(this.organsAdded);
+    this.module.graphicsHighlight.selectColour = 0x444444;
+  },
+  destroyed: function() {
+    this.sortedPrimitiveGroups = undefined;
+  },
   methods: {
     /**
      * This is called when a new organ is read into the scene.
@@ -218,81 +301,6 @@ export default {
         this.removeHover();
       }
     }
-  },
-  props: {
-    /**
-     * @ignore
-     */
-    module: Object,
-      /**
-     * Display all graphics at start
-     */
-    displayAtStartUp: {
-      type: Boolean,
-      default: true
-    },
-  },
-  data: function() {
-    return {
-      checkedItems: [],
-      sortedPrimitiveGroups: [],
-      previousSelection: [],
-      appendToBody: false
-    };
-  },
-  watch: {
-    "module.sceneData.geometries": function() {
-      let tmpArray = uniq(
-        this.sortedPrimitiveGroups.concat(this.module.sceneData.geometries)
-      );
-      this.sortedPrimitiveGroups = orderBy(tmpArray);
-    },
-    "module.sceneData.lines": function() {
-      let tmpArray = uniq(
-        this.sortedPrimitiveGroups.concat(this.module.sceneData.lines)
-      );
-      this.sortedPrimitiveGroups = orderBy(tmpArray);
-    },
-    "module.sceneData.glyphsets": function() {
-      let tmpArray = uniq(
-        this.sortedPrimitiveGroups.concat(this.module.sceneData.glyphsets)
-      );
-      this.sortedPrimitiveGroups = orderBy(tmpArray);
-    },
-    "module.sceneData.pointsets": function() {
-      let tmpArray = uniq(
-        this.sortedPrimitiveGroups.concat(this.module.sceneData.pointset)
-      );
-      this.sortedPrimitiveGroups = orderBy(tmpArray);
-    }
-  },
-  created: function() {
-    this.activeRegion = { element: undefined, name: "" };
-    this.hoverRegion = { element: undefined, name: "" };
-    let tmpArray = this.module.sceneData.geometries.concat(
-      this.module.sceneData.lines
-    );
-    tmpArray = tmpArray.concat(this.module.sceneData.glyphsets);
-    tmpArray = uniq(tmpArray.concat(this.module.sceneData.pointset));
-    this.sortedPrimitiveGroups = orderBy(tmpArray);
-    if (this.displayAtStartUp) {
-      this.checkedItems = this.sortedPrimitiveGroups.slice();
-      this.previousSelection = this.checkedItems.slice();
-      this.addTagsEventListenerNextTick();
-    } else {
-      for (let i = 0; i < this.sortedPrimitiveGroups.length; i++) {
-        if (this.sortedPrimitiveGroups[i])
-          this.module.changeOrganPartsVisibility(
-            this.sortedPrimitiveGroups[i],
-            false
-          );
-      }
-    }
-    this.module.addOrganPartAddedCallback(this.organsAdded);
-    this.module.graphicsHighlight.selectColour = 0x444444;
-  },
-  destroyed: function() {
-    this.sortedPrimitiveGroups = undefined;
   }
 };
 </script>

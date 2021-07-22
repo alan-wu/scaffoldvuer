@@ -1,75 +1,75 @@
 <template>
   <div
-    class="scaffold-container"
+    ref="scaffoldContainer"
     v-loading="loading"
+    class="scaffold-container"
     element-loading-text="Loading..."
     element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.3)"
-    ref="scaffoldContainer"
   >
     <SvgSpriteColor />
     <div
       id="organsDisplayArea"
+      ref="display"
       tabindex="-1"
       style="height:100%;width:100%;"
-      ref="display"
       @keydown.66="backgroundChangeCallback"
-    ></div>
+    />
     <div v-show="displayUI && !isTransitioning">
       <el-popover
         v-if="displayWarning"
+        ref="warningPopover"
+        v-model="hoverVisabilities[6].value"
         :content="warningMessage"
         placement="right"
-        :appendToBody="false"
+        :append-to-body="false"
         trigger="manual"
         popper-class="warning-popper right-popper non-selectable"
-        v-model="hoverVisabilities[6].value"
-        ref="warningPopover"
-      ></el-popover>
+      />
       <i
-        class="el-icon-warning warning-icon"
         v-if="displayWarning"
+        v-popover:warningPopover
+        class="el-icon-warning warning-icon"
         @mouseover="showToolitip(6)"
         @mouseout="hideToolitip(6)"
-        v-popover:warningPopover
       >
         <span class="warning-text">Beta</span>
       </i>
       <el-popover
+        ref="checkBoxPopover"
+        v-model="hoverVisabilities[5].value"
         content="Change region visibility"
         placement="right"
-        :appendToBody="false"
+        :append-to-body="false"
         trigger="manual"
         popper-class="scaffold-popper right-popper non-selectable"
-        v-model="hoverVisabilities[5].value"
-        ref="checkBoxPopover"
-      ></el-popover>
+      />
       <TraditionalControls
+        ref="traditionalControl"
         v-popover:checkBoxPopover
-        :helpMode="helpMode"
+        :help-mode="helpMode"
         :module="$module"
+        :show-colour-picker="showColourPicker"
         @object-selected="objectSelected"
         @object-hovered="objectHovered"
         @drawer-toggled="drawerToggled"
-        :showColourPicker="showColourPicker"
-        ref="traditionalControl"
       />
       <OpacityControls ref="opacityControl" />
       <el-popover
         v-if="sceneData.timeVarying"
+        ref="sliderPopover"
+        v-model="hoverVisabilities[4].value"
         content="Move the slider to animate the region"
         placement="top"
-        :appendToBody="false"
+        :append-to-body="false"
         trigger="manual"
         popper-class="scaffold-popper top-popper non-selectable"
-        v-model="hoverVisabilities[4].value"
-        ref="sliderPopover"
-      ></el-popover>
+      />
       <div
+        v-if="sceneData.timeVarying"
+        v-popover:sliderPopover
         class="time-slider-container"
         :class="[ minimisedSlider ? 'minimised' : '', sliderPosition]"
-        v-popover:sliderPopover
-        v-if="sceneData.timeVarying"
       >
         <el-tabs type="card">
           <el-tab-pane label="Animate scaffold">
@@ -82,9 +82,9 @@
               />
               <SvgIcon
                 v-else
-                @click.native="play(true)"
                 icon="play"
                 class="video-button icon-button"
+                @click.native="play(true)"
               />
               <el-slider
                 :min="0"
@@ -96,18 +96,22 @@
                 :format-tooltip="formatTooltip"
                 :marks="timeStamps"
                 @input="timeChange($event)"
-              ></el-slider>
+              />
             </el-row>
           </el-tab-pane>
           <el-tab-pane label="Animation data">
             <el-row class="tab-content">
               <div class="animation-data">
                 Original duration:
-                <div class="purple">{{ orginalDuration }}</div>
+                <div class="purple">
+                  {{ orginalDuration }}
+                </div>
               </div>
               <div class="animation-data">
                 Animation duration:
-                <div class="purple">{{ animateDuration }}</div>
+                <div class="purple">
+                  {{ animateDuration }}
+                </div>
               </div>
               <div class="animation-data">
                 Playback speed
@@ -133,51 +137,51 @@
       </div>
       <div class="bottom-right-control">
         <el-popover
+          v-model="hoverVisabilities[0].value"
           content="Zoom in"
           placement="left"
-          :appendToBody="false"
+          :append-to-body="false"
           trigger="manual"
           popper-class="scaffold-popper left-popper non-selectable"
-          v-model="hoverVisabilities[0].value"
         >
           <SvgIcon
+            slot="reference"
             icon="zoomIn"
             class="icon-button zoomIn"
-            slot="reference"
             @click.native="zoomIn()"
             @mouseover.native="showToolitip(0)"
             @mouseout.native="hideToolitip(0)"
           />
         </el-popover>
         <el-popover
+          v-model="hoverVisabilities[1].value"
           content="Zoom out"
           placement="top-end"
-          :appendToBody="false"
+          :append-to-body="false"
           trigger="manual"
           popper-class="scaffold-popper popper-zoomout non-selectable"
-          v-model="hoverVisabilities[1].value"
         >
           <SvgIcon
+            slot="reference"
             icon="zoomOut"
             class="icon-button zoomOut"
-            slot="reference"
             @click.native="zoomOut()"
             @mouseover.native="showToolitip(1)"
             @mouseout.native="hideToolitip(1)"
           />
         </el-popover>
         <el-popover
+          v-model="hoverVisabilities[2].value"
           content="Reset"
           placement="top"
-          :appendToBody="false"
+          :append-to-body="false"
           trigger="manual"
           popper-class="scaffold-popper non-selectable"
-          v-model="hoverVisabilities[2].value"
         >
           <SvgIcon
+            slot="reference"
             icon="resetZoom"
             class="icon-button resetView"
-            slot="reference"
             @click.native="resetView()"
             @mouseover.native="showToolitip(2)"
             @mouseout.native="hideToolitip(2)"
@@ -188,11 +192,13 @@
         ref="backgroundPopover"
         placement="top-start"
         width="128"
-        :appendToBody="false"
+        :append-to-body="false"
         trigger="click"
         popper-class="background-popper non-selectable"
       >
-        <el-row class="backgroundText">Change background</el-row>
+        <el-row class="backgroundText">
+          Change background
+        </el-row>
         <el-row class="backgroundChooser">
           <div
             v-for="item in availableBackground"
@@ -203,18 +209,18 @@
         </el-row>
       </el-popover>
       <el-popover
+        v-model="hoverVisabilities[3].value"
         content="Change background color"
         placement="right"
-        :appendToBody="false"
+        :append-to-body="false"
         trigger="manual"
         popper-class="scaffold-popper right-popper non-selectable"
-        v-model="hoverVisabilities[3].value"
       >
         <SvgIcon
+          slot="reference"
           v-popover:backgroundPopover
           icon="changeBckgd"
           class="icon-button background-colour"
-          slot="reference"
           :class="{ open: drawerOpen, close: !drawerOpen }"
           @mouseover.native="showToolitip(3)"
           @mouseout.native="hideToolitip(3)"
@@ -276,6 +282,239 @@ export default {
     SvgSpriteColor,
     TraditionalControls
   },
+  props: {
+    /**
+     * URL of the zincjs metadata. This value will be ignored if a valid
+     * state prop is also provided.
+     * If the url needs to be updated with state present, please use
+     * the setURL method.
+     */
+    url: {
+      type: String,
+      default: ''
+    },
+    /**
+     * Show the colour control of set to true.
+     */
+    showColourPicker: {
+      type: Boolean,
+      default: false
+    },
+    /**
+     * Flag to show/hide the UI.
+     */
+    displayUI: {
+      type: Boolean,
+      default: true
+    },
+    /**
+     * Display all graphics at start.
+     *
+     * This setting only works when traditional is set to false.
+     */
+    displayAtStartUp: {
+      type: Boolean,
+      default: true
+    },
+    /**
+     * Use for toggling the help tooltips.
+     */
+    helpMode: {
+      type: Boolean,
+      default: false
+    },
+    /**
+     * Use for show/display beta warning icon.
+     */
+    displayWarning: {
+      type: Boolean,
+      default: true
+    },
+    /**
+     * Warning message for the hovered over text
+     * on the warning icon.
+     */
+    warningMessage: {
+      type: String,
+      default: "Beta feature - under active development"
+    },
+    /**
+     * Show/hide pickable markers for regions.
+     */
+    displayMarkers: {
+      type: Boolean,
+      default: true
+    },
+    /**
+     * Show/hide minimap.
+     */
+    displayMinimap: {
+      type: Boolean,
+      default: false
+    },
+    /**
+     * Settings for minimap position, size and alignment.
+     */
+    minimapSettings: {
+      type: Object,
+      default: function() {
+        return {
+          x_offset: 16,
+          y_offset: 16,
+          width: 128,
+          height: 128,
+          align: "top-right"
+        };
+      }
+    },
+    /**
+     * State containing state of the scaffold.
+     */
+    state: {
+      type: Object,
+      default: undefined
+    },
+    /**
+     * Optional prop for the name of the region to focus on,
+     * this option is ignored if state or viewURL is also provided.
+     */
+    region: {
+      type: String,
+      default: ""
+    },
+    /**
+     * Optional prop for an URL of containing information of a viewport.
+     * This option is ignored if state is also provided.
+     * It will use the provided URL as base if a relative parth is provided.
+     */
+    viewURL: {
+      type: String,
+      default: ""
+    },
+    /**
+     * Settings for turning on/off rendering
+     */
+    render: {
+      type: Boolean,
+      default: true
+    }
+  },
+  data: function() {
+    return {
+      sceneData: this.$module.sceneData,
+      isPlaying: false,
+      /**
+       * This is set when scene is transitioning.
+       */
+      isTransitioning: false,
+      tooltipAppendToBody: false,
+      hoverVisabilities: [
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false },
+        { value: false }
+      ],
+      inHelp: false,
+      loading: false,
+      duration: 3000,
+      drawerOpen: true,
+      currentBackground: "white",
+      availableBackground: ["white", "lightskyblue", "black"],
+      minimisedSlider: false,
+      sliderPosition: "",
+      timeMax: 100,
+      orginalDuration: "",
+      animateDuration: "6secs",
+      playSpeed: [
+        {
+          value: 0.1,
+          label: "0.1x"
+        },
+        {
+          value: 0.5,
+          label: "0.5x"
+        },
+        {
+          value: 1,
+          label: "1x"
+        },
+        {
+          value: 2,
+          label: "2x"
+        },
+        {
+          value: 5,
+          label: "5x"
+        },
+        {
+          value: 10,
+          label: "10x"
+        }
+      ],
+      currentSpeed: 1,
+      timeStamps: {}
+    };
+  },
+  watch: {
+    url: {
+      handler: function(newValue) {
+        if (this.state === undefined || this.state.url === undefined)
+          this.setURL(newValue);
+      },
+      immediate: true
+    },
+    region: {
+      handler: function(region) {
+        if (!(this.state || this.viewURL))
+          this.setFocusedRegion(region);
+      },
+      immediate: true,
+    },
+    state: {
+      handler: function(state) {
+        this.setState(state);
+      },
+      immediate: true,
+      deep: true
+    },
+    viewURL: {
+      handler: function(viewURL) {
+        this.updateViewURL(viewURL);
+      },
+      immediate: true,
+    },
+    helpMode: function(val) {
+      this.setHelpMode(val);
+    },
+    displayMarkers: function(val) {
+      this.$module.scene.displayMarkers = val;
+    },
+    displayMinimap: function(val) {
+      this.$module.scene.displayMinimap = val;
+    },
+    "sceneData.currentTime": function() {
+      /**
+       * Triggers when scene time changes.
+       *
+       * @property {number} time Current build-in time of scene.
+       * of selected object.
+       */
+      this.$emit("timeChanged", this.sceneData.currentTime);
+    },
+    duration: function() {
+      this.$module.scene.setDuration(this.duration);
+    },
+    minimapSettings: {
+      deep: true,
+      handler: "updateMinimapScissor"
+    },
+    render: function(val) {
+      this.toggleRendering(val);
+    }
+  },
   beforeCreate: function() {
     this.$module = new OrgansViewer();
     this.isReady = false;
@@ -284,6 +523,24 @@ export default {
     this.currentBackground = "white";
     this._currentURL = undefined;
     this.availableBackground = ["white", "black", "lightskyblue"];
+  },
+  mounted: function() {
+    let eventNotifier = new EventNotifier();
+    eventNotifier.subscribe(this, this.eventNotifierCallback);
+    this.$module.addNotifier(eventNotifier);
+    this.$module.addOrganPartAddedCallback(this.organsAdded);
+    this.$module.initialiseRenderer(this.$refs.display);
+    this.toggleRendering(this.render);
+    this.$module.toolTip = undefined;
+    this.ro = new ResizeObserver(this.adjustLayout).observe(
+      this.$refs.scaffoldContainer
+    );
+    this.defaultRate = this.$module.getPlayRate();
+  },
+  beforeDestroy: function() {
+    if (this.ro) this.ro.disconnect();
+    this.$module.destroy();
+    this.$module = undefined;
   },
   methods: {
     /**
@@ -763,254 +1020,6 @@ export default {
         this.$module.zincRenderer.onWindowResize();
       }
     }
-  },
-  props: {
-    /**
-     * URL of the zincjs metadata. This value will be ignored if a valid
-     * state prop is also provided.
-     * If the url needs to be updated with state present, please use
-     * the setURL method.
-     */
-    url: String,
-    /**
-     * Show the colour control of set to true.
-     */
-    showColourPicker: {
-      type: Boolean,
-      default: false
-    },
-    /**
-     * Flag to show/hide the UI.
-     */
-    displayUI: {
-      type: Boolean,
-      default: true
-    },
-    /**
-     * Display all graphics at start.
-     *
-     * This setting only works when traditional is set to false.
-     */
-    displayAtStartUp: {
-      type: Boolean,
-      default: true
-    },
-    /**
-     * Use for toggling the help tooltips.
-     */
-    helpMode: {
-      type: Boolean,
-      default: false
-    },
-    /**
-     * Use for show/display beta warning icon.
-     */
-    displayWarning: {
-      type: Boolean,
-      default: true
-    },
-    /**
-     * Warning message for the hovered over text
-     * on the warning icon.
-     */
-    warningMessage: {
-      type: String,
-      default: "Beta feature - under active development"
-    },
-    /**
-     * Show/hide pickable markers for regions.
-     */
-    displayMarkers: {
-      type: Boolean,
-      default: true
-    },
-    /**
-     * Show/hide minimap.
-     */
-    displayMinimap: {
-      type: Boolean,
-      default: false
-    },
-    /**
-     * Settings for minimap position, size and alignment.
-     */
-    minimapSettings: {
-      type: Object,
-      default: function() {
-        return {
-          x_offset: 16,
-          y_offset: 16,
-          width: 128,
-          height: 128,
-          align: "top-right"
-        };
-      }
-    },
-    /**
-     * State containing state of the scaffold.
-     */
-    state: {
-      type: Object,
-      default: undefined
-    },
-    /**
-     * Optional prop for the name of the region to focus on,
-     * this option is ignored if state or viewURL is also provided.
-     */
-    region: {
-      type: String,
-      default: ""
-    },
-    /**
-     * Optional prop for an URL of containing information of a viewport.
-     * This option is ignored if state is also provided.
-     * It will use the provided URL as base if a relative parth is provided.
-     */
-    viewURL: {
-      type: String,
-      default: ""
-    },
-    /**
-     * Settings for turning on/off rendering
-     */
-    render: {
-      type: Boolean,
-      default: true
-    }
-  },
-  data: function() {
-    return {
-      sceneData: this.$module.sceneData,
-      isPlaying: false,
-      /**
-       * This is set when scene is transitioning.
-       */
-      isTransitioning: false,
-      tooltipAppendToBody: false,
-      hoverVisabilities: [
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false }
-      ],
-      inHelp: false,
-      loading: false,
-      duration: 3000,
-      drawerOpen: true,
-      currentBackground: "white",
-      availableBackground: ["white", "lightskyblue", "black"],
-      minimisedSlider: false,
-      sliderPosition: "",
-      timeMax: 100,
-      orginalDuration: "",
-      animateDuration: "6secs",
-      playSpeed: [
-        {
-          value: 0.1,
-          label: "0.1x"
-        },
-        {
-          value: 0.5,
-          label: "0.5x"
-        },
-        {
-          value: 1,
-          label: "1x"
-        },
-        {
-          value: 2,
-          label: "2x"
-        },
-        {
-          value: 5,
-          label: "5x"
-        },
-        {
-          value: 10,
-          label: "10x"
-        }
-      ],
-      currentSpeed: 1,
-      timeStamps: {}
-    };
-  },
-  watch: {
-    url: {
-      handler: function(newValue) {
-        if (this.state === undefined || this.state.url === undefined)
-          this.setURL(newValue);
-      },
-      immediate: true
-    },
-    region: {
-      handler: function(region) {
-        if (!(this.state || this.viewURL))
-          this.setFocusedRegion(region);
-      },
-      immediate: true,
-    },
-    state: {
-      handler: function(state) {
-        this.setState(state);
-      },
-      immediate: true,
-      deep: true
-    },
-    viewURL: {
-      handler: function(viewURL) {
-        this.updateViewURL(viewURL);
-      },
-      immediate: true,
-    },
-    helpMode: function(val) {
-      this.setHelpMode(val);
-    },
-    displayMarkers: function(val) {
-      this.$module.scene.displayMarkers = val;
-    },
-    displayMinimap: function(val) {
-      this.$module.scene.displayMinimap = val;
-    },
-    "sceneData.currentTime": function() {
-      /**
-       * Triggers when scene time changes.
-       *
-       * @property {number} time Current build-in time of scene.
-       * of selected object.
-       */
-      this.$emit("timeChanged", this.sceneData.currentTime);
-    },
-    duration: function() {
-      this.$module.scene.setDuration(this.duration);
-    },
-    minimapSettings: {
-      deep: true,
-      handler: "updateMinimapScissor"
-    },
-    render: function(val) {
-      this.toggleRendering(val);
-    }
-  },
-  mounted: function() {
-    let eventNotifier = new EventNotifier();
-    eventNotifier.subscribe(this, this.eventNotifierCallback);
-    this.$module.addNotifier(eventNotifier);
-    this.$module.addOrganPartAddedCallback(this.organsAdded);
-    this.$module.initialiseRenderer(this.$refs.display);
-    this.toggleRendering(this.render);
-    this.$module.toolTip = undefined;
-    this.ro = new ResizeObserver(this.adjustLayout).observe(
-      this.$refs.scaffoldContainer
-    );
-    this.defaultRate = this.$module.getPlayRate();
-  },
-  beforeDestroy: function() {
-    if (this.ro) this.ro.disconnect();
-    this.$module.destroy();
-    this.$module = undefined;
   }
 };
 </script>

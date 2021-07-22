@@ -1,23 +1,30 @@
 <template>
-  <div class="opacity-control" ref="control" v-if="material!=undefined">
+  <div
+    v-if="material!=undefined"
+    ref="control"
+    class="opacity-control"
+  >
     <el-container class="opacity-container">
-      <el-header height="37px" class="header">
+      <el-header
+        height="37px"
+        class="header"
+      >
         <div>Opacity</div>
-        <i class="el-icon-arrow-right icon"></i>
+        <i class="el-icon-arrow-right icon" />
       </el-header>
       <el-main class="main">
         <div>Opacity</div>
         <div class="block">
-          <span class="display">{{displayString}}</span>
+          <span class="display">{{ displayString }}</span>
           <el-slider
-            class="my-slider"
-            :step=0.01
-            :min=0
-            :max=1
             v-model="material.opacity"
+            class="my-slider"
+            :step="0.01"
+            :min="0"
+            :max="1"
             :format-tooltip="formatTooltip"
-            :show-tooltip=false
-          ></el-slider>
+            :show-tooltip="false"
+          />
         </div>
       </el-main>
     </el-container>
@@ -42,19 +49,6 @@ Vue.use(Slider);
  */
 export default {
   name: "OpacityControls",
-  methods: {
-    formatTooltip(val) {
-      this.displayString = Math.floor(100 * val + 0.5) + "%";
-      return this.displayString;
-    },
-    setObject(object) {
-      if (object)
-        this.material = object.morph.material;
-      else
-        this.material = undefined;
-      this._zincobject = object;
-    },
-  },
   data: function() {
     return {
       displayString: "100%",
@@ -70,6 +64,19 @@ export default {
   },
   mounted: function() {
     this._zincobject = undefined;
+  },
+  methods: {
+    formatTooltip(val) {
+      this.displayString = Math.floor(100 * val + 0.5) + "%";
+      return this.displayString;
+    },
+    setObject(object) {
+      if (object)
+        this.material = object.morph.material;
+      else
+        this.material = undefined;
+      this._zincobject = object;
+    },
   }
 };
 </script>

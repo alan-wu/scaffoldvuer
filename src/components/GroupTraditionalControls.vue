@@ -1,39 +1,57 @@
 <template>
   <div class="check-list">
-    <div class="control-menu" ref="control-menu" @click="toggleControl">
-      <div class="bar1"></div>
-      <div class="bar2"></div>
-      <div class="bar3"></div>
+    <div
+      ref="control-menu"
+      class="control-menu"
+      @click="toggleControl"
+    >
+      <div class="bar1" />
+      <div class="bar2" />
+      <div class="bar3" />
     </div>
     <div :style="toggleStyle">
       <el-row style="margin-bottom:10px;">
-        <el-button type="primary" @click="viewAll" round>View all</el-button>
+        <el-button
+          type="primary"
+          round
+          @click="viewAll"
+        >
+          View all
+        </el-button>
       </el-row>
       <el-collapse v-model="activeCollapseItems">
         <el-collapse-item
           v-for="(group, type) in primitivesList"
-          :title="type"
           :key="type"
+          :title="type"
           :name="type"
         >
-          <el-checkbox-group v-model="group.checkbox" size="small">
-            <el-row v-for="item in group.sorted" :key="item">
+          <el-checkbox-group
+            v-model="group.checkbox"
+            size="small"
+          >
+            <el-row
+              v-for="item in group.sorted"
+              :key="item"
+            >
               <div style="display: flex;justify-content: space-between;">
                 <el-checkbox
                   style="margin-top:3px;"
                   :label="item"
-                  @change="visibilityToggle(item, $event, type)"
                   :checked="true"
                   border
+                  @change="visibilityToggle(item, $event, type)"
                   @mouseover.native="checkboxHover(item)"
-                >{{item}}</el-checkbox>
+                >
+                  {{ item }}
+                </el-checkbox>
                 <el-color-picker
                   v-if="showColourPicker&&colour(type, item)"
                   style="margin-top:3px;"
                   :value="colour(type, item)"
-                  @change="colourChanged(type, item, $event)"
                   size="small"
-                ></el-color-picker>
+                  @change="colourChanged(type, item, $event)"
+                />
               </div>
             </el-row>
           </el-checkbox-group>
@@ -78,53 +96,6 @@ const getPrimitivesListWithGroupName = function(scene, type, name) {
 
 export default {
   name: "TraditionalControls",
-  methods: {
-    toggleControl: function() {
-      this.$refs["control-menu"].classList.toggle("change");
-      if (this.toggleStyle.visibility == "hidden") {
-        this.toggleStyle.visibility = "visible";
-        this.toggleStyle.opacity = 1.0;
-      }
-      else {
-        this.toggleStyle.opacity = 0.0;
-        this.toggleStyle.visibility = "hidden";
-      }
-    },
-    checkboxHover: function(item) {
-      this.module.setHighlightedByGroupName(item);
-    },
-    viewAll: function() {
-      this.module.viewAll();
-    },
-    visibilityToggle: function(item, event, type) {
-      let typeName = type;
-      if (typeName == "Surfaces") typeName = "Geometries";
-      this.module.changeOrganPartsVisibility(
-        item,
-        event,
-        typeName.toLowerCase()
-      );
-    },
-    colourChanged: function(type, name, colour) {
-      let array = getPrimitivesListWithGroupName(
-        this.module.scene,
-        type,
-        name
-      );
-      let hexString = colour.replace("#", "0x");
-      array.forEach(object => object.setColourHex(hexString));
-      this.lastColourChanged = name;
-    },
-    colour: function(type, name) {
-      let array = getPrimitivesListWithGroupName(
-        this.module.scene,
-        type,
-        name
-      );
-      if (array.length > 0) return "#" + array[0].getColourHex();
-      return undefined;
-    }
-  },
   props: { module: Object, showColourPicker: Boolean },
   data: function() {
     return {
@@ -174,6 +145,53 @@ export default {
       this.primitivesList.Pointsets.sorted = orderBy(
         this.primitivesList.Pointsets.primitives
       );
+    }
+  },
+  methods: {
+    toggleControl: function() {
+      this.$refs["control-menu"].classList.toggle("change");
+      if (this.toggleStyle.visibility == "hidden") {
+        this.toggleStyle.visibility = "visible";
+        this.toggleStyle.opacity = 1.0;
+      }
+      else {
+        this.toggleStyle.opacity = 0.0;
+        this.toggleStyle.visibility = "hidden";
+      }
+    },
+    checkboxHover: function(item) {
+      this.module.setHighlightedByGroupName(item);
+    },
+    viewAll: function() {
+      this.module.viewAll();
+    },
+    visibilityToggle: function(item, event, type) {
+      let typeName = type;
+      if (typeName == "Surfaces") typeName = "Geometries";
+      this.module.changeOrganPartsVisibility(
+        item,
+        event,
+        typeName.toLowerCase()
+      );
+    },
+    colourChanged: function(type, name, colour) {
+      let array = getPrimitivesListWithGroupName(
+        this.module.scene,
+        type,
+        name
+      );
+      let hexString = colour.replace("#", "0x");
+      array.forEach(object => object.setColourHex(hexString));
+      this.lastColourChanged = name;
+    },
+    colour: function(type, name) {
+      let array = getPrimitivesListWithGroupName(
+        this.module.scene,
+        type,
+        name
+      );
+      if (array.length > 0) return "#" + array[0].getColourHex();
+      return undefined;
     }
   }
 };
