@@ -1,17 +1,24 @@
 <template>
-  <div class="traditional-location" :class="{ open: drawerOpen, close: !drawerOpen }">
+  <div
+    class="traditional-location"
+    :class="{ open: drawerOpen, close: !drawerOpen }"
+  >
     <div class="traditional-container">
       <el-row>
         <el-col :span="12">
-          <div class="regions-display-text">Regions</div>
+          <div class="regions-display-text">
+            Regions
+          </div>
         </el-col>
         <el-col :span="12">
           <el-checkbox
+            v-model="checkAll"
             class="all-checkbox"
             :indeterminate="isIndeterminate"
-            v-model="checkAll"
             @change="handleCheckAllChange"
-          >Display all</el-checkbox>
+          >
+            Display all
+          </el-checkbox>
         </el-col>
       </el-row>
       <el-checkbox-group
@@ -21,26 +28,30 @@
         @change="handleCheckedItemsChange"
       >
         <div class="checkbox-group-inner">
-          <el-row v-for="item in sortedPrimitiveGroups" :key="item" :label="item">
+          <el-row
+            v-for="item in sortedPrimitiveGroups"
+            :key="item"
+            :label="item"
+          >
             <div class="checkbox-container">
               <el-checkbox
                 class="my-checkbox"
-                @click.native="itemClicked(item, $event)"
                 :label="item"
-                @change="visibilityToggle(item, $event)"
                 :checked="true"
-                @mouseover.native="checkboxHover(item)"
                 :class="{ activeItem: activeRegion === item, 
-                hoverItem: hoverRegion === item  }"
+                          hoverItem: hoverRegion === item }"
+                @click.native="itemClicked(item, $event)"
+                @change="visibilityToggle(item, $event)"
+                @mouseover.native="checkboxHover(item)"
               >
                 <el-color-picker
                   :class="{ 'show-picker' : showColourPicker }"
                   :value="getColour(item)"
-                  @change="setColour(item, $event)"
                   size="small"
                   :popper-class="myPopperClass"
+                  @change="setColour(item, $event)"
                 />
-                {{item}}
+                {{ item }}
               </el-checkbox>
             </div>
           </el-row>
@@ -48,11 +59,11 @@
       </el-checkbox-group>
     </div>
     <div
-      @click="toggleDrawer"
       class="drawer-button"
       :class="{ open: drawerOpen, close: !drawerOpen }"
+      @click="toggleDrawer"
     >
-      <i class="el-icon-arrow-left"></i>
+      <i class="el-icon-arrow-left" />
     </div>
   </div>
 </template>
@@ -76,6 +87,53 @@ Vue.use(Row);
  */
 export default {
   name: "TraditionalControls",
+  props: {
+    /**
+     * @ignore
+     */
+    module: {
+      type: Object,
+      default: undefined
+    },
+    /**
+     * Enable/disable colour picker
+     */
+    showColourPicker: Boolean
+  },
+  data: function() {
+    return {
+      checkAll: true,
+      isIndeterminate: false,
+      checkedItems: [],
+      sortedPrimitiveGroups: [],
+      activeRegion: "",
+      hoverRegion: "",
+      myPopperClass: "hide-scaffold-colour-popup",
+      drawerOpen: true
+    };
+  },
+  watch: {
+    showColourPicker: {
+      immediate: true,
+      handler: function() {
+        if (this.showColourPicker) this.myPopperClass = "showPicker";
+        else this.myPopperClass = "hide-scaffold-colour-popup";
+      }
+    }
+  },
+  created: function() {
+    let tmpArray = this.module.sceneData.geometries.concat(
+      this.module.sceneData.lines
+    );
+    tmpArray = tmpArray.concat(this.module.sceneData.glyphsets);
+    tmpArray = uniq(tmpArray.concat(this.module.sceneData.pointset));
+    this.sortedPrimitiveGroups = orderBy(tmpArray);
+    this.module.addOrganPartAddedCallback(this.organsAdded);
+    this.module.graphicsHighlight.selectColour = 0x444444;
+  },
+  destroyed: function() {
+    this.sortedPrimitiveGroups = undefined;
+  },
   methods: {
     /**
      * This is called when a new organ is read into the scene.
@@ -260,50 +318,6 @@ export default {
       }
       this.handleCheckedItemsChange();
     }
-  },
-  props: {
-    /**
-     * @ignore
-     */
-    module: Object,
-    /**
-     * Enable/disable colour picker
-     */
-    showColourPicker: Boolean
-  },
-  data: function() {
-    return {
-      checkAll: true,
-      isIndeterminate: false,
-      checkedItems: [],
-      sortedPrimitiveGroups: [],
-      activeRegion: "",
-      hoverRegion: "",
-      myPopperClass: "hide-scaffold-colour-popup",
-      drawerOpen: true
-    };
-  },
-  watch: {
-    showColourPicker: {
-      immediate: true,
-      handler: function() {
-        if (this.showColourPicker) this.myPopperClass = "showPicker";
-        else this.myPopperClass = "hide-scaffold-colour-popup";
-      }
-    }
-  },
-  created: function() {
-    let tmpArray = this.module.sceneData.geometries.concat(
-      this.module.sceneData.lines
-    );
-    tmpArray = tmpArray.concat(this.module.sceneData.glyphsets);
-    tmpArray = uniq(tmpArray.concat(this.module.sceneData.pointset));
-    this.sortedPrimitiveGroups = orderBy(tmpArray);
-    this.module.addOrganPartAddedCallback(this.organsAdded);
-    this.module.graphicsHighlight.selectColour = 0x444444;
-  },
-  destroyed: function() {
-    this.sortedPrimitiveGroups = undefined;
   }
 };
 </script>

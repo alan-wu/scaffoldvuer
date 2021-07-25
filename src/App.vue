@@ -3,92 +3,128 @@
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Asap:400,400i,500,600,700&display=swap"
-    />
+    >
     <ScaffoldVuer
-      class="vuer"
-      :displayUI="displayUI"
-      :url="url"
       ref="scaffold"
-      @scaffold-selected="onSelected"
-      :helpMode="helpMode"
-      :displayMinimap="displayMinimap"
-      :displayMarkers="displayMarkers"
-      :minimapSettings="minimapSettings"
-      :showColourPicker="showColourPicker"
-      @timeChanged="updateCurrentTime"
+      class="vuer"
+      :display-u-i="displayUI"
+      :url="url"
+      :help-mode="helpMode"
+      :display-minimap="displayMinimap"
+      :display-markers="displayMarkers"
+      :minimap-settings="minimapSettings"
+      :show-colour-picker="showColourPicker"
       :render="render"
       :region="region"
-      :viewURL="viewURL"
+      :view-u-r-l="viewURL"
+      @scaffold-selected="onSelected"
+      @timeChanged="updateCurrentTime"
     />
     <el-popover
       placement="bottom"
       trigger="click"
       width="500"
       class="popover"
-      :appendToBody="false"
+      :append-to-body="false"
     >
       <div class="options-container">
         <el-row :gutter="20">
           <p>{{ selectedCoordinates }}</p>
         </el-row>
         <el-row :gutter="20">
-          <p v-if="currentTime!==0">time emited is: {{currentTime.toFixed(2)}}</p>
+          <p v-if="currentTime!==0">
+            time emited is: {{ currentTime.toFixed(2) }}
+          </p>
         </el-row>
         <el-row :gutter="20">
-          <el-col :span="6" :offset="2">
+          <el-col
+            :span="6"
+            :offset="2"
+          >
             <el-switch
+              v-model="displayMarkers"
               class="app-switch"
               active-text="Markers"
               active-icon-class="el-icon-location"
               active-color="#8300bf"
-              v-model="displayMarkers"
-            ></el-switch>
+            />
           </el-col>
-          <el-col :span="6" :offset="2">
+          <el-col
+            :span="6"
+            :offset="2"
+          >
             <el-switch
+              v-model="displayMinimap"
               class="app-switch"
               active-text="Minimap"
               active-icon-class="el-icon-discover"
               active-color="#8300bf"
-              v-model="displayMinimap"
-            ></el-switch>
+            />
           </el-col>
-          <el-col :span="6" :offset="2">
+          <el-col
+            :span="6"
+            :offset="2"
+          >
             <el-switch
+              v-model="tumbleOn"
               class="app-switch"
               active-text="Tumble"
               active-color="#8300bf"
-              v-model="tumbleOn"
-            ></el-switch>
+            />
           </el-col>
         </el-row>
         <el-row :gutter="20">
-          <el-button @click="helpMode = !helpMode" size="mini">Help Mode</el-button>
-          <el-button @click="screenCapture()" size="mini">Capture</el-button>
+          <el-button
+            size="mini"
+            @click="helpMode = !helpMode"
+          >
+            Help Mode
+          </el-button>
+          <el-button
+            size="mini"
+            @click="screenCapture()"
+          >
+            Capture
+          </el-button>
         </el-row>
         <el-row :gutter="20">
-          <el-button @click="saveSettings()" size="mini">Save Settings</el-button>
-          <el-button @click="restoreSettings()" size="mini">Restore Settings</el-button>
+          <el-button
+            size="mini"
+            @click="saveSettings()"
+          >
+            Save Settings
+          </el-button>
+          <el-button
+            size="mini"
+            @click="restoreSettings()"
+          >
+            Restore Settings
+          </el-button>
         </el-row>
         <el-row :gutter="20">
           <el-row :gutter="20">
             <el-switch
+              v-model="render"
               class="app-switch"
               active-text="Rendering"
               active-color="#8300bf"
-              v-model="render"
-            ></el-switch>
+            />
           </el-row>
         </el-row>
         <el-input
+          v-model="input"
           type="textarea"
           autosize
           placeholder="Please input"
-          v-model="input"
           style="padding-left:5%;width:90%;"
         />
       </div>
-      <el-button icon="el-icon-setting" slot="reference">Options</el-button>
+      <el-button
+        slot="reference"
+        icon="el-icon-setting"
+      >
+        Options
+      </el-button>
     </el-popover>
     <el-popover
       placement="bottom"
@@ -96,10 +132,15 @@
       width="800"
       class="models-popover"
       popper-class="table-popover"
-      :appendToBody="false"
+      :append-to-body="false"
     >
-      <ModelsTable @viewModelClicked="viewModelClicked"></ModelsTable>
-      <el-button icon="el-icon-folder-opened" slot="reference">Models</el-button>
+      <ModelsTable @viewModelClicked="viewModelClicked" />
+      <el-button
+        slot="reference"
+        icon="el-icon-folder-opened"
+      >
+        Models
+      </el-button>
     </el-popover>
   </div>
 </template>
@@ -145,10 +186,52 @@ const tumble = function(cameracontrol) {
 }
 */
 export default {
-  name: "app",
+  name: "App",
   components: {
     ScaffoldVuer,
     ModelsTable
+  },
+  data: function() {
+    return {
+      url: undefined,
+      input: undefined,
+      displayUI: true,
+      selectedCoordinates: undefined,
+      helpMode: false,
+      displayMarkers: true,
+      currentTime: 0,
+      displayMinimap: true,
+      tumbleOn: false,
+      showColourPicker: true,
+      minimapSettings: {
+        x_offset: 16,
+        y_offset: 50,
+        width: 128,
+        height: 128,
+        align: "top-right"
+      },
+      render: true,
+      region: "",
+      viewURL: ""
+    };
+  },
+  watch: {
+    input: function() {
+      this.parseInput();
+    },
+    tumbleOn: function(val) {
+      this.autoTumble(val);
+    },
+    "$route.query": {
+      handler: "parseQuery",
+      deep: true,
+      immediate: true
+    }
+  },
+
+  mounted: function() {
+    this._sceneSettings = [];
+    this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
   },
   methods: {
     saveSettings: function() {
@@ -210,48 +293,6 @@ export default {
       } else {
         this.viewURL = "";
       }
-    }
-  },
-  data: function() {
-    return {
-      url: undefined,
-      input: undefined,
-      displayUI: true,
-      selectedCoordinates: undefined,
-      helpMode: false,
-      displayMarkers: true,
-      currentTime: 0,
-      displayMinimap: true,
-      tumbleOn: false,
-      showColourPicker: true,
-      minimapSettings: {
-        x_offset: 16,
-        y_offset: 50,
-        width: 128,
-        height: 128,
-        align: "top-right"
-      },
-      render: true,
-      region: "",
-      viewURL: ""
-    };
-  },
-
-  mounted: function() {
-    this._sceneSettings = [];
-    this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
-  },
-  watch: {
-    input: function() {
-      this.parseInput();
-    },
-    tumbleOn: function(val) {
-      this.autoTumble(val);
-    },
-    "$route.query": {
-      handler: "parseQuery",
-      deep: true,
-      immediate: true
     }
   }
 };
