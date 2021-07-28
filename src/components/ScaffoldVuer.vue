@@ -171,6 +171,7 @@
           />
         </el-popover>
         <el-popover
+          v-model="hoverVisabilities[2].value"
           placement="top"
           :append-to-body="false"
           trigger="manual"
