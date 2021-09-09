@@ -1025,7 +1025,7 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style scoped lang="scss">
 .warning-icon {
   position: absolute;
   top: 15px;
@@ -1033,28 +1033,39 @@ export default {
   text-align: left;
   font-size: 25px;
   color: #ff8400;
+
+  &:hover {
+    cursor: pointer;
+  }
 }
-.warning-icon:hover {
-  cursor: pointer;
-}
+
 .warning-text {
   font-size: 15px;
   vertical-align: 5px;
 }
->>> .warning-popper {
+
+::v-deep .warning-popper {
   padding: 9px 10px;
   min-width: 150px;
   font-size: 12px;
   color: #fff;
   background-color: #ff8400;
-}
->>> .warning-popper.right-popper .popper__arrow::after {
-  border-right-color: #ff8400 !important;
+
+  &.right-popper {
+    .popper__arrow {
+      &::after {
+        border-right-color: #ff8400 !important;
+      }
+    }
+  }
 }
 
-#organsDisplayArea:focus {
-  outline: none !important;
-  border: 0px;
+
+#organsDisplayArea {
+  &:focus {
+    outline: none !important;
+    border: 0px;
+  }
 }
 
 .scaffold-container {
@@ -1071,17 +1082,20 @@ export default {
   bottom: 16px;
   transition: all 1s ease;
   outline: none;
-}
-.time-slider-container.minimised {
-  width: calc(40%);
-}
-.time-slider-container.left {
-  right: 155px;
-  width: calc(100% - 250px);
-}
-.time-slider-container.right {
-  right: 8px;
-  bottom: 54px;
+
+  &.minimised {
+    width: calc(40%);
+  }
+  
+  &.left {
+    right: 155px;
+    width: calc(100% - 250px);
+  }
+
+  &.right {
+    right: 8px;
+    bottom: 54px;
+  }
 }
 
 .slider-display-text {
@@ -1101,47 +1115,46 @@ export default {
   font-size: 14px;
 }
 
-.tab-content >>> .el-slider__marks-text {
-  margin-top: 12px;
-  margin-left: 8px;
-  font-size: 10px;
-}
+.tab-content ::v-deep .el-slider__marks-text {
+    margin-top: 12px;
+    margin-left: 8px;
+    font-size: 10px;
+  }
 
-.tab-content >>> .el-slider__stop {
-  width: 10px;
-  height: 10px;
-  top: -1px;
-  border: solid 1px #8300bf;
-}
+.tab-content  ::v-deep .el-slider__stop {
+    width: 10px;
+    height: 10px;
+    top: -1px;
+    border: solid 1px #8300bf;
+  }
 
 .animation-data {
   margin-left: 8px;
   line-height: 26px;
   display: flex;
-}
 
-.animation-data :not(:first-child) {
-  margin-left: 8px;
+  :not(:first-child) {
+    margin-left: 8px;
+  }
+  .purple {
+    padding-left: 2px;
+    color: #8300bf;
+  }
 }
-
-.animation-data .purple {
-  padding-left: 2px;
-  color: #8300bf;
-}
-
 .slider {
   margin-left: 30px;
   width: calc(100% - 88px);
   margin-top: -7px;
-}
 
-.slider >>> .el-slider__runway {
-  height: 10px;
-  margin: 14px 0;
-}
+  ::v-deep .el-slider__runway {
+    height: 10px;
+    margin: 14px 0;
+  }
 
-.slider >>> .el-slider__button-wrapper {
-  top: -13px;
+  ::v-deep .el-slider__button-wrapper {
+    top: -13px;
+  }
+
 }
 
 .zoomOut {
@@ -1152,12 +1165,11 @@ export default {
   padding-left: 8px;
 }
 
-
->>> .non-selectable{
+::v-deep .non-selectable{
   user-select: none;
 }
 
->>> .background-popper {
+::v-deep .background-popper {
   padding: 5px 12px;
   background-color: #ffffff;
   border: 1px solid rgb(131, 0, 191);
@@ -1165,26 +1177,29 @@ export default {
   height: 72px;
   width: 128px;
   min-width: 128px;
-}
 
->>> .background-popper.el-popper[x-placement^="top"] .popper__arrow {
-  border-top-color: #8300bf !important;
-}
-
->>> .background-popper.el-popper[x-placement^="top"] .popper__arrow:after {
-  border-top-color: #fff !important;
+  &.el-popper[x-placement^="top"] {
+    .popper__arrow {
+      border-top-color: #8300bf !important;
+      &:after {
+        border-top-color: #fff !important;
+      }
+    }
+  }
 }
 
 .background-colour {
   bottom: 16px;
   position: absolute;
   transition: all 1s ease;
-}
-.background-colour.open {
-  left: 322px;
-}
-.background-colour.close {
+
+  &.open {
+    left: 322px;
+  }
+
+  &.close {
   left: 24px;
+  }
 }
 
 .backgroundText {
@@ -1204,32 +1219,37 @@ export default {
   height: 20px;
   border: 1px solid rgb(144, 147, 153);
   margin-left: 20px;
-}
-.backgroundChoice.active {
-  border: 2px solid #8300bf;
-}
-.backgroundChoice:hover {
+
+  &.active {
+    border: 2px solid #8300bf;
+  }
+
+  &:hover {
   cursor: pointer;
+  }
+
+  &.white {
+    background-color: white;
+    margin-left: 10px;
+  }
+
+  &.black {
+    background-color: black;
+  }
+
+  &.lightskyblue {
+    background-color: lightskyblue;
+  }
 }
 
-.backgroundChoice.white {
-  background-color: white;
-  margin-left: 10px;
-}
-.backgroundChoice.black {
-  background-color: black;
-}
-.backgroundChoice.lightskyblue {
-  background-color: lightskyblue;
-}
 
 .icon-button {
   height: 24px !important;
   width: 24px !important;
-}
 
-.icon-button:hover {
-  cursor: pointer;
+  &:hover {
+    cursor: pointer;
+  }
 }
 
 .bottom-right-control {
@@ -1242,55 +1262,51 @@ export default {
   margin-left: 8px;
 }
 
-.time-slider-container >>> .el-tabs__header {
-  margin: 0px;
-  border-bottom: 1px solid rgb(144, 147, 153);
+.time-slider-container {
+  ::v-deep .el-tabs__header {
+    margin: 0px;
+    border-bottom: 1px solid rgb(144, 147, 153);
+  }
+
+  ::v-deep .el-tabs__content {
+    border-left: 1px solid rgb(144, 147, 153);
+    border-bottom: 1px solid rgb(144, 147, 153);
+    border-right: 1px solid rgb(144, 147, 153);
+    border-radius: 0px 0px 4px 4px;
+    background-color: white;
+  }
+
+  ::v-deep .el-tabs--card {
+    > .el-tabs__header {
+      .el-tabs__nav {
+        border: 1px solid rgb(144, 147, 153);
+        border-bottom: none;
+        border-radius: 4px 4px 0px 0px;
+        background-color: white;
+      }
+
+      .el-tabs__item {
+        height: 24px;
+        line-height: 24px;
+        padding: 0 8px !important;
+        border-bottom: 1px solid;
+        border-left: 1px solid rgb(144, 147, 153);
+        &:first-child {
+          border-left: none;
+        }
+        &.is-active {
+          border-bottom: 1px solid white;
+          color: rgb(48, 49, 51);
+        }
+        &:hover {
+          color: #8300bf;
+        }
+      }
+    }
+  }
 }
 
-.time-slider-container >>> .el-tabs__content {
-  border-left: 1px solid rgb(144, 147, 153);
-  border-bottom: 1px solid rgb(144, 147, 153);
-  border-right: 1px solid rgb(144, 147, 153);
-  border-radius: 0px 0px 4px 4px;
-  background-color: white;
-}
-
-.time-slider-container >>> .el-tabs--card > .el-tabs__header .el-tabs__nav {
-  border: 1px solid rgb(144, 147, 153);
-  border-bottom: none;
-  border-radius: 4px 4px 0px 0px;
-  background-color: white;
-}
-.time-slider-container
-  >>> .el-tabs--card
-  > .el-tabs__header
-  .el-tabs__item:first-child {
-  border-left: none;
-}
-
-.time-slider-container >>> .el-tabs--card > .el-tabs__header .el-tabs__item {
-  border-bottom: 1px solid;
-  border-left: 1px solid rgb(144, 147, 153);
-}
-
-.time-slider-container
-  >>> .el-tabs--card
-  > .el-tabs__header
-  .el-tabs__item.is-active {
-  border-bottom: 1px solid white;
-}
-
-.time-slider-container >>> .el-tabs__item {
-  height: 24px;
-  line-height: 24px;
-  padding: 0 8px !important;
-}
-
-.time-slider-container >>> .el-tabs__item.is-active {
-  color: rgb(48, 49, 51);
-}
-
->>> .scaffold-popper {
+::v-deep .scaffold-popper {
   padding: 6px 4px;
   font-size: 12px;
   color: rgb(48, 49, 51);
@@ -1299,59 +1315,56 @@ export default {
   white-space: nowrap;
   min-width: unset;
   pointer-events: none;
+
+  &.left-popper {
+    .popper__arrow {
+      border-left-color: #8300bf !important;
+      &:after {
+        border-left-color: #f3ecf6 !important;
+      }
+    }
+  }
+
+  &.right-popper {
+    .popper__arrow {
+      border-right-color: #8300bf !important;
+      &:after {
+        border-right-color: #f3ecf6 !important;
+      }
+    }
+  }
+
+  &.el-popper[x-placement^="top"] {
+    .popper__arrow {
+      border-top-color: #8300bf !important;
+      &:after {
+        border-top-color: #f3ecf6 !important;
+      }
+    }
+  }
 }
 
->>> .el-slider__button {
+::v-deep .el-slider__button {
   border: 2px solid #8300bf;
 }
 
->>> .el-slider__bar {
+::v-deep .el-slider__bar {
   background-color: #8300bf;
   height: 10px;
 }
 
->>> .scaffold-popper.left-popper .popper__arrow {
-  border-left-color: #8300bf !important;
-}
-
->>> .scaffold-popper.left-popper .popper__arrow:after {
-  border-left-color: #f3ecf6 !important;
-}
-
->>> .scaffold-popper.right-popper .popper__arrow {
-  border-right-color: #8300bf !important;
-}
-
->>> .scaffold-popper.right-popper .popper__arrow:after {
-  border-right-color: #f3ecf6 !important;
-}
-
->>> .scaffold-popper.el-popper[x-placement^="top"] .popper__arrow {
-  border-top-color: #8300bf !important;
-}
-
->>> .scaffold-popper.el-popper[x-placement^="top"] .popper__arrow:after {
-  border-top-color: #f3ecf6 !important;
-}
-
->>> .popper-zoomout {
+::v-deep .popper-zoomout {
   padding-right: 11px;
   left: -21px !important;
+  .popper__arrow {
+    left: 53px !important;
+  }
 }
 
->>> .popper-zoomout .popper__arrow {
-  left: 53px !important;
-}
-
->>> .el-loading-spinner i {
-  color: #8300bf;
-}
->>> .el-loading-spinner .el-loading-text {
-  color: #8300bf;
-}
-
->>> .el-tabs__item:hover {
-  color: #8300bf;
+::v-deep .el-loading-spinner {
+  i, .el-loading-text {
+    color: #8300bf;
+  }
 }
 
 .select-box {
@@ -1362,24 +1375,21 @@ export default {
   font-weight: 500;
   color: rgb(48, 49, 51);
   margin-left: 8px;
-}
 
-.select-box >>> .el-input__inner {
-  color: rgb(131, 0, 191);
-  height: 22px;
-  padding-left: 8px;
-  padding-right: 8px;
-  border: none;
-  font-family: "Asap", sans-serif;
-  line-height:22px;
-}
+  ::v-deep .el-input__inner {
+    color: rgb(131, 0, 191);
+    height: 22px;
+    padding-left: 8px;
+    padding-right: 8px;
+    border: none;
+    font-family: "Asap", sans-serif;
+    line-height:22px;
+  }
 
-.select-box >>> .el-input__icon {
-  line-height: 22px;
-}
-
-.select-box >>> .el-input {
-   line-height: 22px;
+  ::v-deep .el-input,
+  ::v-deep .el-input__icon {
+    line-height: 22px;
+  }
 }
 
 </style>

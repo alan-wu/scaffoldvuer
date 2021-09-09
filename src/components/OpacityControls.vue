@@ -82,7 +82,7 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style scoped lang="scss">
 .opacity-control {
   position: absolute;
   top: 255px;
@@ -135,7 +135,7 @@ export default {
   background-color: #fff;
 }
 
->>> .el-slider__bar {
+::v-deep .el-slider__bar {
   background-color: #8300bf;
 }
 </style>
