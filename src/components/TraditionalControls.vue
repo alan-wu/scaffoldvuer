@@ -408,19 +408,19 @@ export default {
 ::v-deep .el-checkbox__input {
   &.is-indeterminate, &.is-checked {
     .el-checkbox__inner {
-      background-color: #8300bf;
-      border-color: #8300bf;
+      background-color: $app-primary-color;
+      border-color: $app-primary-color;
     }
   }
 }
 
 ::v-deep .el-color-picker__color {
-  border: 1px solid #8300bf;
+  border: 1px solid $app-primary-color;
 }
 
 ::v-deep .el-checkbox__label {
   padding-left: 5px;
-  color: rgb(131, 0, 191) !important;
+  color: $app-primary-color !important;
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0px;
@@ -513,7 +513,7 @@ export default {
 .drawer-button {
   i {
     margin-top: 12px;
-    color: #8300bf;
+    color: $app-primary-color;
     transition-delay: 0.9s;
   }
   &.open {

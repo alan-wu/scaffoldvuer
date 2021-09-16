@@ -141,6 +141,6 @@ export default {
 }
 
 ::v-deep .el-slider__bar {
-  background-color: #8300bf;
+  background-color: $app-primary-color;
 }
 </style>

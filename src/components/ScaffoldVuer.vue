@@ -1051,7 +1051,6 @@ export default {
 @import "~element-ui/packages/theme-chalk/src/tabs";
 @import "~element-ui/packages/theme-chalk/src/tab-pane";
 
-
 .warning-icon {
   position: absolute;
   top: 15px;
@@ -1196,7 +1195,7 @@ export default {
 ::v-deep .background-popper {
   padding: 5px 12px;
   background-color: #ffffff;
-  border: 1px solid rgb(131, 0, 191);
+  border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
   height: 72px;
   width: 128px;
@@ -1204,7 +1203,7 @@ export default {
 
   &.el-popper[x-placement^="top"] {
     .popper__arrow {
-      border-top-color: #8300bf !important;
+      border-top-color: $app-primary-color !important;
       &:after {
         border-top-color: #fff !important;
       }
@@ -1245,7 +1244,7 @@ export default {
   margin-left: 20px;
 
   &.active {
-    border: 2px solid #8300bf;
+    border: 2px solid $app-primary-color;
   }
 
   &:hover {
@@ -1335,14 +1334,14 @@ export default {
   font-size: 12px;
   color: rgb(48, 49, 51);
   background-color: #f3ecf6;
-  border: 1px solid rgb(131, 0, 191);
+  border: 1px solid $app-primary-color;
   white-space: nowrap;
   min-width: unset;
   pointer-events: none;
 
   &.left-popper {
     .popper__arrow {
-      border-left-color: #8300bf !important;
+      border-left-color: $app-primary-color !important;
       &:after {
         border-left-color: #f3ecf6 !important;
       }
@@ -1351,7 +1350,7 @@ export default {
 
   &.right-popper {
     .popper__arrow {
-      border-right-color: #8300bf !important;
+      border-right-color: $app-primary-color !important;
       &:after {
         border-right-color: #f3ecf6 !important;
       }
@@ -1360,7 +1359,7 @@ export default {
 
   &.el-popper[x-placement^="top"] {
     .popper__arrow {
-      border-top-color: #8300bf !important;
+      border-top-color: $app-primary-color !important;
       &:after {
         border-top-color: #f3ecf6 !important;
       }
@@ -1390,7 +1389,7 @@ export default {
   margin-left: 8px;
 
   ::v-deep .el-input__inner {
-    color: rgb(131, 0, 191);
+    color: $app-primary-color;
     height: 22px;
     padding-left: 8px;
     padding-right: 8px;
@@ -1406,14 +1405,16 @@ export default {
 }
 </style>
 
-<style>
+<style scoped lang="scss">
+@import "@/assets/_variables";
+
 .time-slider-tooltip {
   padding: 6px 4px !important;
   font-family: "Asap", sans-serif;
   font-size: 12px !important;
   color: rgb(48, 49, 51) !important;
   background-color: #f3ecf6 !important;
-  border: 1px solid #8300bf !important;
+  border: 1px solid $app-primary-color !important;
   white-space: nowrap !important;
   min-width: unset !important;
 }
