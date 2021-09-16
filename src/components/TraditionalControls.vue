@@ -74,6 +74,7 @@ import Vue from "vue";
 import { Checkbox, CheckboxGroup, ColorPicker, Row } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
+
 const orderBy = require("lodash/orderBy");
 const uniq = require("lodash/uniq");
 locale.use(lang);
@@ -324,6 +325,12 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
+@import "@/assets/styles";
+@import "~element-ui/packages/theme-chalk/src/checkbox";
+@import "~element-ui/packages/theme-chalk/src/checkbox-group";
+@import "~element-ui/packages/theme-chalk/src/color-picker";
+@import "~element-ui/packages/theme-chalk/src/row";
+
 .checkbox-container {
   display: flex;
   cursor: pointer;
@@ -398,21 +405,6 @@ export default {
   }
 }
 
-
-::v-deep .el-color-picker {
-  height: 16px !important;
-  top: 3px;
-}
-
-::v-deep .el-color-picker__trigger {
-  margin-left: 8px;
-  margin-right: 8px;
-  padding: 0px;
-  height: 16px;
-  width: 16px;
-  border: 0px;
-}
-
 ::v-deep .el-checkbox__input {
   &.is-indeterminate, &.is-checked {
     .el-checkbox__inner {
@@ -442,6 +434,21 @@ export default {
 .my-checkbox {
   background-color: #fff;
   width: 100%;
+
+  ::v-deep .el-color-picker {
+    height: 16px !important;
+    top: 3px;
+  }
+
+  ::v-deep .el-color-picker__trigger {
+    margin-left: 8px;
+    margin-right: 8px;
+    padding: 0px;
+    height: 16px;
+    width: 16px;
+    border: 0px;
+  }
+
 }
 
 .hoverItem {
@@ -536,10 +543,3 @@ export default {
 }
 </style>
 
-
-<style scoped src="../styles/purple/checkbox.css">
-</style>
-<style scoped src="../styles/purple/checkbox-group.css">
-</style>
-<style scoped src="../styles/purple/color-picker.css">
-</style>

@@ -73,6 +73,7 @@ import models from './ModelsInformation'
 import { Button, Input, Table, TableColumn } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
+
 locale.use(lang);
 Vue.use(Button);
 Vue.use(Input);
@@ -105,17 +106,9 @@ export default {
 };
 </script>
 
-<style>
-.hide-scaffold-colour-popup {
-  display: none;
-}
-</style>
-
-<style scoped src="../styles/purple/button.css">
-</style>
-<style scoped src="../styles/purple/input.css">
-</style>
-<style scoped src="../styles/purple/table.css">
-</style>
-<style scoped src="../styles/purple/table-column.css">
+<style scoped lang="scss">
+@import "@/assets/styles";
+@import "~element-ui/packages/theme-chalk/src/input";
+@import "~element-ui/packages/theme-chalk/src/table";
+@import "~element-ui/packages/theme-chalk/src/table-column";
 </style>

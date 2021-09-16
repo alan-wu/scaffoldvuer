@@ -177,7 +177,11 @@
           trigger="manual"
           popper-class="scaffold-popper non-selectable"
         >
-          <div>Fit to<br>window</div>
+          <div>
+            Fit to
+            <br>
+            window
+          </div>
           <SvgIcon
             slot="reference"
             icon="fitWindow"
@@ -238,7 +242,6 @@ import TraditionalControls from "./TraditionalControls";
 import { SvgIcon, SvgSpriteColor } from "@abi-software/svg-sprite";
 
 import {
-  Button,
   Col,
   Loading,
   Option,
@@ -251,8 +254,8 @@ import {
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
+
 locale.use(lang);
-Vue.use(Button);
 Vue.use(Col);
 Vue.use(Loading.directive);
 Vue.use(Option);
@@ -291,7 +294,7 @@ export default {
      */
     url: {
       type: String,
-      default: ''
+      default: ""
     },
     /**
      * Show the colour control of set to true.
@@ -468,10 +471,9 @@ export default {
     },
     region: {
       handler: function(region) {
-        if (!(this.state || this.viewURL))
-          this.setFocusedRegion(region);
+        if (!(this.state || this.viewURL)) this.setFocusedRegion(region);
       },
-      immediate: true,
+      immediate: true
     },
     state: {
       handler: function(state) {
@@ -484,7 +486,7 @@ export default {
       handler: function(viewURL) {
         this.updateViewURL(viewURL);
       },
-      immediate: true,
+      immediate: true
     },
     helpMode: function(val) {
       this.setHelpMode(val);
@@ -660,7 +662,7 @@ export default {
      * Focus on named region
      */
     viewRegion: function(name) {
-      if ((name && name != "") && this.$module.scene) {
+      if (name && name != "" && this.$module.scene) {
         let objects = this.$module.scene.findObjectsWithGroupName(name);
         let box = this.$module.scene.getBoundingBoxOfZincObjects(objects);
         if (box) {
@@ -674,18 +676,20 @@ export default {
           this.viewRegion(name);
         } else {
           this.$module.setFinishDownloadCallback(
-            this.setURLFinishCallback({region: name}));
+            this.setURLFinishCallback({ region: name })
+          );
         }
       }
     },
     updateViewURL: function(viewURL) {
       if (viewURL) {
         if (this.isReady) {
-            const url = new URL(viewURL, this.url);
-            this.$module.scene.loadViewURL(url);
+          const url = new URL(viewURL, this.url);
+          this.$module.scene.loadViewURL(url);
         } else {
           this.$module.setFinishDownloadCallback(
-            this.setURLFinishCallback({viewURL: viewURL}));
+            this.setURLFinishCallback({ viewURL: viewURL })
+          );
         }
       }
     },
@@ -878,15 +882,14 @@ export default {
           } else if (options.viewURL && options.viewURL !== "") {
             const url = new URL(options.viewURL, this.url);
             this.$module.scene.loadViewURL(url);
-          } else if (options.region  && options.region !== "") {
+          } else if (options.region && options.region !== "") {
             this.viewRegion(options.region);
           }
           if (options.visibility) {
             // Some UIs may not be ready at this time.
             this.$nextTick(() => {
-              this.$refs.traditionalControl.setState(
-                options.visibility);
-            })
+              this.$refs.traditionalControl.setState(options.visibility);
+            });
           }
         }
         this.updateSettingsfromScene();
@@ -924,9 +927,11 @@ export default {
      */
     setState: function(state) {
       if (state) {
-        if (state.url && (state.url !== this._currentURL)) {
-          this.setURLAndState(state.url, {viewport: state.viewport,
-            visibility: state.visibility});
+        if (state.url && state.url !== this._currentURL) {
+          this.setURLAndState(state.url, {
+            viewport: state.viewport,
+            visibility: state.visibility
+          });
         } else {
           if (state.viewport || state.visibility) {
             if (this.isReady && this.$module.scene) {
@@ -938,8 +943,11 @@ export default {
                 this.$refs.traditionalControl.setState(state.visibility);
             } else {
               this.$module.setFinishDownloadCallback(
-                this.setURLFinishCallback({viewport: state.viewport, 
-                visibility: state.visibility}));
+                this.setURLFinishCallback({
+                  viewport: state.viewport,
+                  visibility: state.visibility
+                })
+              );
             }
           }
         }
@@ -947,23 +955,29 @@ export default {
     },
     /**
      * Function used for reading in new scaffold metadata and a custom
-     * viewport. This function will ignore the state prop and 
+     * viewport. This function will ignore the state prop and
      * read in the new url.
      *
      * @public
      */
     setURLAndState: function(newValue, state) {
       if (newValue != this._currentURL) {
-        let viewport = (state && state.viewport) ? state.viewport : undefined;
-        let visibility = (state && state.visibility) ? state.visibility : undefined;
+        let viewport = state && state.viewport ? state.viewport : undefined;
+        let visibility =
+          state && state.visibility ? state.visibility : undefined;
         this._currentURL = newValue;
         if (this.$refs.traditionalControl)
           this.$refs.traditionalControl.clear();
         this.loading = true;
         this.isReady = false;
         this.$module.setFinishDownloadCallback(
-          this.setURLFinishCallback({viewport: viewport, region: this.region,
-           viewURL: this.viewURL, visibility: visibility}));
+          this.setURLFinishCallback({
+            viewport: viewport,
+            region: this.region,
+            viewURL: this.viewURL,
+            visibility: visibility
+          })
+        );
         this.$module.loadOrgansFromURL(
           newValue,
           undefined,
@@ -1026,13 +1040,25 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
+@import "@/assets/styles";
+@import "~element-ui/packages/theme-chalk/src/col";
+@import "~element-ui/packages/theme-chalk/src/loading";
+@import "~element-ui/packages/theme-chalk/src/option";
+@import "~element-ui/packages/theme-chalk/src/popover";
+@import "~element-ui/packages/theme-chalk/src/row";
+@import "~element-ui/packages/theme-chalk/src/select";
+@import "~element-ui/packages/theme-chalk/src/slider";
+@import "~element-ui/packages/theme-chalk/src/tabs";
+@import "~element-ui/packages/theme-chalk/src/tab-pane";
+
+
 .warning-icon {
   position: absolute;
   top: 15px;
   left: 37px;
   text-align: left;
   font-size: 25px;
-  color: #ff8400;
+  color: $warning;
 
   &:hover {
     cursor: pointer;
@@ -1049,17 +1075,16 @@ export default {
   min-width: 150px;
   font-size: 12px;
   color: #fff;
-  background-color: #ff8400;
+  background-color: $warning;
 
   &.right-popper {
     .popper__arrow {
       &::after {
-        border-right-color: #ff8400 !important;
+        border-right-color: $warning !important;
       }
     }
   }
 }
-
 
 #organsDisplayArea {
   &:focus {
@@ -1086,7 +1111,7 @@ export default {
   &.minimised {
     width: calc(40%);
   }
-  
+
   &.left {
     right: 155px;
     width: calc(100% - 250px);
@@ -1116,17 +1141,17 @@ export default {
 }
 
 .tab-content ::v-deep .el-slider__marks-text {
-    margin-top: 12px;
-    margin-left: 8px;
-    font-size: 10px;
-  }
+  margin-top: 12px;
+  margin-left: 8px;
+  font-size: 10px;
+}
 
-.tab-content  ::v-deep .el-slider__stop {
-    width: 10px;
-    height: 10px;
-    top: -1px;
-    border: solid 1px #8300bf;
-  }
+.tab-content ::v-deep .el-slider__stop {
+  width: 10px;
+  height: 10px;
+  top: -1px;
+  border: solid 1px $app-primary-color;
+}
 
 .animation-data {
   margin-left: 8px;
@@ -1138,7 +1163,7 @@ export default {
   }
   .purple {
     padding-left: 2px;
-    color: #8300bf;
+    color: $app-primary-color;
   }
 }
 .slider {
@@ -1154,7 +1179,6 @@ export default {
   ::v-deep .el-slider__button-wrapper {
     top: -13px;
   }
-
 }
 
 .zoomOut {
@@ -1165,7 +1189,7 @@ export default {
   padding-left: 8px;
 }
 
-::v-deep .non-selectable{
+::v-deep .non-selectable {
   user-select: none;
 }
 
@@ -1198,7 +1222,7 @@ export default {
   }
 
   &.close {
-  left: 24px;
+    left: 24px;
   }
 }
 
@@ -1225,7 +1249,7 @@ export default {
   }
 
   &:hover {
-  cursor: pointer;
+    cursor: pointer;
   }
 
   &.white {
@@ -1241,7 +1265,6 @@ export default {
     background-color: lightskyblue;
   }
 }
-
 
 .icon-button {
   height: 24px !important;
@@ -1266,6 +1289,10 @@ export default {
   ::v-deep .el-tabs__header {
     margin: 0px;
     border-bottom: 1px solid rgb(144, 147, 153);
+  }
+
+  .el-row {
+    margin-bottom: 5px;
   }
 
   ::v-deep .el-tabs__content {
@@ -1297,9 +1324,6 @@ export default {
         &.is-active {
           border-bottom: 1px solid white;
           color: rgb(48, 49, 51);
-        }
-        &:hover {
-          color: #8300bf;
         }
       }
     }
@@ -1344,12 +1368,7 @@ export default {
   }
 }
 
-::v-deep .el-slider__button {
-  border: 2px solid #8300bf;
-}
-
 ::v-deep .el-slider__bar {
-  background-color: #8300bf;
   height: 10px;
 }
 
@@ -1358,12 +1377,6 @@ export default {
   left: -21px !important;
   .popper__arrow {
     left: 53px !important;
-  }
-}
-
-::v-deep .el-loading-spinner {
-  i, .el-loading-text {
-    color: #8300bf;
   }
 }
 
@@ -1383,7 +1396,7 @@ export default {
     padding-right: 8px;
     border: none;
     font-family: "Asap", sans-serif;
-    line-height:22px;
+    line-height: 22px;
   }
 
   ::v-deep .el-input,
@@ -1391,21 +1404,8 @@ export default {
     line-height: 22px;
   }
 }
-
 </style>
 
-<style scoped src="../styles/purple/button.css">
-</style>
-<style scoped src="../styles/purple/select.css">
-</style>
-<style scoped src="../styles/purple/slider.css">
-</style>
-<style scoped src="../styles/purple/loading.css">
-</style>
-<style scoped src="../styles/purple/tabs.css">
-</style>
-<style scoped src="../styles/purple/tab-pane.css">
-</style>
 <style>
 .time-slider-tooltip {
   padding: 6px 4px !important;

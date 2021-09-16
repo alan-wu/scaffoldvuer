@@ -26,5 +26,5 @@ module.exports = {
         return options
       })
       .end()
-  },
+  }
 }
