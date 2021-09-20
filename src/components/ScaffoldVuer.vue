@@ -1324,6 +1324,9 @@ export default {
           border-bottom: 1px solid white;
           color: rgb(48, 49, 51);
         }
+        &:hover {
+          color: $app-primary-color;
+        }
       }
     }
   }
@@ -1367,8 +1370,19 @@ export default {
   }
 }
 
+::v-deep .el-slider__button {
+  border: 2px solid $app-primary-color;
+}
+
 ::v-deep .el-slider__bar {
+  background-color: $app-primary-color;
   height: 10px;
+}
+
+::v-deep .el-loading-spinner {
+  i, .el-loading-text {
+    color: $app-primary-color;
+  }
 }
 
 ::v-deep .popper-zoomout {
