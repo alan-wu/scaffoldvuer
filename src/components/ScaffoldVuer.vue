@@ -1040,7 +1040,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-@import "@/assets/styles";
 @import "~element-ui/packages/theme-chalk/src/col";
 @import "~element-ui/packages/theme-chalk/src/loading";
 @import "~element-ui/packages/theme-chalk/src/option";
@@ -1419,9 +1418,7 @@ export default {
 }
 </style>
 
-<style scoped lang="scss">
-@import "@/assets/_variables";
-
+<style lang="scss">
 .time-slider-tooltip {
   padding: 6px 4px !important;
   font-family: "Asap", sans-serif;

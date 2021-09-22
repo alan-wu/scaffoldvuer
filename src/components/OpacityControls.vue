@@ -84,7 +84,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-@import "@/assets/styles";
 @import "~element-ui/packages/theme-chalk/src/container";
 @import "~element-ui/packages/theme-chalk/src/slider";
 

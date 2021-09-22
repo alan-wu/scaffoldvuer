@@ -299,7 +299,13 @@ export default {
 </script>
 
 <style lang="scss">
-@import '@/assets/app';
+@import "~element-ui/packages/theme-chalk/src/button";
+@import "~element-ui/packages/theme-chalk/src/col";
+@import "~element-ui/packages/theme-chalk/src/icon";
+@import "~element-ui/packages/theme-chalk/src/input";
+@import "~element-ui/packages/theme-chalk/src/switch";
+@import "~element-ui/packages/theme-chalk/src/popover";
+@import "~element-ui/packages/theme-chalk/src/row";
 
 #app {
   font-family: "Asap", sans-serif;

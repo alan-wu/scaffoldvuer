@@ -26,5 +26,13 @@ module.exports = {
         return options
       })
       .end()
+  },
+  css: {
+    //Import variables into all stylesheets.
+    loaderOptions: {
+      sass: {
+        prependData: `@import '@/assets/styles';`
+      }
+    }
   }
 }

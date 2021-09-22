@@ -325,7 +325,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-@import "@/assets/styles";
 @import "~element-ui/packages/theme-chalk/src/checkbox";
 @import "~element-ui/packages/theme-chalk/src/checkbox-group";
 @import "~element-ui/packages/theme-chalk/src/color-picker";

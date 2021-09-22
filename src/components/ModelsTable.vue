@@ -107,7 +107,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import "@/assets/styles";
 @import "~element-ui/packages/theme-chalk/src/input";
 @import "~element-ui/packages/theme-chalk/src/table";
 @import "~element-ui/packages/theme-chalk/src/table-column";
