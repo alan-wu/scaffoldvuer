@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/scaffoldvuer",
-  "version": "0.1.48",
+  "version": "0.1.48-wc-0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
     "styleguide": "vue-cli-service styleguidist",
     "styleguide:build": "vue-cli-service styleguidist:build"
   },
-  "main": "./dist/scaffoldvuer.common.js",
+  "main": "./dist/scaffoldvuer-wc.umd.min.js",
   "files": [
     "dist/*",
     "src/*",
