@@ -177,7 +177,11 @@
           trigger="manual"
           popper-class="scaffold-popper non-selectable"
         >
-          <div>Fit to<br>window</div>
+          <div>
+            Fit to
+            <br>
+            window
+          </div>
           <SvgIcon
             slot="reference"
             icon="fitWindow"
@@ -238,7 +242,6 @@ import TraditionalControls from "./TraditionalControls";
 import { SvgIcon, SvgSpriteColor } from "@abi-software/svg-sprite";
 
 import {
-  Button,
   Col,
   Loading,
   Option,
@@ -251,8 +254,8 @@ import {
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
+
 locale.use(lang);
-Vue.use(Button);
 Vue.use(Col);
 Vue.use(Loading.directive);
 Vue.use(Option);
@@ -291,7 +294,7 @@ export default {
      */
     url: {
       type: String,
-      default: ''
+      default: ""
     },
     /**
      * Show the colour control of set to true.
@@ -468,10 +471,9 @@ export default {
     },
     region: {
       handler: function(region) {
-        if (!(this.state || this.viewURL))
-          this.setFocusedRegion(region);
+        if (!(this.state || this.viewURL)) this.setFocusedRegion(region);
       },
-      immediate: true,
+      immediate: true
     },
     state: {
       handler: function(state) {
@@ -484,7 +486,7 @@ export default {
       handler: function(viewURL) {
         this.updateViewURL(viewURL);
       },
-      immediate: true,
+      immediate: true
     },
     helpMode: function(val) {
       this.setHelpMode(val);
@@ -660,7 +662,7 @@ export default {
      * Focus on named region
      */
     viewRegion: function(name) {
-      if ((name && name != "") && this.$module.scene) {
+      if (name && name != "" && this.$module.scene) {
         let objects = this.$module.scene.findObjectsWithGroupName(name);
         let box = this.$module.scene.getBoundingBoxOfZincObjects(objects);
         if (box) {
@@ -674,18 +676,20 @@ export default {
           this.viewRegion(name);
         } else {
           this.$module.setFinishDownloadCallback(
-            this.setURLFinishCallback({region: name}));
+            this.setURLFinishCallback({ region: name })
+          );
         }
       }
     },
     updateViewURL: function(viewURL) {
       if (viewURL) {
         if (this.isReady) {
-            const url = new URL(viewURL, this.url);
-            this.$module.scene.loadViewURL(url);
+          const url = new URL(viewURL, this.url);
+          this.$module.scene.loadViewURL(url);
         } else {
           this.$module.setFinishDownloadCallback(
-            this.setURLFinishCallback({viewURL: viewURL}));
+            this.setURLFinishCallback({ viewURL: viewURL })
+          );
         }
       }
     },
@@ -878,15 +882,14 @@ export default {
           } else if (options.viewURL && options.viewURL !== "") {
             const url = new URL(options.viewURL, this.url);
             this.$module.scene.loadViewURL(url);
-          } else if (options.region  && options.region !== "") {
+          } else if (options.region && options.region !== "") {
             this.viewRegion(options.region);
           }
           if (options.visibility) {
             // Some UIs may not be ready at this time.
             this.$nextTick(() => {
-              this.$refs.traditionalControl.setState(
-                options.visibility);
-            })
+              this.$refs.traditionalControl.setState(options.visibility);
+            });
           }
         }
         this.updateSettingsfromScene();
@@ -924,9 +927,11 @@ export default {
      */
     setState: function(state) {
       if (state) {
-        if (state.url && (state.url !== this._currentURL)) {
-          this.setURLAndState(state.url, {viewport: state.viewport,
-            visibility: state.visibility});
+        if (state.url && state.url !== this._currentURL) {
+          this.setURLAndState(state.url, {
+            viewport: state.viewport,
+            visibility: state.visibility
+          });
         } else {
           if (state.viewport || state.visibility) {
             if (this.isReady && this.$module.scene) {
@@ -938,8 +943,11 @@ export default {
                 this.$refs.traditionalControl.setState(state.visibility);
             } else {
               this.$module.setFinishDownloadCallback(
-                this.setURLFinishCallback({viewport: state.viewport, 
-                visibility: state.visibility}));
+                this.setURLFinishCallback({
+                  viewport: state.viewport,
+                  visibility: state.visibility
+                })
+              );
             }
           }
         }
@@ -947,23 +955,29 @@ export default {
     },
     /**
      * Function used for reading in new scaffold metadata and a custom
-     * viewport. This function will ignore the state prop and 
+     * viewport. This function will ignore the state prop and
      * read in the new url.
      *
      * @public
      */
     setURLAndState: function(newValue, state) {
       if (newValue != this._currentURL) {
-        let viewport = (state && state.viewport) ? state.viewport : undefined;
-        let visibility = (state && state.visibility) ? state.visibility : undefined;
+        let viewport = state && state.viewport ? state.viewport : undefined;
+        let visibility =
+          state && state.visibility ? state.visibility : undefined;
         this._currentURL = newValue;
         if (this.$refs.traditionalControl)
           this.$refs.traditionalControl.clear();
         this.loading = true;
         this.isReady = false;
         this.$module.setFinishDownloadCallback(
-          this.setURLFinishCallback({viewport: viewport, region: this.region,
-           viewURL: this.viewURL, visibility: visibility}));
+          this.setURLFinishCallback({
+            viewport: viewport,
+            region: this.region,
+            viewURL: this.viewURL,
+            visibility: visibility
+          })
+        );
         this.$module.loadOrgansFromURL(
           newValue,
           undefined,
@@ -1025,36 +1039,56 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style scoped lang="scss">
+@import "~element-ui/packages/theme-chalk/src/col";
+@import "~element-ui/packages/theme-chalk/src/loading";
+@import "~element-ui/packages/theme-chalk/src/option";
+@import "~element-ui/packages/theme-chalk/src/popover";
+@import "~element-ui/packages/theme-chalk/src/row";
+@import "~element-ui/packages/theme-chalk/src/select";
+@import "~element-ui/packages/theme-chalk/src/slider";
+@import "~element-ui/packages/theme-chalk/src/tabs";
+@import "~element-ui/packages/theme-chalk/src/tab-pane";
+
 .warning-icon {
   position: absolute;
   top: 15px;
   left: 37px;
   text-align: left;
   font-size: 25px;
-  color: #ff8400;
+  color: $warning;
+
+  &:hover {
+    cursor: pointer;
+  }
 }
-.warning-icon:hover {
-  cursor: pointer;
-}
+
 .warning-text {
   font-size: 15px;
   vertical-align: 5px;
 }
->>> .warning-popper {
+
+::v-deep .warning-popper {
   padding: 9px 10px;
   min-width: 150px;
   font-size: 12px;
   color: #fff;
-  background-color: #ff8400;
-}
->>> .warning-popper.right-popper .popper__arrow::after {
-  border-right-color: #ff8400 !important;
+  background-color: $warning;
+
+  &.right-popper {
+    .popper__arrow {
+      &::after {
+        border-right-color: $warning !important;
+      }
+    }
+  }
 }
 
-#organsDisplayArea:focus {
-  outline: none !important;
-  border: 0px;
+#organsDisplayArea {
+  &:focus {
+    outline: none !important;
+    border: 0px;
+  }
 }
 
 .scaffold-container {
@@ -1071,17 +1105,20 @@ export default {
   bottom: 16px;
   transition: all 1s ease;
   outline: none;
-}
-.time-slider-container.minimised {
-  width: calc(40%);
-}
-.time-slider-container.left {
-  right: 155px;
-  width: calc(100% - 250px);
-}
-.time-slider-container.right {
-  right: 8px;
-  bottom: 54px;
+
+  &.minimised {
+    width: calc(40%);
+  }
+
+  &.left {
+    right: 155px;
+    width: calc(100% - 250px);
+  }
+
+  &.right {
+    right: 8px;
+    bottom: 54px;
+  }
 }
 
 .slider-display-text {
@@ -1101,47 +1138,45 @@ export default {
   font-size: 14px;
 }
 
-.tab-content >>> .el-slider__marks-text {
+.tab-content ::v-deep .el-slider__marks-text {
   margin-top: 12px;
   margin-left: 8px;
   font-size: 10px;
 }
 
-.tab-content >>> .el-slider__stop {
+.tab-content ::v-deep .el-slider__stop {
   width: 10px;
   height: 10px;
   top: -1px;
-  border: solid 1px #8300bf;
+  border: solid 1px $app-primary-color;
 }
 
 .animation-data {
   margin-left: 8px;
   line-height: 26px;
   display: flex;
-}
 
-.animation-data :not(:first-child) {
-  margin-left: 8px;
+  :not(:first-child) {
+    margin-left: 8px;
+  }
+  .purple {
+    padding-left: 2px;
+    color: $app-primary-color;
+  }
 }
-
-.animation-data .purple {
-  padding-left: 2px;
-  color: #8300bf;
-}
-
 .slider {
   margin-left: 30px;
   width: calc(100% - 88px);
   margin-top: -7px;
-}
 
-.slider >>> .el-slider__runway {
-  height: 10px;
-  margin: 14px 0;
-}
+  ::v-deep .el-slider__runway {
+    height: 10px;
+    margin: 14px 0;
+  }
 
-.slider >>> .el-slider__button-wrapper {
-  top: -13px;
+  ::v-deep .el-slider__button-wrapper {
+    top: -13px;
+  }
 }
 
 .zoomOut {
@@ -1152,39 +1187,41 @@ export default {
   padding-left: 8px;
 }
 
-
->>> .non-selectable{
+::v-deep .non-selectable {
   user-select: none;
 }
 
->>> .background-popper {
+::v-deep .background-popper {
   padding: 5px 12px;
   background-color: #ffffff;
-  border: 1px solid rgb(131, 0, 191);
+  border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
   height: 72px;
   width: 128px;
   min-width: 128px;
-}
 
->>> .background-popper.el-popper[x-placement^="top"] .popper__arrow {
-  border-top-color: #8300bf !important;
-}
-
->>> .background-popper.el-popper[x-placement^="top"] .popper__arrow:after {
-  border-top-color: #fff !important;
+  &.el-popper[x-placement^="top"] {
+    .popper__arrow {
+      border-top-color: $app-primary-color !important;
+      &:after {
+        border-top-color: #fff !important;
+      }
+    }
+  }
 }
 
 .background-colour {
   bottom: 16px;
   position: absolute;
   transition: all 1s ease;
-}
-.background-colour.open {
-  left: 322px;
-}
-.background-colour.close {
-  left: 24px;
+
+  &.open {
+    left: 322px;
+  }
+
+  &.close {
+    left: 24px;
+  }
 }
 
 .backgroundText {
@@ -1204,32 +1241,36 @@ export default {
   height: 20px;
   border: 1px solid rgb(144, 147, 153);
   margin-left: 20px;
-}
-.backgroundChoice.active {
-  border: 2px solid #8300bf;
-}
-.backgroundChoice:hover {
-  cursor: pointer;
-}
 
-.backgroundChoice.white {
-  background-color: white;
-  margin-left: 10px;
-}
-.backgroundChoice.black {
-  background-color: black;
-}
-.backgroundChoice.lightskyblue {
-  background-color: lightskyblue;
+  &.active {
+    border: 2px solid $app-primary-color;
+  }
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  &.white {
+    background-color: white;
+    margin-left: 10px;
+  }
+
+  &.black {
+    background-color: black;
+  }
+
+  &.lightskyblue {
+    background-color: lightskyblue;
+  }
 }
 
 .icon-button {
   height: 24px !important;
   width: 24px !important;
-}
 
-.icon-button:hover {
-  cursor: pointer;
+  &:hover {
+    cursor: pointer;
+  }
 }
 
 .bottom-right-control {
@@ -1242,116 +1283,113 @@ export default {
   margin-left: 8px;
 }
 
-.time-slider-container >>> .el-tabs__header {
-  margin: 0px;
-  border-bottom: 1px solid rgb(144, 147, 153);
+.time-slider-container {
+  ::v-deep .el-tabs__header {
+    margin: 0px;
+    border-bottom: 1px solid rgb(144, 147, 153);
+  }
+
+  .el-row {
+    margin-bottom: 5px;
+  }
+
+  ::v-deep .el-tabs__content {
+    border-left: 1px solid rgb(144, 147, 153);
+    border-bottom: 1px solid rgb(144, 147, 153);
+    border-right: 1px solid rgb(144, 147, 153);
+    border-radius: 0px 0px 4px 4px;
+    background-color: white;
+  }
+
+  ::v-deep .el-tabs--card {
+    > .el-tabs__header {
+      .el-tabs__nav {
+        border: 1px solid rgb(144, 147, 153);
+        border-bottom: none;
+        border-radius: 4px 4px 0px 0px;
+        background-color: white;
+      }
+
+      .el-tabs__item {
+        height: 24px;
+        line-height: 24px;
+        padding: 0 8px !important;
+        border-bottom: 1px solid;
+        border-left: 1px solid rgb(144, 147, 153);
+        &:first-child {
+          border-left: none;
+        }
+        &.is-active {
+          border-bottom: 1px solid white;
+          color: rgb(48, 49, 51);
+        }
+        &:hover {
+          color: $app-primary-color;
+        }
+      }
+    }
+  }
 }
 
-.time-slider-container >>> .el-tabs__content {
-  border-left: 1px solid rgb(144, 147, 153);
-  border-bottom: 1px solid rgb(144, 147, 153);
-  border-right: 1px solid rgb(144, 147, 153);
-  border-radius: 0px 0px 4px 4px;
-  background-color: white;
-}
-
-.time-slider-container >>> .el-tabs--card > .el-tabs__header .el-tabs__nav {
-  border: 1px solid rgb(144, 147, 153);
-  border-bottom: none;
-  border-radius: 4px 4px 0px 0px;
-  background-color: white;
-}
-.time-slider-container
-  >>> .el-tabs--card
-  > .el-tabs__header
-  .el-tabs__item:first-child {
-  border-left: none;
-}
-
-.time-slider-container >>> .el-tabs--card > .el-tabs__header .el-tabs__item {
-  border-bottom: 1px solid;
-  border-left: 1px solid rgb(144, 147, 153);
-}
-
-.time-slider-container
-  >>> .el-tabs--card
-  > .el-tabs__header
-  .el-tabs__item.is-active {
-  border-bottom: 1px solid white;
-}
-
-.time-slider-container >>> .el-tabs__item {
-  height: 24px;
-  line-height: 24px;
-  padding: 0 8px !important;
-}
-
-.time-slider-container >>> .el-tabs__item.is-active {
-  color: rgb(48, 49, 51);
-}
-
->>> .scaffold-popper {
+::v-deep .scaffold-popper {
   padding: 6px 4px;
   font-size: 12px;
   color: rgb(48, 49, 51);
   background-color: #f3ecf6;
-  border: 1px solid rgb(131, 0, 191);
+  border: 1px solid $app-primary-color;
   white-space: nowrap;
   min-width: unset;
   pointer-events: none;
+
+  &.left-popper {
+    .popper__arrow {
+      border-left-color: $app-primary-color !important;
+      &:after {
+        border-left-color: #f3ecf6 !important;
+      }
+    }
+  }
+
+  &.right-popper {
+    .popper__arrow {
+      border-right-color: $app-primary-color !important;
+      &:after {
+        border-right-color: #f3ecf6 !important;
+      }
+    }
+  }
+
+  &.el-popper[x-placement^="top"] {
+    .popper__arrow {
+      border-top-color: $app-primary-color !important;
+      &:after {
+        border-top-color: #f3ecf6 !important;
+      }
+    }
+  }
 }
 
->>> .el-slider__button {
-  border: 2px solid #8300bf;
+::v-deep .el-slider__button {
+  border: 2px solid $app-primary-color;
 }
 
->>> .el-slider__bar {
-  background-color: #8300bf;
+::v-deep .el-slider__bar {
+  background-color: $app-primary-color;
   height: 10px;
 }
 
->>> .scaffold-popper.left-popper .popper__arrow {
-  border-left-color: #8300bf !important;
+::v-deep .el-loading-spinner {
+  i, .el-loading-text {
+    color: $app-primary-color;
+  }
 }
 
->>> .scaffold-popper.left-popper .popper__arrow:after {
-  border-left-color: #f3ecf6 !important;
-}
-
->>> .scaffold-popper.right-popper .popper__arrow {
-  border-right-color: #8300bf !important;
-}
-
->>> .scaffold-popper.right-popper .popper__arrow:after {
-  border-right-color: #f3ecf6 !important;
-}
-
->>> .scaffold-popper.el-popper[x-placement^="top"] .popper__arrow {
-  border-top-color: #8300bf !important;
-}
-
->>> .scaffold-popper.el-popper[x-placement^="top"] .popper__arrow:after {
-  border-top-color: #f3ecf6 !important;
-}
-
->>> .popper-zoomout {
+::v-deep .popper-zoomout {
   padding-right: 11px;
   left: -21px !important;
-}
-
->>> .popper-zoomout .popper__arrow {
-  left: 53px !important;
-}
-
->>> .el-loading-spinner i {
-  color: #8300bf;
-}
->>> .el-loading-spinner .el-loading-text {
-  color: #8300bf;
-}
-
->>> .el-tabs__item:hover {
-  color: #8300bf;
+  .popper__arrow {
+    left: 53px !important;
+  }
 }
 
 .select-box {
@@ -1362,48 +1400,32 @@ export default {
   font-weight: 500;
   color: rgb(48, 49, 51);
   margin-left: 8px;
+
+  ::v-deep .el-input__inner {
+    color: $app-primary-color;
+    height: 22px;
+    padding-left: 8px;
+    padding-right: 8px;
+    border: none;
+    font-family: "Asap", sans-serif;
+    line-height: 22px;
+  }
+
+  ::v-deep .el-input,
+  ::v-deep .el-input__icon {
+    line-height: 22px;
+  }
 }
-
-.select-box >>> .el-input__inner {
-  color: rgb(131, 0, 191);
-  height: 22px;
-  padding-left: 8px;
-  padding-right: 8px;
-  border: none;
-  font-family: "Asap", sans-serif;
-  line-height:22px;
-}
-
-.select-box >>> .el-input__icon {
-  line-height: 22px;
-}
-
-.select-box >>> .el-input {
-   line-height: 22px;
-}
-
 </style>
 
-<style scoped src="../styles/purple/button.css">
-</style>
-<style scoped src="../styles/purple/select.css">
-</style>
-<style scoped src="../styles/purple/slider.css">
-</style>
-<style scoped src="../styles/purple/loading.css">
-</style>
-<style scoped src="../styles/purple/tabs.css">
-</style>
-<style scoped src="../styles/purple/tab-pane.css">
-</style>
-<style>
+<style lang="scss">
 .time-slider-tooltip {
   padding: 6px 4px !important;
   font-family: "Asap", sans-serif;
   font-size: 12px !important;
   color: rgb(48, 49, 51) !important;
   background-color: #f3ecf6 !important;
-  border: 1px solid #8300bf !important;
+  border: 1px solid $app-primary-color !important;
   white-space: nowrap !important;
   min-width: unset !important;
 }

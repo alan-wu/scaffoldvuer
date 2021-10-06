@@ -37,6 +37,7 @@ import Vue from "vue";
 import { Container, Header, Icon, Main, Slider } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
+
 locale.use(lang);
 Vue.use(Container);
 Vue.use(Header);
@@ -82,7 +83,10 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style scoped lang="scss">
+@import "~element-ui/packages/theme-chalk/src/container";
+@import "~element-ui/packages/theme-chalk/src/slider";
+
 .opacity-control {
   position: absolute;
   top: 255px;
@@ -135,12 +139,7 @@ export default {
   background-color: #fff;
 }
 
->>> .el-slider__bar {
-  background-color: #8300bf;
+::v-deep .el-slider__bar {
+  background-color: $app-primary-color;
 }
-</style>
-
-<style scoped src="../styles/purple/container.css">
-</style>
-<style scoped src="../styles/purple/slider.css">
 </style>

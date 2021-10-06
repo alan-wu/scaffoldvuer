@@ -31,7 +31,10 @@
         <el-row :gutter="20">
           <p>{{ selectedCoordinates }}</p>
         </el-row>
-        <el-row :gutter="20">
+        <el-row
+          class="app-row"
+          :gutter="20"
+        >
           <p v-if="currentTime!==0">
             time emited is: {{ currentTime.toFixed(2) }}
           </p>
@@ -43,7 +46,6 @@
           >
             <el-switch
               v-model="displayMarkers"
-              class="app-switch"
               active-text="Markers"
               active-icon-class="el-icon-location"
               active-color="#8300bf"
@@ -55,7 +57,6 @@
           >
             <el-switch
               v-model="displayMinimap"
-              class="app-switch"
               active-text="Minimap"
               active-icon-class="el-icon-discover"
               active-color="#8300bf"
@@ -67,7 +68,6 @@
           >
             <el-switch
               v-model="tumbleOn"
-              class="app-switch"
               active-text="Tumble"
               active-color="#8300bf"
             />
@@ -105,7 +105,6 @@
           <el-row :gutter="20">
             <el-switch
               v-model="render"
-              class="app-switch"
               active-text="Rendering"
               active-color="#8300bf"
             />
@@ -147,12 +146,13 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import ScaffoldVuer from "./components/ScaffoldVuer.vue";
+import { ScaffoldVuer } from "./components/index.js";
 import ModelsTable from "./components/ModelsTable.vue";
 import Vue from "vue";
 import { Button, Col, Icon, Input, Popover, Row, Switch } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
+
 locale.use(lang);
 Vue.use(Button);
 Vue.use(Col);
@@ -298,7 +298,15 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
+@import "~element-ui/packages/theme-chalk/src/button";
+@import "~element-ui/packages/theme-chalk/src/col";
+@import "~element-ui/packages/theme-chalk/src/icon";
+@import "~element-ui/packages/theme-chalk/src/input";
+@import "~element-ui/packages/theme-chalk/src/switch";
+@import "~element-ui/packages/theme-chalk/src/popover";
+@import "~element-ui/packages/theme-chalk/src/row";
+
 #app {
   font-family: "Asap", sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -331,14 +339,12 @@ body {
   position: absolute;
 }
 
-.app-switch .el-switch__label.is-active span {
-  color: #8300bf;
-}
-
-.el-row {
-  margin-bottom: 5px;
-  &:last-child {
-    margin-bottom: 0;
+.app-row {
+  .el-row {
+    margin-bottom: 5px;
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
 }
 
@@ -350,13 +356,4 @@ body {
 .table-popover {
   opacity: 0.9;
 }
-</style>
-
-<style scoped src="./styles/purple/button.css">
-</style>
-<style scoped src="./styles/purple/icon.css">
-</style>
-<style scoped src="./styles/purple/input.css">
-</style>
-<style scoped src="./styles/purple/popover.css">
 </style>

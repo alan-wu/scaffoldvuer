@@ -74,6 +74,7 @@ import Vue from "vue";
 import { Checkbox, CheckboxGroup, ColorPicker, Row } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
+
 const orderBy = require("lodash/orderBy");
 const uniq = require("lodash/uniq");
 locale.use(lang);
@@ -323,7 +324,12 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style scoped lang="scss">
+@import "~element-ui/packages/theme-chalk/src/checkbox";
+@import "~element-ui/packages/theme-chalk/src/checkbox-group";
+@import "~element-ui/packages/theme-chalk/src/color-picker";
+@import "~element-ui/packages/theme-chalk/src/row";
+
 .checkbox-container {
   display: flex;
   cursor: pointer;
@@ -333,17 +339,16 @@ export default {
   position: absolute;
   bottom: 0px;
   transition: all 1s ease;
-}
 
-.traditional-location:focus {
-  outline: none;
-}
-
-.traditional-location.open {
-  left: 0px;
-}
-.traditional-location.close {
-  left: -298px;
+  &:focus{
+    outline: none;
+  }
+  &.open {
+   left: 0px;
+  }
+  &.close {
+    left: -298px;
+  }
 }
 
 .traditional-container {
@@ -388,48 +393,33 @@ export default {
   overflow: auto;
   scrollbar-color: #c0c4cc rgba(1, 1, 1, 0);
   scrollbar-width: thin;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    box-shadow: inset 0 0 6px #c0c4cc;
+  }
 }
 
-.checkbox-group-inner::-webkit-scrollbar {
-  width: 4px;
+::v-deep .el-checkbox__input {
+  &.is-indeterminate, &.is-checked {
+    .el-checkbox__inner {
+      background-color: $app-primary-color;
+      border-color: $app-primary-color;
+    }
+  }
 }
 
-.checkbox-group-inner::-webkit-scrollbar-thumb {
-  border-radius: 10px;
-  box-shadow: inset 0 0 6px #c0c4cc;
+::v-deep .el-color-picker__color {
+  border: 1px solid $app-primary-color;
 }
 
->>> .el-color-picker {
-  height: 16px !important;
-  top: 3px;
-}
-
->>> .el-color-picker__trigger {
-  margin-left: 8px;
-  margin-right: 8px;
-  padding: 0px;
-  height: 16px;
-  width: 16px;
-  border: 0px;
-}
-
->>> .el-checkbox__input.is-indeterminate .el-checkbox__inner {
-  background-color: #8300bf;
-  border-color: #8300bf;
-}
-
->>> .el-checkbox__input.is-checked .el-checkbox__inner {
-  background-color: #8300bf;
-  border-color: #8300bf;
-}
-
->>> .el-color-picker__color {
-  border: 1px solid #8300bf;
-}
-
->>> .el-checkbox__label {
+::v-deep .el-checkbox__label {
   padding-left: 5px;
-  color: rgb(131, 0, 191) !important;
+  color: $app-primary-color !important;
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0px;
@@ -443,27 +433,50 @@ export default {
 .my-checkbox {
   background-color: #fff;
   width: 100%;
+
+  ::v-deep .el-color-picker {
+    height: 16px !important;
+    top: 3px;
+  }
+
+  ::v-deep .el-color-picker__trigger {
+    margin-left: 8px;
+    margin-right: 8px;
+    padding: 0px;
+    height: 16px;
+    width: 16px;
+    border: 0px;
+  }
+
 }
 
 .hoverItem {
   background-color: #eee !important;
 }
 
->>> .el-color-picker__icon.el-icon-arrow-down {
-  display: none;
+::v-deep .el-color-picker__icon {
+  &.el-icon-arrow-down {
+    display: none;
+  }
 }
 
->>> .show-picker .el-color-picker__icon.el-icon-arrow-down {
-  display: block;
+::v-deep .show-picker {
+  .el-color-picker__icon {
+    &.el-icon-arrow-down {
+      display: block;
+    }
+  }
 }
 
->>> .my-drawer {
+::v-deep .my-drawer {
   background: rgba(0, 0, 0, 0);
   box-shadow: none;
 }
 
-.drawer >>> .el-drawer:focus {
-  outline: none;
+.drawer {
+  ::v-deep .el-drawer:focus {
+    outline: none;
+  }
 }
 
 .open-drawer {
@@ -496,10 +509,22 @@ export default {
   pointer-events: auto;
 }
 
-.drawer-button i {
-  margin-top: 12px;
-  color: #8300bf;
-  transition-delay: 0.9s;
+.drawer-button {
+  i {
+    margin-top: 12px;
+    color: $app-primary-color;
+    transition-delay: 0.9s;
+  }
+  &.open {
+    i {
+      transform: rotate(0deg) scaleY(2.5);   
+    }
+  }
+  &.close {
+    i {
+      transform: rotate(180deg) scaleY(2.5);   
+    }
+  }
 }
 
 .drawer-button.open i {
@@ -517,10 +542,3 @@ export default {
 }
 </style>
 
-
-<style scoped src="../styles/purple/checkbox.css">
-</style>
-<style scoped src="../styles/purple/checkbox-group.css">
-</style>
-<style scoped src="../styles/purple/color-picker.css">
-</style>
