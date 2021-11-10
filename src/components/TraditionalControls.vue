@@ -344,14 +344,22 @@ export default {
     outline: none;
   }
   &.open {
-   left: 0px;
+    left: 0px;
+    .traditional-container {
+      opacity: 1;
+    }
   }
   &.close {
     left: -298px;
+    .traditional-container {
+      pointer-events:none;
+      opacity: 0;
+    }
   }
 }
 
 .traditional-container {
+  transition: all 1s ease;
   float: left;
   padding-left: 16px;
   padding-right: 18px;
