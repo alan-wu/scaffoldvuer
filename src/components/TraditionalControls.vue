@@ -525,7 +525,7 @@ export default {
   }
   &.open {
     i {
-      transform: rotate(0deg) scaleY(2.5);   
+      transform: rotate(0deg) scaleY(2.5);
     }
   }
   &.close {
