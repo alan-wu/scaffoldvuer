@@ -54,7 +54,9 @@
         @object-hovered="objectHovered"
         @drawer-toggled="drawerToggled"
       />
-      <OpacityControls ref="opacityControl" />
+      <div class="opacity-box">
+        <OpacityControls ref="opacityControl" />
+      </div>
       <el-popover
         v-if="sceneData.timeVarying"
         ref="sliderPopover"
@@ -1434,5 +1436,12 @@ export default {
   white-space: nowrap;
   text-align: left;
   font-family: "Asap", sans-serif;
+}
+
+.opacity-box {
+  right: 0px;
+  bottom:200px;
+  position:absolute;
+
 }
 </style>

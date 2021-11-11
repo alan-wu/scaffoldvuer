@@ -4,13 +4,6 @@
     ref="control"
     class="opacity-control"
   >
-    <div
-      v-if="!drawerOpen"
-      class="tab-button open"
-      @click="toggleDrawer"
-    >
-      <i class="el-icon-arrow-left" />
-    </div>
     <el-drawer
       custom-class="my-drawer"
       class="drawer-content"
@@ -52,6 +45,13 @@
         </el-main>
       </el-container>
     </el-drawer>
+    <div
+      v-if="!drawerOpen"
+      class="tab-button open"
+      @click="toggleDrawer"
+    >
+      <i class="el-icon-arrow-left" />
+    </div>
   </div>
 </template>
 
@@ -116,9 +116,6 @@ export default {
 @import "~element-ui/packages/theme-chalk/src/slider";
 
 .opacity-control {
-  position: absolute;
-  top: 255px;
-  right: 0px;
   text-align: left;
   width:300px;
 }
@@ -201,6 +198,7 @@ export default {
   vertical-align: middle;
   cursor: pointer;
   pointer-events: auto;
+  //transition: bottom 0.3s;
 
   &.close {
     float: left;
@@ -211,17 +209,8 @@ export default {
 
   &.open {
     position: absolute;
-    top:26px;
+    bottom:26px;
   }
-
-  i {
-    margin-top: 12px;
-    color: $app-primary-color;
-    transform: scaleY(2.5);
-  }
-}
-
-.open-tab{
 
   i {
     margin-top: 12px;
