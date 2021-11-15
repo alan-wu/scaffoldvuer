@@ -4,42 +4,67 @@
     ref="control"
     class="opacity-control"
   >
-    <el-container class="opacity-container">
-      <el-header
-        height="37px"
-        class="header"
+    <el-drawer
+      custom-class="my-drawer"
+      class="drawer-content"
+      :visible.sync="drawerOpen"
+      :append-to-body="false"
+      :modal-append-to-body="false"
+      size="300"
+      :with-header="false"
+      :wrapper-closable="false"
+      :modal="false"
+    >
+      <div
+        v-if="drawerOpen"
+        class="tab-button close"
+        @click="toggleDrawer"
       >
-        <div>Opacity</div>
-        <i class="el-icon-arrow-right icon" />
-      </el-header>
-      <el-main class="main">
-        <div>Opacity</div>
-        <div class="block">
-          <span class="display">{{ displayString }}</span>
-          <el-slider
-            v-model="material.opacity"
-            class="my-slider"
-            :step="0.01"
-            :min="0"
-            :max="1"
-            :format-tooltip="formatTooltip"
-            :show-tooltip="false"
-          />
-        </div>
-      </el-main>
-    </el-container>
+        <i class="el-icon-arrow-right" />
+      </div>
+      <el-container class="opacity-container">
+        <el-header
+          height="37px"
+          class="header"
+        >
+          <div>Opacity</div>
+        </el-header>
+        <el-main class="main">
+          <div class="block">
+            <span class="display">{{ displayString }}</span>
+            <el-slider
+              v-model="material.opacity"
+              class="my-slider"
+              :step="0.01"
+              :min="0"
+              :max="1"
+              :format-tooltip="formatTooltip"
+              :show-tooltip="false"
+            />
+          </div>
+        </el-main>
+      </el-container>
+    </el-drawer>
+    <div
+      v-if="!drawerOpen"
+      class="tab-button open"
+      @click="toggleDrawer"
+    >
+      <i class="el-icon-arrow-left" />
+    </div>
   </div>
 </template>
 
 <script>
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
-import { Container, Header, Icon, Main, Slider } from "element-ui";
+import { Container, Drawer, Header, Icon, Main, Slider } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 
 locale.use(lang);
 Vue.use(Container);
+Vue.use(Drawer);
 Vue.use(Header);
 Vue.use(Icon);
 Vue.use(Main);
@@ -54,6 +79,7 @@ export default {
     return {
       displayString: "100%",
       material: undefined,
+      drawerOpen: true
     };
   },
   watch: {
@@ -71,13 +97,14 @@ export default {
       this.displayString = Math.floor(100 * val + 0.5) + "%";
       return this.displayString;
     },
-    setObject(object) {
-      if (object)
-        this.material = object.morph.material;
-      else
-        this.material = undefined;
-      this._zincobject = object;
+    toggleDrawer: function() {
+      this.drawerOpen = !this.drawerOpen;
     },
+    setObject(object) {
+      if (object) this.material = object.morph.material;
+      else this.material = undefined;
+      this._zincobject = object;
+    }
   }
 };
 </script>
@@ -85,13 +112,12 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 @import "~element-ui/packages/theme-chalk/src/container";
+@import "~element-ui/packages/theme-chalk/src/drawer";
 @import "~element-ui/packages/theme-chalk/src/slider";
 
 .opacity-control {
-  position: absolute;
-  top: 255px;
-  right: 20px;
   text-align: left;
+  width:300px;
 }
 
 .header {
@@ -118,17 +144,18 @@ export default {
 }
 
 .block {
-  right: 17px;
+  left: 40px;
   position: absolute;
   top: 57px;
-  width: 110px;
+  width: 200px;
 }
 
 .my-slider {
   position: absolute;
-  width: 65px;
+  width: 109px;
   top: -12px;
-  right: 0px;
+  left: 50px;
+  pointer-events: auto;
 }
 
 .opacity-container {
@@ -142,4 +169,54 @@ export default {
 ::v-deep .el-slider__bar {
   background-color: $app-primary-color;
 }
+
+.drawer-content {
+  position: relative;
+  height: 93px;
+  pointer-events: none;
+}
+
+::v-deep .my-drawer {
+  background: rgba(0, 0, 0, 0);
+  box-shadow: none;
+}
+
+::v-deep .my-drawer .el-drawer__body {
+  height: 93px;
+}
+
+.tab-button {
+  width: 20px;
+  height: 40px;
+  z-index: 8;
+  right: 0px;
+  
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
+  border: solid 1px #e4e7ed;
+  background-color: #FFFFFF;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  pointer-events: auto;
+  //transition: bottom 0.3s;
+
+  &.close {
+    float: left;
+    flex: 1;
+    border-right: 0;
+    margin-top: 26px;
+  }
+
+  &.open {
+    position: absolute;
+    bottom:26px;
+  }
+
+  i {
+    margin-top: 12px;
+    color: $app-primary-color;
+    transform: scaleY(2.5);
+  }
+}
+
 </style>
