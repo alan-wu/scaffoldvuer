@@ -953,6 +953,9 @@ export default {
         }
       }
     },
+    exportGLTF: function(binary) {
+      return this.$module.scene.exportGLTF(binary);
+    },
     /**
      * Function used for reading in new scaffold metadata and a custom
      * viewport. This function will ignore the state prop and

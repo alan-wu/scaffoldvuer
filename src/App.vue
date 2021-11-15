@@ -100,6 +100,12 @@
           >
             Restore Settings
           </el-button>
+          <el-button
+            size="mini"
+            @click="exportGLB()"
+          >
+            Export GLTF
+          </el-button>
         </el-row>
         <el-row :gutter="20">
           <el-row :gutter="20">
@@ -234,6 +240,31 @@ export default {
     this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
   },
   methods: {
+    exportGLTF: function() {
+      this.$refs.scaffold.exportGLTF(false)
+        .then(data =>{
+          let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+          let hrefElement = document.createElement("a");
+          document.body.append(hrefElement);
+          hrefElement.download = `export.gltf`;
+          hrefElement.href = dataStr;
+          hrefElement.click();
+          hrefElement.remove();
+        })
+    },
+    exportGLB: function() {
+      this.$refs.scaffold.exportGLTF(true)
+        .then(data =>{
+          let blob = new Blob([data], {type: "octet/stream"});
+          let url = window.URL.createObjectURL(blob);
+          let hrefElement = document.createElement("a");
+          document.body.append(hrefElement);
+          hrefElement.download = `export.glb`;
+          hrefElement.href = url;
+          hrefElement.click();
+          hrefElement.remove();
+        })
+    },
     saveSettings: function() {
       this._sceneSettings.push(this.$refs.scaffold.getState());
     },
