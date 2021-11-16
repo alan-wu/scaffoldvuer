@@ -54,7 +54,9 @@
         @object-hovered="objectHovered"
         @drawer-toggled="drawerToggled"
       />
-      <OpacityControls ref="opacityControl" />
+      <div class="opacity-box">
+        <OpacityControls ref="opacityControl" />
+      </div>
       <el-popover
         v-if="sceneData.timeVarying"
         ref="sliderPopover"
@@ -714,14 +716,14 @@ export default {
      */
     eventNotifierCallback: function(event) {
       if (event.eventType == 1) {
-        if (this.controls) {
+        if (this.$refs.traditionalControl) {
           if (event.identifiers[0]) {
             let id = event.identifiers[0].data.id
               ? event.identifiers[0].data.id
               : event.identifiers[0].data.group;
-            this.controls.changeActiveByName(id);
+            this.$refs.traditionalControl.changeActiveByName(id);
           } else {
-            this.controls.removeActive();
+            this.$refs.traditionalControl.removeActive();
           }
         }
         /**
@@ -732,13 +734,13 @@ export default {
          */
         this.$emit("scaffold-selected", event.identifiers);
       } else if (event.eventType == 2) {
-        if (this.controls) {
+        if (this.$refs.traditionalControl) {
           if (event.identifiers[0]) {
             let id = event.identifiers[0].data.id
               ? event.identifiers[0].data.id
               : event.identifiers[0].data.group;
-            this.controls.changeHoverByName(id);
-          } else this.controls.removeHover();
+            this.$refs.traditionalControl.changeHoverByName(id);
+          } else this.$refs.traditionalControl.removeHover();
         }
         /**
          * Triggers when an object has been highlighted
@@ -1437,5 +1439,11 @@ export default {
   white-space: nowrap;
   text-align: left;
   font-family: "Asap", sans-serif;
+}
+
+.opacity-box {
+  right: 0px;
+  bottom:200px;
+  position:absolute;
 }
 </style>
