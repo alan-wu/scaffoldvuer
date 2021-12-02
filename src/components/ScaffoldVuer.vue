@@ -695,6 +695,12 @@ export default {
         }
       }
     },
+    getRendererInfo: function() {
+      if (this.$module.zincRenderer) {
+        return this.$module.zincRenderer.getThreeJSRenderer().info;
+      }
+      return undefined;
+    },
     /**
      * Function used to rotate the scene.
      * Also called when the associated button is pressed.

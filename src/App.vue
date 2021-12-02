@@ -107,15 +107,50 @@
             Export GLTF
           </el-button>
         </el-row>
-        <el-row :gutter="20">
-          <el-row :gutter="20">
+        <el-row :gutter="30">
+          <el-col
+            :span="7"
+            :offset="4"
+          >
             <el-switch
               v-model="render"
               active-text="Rendering"
               active-color="#8300bf"
             />
-          </el-row>
+          </el-col>
+          <el-col
+            :span="8"
+            :offset="1"
+          >
+            <el-switch
+              v-model="renderInfoOn"
+              active-text="Renderer Info"
+              active-color="#8300bf"
+            />
+          </el-col>
         </el-row>
+        <template v-if="renderInfoOn && rendererInfo">
+          <el-row>
+            <el-col
+              v-for="(value, name) in rendererInfo.memory"
+              :key="name"
+              :offset="4"
+              :span="6"
+            >
+              {{ name }} : {{ value }}
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col
+              v-for="(value, name) in rendererInfo.render"
+              :key="name"
+              :offset="1"
+              :span="6"
+            >
+              {{ name }} : {{ value }}
+            </el-col>
+          </el-row>
+        </template>
         <el-input
           v-model="input"
           type="textarea"
@@ -218,7 +253,9 @@ export default {
       },
       render: true,
       region: "",
-      viewURL: ""
+      viewURL: "",
+      renderInfoOn: false,
+      rendererInfo: undefined
     };
   },
   watch: {
@@ -238,6 +275,7 @@ export default {
   mounted: function() {
     this._sceneSettings = [];
     this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
+    this.rendererInfo = this.$refs.scaffold.getRendererInfo();
   },
   methods: {
     exportGLTF: function() {
@@ -356,6 +394,12 @@ body {
 
 .options-container {
   text-align: center;
+  .el-row {
+    margin-bottom: 8px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 }
 
 .vuer {
