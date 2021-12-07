@@ -153,47 +153,41 @@ export default {
     /**
      * Select a region by its name.
      */
-    changeActiveByName: function(name) {
+    changeActiveByName: function(name, propagate) {
       let targetObject = this.getFirstZincObjectWithGroupName(name);
       if (targetObject && targetObject.getVisibility()) {
         this.activeRegion = name;
-        /**
-         * Triggers when an item has been selected.
-         *
-         * @property {object} target selected object.
-         */
-        this.$emit("object-selected", targetObject);
+        this.$emit("object-selected", targetObject, propagate);
+      } else {
+        this.removeActive(propagate);
       }
-      this.removeHover();
+      this.removeHover(propagate);
     },
     /**
      * Hover a region by its name.
      */
-    changeHoverByName: function(name) {
+    changeHoverByName: function(name, propagate) {
       let targetObject = this.getFirstZincObjectWithGroupName(name);
       if (targetObject) {
         this.hoverRegion = name;
-        /**
-         * Triggers when an item has been hovered over.
-         *
-         * @property {object} target hovered object.
-         */
-        this.$emit("object-hovered", targetObject);
+        this.$emit("object-hovered", targetObject, propagate);
+      } else {
+        this.removeHover(propagate);
       }
     },
     /**
      * Unselect the current selected region.
      */
-    removeActive: function() {
+    removeActive: function(propagate) {
       this.activeRegion = "";
-      this.$emit("object-selected", undefined);
+      this.$emit("object-selected", undefined, propagate);
     },
     /**
      * Unselect the current hover region.
      */
-    removeHover: function() {
+    removeHover: function(propagate) {
       this.hoverRegion = "";
-      this.$emit("object-hovered", undefined);
+      this.$emit("object-hovered", undefined, propagate);
     },
     /**
      * Reset the controls.
@@ -236,7 +230,7 @@ export default {
       }
     },
     checkboxHover: function(name) {
-      this.changeHoverByName(name);
+      this.changeHoverByName(name, true);
     },
     itemClicked: function(name, event) {
       if (
@@ -245,7 +239,7 @@ export default {
           event.target.classList.contains("el-checkbox__original")
         )
       ) {
-        this.changeActiveByName(name);
+        this.changeActiveByName(name, true);
         event.preventDefault();
       }
     },
@@ -272,10 +266,10 @@ export default {
       this.module.changeOrganPartsVisibility(item, event);
       if (event == false) {
         if (this.activeRegion === item) {
-          this.removeActive();
+          this.removeActive(true);
         }
         if (this.hoverRegion === item) {
-          this.removeHover();
+          this.removeHover(true);
         }
       }
     },

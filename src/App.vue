@@ -100,16 +100,57 @@
           >
             Restore Settings
           </el-button>
+          <el-button
+            size="mini"
+            @click="exportGLB()"
+          >
+            Export GLTF
+          </el-button>
         </el-row>
-        <el-row :gutter="20">
-          <el-row :gutter="20">
+        <el-row :gutter="30">
+          <el-col
+            :span="7"
+            :offset="4"
+          >
             <el-switch
               v-model="render"
               active-text="Rendering"
               active-color="#8300bf"
             />
-          </el-row>
+          </el-col>
+          <el-col
+            :span="8"
+            :offset="1"
+          >
+            <el-switch
+              v-model="renderInfoOn"
+              active-text="Renderer Info"
+              active-color="#8300bf"
+            />
+          </el-col>
         </el-row>
+        <template v-if="renderInfoOn && rendererInfo">
+          <el-row>
+            <el-col
+              v-for="(value, name) in rendererInfo.memory"
+              :key="name"
+              :offset="4"
+              :span="6"
+            >
+              {{ name }} : {{ value }}
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col
+              v-for="(value, name) in rendererInfo.render"
+              :key="name"
+              :offset="1"
+              :span="6"
+            >
+              {{ name }} : {{ value }}
+            </el-col>
+          </el-row>
+        </template>
         <el-input
           v-model="input"
           type="textarea"
@@ -212,7 +253,9 @@ export default {
       },
       render: true,
       region: "",
-      viewURL: ""
+      viewURL: "",
+      renderInfoOn: false,
+      rendererInfo: undefined
     };
   },
   watch: {
@@ -232,8 +275,34 @@ export default {
   mounted: function() {
     this._sceneSettings = [];
     this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
+    this.rendererInfo = this.$refs.scaffold.getRendererInfo();
   },
   methods: {
+    exportGLTF: function() {
+      this.$refs.scaffold.exportGLTF(false)
+        .then(data =>{
+          let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+          let hrefElement = document.createElement("a");
+          document.body.append(hrefElement);
+          hrefElement.download = `export.gltf`;
+          hrefElement.href = dataStr;
+          hrefElement.click();
+          hrefElement.remove();
+        })
+    },
+    exportGLB: function() {
+      this.$refs.scaffold.exportGLTF(true)
+        .then(data =>{
+          let blob = new Blob([data], {type: "octet/stream"});
+          let url = window.URL.createObjectURL(blob);
+          let hrefElement = document.createElement("a");
+          document.body.append(hrefElement);
+          hrefElement.download = `export.glb`;
+          hrefElement.href = url;
+          hrefElement.click();
+          hrefElement.remove();
+        })
+    },
     saveSettings: function() {
       this._sceneSettings.push(this.$refs.scaffold.getState());
     },
@@ -325,6 +394,12 @@ body {
 
 .options-container {
   text-align: center;
+  .el-row {
+    margin-bottom: 8px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 }
 
 .vuer {

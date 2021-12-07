@@ -695,6 +695,12 @@ export default {
         }
       }
     },
+    getRendererInfo: function() {
+      if (this.$module.zincRenderer) {
+        return this.$module.zincRenderer.getThreeJSRenderer().info;
+      }
+      return undefined;
+    },
     /**
      * Function used to rotate the scene.
      * Also called when the associated button is pressed.
@@ -721,9 +727,9 @@ export default {
             let id = event.identifiers[0].data.id
               ? event.identifiers[0].data.id
               : event.identifiers[0].data.group;
-            this.$refs.traditionalControl.changeActiveByName(id);
+            this.$refs.traditionalControl.changeActiveByName(id, true);
           } else {
-            this.$refs.traditionalControl.removeActive();
+            this.$refs.traditionalControl.removeActive(true);
           }
         }
         /**
@@ -739,8 +745,8 @@ export default {
             let id = event.identifiers[0].data.id
               ? event.identifiers[0].data.id
               : event.identifiers[0].data.group;
-            this.$refs.traditionalControl.changeHoverByName(id);
-          } else this.$refs.traditionalControl.removeHover();
+            this.$refs.traditionalControl.changeHoverByName(id, true);
+          } else this.$refs.traditionalControl.removeHover(true);
         }
         /**
          * Triggers when an object has been highlighted
@@ -781,29 +787,51 @@ export default {
         this.$module.updateTime(normalizedTime);
     },
     /**
-     * Set the selected zinc object
+     * A callback used by children components. Set the selected zinc object
      *
      * @param {object} object Zinc object
      */
-    objectSelected: function(object) {
+    objectSelected: function(object, propagate) {
       if (object !== this.selectedObject) {
         this.selectedObject = object;
         this.$refs.opacityControl.setObject(this.selectedObject);
-        if (object) this.$module.setSelectedByZincObject(object, true);
-        else this.$module.setSelectedByObjects([], true);
+        if (object) this.$module.setSelectedByZincObject(object, propagate);
+        else this.$module.setSelectedByObjects([], propagate);
       }
     },
     /**
-     * Set the highlighted zinc object
+     * A callback used by children components. Set the highlighted zinc object
      *
      * @param {object} object Zinc object
      */
-    objectHovered: function(object) {
+    objectHovered: function(object, propagate) {
       if (object !== this.hoveredObject) {
         this.hoveredObject = object;
-        if (object) this.$module.setHighlightedByZincObject(object, true);
-        else this.$module.setHighlightedByObjects([], true);
+        if (object) this.$module.setHighlightedByZincObject(object, propagate);
+        else this.$module.setHighlightedByObjects([], propagate);
       }
+    },
+    /**
+     * Set the selected by name.
+     *
+     * @param {name} name Name of the region
+     */
+    changeActiveByName: function(name, propagate) {
+      if (name === undefined)
+        this.$refs.traditionalControl.removeActive(propagate);
+      else
+        this.$refs.traditionalControl.changeActiveByName(name, propagate);
+    },
+    /**
+     * Set the highlighted by name.
+     *
+     * @param {name} name Name of the region
+     */
+    changeHighlightedByName: function(name, propagate) {
+      if (name === undefined)
+        this.$refs.traditionalControl.removeHover(propagate);
+      else
+        this.$refs.traditionalControl.changeHoverByName(name, propagate);
     },
     /**
      * Start the animation.
@@ -954,6 +982,9 @@ export default {
           }
         }
       }
+    },
+    exportGLTF: function(binary) {
+      return this.$module.scene.exportGLTF(binary);
     },
     /**
      * Function used for reading in new scaffold metadata and a custom
