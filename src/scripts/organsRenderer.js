@@ -467,7 +467,6 @@ const OrgansSceneData = function() {
 			      organScene.loadMetadataURL(url, _addOrganPartCallback(systemName, partName, false),
 			    	  downloadCompletedCallback());	      
 			      _this.scene = organScene;
-            console.log(_this.scene);
 			      _this.zincRenderer.setCurrentScene(organScene);
 			      _this.graphicsHighlight.reset();
 			      const zincCameraControl = organScene.getZincCameraControls();
