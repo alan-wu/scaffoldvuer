@@ -268,10 +268,8 @@ Vue.use(Slider);
 Vue.use(TabPane);
 Vue.use(Tabs);
 
-const OrgansViewer = require("physiomeportal/src/modules/organsRenderer")
-  .OrgansViewer;
-const EventNotifier = require("physiomeportal/src/utilities/eventNotifier")
-  .EventNotifier;
+const OrgansViewer = require("../scripts/organsRenderer").OrgansViewer;
+const EventNotifier = require("../scripts/eventNotifier").EventNotifier;
 
 /**
  * A vue component of the scaffold viewer.
@@ -535,7 +533,6 @@ export default {
     this.$module.addOrganPartAddedCallback(this.organsAdded);
     this.$module.initialiseRenderer(this.$refs.display);
     this.toggleRendering(this.render);
-    this.$module.toolTip = undefined;
     this.ro = new ResizeObserver(this.adjustLayout).observe(
       this.$refs.scaffoldContainer
     );
