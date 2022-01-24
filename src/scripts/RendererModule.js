@@ -57,31 +57,33 @@ RendererModule.prototype.getIntersectedObject = function(intersects) {
 }
 
 RendererModule.prototype.getAnnotationsFromObjects = function(objects) {
-    const annotations = [];
-    for (var i = 0; i < objects.length; i++) {
-    	const zincObject = objects[i].userData;
-      let annotation = undefined;
-      if (zincObject) {
-        if (zincObject.isGlyph || zincObject.isGlyphset) {
-          const glyphset = zincObject;
-          if (zincObject.isGlyph)
-            glyphset = zincObject.getGlyphset();
-          annotation = glyphset.userData ? glyphset.userData[0] : undefined;
-          if (annotation && annotation.data) {
-            if (objects[i].name && objects[i].name != "")
-              annotation.data.id = objects[i].name;
-            else
-              annotation.data.id = glyphset.groupName;
-          }
-        } else {
-          annotation = zincObject.userData ? zincObject.userData[0] : undefined;
-          if (annotation && annotation.data){
+  const annotations = [];
+  let count = 0;
+  for (var i = 0; i < objects.length; i++) {
+    const zincObject = objects[i].userData;
+    let annotation = undefined;
+    if (zincObject) {
+      if (zincObject.isGlyph || zincObject.isGlyphset) {
+        const glyphset = zincObject;
+        if (zincObject.isGlyph)
+          glyphset = zincObject.getGlyphset();
+        annotation = glyphset.userData ? glyphset.userData[0] : undefined;
+        if (annotation && annotation.data) {
+          if (objects[i].name && objects[i].name != "")
             annotation.data.id = objects[i].name;
-          }
+          else
+            annotation.data.id = glyphset.groupName;
+        }
+      } else {
+        annotation = zincObject.userData ? zincObject.userData[0] : undefined;
+        if (annotation && annotation.data){
+          annotation.data.id = objects[i].name;
         }
       }
-      annotations[i] = annotation;
     }
+    if (annotation)
+      annotations[count++] = annotation;
+  }
 	return annotations;
 }
 
