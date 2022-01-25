@@ -33,7 +33,7 @@
     "vue": "^2.6.10",
     "vue-drag-resize": "^1.3.2",
     "vue-router": "^3.5.1",
-    "zincjs": "^0.41.1"
+    "zincjs": "^0.41.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.0.0",
