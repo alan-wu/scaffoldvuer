@@ -7,7 +7,7 @@
     element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.3)"
   >
-    <SvgSpriteColor />
+    <map-svg-sprite-color />
     <div
       id="organsDisplayArea"
       ref="display"
@@ -76,13 +76,13 @@
         <el-tabs type="card">
           <el-tab-pane label="Animate scaffold">
             <el-row class="tab-content">
-              <SvgIcon
+              <map-svg-icon
                 v-if="isPlaying"
                 icon="pause"
                 class="icon-button video-button"
                 @click.native="play(false)"
               />
-              <SvgIcon
+              <map-svg-icon
                 v-else
                 icon="play"
                 class="video-button icon-button"
@@ -146,7 +146,7 @@
           trigger="manual"
           popper-class="scaffold-popper left-popper non-selectable"
         >
-          <SvgIcon
+          <map-svg-icon
             slot="reference"
             icon="zoomIn"
             class="icon-button zoomIn"
@@ -163,7 +163,7 @@
           trigger="manual"
           popper-class="scaffold-popper popper-zoomout non-selectable"
         >
-          <SvgIcon
+          <map-svg-icon
             slot="reference"
             icon="zoomOut"
             class="icon-button zoomOut"
@@ -184,7 +184,7 @@
             <br>
             window
           </div>
-          <SvgIcon
+          <map-svg-icon
             slot="reference"
             icon="fitWindow"
             class="icon-button fitWindow"
@@ -222,7 +222,7 @@
         trigger="manual"
         popper-class="scaffold-popper right-popper non-selectable"
       >
-        <SvgIcon
+        <map-svg-icon
           slot="reference"
           v-popover:backgroundPopover
           icon="changeBckgd"
@@ -241,7 +241,7 @@
 import Vue from "vue";
 import OpacityControls from "./OpacityControls";
 import TraditionalControls from "./TraditionalControls";
-import { SvgIcon, SvgSpriteColor } from "@abi-software/svg-sprite";
+import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
 
 import {
   Col,
@@ -281,8 +281,8 @@ export default {
   name: "ScaffoldVuer",
   components: {
     OpacityControls,
-    SvgIcon,
-    SvgSpriteColor,
+    MapSvgIcon,
+    MapSvgSpriteColor,
     TraditionalControls
   },
   props: {
