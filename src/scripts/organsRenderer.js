@@ -41,6 +41,7 @@ const OrgansSceneData = function() {
   const organPartAddedCallbacks = new Array();
   let finishDownloadCallback = undefined;
 	const modelsLoader = ModelsLoaderIn;
+  this.NDCCameraControl = undefined;
 	_this.typeName = "Organ Viewer";
 	
 	this.getSceneData = function() {
@@ -81,6 +82,28 @@ const OrgansSceneData = function() {
       _this.sceneData.nerveMap.additionalReader.setTime(currentTime / 
         duration);
 		_this.sceneData.currentTime = currentTime / duration * 100.0;
+  }
+
+  this.toggleSyncControl = (flag) => {
+    let cameraControl = this.scene.getZincCameraControls();
+    if (flag) {
+      cameraControl.resetView();
+      this.NDCCameraControl = cameraControl.enableSyncControl();
+    } else {
+      this.NDCCameraControl = cameraControl.disableSyncControl();
+    }
+  }
+
+  this.setSyncControlCallback = (callback) => {
+    if (this.NDCCameraControl) {
+      this.NDCCameraControl.setEventCallback(callback);
+    }
+  }
+
+  this.setSyncControlCenterZoom = (center, zoom) => {
+    if (this.NDCCameraControl) {
+      this.NDCCameraControl.setCenterZoom(center, zoom);
+    }
   }
   
   const postRenderSelectedCoordinatesUpdate = function() {

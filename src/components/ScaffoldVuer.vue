@@ -1039,7 +1039,6 @@ export default {
     },
     /**
      * Callback using ResizeObserver.
-    
      */
     adjustLayout: function() {
       let width = this.$refs.scaffoldContainer.clientWidth;
@@ -1063,6 +1062,14 @@ export default {
       if (this.$module.zincRenderer) {
         this.$module.zincRenderer.onWindowResize();
       }
+    },
+    syncControlCallback: function() {
+      const payload = this.$module.NDCCameraControl.getPanZoom();
+      this.$emit("scaffold-navigated", payload);
+    },
+    toggleSyncControl: function(flag) {
+      this.$module.toggleSyncControl(flag);
+      this.$module.setSyncControlCallback(this.syncControlCallback);
     }
   }
 };

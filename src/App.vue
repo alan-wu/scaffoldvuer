@@ -18,6 +18,7 @@
       :region="region"
       :view-u-r-l="viewURL"
       @scaffold-selected="onSelected"
+      @scaffold-navigated="onNavigated"
       @timeChanged="updateCurrentTime"
     />
     <el-popover
@@ -106,6 +107,18 @@
           >
             Export GLTF
           </el-button>
+        </el-row>
+        <el-row :gutter="30">
+          <el-col
+            :span="7"
+            :offset="11"
+          >
+            <el-switch
+              v-model="syncMode"
+              active-text="Sync Mode"
+              active-color="#8300bf"
+            />
+          </el-col>
         </el-row>
         <el-row :gutter="30">
           <el-col
@@ -240,6 +253,7 @@ export default {
       selectedCoordinates: undefined,
       helpMode: false,
       displayMarkers: true,
+      syncMode: false,
       currentTime: 0,
       displayMinimap: true,
       tumbleOn: false,
@@ -269,6 +283,9 @@ export default {
       handler: "parseQuery",
       deep: true,
       immediate: true
+    },
+    syncMode: function(val) {
+      this.$refs.scaffold.toggleSyncControl(val);
     }
   },
 
@@ -334,6 +351,9 @@ export default {
           query: { ...this.$route.query, region: data[0].data.group }
         });
       }
+    },
+    onNavigated: function(data) {
+      console.log(data);
     },
     parseInput: function() {
       if (this.$route.query.url !== this.input)
