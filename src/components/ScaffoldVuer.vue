@@ -665,7 +665,11 @@ export default {
         let objects = this.$module.scene.findObjectsWithGroupName(name);
         let box = this.$module.scene.getBoundingBoxOfZincObjects(objects);
         if (box) {
-          this.$module.scene.viewAllWithBoundingBox(box);
+          if (this.$module.isSyncControl()) {
+            this.$module.setSyncControlZoomToBox(box);
+          } else {
+            this.$module.scene.viewAllWithBoundingBox(box);
+          }
         }
       }
     },

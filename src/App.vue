@@ -111,13 +111,37 @@
         <el-row :gutter="30">
           <el-col
             :span="7"
-            :offset="11"
+            :offset="2"
           >
             <el-switch
               v-model="syncMode"
               active-text="Sync Mode"
               active-color="#8300bf"
             />
+            <el-row v-if="syncMode">
+              <el-input-number
+                v-model="zoom"
+                :min="1.0"
+                :controls="false"
+                placeholder="Please input"
+                label="zoom"
+              />
+              <el-input-number
+                v-model="pos[0]"
+                :min="-1.0"
+                :max="1.0"
+                :controls="false"
+                placeholder="Please input"
+                label="x"
+              />
+              <el-input-number
+                v-model="pos[1]"
+                :min="-1.0"
+                :max="1.0"
+                :controls="false"
+                label="y"
+              />
+            </el-row>
           </el-col>
         </el-row>
         <el-row :gutter="30">
@@ -203,7 +227,7 @@
 import { ScaffoldVuer } from "./components/index.js";
 import ModelsTable from "./components/ModelsTable.vue";
 import Vue from "vue";
-import { Button, Col, Icon, Input, Popover, Row, Switch } from "element-ui";
+import { Button, Col, Icon, Input, InputNumber, Popover, Row, Switch } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 
@@ -212,6 +236,7 @@ Vue.use(Button);
 Vue.use(Col);
 Vue.use(Icon);
 Vue.use(Input);
+Vue.use(InputNumber);
 Vue.use(Popover);
 Vue.use(Row);
 Vue.use(Switch);
@@ -269,7 +294,9 @@ export default {
       region: "",
       viewURL: "",
       renderInfoOn: false,
-      rendererInfo: undefined
+      rendererInfo: undefined,
+      zoom: 1,
+      pos: [0, 0],
     };
   },
   watch: {
@@ -353,7 +380,10 @@ export default {
       }
     },
     onNavigated: function(data) {
-      console.log(data);
+      console.log(data)
+      this.zoom = data.zoom;
+      this.pos[0] = data.target[0];
+      this.pos[1] = data.target[1];
     },
     parseInput: function() {
       if (this.$route.query.url !== this.input)

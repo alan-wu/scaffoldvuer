@@ -90,7 +90,18 @@ const OrgansSceneData = function() {
       cameraControl.resetView();
       this.NDCCameraControl = cameraControl.enableSyncControl();
     } else {
-      this.NDCCameraControl = cameraControl.disableSyncControl();
+      cameraControl.disableSyncControl();
+      this.NDCCameraControl = undefined;
+    }
+  }
+
+  this.isSyncControl = () => {
+    return this.NDCCameraControl !== undefined;
+  }
+
+  this.setSyncControlZoomToBox = (box) => {
+    if (this.NDCCameraControl) {
+      this.NDCCameraControl.zoomToBox(box, 2);
     }
   }
 
