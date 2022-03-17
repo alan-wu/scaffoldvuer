@@ -277,7 +277,7 @@ export default {
       displayUI: true,
       selectedCoordinates: undefined,
       helpMode: false,
-      displayMarkers: true,
+      displayMarkers: false,
       syncMode: false,
       currentTime: 0,
       displayMinimap: false,
