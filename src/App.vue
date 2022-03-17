@@ -277,10 +277,10 @@ export default {
       displayUI: true,
       selectedCoordinates: undefined,
       helpMode: false,
-      displayMarkers: true,
+      displayMarkers: false,
       syncMode: false,
       currentTime: 0,
-      displayMinimap: true,
+      displayMinimap: false,
       tumbleOn: false,
       showColourPicker: true,
       minimapSettings: {
