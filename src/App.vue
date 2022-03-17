@@ -280,7 +280,7 @@ export default {
       displayMarkers: true,
       syncMode: false,
       currentTime: 0,
-      displayMinimap: true,
+      displayMinimap: false,
       tumbleOn: false,
       showColourPicker: true,
       minimapSettings: {

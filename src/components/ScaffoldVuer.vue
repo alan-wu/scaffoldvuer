@@ -8,6 +8,11 @@
     element-loading-background="rgba(0, 0, 0, 0.3)"
   >
     <map-svg-sprite-color />
+    <scaffold-tooltip
+      :label="tData.label"
+      :visible="tData.visible"
+      :style="position"
+    />
     <div
       id="organsDisplayArea"
       ref="display"
@@ -44,8 +49,8 @@
         trigger="manual"
         popper-class="scaffold-popper right-popper non-selectable"
       />
-      <TraditionalControls
-        ref="traditionalControl"
+      <tree-controls
+        ref="treeControl"
         v-popover:checkBoxPopover
         :help-mode="helpMode"
         :module="$module"
@@ -55,7 +60,7 @@
         @drawer-toggled="drawerToggled"
       />
       <div class="opacity-box">
-        <OpacityControls ref="opacityControl" />
+        <opacity-controls ref="opacityControl" />
       </div>
       <el-popover
         v-if="sceneData.timeVarying"
@@ -240,7 +245,8 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import OpacityControls from "./OpacityControls";
-import TraditionalControls from "./TraditionalControls";
+import ScaffoldTooltip from "./ScaffoldTooltip";
+import TreeControls from "./TreeControls";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
 
 import {
@@ -275,15 +281,16 @@ const EventNotifier = require("../scripts/eventNotifier").EventNotifier;
  * A vue component of the scaffold viewer.
  *
  * @requires ./OpacityControls.vue
- * @requires ./TraditionalControls.vue
+ * @requires ./TreeControls.vue
  */
 export default {
   name: "ScaffoldVuer",
   components: {
-    OpacityControls,
     MapSvgIcon,
     MapSvgSpriteColor,
-    TraditionalControls
+    OpacityControls,
+    ScaffoldTooltip,
+    TreeControls,
   },
   props: {
     /**
@@ -458,8 +465,20 @@ export default {
         }
       ],
       currentSpeed: 1,
-      timeStamps: {}
+      timeStamps: {},
+      defaultCheckedKeys: [],
+      tData: {
+        label: "",
+        visible: false,
+        x: 0,
+        y: 0
+      }
     };
+  },
+  computed: {
+    position: function() {
+      return {left: this.tData.x + "px", top: this.tData.y + "px"};
+    }
   },
   watch: {
     url: {
@@ -722,39 +741,40 @@ export default {
      * It will also update other controls.
      */
     eventNotifierCallback: function(event) {
+      this.tData.visible = false;
       if (event.eventType == 1) {
-        if (this.$refs.traditionalControl) {
+        if (this.$refs.treeControl) {
           if (event.identifiers[0]) {
             let id = event.identifiers[0].data.id
               ? event.identifiers[0].data.id
               : event.identifiers[0].data.group;
-            this.$refs.traditionalControl.changeActiveByName(id, true);
+            let region = event.identifiers[0].data.region;
+            this.$refs.treeControl.changeActiveByName(id, region, true);
           } else {
-            this.$refs.traditionalControl.removeActive(true);
+            this.$refs.treeControl.removeActive(true);
           }
         }
-        /**
-         * Triggers when an object has been selected
-         *
-         * @property {array} identifiers array of identifiers
-         * of selected object.
-         */
+        // Triggers when an object has been selected
         this.$emit("scaffold-selected", event.identifiers);
       } else if (event.eventType == 2) {
-        if (this.$refs.traditionalControl) {
-          if (event.identifiers[0]) {
-            let id = event.identifiers[0].data.id
-              ? event.identifiers[0].data.id
-              : event.identifiers[0].data.group;
-            this.$refs.traditionalControl.changeHoverByName(id, true);
-          } else this.$refs.traditionalControl.removeHover(true);
+        if (event.identifiers[0]) {
+          let id = event.identifiers[0].data.id
+            ? event.identifiers[0].data.id
+            : event.identifiers[0].data.group;
+          if (event.identifiers[0].coords) {
+            this.tData.visible = true;
+            this.tData.label = id;
+            this.tData.x = event.identifiers[0].coords.x;
+            this.tData.y =event.identifiers[0].coords.y;
+          }
+          if (this.$refs.treeControl) {
+            let region = event.identifiers[0].data.region;
+            this.$refs.treeControl.changeHoverByName(id, region, true);
+          } else {
+            this.$refs.treeControl.removeHover(true);
+          }
         }
-        /**
-         * Triggers when an object has been highlighted
-         *
-         * @property {array} identifiers array of identifiers
-         * of highlighted object.
-         */
+        // Triggers when an object has been highlighted
         this.$emit("scaffold-highlighted", event.identifiers);
       }
     },
@@ -796,8 +816,8 @@ export default {
       if (object !== this.selectedObject) {
         this.selectedObject = object;
         this.$refs.opacityControl.setObject(this.selectedObject);
-        if (object) this.$module.setSelectedByZincObject(object, propagate);
-        else this.$module.setSelectedByObjects([], propagate);
+        if (object) this.$module.setSelectedByZincObject(object, undefined, propagate);
+        else this.$module.setSelectedByObjects([], undefined, propagate);
       }
     },
     /**
@@ -808,31 +828,31 @@ export default {
     objectHovered: function(object, propagate) {
       if (object !== this.hoveredObject) {
         this.hoveredObject = object;
-        if (object) this.$module.setHighlightedByZincObject(object, propagate);
-        else this.$module.setHighlightedByObjects([], propagate);
+        if (object) this.$module.setHighlightedByZincObject(object, undefined, propagate);
+        else this.$module.setHighlightedByObjects([], undefined, propagate);
       }
     },
     /**
      * Set the selected by name.
      *
-     * @param {name} name Name of the region
+     * @param {name} name Name of the group
      */
-    changeActiveByName: function(name, propagate) {
+    changeActiveByName: function(name, region, propagate) {
       if (name === undefined)
-        this.$refs.traditionalControl.removeActive(propagate);
+        this.$refs.treeControl.removeActive(propagate);
       else
-        this.$refs.traditionalControl.changeActiveByName(name, propagate);
+        this.$refs.treeControl.changeActiveByName(name, region, propagate);
     },
     /**
      * Set the highlighted by name.
      *
-     * @param {name} name Name of the region
+     * @param {name} name Name of the group
      */
-    changeHighlightedByName: function(name, propagate) {
+    changeHighlightedByName: function(name, region, propagate) {
       if (name === undefined)
-        this.$refs.traditionalControl.removeHover(propagate);
+        this.$refs.treeControl.removeHover(propagate);
       else
-        this.$refs.traditionalControl.changeHoverByName(name, propagate);
+        this.$refs.treeControl.changeHoverByName(name, region, propagate);
     },
     /**
      * Start the animation.
@@ -919,7 +939,7 @@ export default {
           if (options.visibility) {
             // Some UIs may not be ready at this time.
             this.$nextTick(() => {
-              this.$refs.traditionalControl.setState(options.visibility);
+              this.$refs.treeControl.setState(options.visibility);
             });
           }
         }
@@ -942,8 +962,8 @@ export default {
         viewport: undefined,
         visibility: undefined
       };
-      if (this.$refs.traditionalControl)
-        state.visibility = this.$refs.traditionalControl.getState();
+      if (this.$refs.treeControl)
+        state.visibility = this.$refs.treeControl.getState();
       if (this.$module.scene) {
         let zincCameraControls = this.$module.scene.getZincCameraControls();
         state.viewport = zincCameraControls.getCurrentViewport();
@@ -971,7 +991,7 @@ export default {
                   .getZincCameraControls()
                   .setCurrentCameraSettings(state.viewport);
               if (state.visibility)
-                this.$refs.traditionalControl.setState(state.visibility);
+                this.$refs.treeControl.setState(state.visibility);
             } else {
               this.$module.setFinishDownloadCallback(
                 this.setURLFinishCallback({
@@ -1000,8 +1020,8 @@ export default {
         let visibility =
           state && state.visibility ? state.visibility : undefined;
         this._currentURL = newValue;
-        if (this.$refs.traditionalControl)
-          this.$refs.traditionalControl.clear();
+        if (this.$refs.treeControl)
+          this.$refs.treeControl.clear();
         this.loading = true;
         this.isReady = false;
         this.$module.setFinishDownloadCallback(
