@@ -4,23 +4,29 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Asap:400,400i,500,600,700&display=swap"
     >
-    <ScaffoldVuer
-      ref="scaffold"
-      class="vuer"
-      :display-u-i="displayUI"
-      :url="url"
-      :help-mode="helpMode"
-      :display-minimap="displayMinimap"
-      :display-markers="displayMarkers"
-      :minimap-settings="minimapSettings"
-      :show-colour-picker="showColourPicker"
-      :render="render"
-      :region="region"
-      :view-u-r-l="viewURL"
-      @scaffold-selected="onSelected"
-      @scaffold-navigated="onNavigated"
-      @timeChanged="updateCurrentTime"
-    />
+    <drop-zone
+      ref="dropzone"
+      @files-drop="onFilesDrop"
+    >
+      <ScaffoldVuer
+        ref="scaffold"
+        class="vuer"
+        :display-u-i="displayUI"
+        :url="url"
+        :help-mode="helpMode"
+        :display-minimap="displayMinimap"
+        :display-markers="displayMarkers"
+        :minimap-settings="minimapSettings"
+        :show-colour-picker="showColourPicker"
+        :render="render"
+        :region="region"
+        :view-u-r-l="viewURL"
+        @on-ready="onReady"
+        @scaffold-selected="onSelected"
+        @scaffold-navigated="onNavigated"
+        @timeChanged="updateCurrentTime"
+      />
+    </drop-zone>
     <el-popover
       placement="bottom"
       trigger="click"
@@ -88,7 +94,7 @@
             Capture
           </el-button>
         </el-row>
-        <el-row :gutter="20">
+        <el-row :gutter="10">
           <el-button
             size="mini"
             @click="saveSettings()"
@@ -104,6 +110,12 @@
           <el-button
             size="mini"
             @click="exportGLB()"
+          >
+            Export GLB
+          </el-button>
+          <el-button
+            size="mini"
+            @click="exportGLTF()"
           >
             Export GLTF
           </el-button>
@@ -225,6 +237,7 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import { ScaffoldVuer } from "./components/index.js";
+import DropZone from "./components/DropZone.vue";
 import ModelsTable from "./components/ModelsTable.vue";
 import Vue from "vue";
 import { Button, Col, Icon, Input, InputNumber, Popover, Row, Switch } from "element-ui";
@@ -241,32 +254,10 @@ Vue.use(Popover);
 Vue.use(Row);
 Vue.use(Switch);
 
-/*
-const alignToObject = function(cameracontrol, scene) {
-  var object = scene.findGeometriesWithGroupName("Endocardium of left atrium")[0];
-  const boundingBox = object.getBoundingBox();
-  if (boundingBox) {
-    const radius = boundingBox.min.distanceTo(boundingBox.max)/2.0;
-    const centreX = (boundingBox.min.x + boundingBox.max.x) / 2.0;
-    const centreY = (boundingBox.min.y + boundingBox.max.y) / 2.0;
-    const centreZ = (boundingBox.min.z + boundingBox.max.z) / 2.0;
-    const clip_factor = 8.0;
-    const endingViewport = cameracontrol.getViewportFromCentreAndRadius(centreX, centreY, centreZ, radius, 40, radius * clip_factor );
-    const startingViewport = cameracontrol.getCurrentViewport();
-    cameracontrol.cameraTransition(startingViewport, endingViewport, 1500);
-    cameracontrol.enableCameraTransition();
-  }
-  setTimeout(function(){ tumble(cameracontrol) }, 2000);
-}
-
-const tumble = function(cameracontrol) {
-  cameracontrol.enableAutoTumble();
-  cameracontrol.autoTumble([1.0, 0.0], Math.PI / 2, true);
-}
-*/
 export default {
   name: "App",
   components: {
+    DropZone,
     ScaffoldVuer,
     ModelsTable
   },
@@ -315,7 +306,6 @@ export default {
       this.$refs.scaffold.toggleSyncControl(val);
     }
   },
-
   mounted: function() {
     this._sceneSettings = [];
     this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
@@ -371,6 +361,9 @@ export default {
         cameracontrol.stopAutoTumble();
       }
     },
+    onReady: function() {
+      this.$refs.dropzone.revokeURLs();
+    },
     onSelected: function(data) {
       if (data && data[0].data.group) {
         delete this.$route.query["viewURL"];
@@ -380,16 +373,22 @@ export default {
       }
     },
     onNavigated: function(data) {
-      console.log(data)
       this.zoom = data.zoom;
       this.pos[0] = data.target[0];
       this.pos[1] = data.target[1];
     },
+    onFilesDrop: function(metaURL) {
+      this.url = metaURL;
+    },
     parseInput: function() {
-      if (this.$route.query.url !== this.input)
+      if (this.$route.query.url !== this.input) {
+        const queries = {...this.$route.query};
+        if (this.input && this.input !== "")
+          queries.url = this.input;
         this.$router.replace({
           query: { ...this.$route.query, url: this.input }
         });
+      }
     },
     updateCurrentTime: function(val) {
       this.currentTime = val;

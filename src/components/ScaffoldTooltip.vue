@@ -1,14 +1,20 @@
 <template>
-  <el-popover
-    v-model="display"
-    :content="label"
-    placement="top"
-    :append-to-body="false"
-    trigger="manual"
-    popper-class="popper non-selectable"
+  <div
+    :style="position"
+    class="tooltipContainer"
   >
-    <div />
-  </el-popover>
+    <el-popover
+      ref="tooltip"
+      v-model="display"
+      placement="top"
+      :append-to-body="false"
+      trigger="manual"
+      popper-class="tooltip-popper non-selectable"
+    >
+      <div> {{ label }} </div>
+      <i v-popover:tooltip />
+    </el-popover>
+  </div>
 </template>
 
 <script>
@@ -35,17 +41,47 @@ export default {
       type: Boolean,
       default: false
     },
+    x: {
+      type: Number,
+      default: 200
+    },
+    y: {
+      type: Number,
+      default: 200
+    },
+  },
+  data: function() {
+    return {
+      display: false
+    }
   },
   computed: {
-    display: function() {
-      if (this.visible) {
-        if (this.label && this.label !== "") {
-          return true;
-        }
-      }
-      return false;
+    position: function() {
+      const styleString = "translate(" + this.x + 
+        "px, " + (this.y - 30) + "px)";
+      return {transform: styleString};
     }
-  }
+  },
+  watch: {
+    label: {
+      handler: function() {
+        if (this.visible && this.label && this.label !== "")
+          this.display = true;
+        else
+          this.display = false;
+      },
+      immediate: true
+    },
+    visible: {
+      handler: function() {
+        if (this.visible && this.label && this.label !== "")
+          this.display = true;
+        else
+          this.display = false;
+      },
+      immediate: true
+    },
+  },
 };
 </script>
 
@@ -53,7 +89,7 @@ export default {
 <style scoped lang="scss">
 @import "~element-ui/packages/theme-chalk/src/popover";
 
-::v-deep .scaffold-popper {
+::v-deep .tooltip-popper {
   padding: 6px 4px;
   font-size: 12px;
   color: rgb(48, 49, 51);
@@ -62,15 +98,27 @@ export default {
   white-space: nowrap;
   min-width: unset;
   pointer-events: none;
+  
 
-  &.el-popper[x-placement^="top"] {
+  &.el-popper[x-placement^="bottom"] {
     .popper__arrow {
-      border-top-color: $app-primary-color !important;
+      border-bottom-color: $app-primary-color !important;
       &:after {
-        border-top-color: #f3ecf6 !important;
+        border-bottom-color: #f3ecf6 !important;
       }
     }
   }
+}
+
+.tooltipContainer {
+  position:absolute;
+  height:50px;
+  z-index: 2;
+}
+
+::v-deep .non-selectable {
+  user-select: none;
+  pointer-events: none;
 }
 
 </style>

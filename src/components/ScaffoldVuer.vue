@@ -9,9 +9,11 @@
   >
     <map-svg-sprite-color />
     <scaffold-tooltip
+      v-if="false"
       :label="tData.label"
       :visible="tData.visible"
-      :style="position"
+      :x="tData.x"
+      :y="tData.y"
     />
     <div
       id="organsDisplayArea"
@@ -470,15 +472,10 @@ export default {
       tData: {
         label: "",
         visible: false,
-        x: 0,
-        y: 0
+        x: 200,
+        y: 200
       }
     };
-  },
-  computed: {
-    position: function() {
-      return {left: this.tData.x + "px", top: this.tData.y + "px"};
-    }
   },
   watch: {
     url: {
@@ -947,6 +944,7 @@ export default {
         this.$module.updateTime(0.01);
         this.$module.updateTime(0);
         this.$module.unsetFinishDownloadCallback();
+        this.$emit("on-ready");
         this.isReady = true;
       };
     },
