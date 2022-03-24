@@ -89,8 +89,10 @@ RendererModule.prototype.getAnnotationsFromObjects = function(objects) {
 RendererModule.prototype.setHighlightedByObjects = function(
   objects, coords, propagateChanges) {
   const changed = this.graphicsHighlight.setHighlighted(objects);
-  if (changed && propagateChanges) {
-    const eventType = require("./eventNotifier").EVENT_TYPE.HIGHLIGHTED;
+  if (propagateChanges) {
+    eventType = require("./eventNotifier").EVENT_TYPE.MOVE;
+    if (changed)
+      eventType = require("./eventNotifier").EVENT_TYPE.HIGHLIGHTED;
     const annotations = this.getAnnotationsFromObjects(objects);
     if (annotations.length > 0)
       annotations[0].coords = coords;

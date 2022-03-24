@@ -1,8 +1,5 @@
 <template>
-  <div
-    :style="position"
-    class="tooltipContainer"
-  >
+  <div :style="position" class="tooltipContainer">
     <el-popover
       ref="tooltip"
       v-model="display"
@@ -11,7 +8,7 @@
       trigger="manual"
       popper-class="tooltip-popper non-selectable"
     >
-      <div> {{ label }} </div>
+      <div>{{ label }}</div>
       <i v-popover:tooltip />
     </el-popover>
   </div>
@@ -35,51 +32,47 @@ export default {
   props: {
     label: {
       type: String,
-      default: ""
+      default: "",
     },
     visible: {
       type: Boolean,
-      default: false
+      default: false,
     },
     x: {
       type: Number,
-      default: 200
+      default: 200,
     },
     y: {
       type: Number,
-      default: 200
+      default: 200,
     },
   },
-  data: function() {
+  data: function () {
     return {
-      display: false
-    }
+      display: false,
+    };
   },
   computed: {
-    position: function() {
-      const styleString = "translate(" + this.x + 
-        "px, " + (this.y - 30) + "px)";
-      return {transform: styleString};
-    }
+    position: function () {
+      return { left: this.x + "px", top: this.y - 30 + "px" };
+    },
   },
   watch: {
     label: {
-      handler: function() {
+      handler: function () {
         if (this.visible && this.label && this.label !== "")
           this.display = true;
-        else
-          this.display = false;
+        else this.display = false;
       },
-      immediate: true
+      immediate: true,
     },
     visible: {
-      handler: function() {
+      handler: function () {
         if (this.visible && this.label && this.label !== "")
           this.display = true;
-        else
-          this.display = false;
+        else this.display = false;
       },
-      immediate: true
+      immediate: true,
     },
   },
 };
@@ -90,29 +83,30 @@ export default {
 @import "~element-ui/packages/theme-chalk/src/popover";
 
 ::v-deep .tooltip-popper {
-  padding: 6px 4px;
-  font-size: 12px;
-  color: rgb(48, 49, 51);
-  background-color: #f3ecf6;
+  padding: 2px 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  color: $app-primary-color;
+  background-color: #fff;
   border: 1px solid $app-primary-color;
+  border-radius: 4px;
   white-space: nowrap;
   min-width: unset;
   pointer-events: none;
-  
 
-  &.el-popper[x-placement^="bottom"] {
+  &.el-popper[x-placement^="top"] {
     .popper__arrow {
-      border-bottom-color: $app-primary-color !important;
+      border-top-color: $app-primary-color !important;
       &:after {
-        border-bottom-color: #f3ecf6 !important;
+        border-top-color: #fff !important;
       }
     }
   }
 }
 
 .tooltipContainer {
-  position:absolute;
-  height:50px;
+  position: absolute;
+  height: 50px;
   z-index: 2;
 }
 
@@ -120,5 +114,4 @@ export default {
   user-select: none;
   pointer-events: none;
 }
-
 </style>

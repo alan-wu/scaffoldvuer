@@ -9,7 +9,6 @@
   >
     <map-svg-sprite-color />
     <scaffold-tooltip
-      v-if="false"
       :label="tData.label"
       :visible="tData.visible"
       :x="tData.x"
@@ -738,7 +737,6 @@ export default {
      * It will also update other controls.
      */
     eventNotifierCallback: function(event) {
-      this.tData.visible = false;
       if (event.eventType == 1) {
         if (this.$refs.treeControl) {
           if (event.identifiers[0]) {
@@ -754,6 +752,7 @@ export default {
         // Triggers when an object has been selected
         this.$emit("scaffold-selected", event.identifiers);
       } else if (event.eventType == 2) {
+        this.tData.visible = false;
         if (event.identifiers[0]) {
           let id = event.identifiers[0].data.id
             ? event.identifiers[0].data.id
@@ -773,6 +772,13 @@ export default {
         }
         // Triggers when an object has been highlighted
         this.$emit("scaffold-highlighted", event.identifiers);
+      } else if (event.eventType == 3)  { //MOVE
+        if (event.identifiers[0]) {
+          if (event.identifiers[0].coords) {
+            this.tData.x = event.identifiers[0].coords.x;
+            this.tData.y = event.identifiers[0].coords.y;
+          }
+        }
       }
     },
     /**
