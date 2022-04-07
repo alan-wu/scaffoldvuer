@@ -71,12 +71,12 @@ export default {
             list[relativePath] = file;
           }
         });
+        const metaFileURL = URL.createObjectURL(metadata.file);
+        fetch(metaFileURL)
+          .then((response) => response.text())
+          .then((text) => this.createObjectURLs(text, list));
+        URL.revokeObjectURL(metaFileURL);
       }
-      const metaFileURL = URL.createObjectURL(metadata.file);
-      fetch(metaFileURL)
-        .then((response) => response.text())
-        .then((text) => this.createObjectURLs(text, list));
-      URL.revokeObjectURL(metaFileURL);
     },
   },
 };

@@ -378,7 +378,7 @@ export default {
       this.pos[1] = data.target[1];
     },
     onFilesDrop: function(metaURL) {
-      this.url = metaURL;
+      this.input = metaURL;
     },
     parseInput: function() {
       if (this.$route.query.url !== this.input) {
