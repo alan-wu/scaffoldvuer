@@ -753,6 +753,7 @@ export default {
         this.$emit("scaffold-selected", event.identifiers);
       } else if (event.eventType == 2) {
         this.tData.visible = false;
+        const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
         if (event.identifiers[0]) {
           let id = event.identifiers[0].data.id
             ? event.identifiers[0].data.id
@@ -760,8 +761,8 @@ export default {
           if (event.identifiers[0].coords) {
             this.tData.visible = true;
             this.tData.label = id;
-            this.tData.x = event.identifiers[0].coords.x;
-            this.tData.y =event.identifiers[0].coords.y;
+            this.tData.x = event.identifiers[0].coords.x - offsets.left;
+            this.tData.y = event.identifiers[0].coords.y - offsets.top;
           }
           if (this.$refs.treeControl) {
             let region = event.identifiers[0].data.region;
@@ -775,8 +776,9 @@ export default {
       } else if (event.eventType == 3)  { //MOVE
         if (event.identifiers[0]) {
           if (event.identifiers[0].coords) {
-            this.tData.x = event.identifiers[0].coords.x;
-            this.tData.y = event.identifiers[0].coords.y;
+            const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
+            this.tData.x = event.identifiers[0].coords.x - offsets.left;
+            this.tData.y = event.identifiers[0].coords.y - offsets.top;
           }
         }
       }

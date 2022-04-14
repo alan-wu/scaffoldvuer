@@ -102,6 +102,15 @@ export default {
       }
     }
   }
+
+  &.el-popper[x-placement^="bottom"] {
+    .popper__arrow {
+      border-bottom-color: $app-primary-color !important;
+      &:after {
+        border-bottom-color: #fff !important;
+      }
+    }
+  }
 }
 
 .tooltipContainer {
