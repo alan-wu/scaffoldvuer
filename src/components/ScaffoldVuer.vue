@@ -672,21 +672,28 @@ export default {
       cameracontrol.stopAutoTumble();
       this.isTransitioning = false;
     },
+    findObjectsWithGroupName: function(name) {
+      let objects = [];
+      if (name && name != "" && this.$module.scene) {
+        objects = this.$module.scene.findObjectsWithGroupName(name);
+      }
+      return objects;
+    },
     /**
      * Focus on named region
      */
     viewRegion: function(name) {
-      if (name && name != "" && this.$module.scene) {
-        let objects = this.$module.scene.findObjectsWithGroupName(name);
-        let box = this.$module.scene.getBoundingBoxOfZincObjects(objects);
-        if (box) {
-          if (this.$module.isSyncControl()) {
-            this.$module.setSyncControlZoomToBox(box);
-          } else {
-            this.$module.scene.viewAllWithBoundingBox(box);
-          }
+      let objects = this.findObjectsWithGroupName(name);
+      let box = this.$module.scene.getBoundingBoxOfZincObjects(objects);
+      if (box) {
+        if (this.$module.isSyncControl()) {
+          this.$module.setSyncControlZoomToBox(box);
+        } else {
+          this.$module.scene.viewAllWithBoundingBox(box);
         }
+        return true;
       }
+      return false;
     },
     setFocusedRegion: function(name) {
       if (name) {
