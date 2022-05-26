@@ -41,6 +41,7 @@ const OrgansSceneData = function() {
   const organPartAddedCallbacks = new Array();
   let finishDownloadCallback = undefined;
 	const modelsLoader = ModelsLoaderIn;
+  this.NDCCameraControl = undefined;
 	_this.typeName = "Organ Viewer";
 	
 	this.getSceneData = function() {
@@ -81,6 +82,39 @@ const OrgansSceneData = function() {
       _this.sceneData.nerveMap.additionalReader.setTime(currentTime / 
         duration);
 		_this.sceneData.currentTime = currentTime / duration * 100.0;
+  }
+
+  this.toggleSyncControl = (flag) => {
+    let cameraControl = this.scene.getZincCameraControls();
+    if (flag) {
+      cameraControl.resetView();
+      this.NDCCameraControl = cameraControl.enableSyncControl();
+    } else {
+      cameraControl.disableSyncControl();
+      this.NDCCameraControl = undefined;
+    }
+  }
+
+  this.isSyncControl = () => {
+    return this.NDCCameraControl !== undefined;
+  }
+
+  this.setSyncControlZoomToBox = (box) => {
+    if (this.NDCCameraControl) {
+      this.NDCCameraControl.zoomToBox(box, 2);
+    }
+  }
+
+  this.setSyncControlCallback = (callback) => {
+    if (this.NDCCameraControl) {
+      this.NDCCameraControl.setEventCallback(callback);
+    }
+  }
+
+  this.setSyncControlCenterZoom = (center, zoom) => {
+    if (this.NDCCameraControl) {
+      this.NDCCameraControl.setCenterZoom(center, zoom);
+    }
   }
   
   const postRenderSelectedCoordinatesUpdate = function() {
@@ -185,18 +219,20 @@ const OrgansSceneData = function() {
 		return function(intersects, window_x, window_y) {
       const intersected = _this.getIntersectedObject(intersects);
       const idObject = getIdObjectFromIntersect(intersected);
+      const coords = { x: window_x, y: window_y };
       if (idObject.id) {
-        if (idObject.object.userData.isGlyph) {
+        if (idObject.object.userData.isGlyph) { 
           if (idObject.object.name)
-            _this.setSelectedByObjects([idObject.object], true);
+            _this.setSelectedByObjects([idObject.object], coords, true);
           else
-            _this.setSelectedByZincObject(idObject.object.userData.getGlyphset(), true);
+            _this.setSelectedByZincObject(idObject.object.userData.getGlyphset(),
+              coords, true);
         } else {
-          _this.setSelectedByObjects([idObject.object], true);
+          _this.setSelectedByObjects([idObject.object], coords, true);
         }
         return;
       } else {
-				_this.setSelectedByObjects([], true);
+				_this.setSelectedByObjects([], coords, true);
 			}
 		}
 	};
@@ -210,14 +246,15 @@ const OrgansSceneData = function() {
 		return function(intersects, window_x, window_y) {
       const intersected = _this.getIntersectedObject(intersects);
       const idObject = getIdObjectFromIntersect(intersected);
+      const coords = { x: window_x, y: window_y };
       if (idObject.id) {
         _this.displayArea.style.cursor = "pointer";
-        _this.setHighlightedByObjects([idObject.object], true);
+        _this.setHighlightedByObjects([idObject.object], coords, true);
         return;
       }
       else {
 				_this.displayArea.style.cursor = "auto";
-				_this.setHighlightedByObjects([], true);
+				_this.setHighlightedByObjects([], coords, true);
       }
 		}
 	};
@@ -312,37 +349,29 @@ const OrgansSceneData = function() {
 	}
 
 	const addOrganPartToSceneData = function(zincObject) {
-		if (zincObject.groupName) {
-			if (zincObject.isGeometry) {
-				if (!_this.sceneData.geometries.includes(zincObject.groupName)) {
-					_this.sceneData.geometries.push(zincObject.groupName);
-				}
-			} else if (zincObject.isGlyphset) {
-				if (!_this.sceneData.glyphsets.includes(zincObject.groupName)) {
-					_this.sceneData.glyphsets.push(zincObject.groupName);
-				}
-			} else if (zincObject.isLines) {
-				if (!_this.sceneData.lines.includes(zincObject.groupName)) {
-					_this.sceneData.lines.push(zincObject.groupName);
-				}
-			} else if (zincObject.isPointset) {
-				if (!_this.sceneData.pointsets.includes(zincObject.groupName)) {
-					_this.sceneData.pointsets.push(zincObject.groupName);
-				}
-			}
-		}
+    if (zincObject.isGeometry) {
+      _this.sceneData.geometries.push(zincObject);
+    } else if (zincObject.isGlyphset) {
+      _this.sceneData.glyphsets.push(zincObject);
+    } else if (zincObject.isLines) {
+      _this.sceneData.lines.push(zincObject);
+    } else if (zincObject.isPointset) {
+      _this.sceneData.pointsets.push(zincObject);
+    }
 	}
 
 	const addOrganPart = function(systemName, partName, useDefautColour, zincObject) {
     for (let i = 0; i < organPartAddedCallbacks.length;i++) {
-      organPartAddedCallbacks[i](zincObject.groupName, _this.scene.isTimeVarying(), zincObject);
+      organPartAddedCallbacks[i](zincObject, _this.scene.isTimeVarying());
     }
     if (useDefautColour)
       modelsLoader.setGeometryColour(zincObject, systemName, partName);
     addOrganPartToSceneData(zincObject);
 		const annotation = new (require('./annotation').annotation)();
-		annotation.data = {species:_this.sceneData.currentSpecies, system:systemName, part:partName, group:zincObject.groupName};
-		zincObject.userData = [annotation];
+    const region = zincObject.region.getFullPath();
+		annotation.data = {species:_this.sceneData.currentSpecies, system:systemName,
+      part:partName, group:zincObject.groupName, region: region};
+		zincObject.userData["annotation"] = annotation;
 	}
 
 	  /**

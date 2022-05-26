@@ -9,9 +9,9 @@ var THREE = require('zincjs').THREE;
 exports.GraphicsHighlight = function() {
   let currentHighlightedObjects = [];
   let currentSelectedObjects = [];
-  this.highlightColour = 0x0000FF;
-  this.selectColour = 0x00FF00;
-  this.originalColour = 0x000000;
+  this.highlightColour = [1, 0, 0];
+  this.selectColour = [0, 1, 0];
+  this.originalColour = [0, 0, 0];
   const _this = this;
 
   const isDifferent = function(array1, array2) {
@@ -65,7 +65,7 @@ exports.GraphicsHighlight = function() {
     const fullList = getFullListOfObjects(array);
     for (let i = 0; i < fullList.length; i++) {
       if (fullList[i] && fullList[i].material && fullList[i].material.emissive)
-        fullList[i].material.emissive.setHex(_this.highlightColour);
+        fullList[i].material.emissive.setRGB(..._this.highlightColour);
     }
     currentHighlightedObjects = array;
     return isDifferent(currentHighlightedObjects, previousHighlightedObjects);
@@ -80,7 +80,7 @@ exports.GraphicsHighlight = function() {
     const fullList = getFullListOfObjects(objects);
     for (let i = 0; i < fullList.length; i++) {
     	if (fullList[i] && fullList[i].material && fullList[i].material.emissive)
-        fullList[i].material.emissive.setHex(_this.selectColour);
+        fullList[i].material.emissive.setRGB(..._this.selectColour);
     }
     currentSelectedObjects = objects;
     return isDifferent(currentSelectedObjects, previousHSelectedObjects);
@@ -100,7 +100,7 @@ exports.GraphicsHighlight = function() {
     for (let i = 0; i < fullList.length; i++) {
       if (fullList[i] && fullList[i].material) {
         if (fullList[i].material.emissive)
-          fullList[i].material.emissive.setHex(_this.originalColour);
+          fullList[i].material.emissive.setRGB(..._this.originalColour);
         if (fullList[i].material.depthFunc)
           fullList[i].material.depthFunc = THREE.LessEqualDepth;
       }
@@ -113,7 +113,7 @@ exports.GraphicsHighlight = function() {
     for (let i = 0; i < fullList.length; i++) {
     	if (fullList[i] && fullList[i].material) {
     		if (fullList[i].material.emissive)
-          fullList[i].material.emissive.setHex(_this.originalColour);
+          fullList[i].material.emissive.setRGB(..._this.originalColour);
     		if (fullList[i].material.depthFunc)
           fullList[i].material.depthFunc = THREE.LessEqualDepth;
     	}

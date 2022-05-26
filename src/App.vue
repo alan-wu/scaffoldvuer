@@ -4,22 +4,29 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Asap:400,400i,500,600,700&display=swap"
     >
-    <ScaffoldVuer
-      ref="scaffold"
-      class="vuer"
-      :display-u-i="displayUI"
-      :url="url"
-      :help-mode="helpMode"
-      :display-minimap="displayMinimap"
-      :display-markers="displayMarkers"
-      :minimap-settings="minimapSettings"
-      :show-colour-picker="showColourPicker"
-      :render="render"
-      :region="region"
-      :view-u-r-l="viewURL"
-      @scaffold-selected="onSelected"
-      @timeChanged="updateCurrentTime"
-    />
+    <drop-zone
+      ref="dropzone"
+      @files-drop="onFilesDrop"
+    >
+      <ScaffoldVuer
+        ref="scaffold"
+        class="vuer"
+        :display-u-i="displayUI"
+        :url="url"
+        :help-mode="helpMode"
+        :display-minimap="displayMinimap"
+        :display-markers="displayMarkers"
+        :minimap-settings="minimapSettings"
+        :show-colour-picker="showColourPicker"
+        :render="render"
+        :region="region"
+        :view-u-r-l="viewURL"
+        @on-ready="onReady"
+        @scaffold-selected="onSelected"
+        @scaffold-navigated="onNavigated"
+        @timeChanged="updateCurrentTime"
+      />
+    </drop-zone>
     <el-popover
       placement="bottom"
       trigger="click"
@@ -87,7 +94,7 @@
             Capture
           </el-button>
         </el-row>
-        <el-row :gutter="20">
+        <el-row :gutter="10">
           <el-button
             size="mini"
             @click="saveSettings()"
@@ -104,8 +111,50 @@
             size="mini"
             @click="exportGLB()"
           >
+            Export GLB
+          </el-button>
+          <el-button
+            size="mini"
+            @click="exportGLTF()"
+          >
             Export GLTF
           </el-button>
+        </el-row>
+        <el-row :gutter="30">
+          <el-col
+            :span="7"
+            :offset="2"
+          >
+            <el-switch
+              v-model="syncMode"
+              active-text="Sync Mode"
+              active-color="#8300bf"
+            />
+            <el-row v-if="syncMode">
+              <el-input-number
+                v-model="zoom"
+                :min="1.0"
+                :controls="false"
+                placeholder="Please input"
+                label="zoom"
+              />
+              <el-input-number
+                v-model="pos[0]"
+                :min="-1.0"
+                :max="1.0"
+                :controls="false"
+                placeholder="Please input"
+                label="x"
+              />
+              <el-input-number
+                v-model="pos[1]"
+                :min="-1.0"
+                :max="1.0"
+                :controls="false"
+                label="y"
+              />
+            </el-row>
+          </el-col>
         </el-row>
         <el-row :gutter="30">
           <el-col
@@ -188,9 +237,10 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import { ScaffoldVuer } from "./components/index.js";
+import DropZone from "./components/DropZone.vue";
 import ModelsTable from "./components/ModelsTable.vue";
 import Vue from "vue";
-import { Button, Col, Icon, Input, Popover, Row, Switch } from "element-ui";
+import { Button, Col, Icon, Input, InputNumber, Popover, Row, Switch } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 
@@ -199,36 +249,15 @@ Vue.use(Button);
 Vue.use(Col);
 Vue.use(Icon);
 Vue.use(Input);
+Vue.use(InputNumber);
 Vue.use(Popover);
 Vue.use(Row);
 Vue.use(Switch);
 
-/*
-const alignToObject = function(cameracontrol, scene) {
-  var object = scene.findGeometriesWithGroupName("Endocardium of left atrium")[0];
-  const boundingBox = object.getBoundingBox();
-  if (boundingBox) {
-    const radius = boundingBox.min.distanceTo(boundingBox.max)/2.0;
-    const centreX = (boundingBox.min.x + boundingBox.max.x) / 2.0;
-    const centreY = (boundingBox.min.y + boundingBox.max.y) / 2.0;
-    const centreZ = (boundingBox.min.z + boundingBox.max.z) / 2.0;
-    const clip_factor = 8.0;
-    const endingViewport = cameracontrol.getViewportFromCentreAndRadius(centreX, centreY, centreZ, radius, 40, radius * clip_factor );
-    const startingViewport = cameracontrol.getCurrentViewport();
-    cameracontrol.cameraTransition(startingViewport, endingViewport, 1500);
-    cameracontrol.enableCameraTransition();
-  }
-  setTimeout(function(){ tumble(cameracontrol) }, 2000);
-}
-
-const tumble = function(cameracontrol) {
-  cameracontrol.enableAutoTumble();
-  cameracontrol.autoTumble([1.0, 0.0], Math.PI / 2, true);
-}
-*/
 export default {
   name: "App",
   components: {
+    DropZone,
     ScaffoldVuer,
     ModelsTable
   },
@@ -239,9 +268,10 @@ export default {
       displayUI: true,
       selectedCoordinates: undefined,
       helpMode: false,
-      displayMarkers: true,
+      displayMarkers: false,
+      syncMode: false,
       currentTime: 0,
-      displayMinimap: true,
+      displayMinimap: false,
       tumbleOn: false,
       showColourPicker: true,
       minimapSettings: {
@@ -255,7 +285,9 @@ export default {
       region: "",
       viewURL: "",
       renderInfoOn: false,
-      rendererInfo: undefined
+      rendererInfo: undefined,
+      zoom: 1,
+      pos: [0, 0],
     };
   },
   watch: {
@@ -269,9 +301,11 @@ export default {
       handler: "parseQuery",
       deep: true,
       immediate: true
+    },
+    syncMode: function(val) {
+      this.$refs.scaffold.toggleSyncControl(val);
     }
   },
-
   mounted: function() {
     this._sceneSettings = [];
     this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
@@ -327,6 +361,9 @@ export default {
         cameracontrol.stopAutoTumble();
       }
     },
+    onReady: function() {
+      this.$refs.dropzone.revokeURLs();
+    },
     onSelected: function(data) {
       if (data && data[0].data.group) {
         delete this.$route.query["viewURL"];
@@ -335,11 +372,23 @@ export default {
         });
       }
     },
+    onNavigated: function(data) {
+      this.zoom = data.zoom;
+      this.pos[0] = data.target[0];
+      this.pos[1] = data.target[1];
+    },
+    onFilesDrop: function(metaURL) {
+      this.input = metaURL;
+    },
     parseInput: function() {
-      if (this.$route.query.url !== this.input)
+      if (this.$route.query.url !== this.input) {
+        const queries = {...this.$route.query};
+        if (this.input && this.input !== "")
+          queries.url = this.input;
         this.$router.replace({
           query: { ...this.$route.query, url: this.input }
         });
+      }
     },
     updateCurrentTime: function(val) {
       this.currentTime = val;

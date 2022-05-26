@@ -1,4 +1,4 @@
-const EVENT_TYPE = { ALL: 0, SELECTED: 1, HIGHLIGHTED: 2 };
+const EVENT_TYPE = { ALL: 0, SELECTED: 1, HIGHLIGHTED: 2, MOVE: 3 };
 
 const SelectionEvent = function(eventTypeIn, identifiersIn) {
   this.eventType = eventTypeIn;

@@ -47,7 +47,8 @@ RendererModule.prototype.getIntersectedObject = function(intersects) {
 				if (intersects[i].object &&
             intersects[i].object.userData && 
             intersects[i].object.userData.isZincObject && 
-            (intersects[i].object.name || 
+            ((intersects[i].object.name && 
+              intersects[i].object.name !== "_Unnamed") ||
             intersects[i].object.userData.isMarker))
 					return intersects[i];
 			}
@@ -58,7 +59,6 @@ RendererModule.prototype.getIntersectedObject = function(intersects) {
 
 RendererModule.prototype.getAnnotationsFromObjects = function(objects) {
   const annotations = [];
-  let count = 0;
   for (var i = 0; i < objects.length; i++) {
     const zincObject = objects[i].userData;
     let annotation = undefined;
@@ -67,7 +67,7 @@ RendererModule.prototype.getAnnotationsFromObjects = function(objects) {
         const glyphset = zincObject;
         if (zincObject.isGlyph)
           glyphset = zincObject.getGlyphset();
-        annotation = glyphset.userData ? glyphset.userData[0] : undefined;
+        annotation = glyphset.userData ? glyphset.userData.annotation : undefined;
         if (annotation && annotation.data) {
           if (objects[i].name && objects[i].name != "")
             annotation.data.id = objects[i].name;
@@ -75,23 +75,28 @@ RendererModule.prototype.getAnnotationsFromObjects = function(objects) {
             annotation.data.id = glyphset.groupName;
         }
       } else {
-        annotation = zincObject.userData ? zincObject.userData[0] : undefined;
+        annotation = zincObject.userData ? zincObject.userData.annotation : undefined;
         if (annotation && annotation.data){
           annotation.data.id = objects[i].name;
         }
       }
     }
     if (annotation)
-      annotations[count++] = annotation;
+      annotations.push(annotation);
   }
 	return annotations;
 }
 
-RendererModule.prototype.setHighlightedByObjects = function(objects, propagateChanges) {
+RendererModule.prototype.setHighlightedByObjects = function(
+  objects, coords, propagateChanges) {
   const changed = this.graphicsHighlight.setHighlighted(objects);
-  if (changed && propagateChanges) {
-    const eventType = require("./eventNotifier").EVENT_TYPE.HIGHLIGHTED;
+  if (propagateChanges) {
+    eventType = require("./eventNotifier").EVENT_TYPE.MOVE;
+    if (changed)
+      eventType = require("./eventNotifier").EVENT_TYPE.HIGHLIGHTED;
     const annotations = this.getAnnotationsFromObjects(objects);
+    if (annotations.length > 0)
+      annotations[0].coords = coords;
     this.publishChanges(annotations, eventType);
   }
   return changed;
@@ -99,8 +104,8 @@ RendererModule.prototype.setHighlightedByObjects = function(objects, propagateCh
 
 
 RendererModule.prototype.setHighlightedByZincObject = function(
-  zincObject, propagateChanges) {
-    return this.setHighlightedByObjects([zincObject ? zincObject.morph : undefined], propagateChanges);
+  zincObject, coords, propagateChanges) {
+    return this.setHighlightedByObjects([zincObject ? zincObject.morph : undefined], coords,propagateChanges);
 }
 
 RendererModule.prototype.setupLiveCoordinates = function(zincObjects) {
@@ -139,7 +144,7 @@ RendererModule.prototype.objectsToZincObjects = function(objects) {
 
 
 RendererModule.prototype.setSelectedByObjects = function(
-  objects, propagateChanges) {
+  objects, coords, propagateChanges) {
   const changed = this.graphicsHighlight.setSelected(objects);
   if (changed) {
     const zincObjects = this.objectsToZincObjects(objects);
@@ -147,6 +152,8 @@ RendererModule.prototype.setSelectedByObjects = function(
     if (propagateChanges) {
       const eventType = require("./eventNotifier").EVENT_TYPE.SELECTED;
       const annotations = this.getAnnotationsFromObjects(objects);
+      if (annotations.length > 0)
+        annotations[0].coords = coords;
       this.publishChanges(annotations, eventType);
     }
   }
@@ -154,8 +161,9 @@ RendererModule.prototype.setSelectedByObjects = function(
 }
 
 RendererModule.prototype.setSelectedByZincObject = function(
-  zincObject, propagateChanges) {
-  return this.setSelectedByObjects([zincObject ? zincObject.morph : undefined], propagateChanges);
+  zincObject, coords, propagateChanges) {
+  return this.setSelectedByObjects([zincObject ? zincObject.morph : undefined],
+    coords, propagateChanges);
 }
 
 const addGlyphToArray = function(objects) {
@@ -180,12 +188,12 @@ RendererModule.prototype.findObjectsByGroupName = function(groupName) {
 
 RendererModule.prototype.setHighlightedByGroupName = function(groupName, propagateChanges) {
   const objects = this.findObjectsByGroupName(groupName);
-  return this.setHighlightedByObjects(objects, propagateChanges);
+  return this.setHighlightedByObjects(objects, undefined, propagateChanges);
 }
 
 RendererModule.prototype.setSelectedByGroupName = function(groupName, propagateChanges) {
   const objects = this.findObjectsByGroupName(groupName);
-  return this.setSelectedByObjects(objects, propagateChanges);
+  return this.setSelectedByObjects(objects, undefined, propagateChanges);
 }
 
 RendererModule.prototype.changeBackgroundColour = function(backgroundColourString) {
