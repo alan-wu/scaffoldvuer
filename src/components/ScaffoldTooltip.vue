@@ -1,5 +1,5 @@
 <template>
-  <div :style="position" class="tooltipContainer">
+  <div :style="position" class="region-tooltip">
     <el-popover
       ref="tooltip"
       v-model="display"
@@ -82,45 +82,45 @@ export default {
 <style scoped lang="scss">
 @import "~element-ui/packages/theme-chalk/src/popover";
 
-::v-deep .tooltip-popper {
-  padding: 2px 6px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  font-size: 16px;
-  color: $app-primary-color;
-  background-color: #fff;
-  border: 1px solid $app-primary-color;
-  border-radius: 4px;
-  white-space: nowrap;
-  min-width: unset;
-  pointer-events: none;
-
-  &.el-popper[x-placement^="top"] {
-    .popper__arrow {
-      border-top-color: $app-primary-color !important;
-      &:after {
-        border-top-color: #fff !important;
-      }
-    }
-  }
-
-  &.el-popper[x-placement^="bottom"] {
-    .popper__arrow {
-      border-bottom-color: $app-primary-color !important;
-      &:after {
-        border-bottom-color: #fff !important;
-      }
-    }
-  }
-}
-
-.tooltipContainer {
+.region-tooltip {
   position: absolute;
   height: 50px;
   z-index: 2;
-}
+  ::v-deep .tooltip-popper {
+    padding: 2px 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    color: $app-primary-color;
+    background-color: #fff;
+    border: 1px solid $app-primary-color;
+    border-radius: 4px;
+    white-space: nowrap;
+    min-width: unset;
+    pointer-events: none;
+    top: -15px!important;
 
-::v-deep .non-selectable {
-  user-select: none;
-  pointer-events: none;
+    &.el-popper[x-placement^="top"] {
+      .popper__arrow {
+        border-top-color: $app-primary-color !important;
+        &:after {
+          border-top-color: #fff !important;
+        }
+      }
+    }
+
+    &.el-popper[x-placement^="bottom"] {
+      .popper__arrow {
+        border-bottom-color: $app-primary-color !important;
+        &:after {
+          border-bottom-color: #fff !important;
+        }
+      }
+    }
+  }
+
+  ::v-deep .non-selectable {
+    user-select: none;
+    pointer-events: none;
+  }
 }
 </style>

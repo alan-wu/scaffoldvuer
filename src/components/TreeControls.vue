@@ -240,7 +240,6 @@ export default {
       if (primitive && primitive.getVisibility()) {
         this.active.group = primitive.groupName;
         this.active.regionPath = primitive.region.getFullPath();
-        console.log(this.active)
         this.$emit("object-selected", primitive, propagate);
       } else {
         this.removeActive(propagate);
