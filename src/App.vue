@@ -338,7 +338,9 @@ export default {
         })
     },
     saveSettings: function() {
+      const state = this.$refs.scaffold.getState();
       this._sceneSettings.push(this.$refs.scaffold.getState());
+      console.log(state)
     },
     restoreSettings: function() {
       if (this._sceneSettings.length > 0)
