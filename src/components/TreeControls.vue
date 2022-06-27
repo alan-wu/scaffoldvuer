@@ -27,14 +27,8 @@
             slot-scope="{ node, data }"
             class="region-tree-node"
             :class="{
-              activeItem: 
-                (active.group === data.label && 
-                  ((active.regionPath === data.regionPath) || 
-                  active.regionPath === undefined)),
-              hoverItem: 
-                (hover.group === data.label && 
-                  ((hover.regionPath === data.regionPath) || 
-                  hover.regionPath === undefined))
+              activeItem: nodeIsActive(data),
+              hoverItem: nodeIsHover(data),
             }"
             @click="changeActiveByNode(data, true)"
             @mouseover="changeHoverByNode(data, true)"
@@ -96,6 +90,36 @@ const extractAllIds = (item, list) => {
     item.children.forEach(child => extractAllIds(child, list));
 }
 
+const findObjectsWithNames = (rootRegion, names, regionPath) => {
+  let targetRegion = rootRegion;
+  const targetObjects = [];
+  if (regionPath)
+    targetRegion = rootRegion.findChildFromPath(regionPath);
+  if (targetRegion) {
+    names.forEach(name => {
+      const temp = targetRegion.findObjectsWithGroupName(
+        name, true);
+      targetObjects.push(...temp);
+    });
+  }
+  return targetObjects;
+}
+
+const createListFromPrimitives = primitives => {
+  const list = [];
+  if (primitives) {
+    primitives.forEach(primitive => {
+      if (primitive && primitive.getVisibility()) {
+        list.push({
+          group: primitive.groupName,
+          regionPath: primitive.region.getFullPath()
+        });
+      }
+    });
+  }
+  return list;
+}
+
 /**
  * A vue component for toggling visibility of various regions.
  */
@@ -117,8 +141,8 @@ export default {
   data: function () {
     return {
       treeData: [{ label: "Root", id: "__r/", children: [] }],
-      active: {group: "", regionPath: undefined},
-      hover: {group: "", regionPath: undefined},
+      active: [{group: "", regionPath: undefined}],
+      hover: [{group: "", regionPath: undefined}],
       myPopperClass: "hide-scaffold-colour-popup",
       drawerOpen: true,
     };
@@ -201,6 +225,28 @@ export default {
         return data;
       }
     },
+    nodeIsActive: function(data) {
+      for (let i = 0; i < this.active.length; i++) {
+        let item = this.active[i];
+        if (item.group === data.label && 
+          ((item.regionPath === item.regionPath) || 
+          item.regionPath === undefined)) {
+          return true;
+        }
+      }
+      return false;
+    },
+    nodeIsHover: function(data) {
+      for (let i = 0; i < this.hover.length; i++) {
+        let item = this.hover[i];
+        if (item.group === data.label && 
+          ((item.regionPath === item.regionPath) || 
+          item.regionPath === undefined)) {
+          return true;
+        }
+      }
+      return false;
+    },
     /**
      * This is called when a new organ is read into the scene.
      */
@@ -236,21 +282,23 @@ export default {
         });
       }
     },
-    changeActiveByPrimitive: function (primitive, propagate) {
-      if (primitive && primitive.getVisibility()) {
-        this.active.group = primitive.groupName;
-        this.active.regionPath = primitive.region.getFullPath();
-        this.$emit("object-selected", primitive, propagate);
+    changeActiveByPrimitives: function (primitives, propagate) {
+      if (primitives && primitives.length > 0) {
+        this.active = [];
+        const list = createListFromPrimitives(primitives);
+        this.active.push(...list);
+        this.$emit("object-selected", primitives, propagate);
       } else {
         this.removeActive(propagate);
       }
       this.removeHover(propagate);
     },
-    changeHoverByPrimitive: function (primitive, propagate) {
-      if (primitive) {
-        this.hover.group = primitive.groupName;
-        this.hover.regionPath = primitive.region.getFullPath();
-        this.$emit("object-hovered", primitive, propagate);
+    changeHoverByPrimitives: function (primitives, propagate) {
+      if (primitives && primitives.length > 0) {
+        this.hover = [];
+        const list = createListFromPrimitives(primitives);
+        this.hover.push(...list);
+        this.$emit("object-hovered", primitives, propagate);
       } else {
         this.removeHover(propagate);
       }
@@ -258,43 +306,41 @@ export default {
     /**
      * Select a region by its name.
      */
-    changeActiveByName: function (name, regionPath, propagate) {
+    changeActiveByNames: function (names, regionPath, propagate) {
       const rootRegion = this.module.scene.getRootRegion();
-      const targetRegion = rootRegion.findChildFromPath(regionPath);
-      let targetObject = this.getFirstZincObjectWithGroupName(targetRegion, name);
-      this.changeActiveByPrimitive(targetObject, propagate);
+      const targetObjects = findObjectsWithNames(rootRegion, names,
+        regionPath);
+      this.changeActiveByPrimitives(targetObjects, propagate);
     },
     /**
      * Hover a region by its name.
      */
-    changeHoverByName: function (name, regionPath, propagate) {
+    changeHoverByNames: function (names, regionPath, propagate) {
       const rootRegion = this.module.scene.getRootRegion();
-      const targetRegion = rootRegion.findChildFromPath(regionPath);
-      let targetObject = this.getFirstZincObjectWithGroupName(targetRegion, name);
-      this.changeHoverByPrimitive(targetObject, propagate);
+      const targetObjects = findObjectsWithNames(rootRegion, names,
+        regionPath);
+      this.changeHoverByPrimitives(targetObjects, propagate);
     },
     changeActiveByNode: function (node, propagate) {
       if (node.primitives)
-        this.changeActiveByPrimitive(node.primitives[0], propagate);
+        this.changeActiveByPrimitives(node.primitives, propagate);
     },
     changeHoverByNode: function (node, propagate) {
       if (node.primitives)
-        this.changeHoverByPrimitive(node.primitives[0], propagate);
+        this.changeHoverByPrimitives(node.primitives, propagate);
     },
     /**
      * Unselect the current selected region.
      */
     removeActive: function (propagate) {
-      this.active.group = "";
-      this.active.regionPath = undefined;
+      this.active = [];
       this.$emit("object-selected", undefined, propagate);
     },
     /**
      * Unselect the current hover region.
      */
     removeHover: function (propagate) {
-      this.hover.group = "";
-      this.hover.regionPath = undefined;
+      this.hover = [];
       this.$emit("object-hovered", undefined, propagate);
     },
     /**

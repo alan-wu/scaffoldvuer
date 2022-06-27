@@ -535,8 +535,8 @@ export default {
   beforeCreate: function() {
     this.$module = new OrgansViewer();
     this.isReady = false;
-    this.selectedObject = undefined;
-    this.hoveredObject = undefined;
+    this.selectedObjects = [];
+    this.hoveredObjects = [];
     this.currentBackground = "white";
     this._currentURL = undefined;
     this.availableBackground = ["white", "black", "lightskyblue"];
@@ -746,12 +746,12 @@ export default {
     eventNotifierCallback: function(event) {
       if (event.eventType == 1) {
         if (this.$refs.treeControl) {
-          if (event.identifiers[0]) {
+          if ((event.identifiers.length > 0) && event.identifiers[0]) {
             let id = event.identifiers[0].data.id
               ? event.identifiers[0].data.id
               : event.identifiers[0].data.group;
             let region = event.identifiers[0].data.region;
-            this.$refs.treeControl.changeActiveByName(id, region, true);
+            this.$refs.treeControl.changeActiveByNames([id], region, true);
           } else {
             this.$refs.treeControl.removeActive(true);
           }
@@ -761,7 +761,7 @@ export default {
       } else if (event.eventType == 2) {
         this.tData.visible = false;
        // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
-        if (event.identifiers[0]) {
+        if ((event.identifiers.length > 0) && event.identifiers[0]) {
           let id = event.identifiers[0].data.id
             ? event.identifiers[0].data.id
             : event.identifiers[0].data.group;
@@ -769,19 +769,21 @@ export default {
             this.tData.visible = true;
             this.tData.label = id;
             this.tData.x = event.identifiers[0].coords.x;
-            this.tData.y = event.identifiers[0].coords.y;
+            this.tData.y  = event.identifiers[0].coords.y;
           }
           if (this.$refs.treeControl) {
             let region = event.identifiers[0].data.region;
-            this.$refs.treeControl.changeHoverByName(id, region, true);
-          } else {
+            this.$refs.treeControl.changeHoverByNames([id], region, true);
+          }
+        } else {
+          if (this.$refs.treeControl) {
             this.$refs.treeControl.removeHover(true);
           }
         }
         // Triggers when an object has been highlighted
         this.$emit("scaffold-highlighted", event.identifiers);
       } else if (event.eventType == 3)  { //MOVE
-        if (event.identifiers[0]) {
+        if ((event.identifiers.length > 0) && event.identifiers[0]) {
           if (event.identifiers[0].coords) {
             const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
             this.tData.x = event.identifiers[0].coords.x - offsets.left;
@@ -796,8 +798,8 @@ export default {
      * @public
      */
     getCoordinatesOfSelected: function() {
-      if (this.selectedObject) {
-        return this.$module.scene.getObjectsScreenXY([this.selectedObject]);
+      if (this.selectedObjects && this.selectedObjects.length > 0) {
+        return this.$module.scene.getObjectsScreenXY([this.selectedObjects]);
       }
       return undefined;
     },
@@ -824,47 +826,54 @@ export default {
      *
      * @param {object} object Zinc object
      */
-    objectSelected: function(object, propagate) {
-      if (object !== this.selectedObject) {
-        this.selectedObject = object;
-        this.$refs.opacityControl.setObject(this.selectedObject);
-        if (object) this.$module.setSelectedByZincObject(object, undefined, propagate);
-        else this.$module.setSelectedByObjects([], undefined, propagate);
-      }
+    objectSelected: function(objects, propagate) {
+      this.selectedObjects = objects;
+      if (this.selectedObjects)
+        this.$refs.opacityControl.setObject(this.selectedObjects[0]);
+      if (objects) this.$module.setSelectedByZincObjects(objects, undefined, propagate);
+      else this.$module.setSelectedByObjects([], undefined, propagate);
     },
     /**
      * A callback used by children components. Set the highlighted zinc object
      *
      * @param {object} object Zinc object
      */
-    objectHovered: function(object, propagate) {
-      if (object !== this.hoveredObject) {
-        this.hoveredObject = object;
-        if (object) this.$module.setHighlightedByZincObject(object, undefined, propagate);
-        else this.$module.setHighlightedByObjects([], undefined, propagate);
-      }
+    objectHovered: function(objects, propagate) {
+      this.hoveredObjects = objects;
+      if (objects) this.$module.setHighlightedByZincObjects(objects, undefined, propagate);
+      else this.$module.setHighlightedByObjects([], undefined, propagate);
     },
     /**
      * Set the selected by name.
      *
-     * @param {name} name Name of the group
+     * @param {} name Name of the group
      */
-    changeActiveByName: function(name, region, propagate) {
-      if (name === undefined)
+    changeActiveByName: function(names, region, propagate) {
+      const isArray = Array.isArray(names);
+      if (names === undefined || (isArray && names.length === 0)) {
         this.$refs.treeControl.removeActive(propagate);
-      else
-        this.$refs.treeControl.changeActiveByName(name, region, propagate);
+      } else {
+        let array = names;
+        if (!isArray)
+          array = [array];
+        this.$refs.treeControl.changeActiveByNames(array, region, propagate);
+      }
     },
     /**
      * Set the highlighted by name.
      *
      * @param {name} name Name of the group
      */
-    changeHighlightedByName: function(name, region, propagate) {
-      if (name === undefined)
+    changeHighlightedByName: function(names, region, propagate) {
+      const isArray = Array.isArray(names);
+      if (names === undefined || (isArray && names.length === 0)) {
         this.$refs.treeControl.removeHover(propagate);
-      else
-        this.$refs.treeControl.changeHoverByName(name, region, propagate);
+      } else {
+        let array = names;
+        if (!isArray)
+          array = [array];
+        this.$refs.treeControl.changeHoverByNames(array, region, propagate);
+      }
     },
     /**
      * Start the animation.

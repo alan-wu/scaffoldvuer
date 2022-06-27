@@ -367,7 +367,8 @@ export default {
       this.$refs.dropzone.revokeURLs();
     },
     onSelected: function(data) {
-      if (data && data[0].data.group) {
+      console.log(data)
+      if (data && (data.length > 0) && data[0].data.group) {
         delete this.$route.query["viewURL"];
         this.$router.replace({
           query: { ...this.$route.query, region: data[0].data.group }

@@ -103,9 +103,17 @@ RendererModule.prototype.setHighlightedByObjects = function(
 }
 
 
-RendererModule.prototype.setHighlightedByZincObject = function(
-  zincObject, coords, propagateChanges) {
-    return this.setHighlightedByObjects([zincObject ? zincObject.morph : undefined], coords,propagateChanges);
+RendererModule.prototype.setHighlightedByZincObjects = function(
+  zincObjects, coords, propagateChanges) {
+    let morphs = [];
+    if (zincObjects) {
+      zincObjects.forEach(zincObject => {
+        if (zincObject && zincObject.morph)
+          morphs.push(zincObject.morph);
+      });
+    }
+
+    return this.setHighlightedByObjects(morphs, coords,propagateChanges);
 }
 
 RendererModule.prototype.setupLiveCoordinates = function(zincObjects) {
@@ -160,10 +168,17 @@ RendererModule.prototype.setSelectedByObjects = function(
   return changed;
 }
 
-RendererModule.prototype.setSelectedByZincObject = function(
-  zincObject, coords, propagateChanges) {
-  return this.setSelectedByObjects([zincObject ? zincObject.morph : undefined],
-    coords, propagateChanges);
+RendererModule.prototype.setSelectedByZincObjects = function(
+  zincObjects, coords, propagateChanges) {
+  let morphs = [];
+  if (zincObjects) {
+    zincObjects.forEach(zincObject => {
+      if (zincObject && zincObject.morph)
+        morphs.push(zincObject.morph);
+    });
+  }
+
+  return this.setSelectedByObjects(morphs, coords, propagateChanges);
 }
 
 const addGlyphToArray = function(objects) {
