@@ -783,7 +783,7 @@ export default {
             if (names.length > 0) {
               this.$refs.treeControl.changeHoverByNames(names, region, true);
             } else {
-              this.$refs.treeControl.removeActive(true);
+              this.$refs.treeControl.removeHover(true);
             }
           }
         } else {
