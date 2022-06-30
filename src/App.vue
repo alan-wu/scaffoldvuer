@@ -366,9 +366,10 @@ export default {
     onReady: function() {
       this.$refs.dropzone.revokeURLs();
       const names = ["left ventricle.mesh2d", "right ventricle.mesh2d"];
-      this.$refs.scaffold.changeActiveByName(names, "", false);
+      this.$refs.scaffold.changeActiveByName(names, "", true);
     },
     onSelected: function(data) {
+      console.log(data)
       if (data && (data.length > 0) && data[0].data.group) {
         delete this.$route.query["viewURL"];
         this.$router.replace({

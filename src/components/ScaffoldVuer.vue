@@ -744,14 +744,22 @@ export default {
      * It will also update other controls.
      */
     eventNotifierCallback: function(event) {
+      const names = [];
+      const region = undefined;
+      if (event.eventType == 1 || event.eventType == 2) {
+        event.identifiers.forEach(identifier => {
+          if (identifier) {
+            let id = identifier.data.id
+              ? identifier.data.id
+              : identifier.data.group;
+            names.push(id);
+          }
+        });
+      }
       if (event.eventType == 1) {
         if (this.$refs.treeControl) {
-          if ((event.identifiers.length > 0) && event.identifiers[0]) {
-            let id = event.identifiers[0].data.id
-              ? event.identifiers[0].data.id
-              : event.identifiers[0].data.group;
-            let region = event.identifiers[0].data.region;
-            this.$refs.treeControl.changeActiveByNames([id], region, true);
+          if (names.length > 0) {
+            this.$refs.treeControl.changeActiveByNames(names, region, true);
           } else {
             this.$refs.treeControl.removeActive(true);
           }
@@ -772,8 +780,11 @@ export default {
             this.tData.y  = event.identifiers[0].coords.y;
           }
           if (this.$refs.treeControl) {
-            let region = event.identifiers[0].data.region;
-            this.$refs.treeControl.changeHoverByNames([id], region, true);
+            if (names.length > 0) {
+              this.$refs.treeControl.changeHoverByNames(names, region, true);
+            } else {
+              this.$refs.treeControl.removeActive(true);
+            }
           }
         } else {
           if (this.$refs.treeControl) {
