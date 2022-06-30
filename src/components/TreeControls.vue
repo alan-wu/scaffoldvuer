@@ -17,7 +17,7 @@
           default-expand-all
           node-key="id"
           show-checkbox
-          :check-strictly="true"
+          :check-strictly="false"
           :data="treeData"
           :default-checked-keys="['__r/']"
           :expand-on-click-node="false"
@@ -97,8 +97,7 @@ const findObjectsWithNames = (rootRegion, names, regionPath) => {
     targetRegion = rootRegion.findChildFromPath(regionPath);
   if (targetRegion) {
     names.forEach(name => {
-      const temp = targetRegion.findObjectsWithGroupName(
-        name, true);
+      const temp = targetRegion.findObjectsWithGroupName(name, true);
       targetObjects.push(...temp);
     });
   }
@@ -274,13 +273,19 @@ export default {
       }
     },
     checkChanged: function (node, data) {
-      let checked = data.checkedKeys.includes(node.id);
-      if (node.region) node.region.setVisibility(checked);
-      if (node.primitives) {
-        node.primitives.forEach(primitive => {
-          primitive.setVisibility(checked);
-        });
-      }
+      const rootRegion = this.module.scene.getRootRegion();
+      rootRegion.hideAllChildren();
+      data.checkedNodes.forEach(localNode => {
+        if (localNode.region) localNode.region.setVisibility(true);
+        if (localNode.primitives) {
+          localNode.primitives.forEach(primitive => {
+            primitive.setVisibility(true);
+          });
+        }
+      });
+      data.halfCheckedNodes.forEach(localNode => {
+        if (localNode.region) localNode.region.setVisibility(true);
+      });
     },
     changeActiveByPrimitives: function (primitives, propagate) {
       if (primitives && primitives.length > 0) {
@@ -354,19 +359,6 @@ export default {
       this.$refs.regionTree.updateKeyChildren( "__r/", []);
       this.$emit("object-selected", undefined);
     },
-    getFirstZincObjectWithGroupName: function (region, name) {
-      if (region) {
-        let array = region.findGeometriesWithGroupName(name);
-        if (array.length > 0) return array[0];
-        array = region.findGlyphsetsWithGroupName(name);
-        if (array.length > 0) return array[0];
-        array = region.findLinesWithGroupName(name);
-        if (array.length > 0) return array[0];
-        array = region.findPointsetsWithGroupName(name);
-        if (array.length > 0) return array[0];
-      }
-      return undefined;
-    },
     getColour: function (nodeData) {
       if (nodeData) {
         let graphic = nodeData.primitives[0];
@@ -378,12 +370,11 @@ export default {
       return "#FFFFFF";
     },
     setColour: function (nodeData, value) {
-      if (nodeData) {
-        let graphic = nodeData.primitives[0];
-        if (graphic) {
+      if (nodeData && nodeData.primitives) {
+        nodeData.primitives.forEach(primitive => {
           let hexString = value.replace("#", "0x");
-          graphic.setColourHex(hexString);
-        }
+          primitive.setColourHex(hexString);
+        });
       }
     },
     viewAll: function () {
