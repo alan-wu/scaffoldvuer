@@ -340,7 +340,6 @@ export default {
     saveSettings: function() {
       const state = this.$refs.scaffold.getState();
       this._sceneSettings.push(this.$refs.scaffold.getState());
-      console.log(state)
     },
     restoreSettings: function() {
       if (this._sceneSettings.length > 0)
@@ -364,9 +363,10 @@ export default {
       }
     },
     onReady: function() {
+      console.log("ready")
       this.$refs.dropzone.revokeURLs();
-      const names = ["left ventricle.mesh2d", "right ventricle.mesh2d"];
-      this.$refs.scaffold.changeActiveByName(names, "", true);
+      //const names = ["left ventricle.mesh2d", "right ventricle.mesh2d"];
+      //this.$refs.scaffold.changeActiveByName(names, "", true);
     },
     onSelected: function(data) {
       console.log(data)

@@ -225,7 +225,7 @@ const OrgansSceneData = function() {
           if (idObject.object.name)
             _this.setSelectedByObjects([idObject.object], coords, true);
           else
-            _this.setSelectedByZincObject(idObject.object.userData.getGlyphset(),
+            _this.setSelectedByZincObjects(idObject.object.userData.getGlyphset(),
               coords, true);
         } else {
           _this.setSelectedByObjects([idObject.object], coords, true);

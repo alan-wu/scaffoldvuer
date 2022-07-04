@@ -759,7 +759,7 @@ export default {
       if (event.eventType == 1) {
         if (this.$refs.treeControl) {
           if (names.length > 0) {
-            this.$refs.treeControl.changeActiveByNames(names, region, true);
+            this.$refs.treeControl.changeActiveByNames(names, region, false);
           } else {
             this.$refs.treeControl.removeActive(true);
           }
@@ -769,6 +769,13 @@ export default {
       } else if (event.eventType == 2) {
         this.tData.visible = false;
        // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
+        if (this.$refs.treeControl) {
+          if (names.length > 0) {
+            this.$refs.treeControl.changeHoverByNames(names, region, false);
+          } else {
+            this.$refs.treeControl.removeHover(true);
+          }
+        }
         if ((event.identifiers.length > 0) && event.identifiers[0]) {
           let id = event.identifiers[0].data.id
             ? event.identifiers[0].data.id
@@ -778,17 +785,6 @@ export default {
             this.tData.label = id;
             this.tData.x = event.identifiers[0].coords.x;
             this.tData.y  = event.identifiers[0].coords.y;
-          }
-          if (this.$refs.treeControl) {
-            if (names.length > 0) {
-              this.$refs.treeControl.changeHoverByNames(names, region, true);
-            } else {
-              this.$refs.treeControl.removeHover(true);
-            }
-          }
-        } else {
-          if (this.$refs.treeControl) {
-            this.$refs.treeControl.removeHover(true);
           }
         }
         // Triggers when an object has been highlighted
