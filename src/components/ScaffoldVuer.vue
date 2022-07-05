@@ -249,7 +249,7 @@ import OpacityControls from "./OpacityControls";
 import ScaffoldTooltip from "./ScaffoldTooltip";
 import TreeControls from "./TreeControls";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
-
+import { findObjectsWithNames } from "../scripts/utilities.js";
 import {
   Col,
   Loading,
@@ -682,8 +682,10 @@ export default {
     /**
      * Focus on named region
      */
-    viewRegion: function(name) {
-      let objects = this.findObjectsWithGroupName(name);
+    viewRegion: function(names) {
+      const rootRegion = this.$module.scene.getRootRegion();
+      const groups = Array.isArray(names) ? names : [names];
+      const objects = findObjectsWithNames(rootRegion, groups, "");
       let box = this.$module.scene.getBoundingBoxOfZincObjects(objects);
       if (box) {
         if (this.$module.isSyncControl()) {
@@ -1120,8 +1122,12 @@ export default {
       const payload = this.$module.NDCCameraControl.getPanZoom();
       this.$emit("scaffold-navigated", payload);
     },
-    toggleSyncControl: function(flag) {
-      this.$module.toggleSyncControl(flag);
+    /** 
+     * Rotate mode - "none", "horizontal", "vertical", "free" but
+     * it will be ignored if flag is set to false.
+     */
+    toggleSyncControl: function(flag, rotateMode) {
+      this.$module.toggleSyncControl(flag, rotateMode);
       this.$module.setSyncControlCallback(this.syncControlCallback);
     }
   }

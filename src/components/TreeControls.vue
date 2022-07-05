@@ -62,6 +62,7 @@ import Vue from "vue";
 import { Checkbox, CheckboxGroup, ColorPicker, Row, Tree } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
+import { createListFromPrimitives, extractAllIds, findObjectsWithNames } from "../scripts/utilities.js";
 
 const orderBy = require("lodash/orderBy");
 const uniq = require("lodash/uniq");
@@ -83,41 +84,6 @@ const nameSorting = (a, b) => {
   }
   return 0;
 };
-
-const extractAllIds = (item, list) => {
-  list.push(item.id);
-  if (item.children)
-    item.children.forEach(child => extractAllIds(child, list));
-}
-
-const findObjectsWithNames = (rootRegion, names, regionPath) => {
-  let targetRegion = rootRegion;
-  const targetObjects = [];
-  if (regionPath)
-    targetRegion = rootRegion.findChildFromPath(regionPath);
-  if (targetRegion) {
-    names.forEach(name => {
-      const temp = targetRegion.findObjectsWithGroupName(name, true);
-      targetObjects.push(...temp);
-    });
-  }
-  return targetObjects;
-}
-
-const createListFromPrimitives = primitives => {
-  const list = [];
-  if (primitives) {
-    primitives.forEach(primitive => {
-      if (primitive && primitive.getVisibility()) {
-        list.push({
-          group: primitive.groupName,
-          regionPath: primitive.region.getFullPath()
-        });
-      }
-    });
-  }
-  return list;
-}
 
 /**
  * A vue component for toggling visibility of various regions.

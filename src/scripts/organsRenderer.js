@@ -84,14 +84,16 @@ const OrgansSceneData = function() {
 		_this.sceneData.currentTime = currentTime / duration * 100.0;
   }
 
-  this.toggleSyncControl = (flag) => {
+  this.toggleSyncControl = (flag, rotateMode) => {
     let cameraControl = this.scene.getZincCameraControls();
     if (flag) {
       cameraControl.resetView();
       this.NDCCameraControl = cameraControl.enableSyncControl();
+      cameraControl.setRotationMode(rotateMode);
     } else {
       cameraControl.disableSyncControl();
       this.NDCCameraControl = undefined;
+      cameraControl.setRotationMode("free");
     }
   }
 
