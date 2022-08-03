@@ -17,7 +17,7 @@
           default-expand-all
           node-key="id"
           show-checkbox
-          :check-strictly="true"
+          :check-strictly="false"
           :data="treeData"
           :default-checked-keys="['__r/']"
           :expand-on-click-node="false"
@@ -27,14 +27,8 @@
             slot-scope="{ node, data }"
             class="region-tree-node"
             :class="{
-              activeItem: 
-                (active.group === data.label && 
-                  ((active.regionPath === data.regionPath) || 
-                  active.regionPath === undefined)),
-              hoverItem: 
-                (hover.group === data.label && 
-                  ((hover.regionPath === data.regionPath) || 
-                  hover.regionPath === undefined))
+              activeItem: nodeIsActive(data),
+              hoverItem: nodeIsHover(data),
             }"
             @click="changeActiveByNode(data, true)"
             @mouseover="changeHoverByNode(data, true)"
@@ -68,6 +62,7 @@ import Vue from "vue";
 import { Checkbox, CheckboxGroup, ColorPicker, Row, Tree } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
+import { createListFromPrimitives, extractAllIds, findObjectsWithNames } from "../scripts/utilities.js";
 
 const orderBy = require("lodash/orderBy");
 const uniq = require("lodash/uniq");
@@ -90,12 +85,6 @@ const nameSorting = (a, b) => {
   return 0;
 };
 
-const extractAllIds = (item, list) => {
-  list.push(item.id);
-  if (item.children)
-    item.children.forEach(child => extractAllIds(child, list));
-}
-
 /**
  * A vue component for toggling visibility of various regions.
  */
@@ -117,8 +106,8 @@ export default {
   data: function () {
     return {
       treeData: [{ label: "Root", id: "__r/", children: [] }],
-      active: {group: "", regionPath: undefined},
-      hover: {group: "", regionPath: undefined},
+      active: [{group: "", regionPath: undefined}],
+      hover: [{group: "", regionPath: undefined}],
       myPopperClass: "hide-scaffold-colour-popup",
       drawerOpen: true,
     };
@@ -201,6 +190,28 @@ export default {
         return data;
       }
     },
+    nodeIsActive: function(data) {
+      for (let i = 0; i < this.active.length; i++) {
+        let item = this.active[i];
+        if (item.group === data.label && 
+          ((item.regionPath === item.regionPath) || 
+          item.regionPath === undefined)) {
+          return true;
+        }
+      }
+      return false;
+    },
+    nodeIsHover: function(data) {
+      for (let i = 0; i < this.hover.length; i++) {
+        let item = this.hover[i];
+        if (item.group === data.label && 
+          ((item.regionPath === item.regionPath) || 
+          item.regionPath === undefined)) {
+          return true;
+        }
+      }
+      return false;
+    },
     /**
      * This is called when a new organ is read into the scene.
      */
@@ -228,29 +239,37 @@ export default {
       }
     },
     checkChanged: function (node, data) {
-      let checked = data.checkedKeys.includes(node.id);
-      if (node.region) node.region.setVisibility(checked);
-      if (node.primitives) {
-        node.primitives.forEach(primitive => {
-          primitive.setVisibility(checked);
-        });
-      }
+      const rootRegion = this.module.scene.getRootRegion();
+      rootRegion.hideAllChildren();
+      data.checkedNodes.forEach(localNode => {
+        if (localNode.region) localNode.region.setVisibility(true);
+        if (localNode.primitives) {
+          localNode.primitives.forEach(primitive => {
+            primitive.setVisibility(true);
+          });
+        }
+      });
+      data.halfCheckedNodes.forEach(localNode => {
+        if (localNode.region) localNode.region.setVisibility(true);
+      });
     },
-    changeActiveByPrimitive: function (primitive, propagate) {
-      if (primitive && primitive.getVisibility()) {
-        this.active.group = primitive.groupName;
-        this.active.regionPath = primitive.region.getFullPath();
-        this.$emit("object-selected", primitive, propagate);
+    changeActiveByPrimitives: function (primitives, propagate) {
+      if (primitives && primitives.length > 0) {
+        this.active = [];
+        const list = createListFromPrimitives(primitives);
+        this.active.push(...list);
+        this.$emit("object-selected", primitives, propagate);
       } else {
         this.removeActive(propagate);
       }
       this.removeHover(propagate);
     },
-    changeHoverByPrimitive: function (primitive, propagate) {
-      if (primitive) {
-        this.hover.group = primitive.groupName;
-        this.hover.regionPath = primitive.region.getFullPath();
-        this.$emit("object-hovered", primitive, propagate);
+    changeHoverByPrimitives: function (primitives, propagate) {
+      if (primitives && primitives.length > 0) {
+        this.hover = [];
+        const list = createListFromPrimitives(primitives);
+        this.hover.push(...list);
+        this.$emit("object-hovered", primitives, propagate);
       } else {
         this.removeHover(propagate);
       }
@@ -258,43 +277,41 @@ export default {
     /**
      * Select a region by its name.
      */
-    changeActiveByName: function (name, regionPath, propagate) {
+    changeActiveByNames: function (names, regionPath, propagate) {
       const rootRegion = this.module.scene.getRootRegion();
-      const targetRegion = rootRegion.findChildFromPath(regionPath);
-      let targetObject = this.getFirstZincObjectWithGroupName(targetRegion, name);
-      this.changeActiveByPrimitive(targetObject, propagate);
+      const targetObjects = findObjectsWithNames(rootRegion, names,
+        regionPath);
+      this.changeActiveByPrimitives(targetObjects, propagate);
     },
     /**
      * Hover a region by its name.
      */
-    changeHoverByName: function (name, regionPath, propagate) {
+    changeHoverByNames: function (names, regionPath, propagate) {
       const rootRegion = this.module.scene.getRootRegion();
-      const targetRegion = rootRegion.findChildFromPath(regionPath);
-      let targetObject = this.getFirstZincObjectWithGroupName(targetRegion, name);
-      this.changeHoverByPrimitive(targetObject, propagate);
+      const targetObjects = findObjectsWithNames(rootRegion, names,
+        regionPath);
+      this.changeHoverByPrimitives(targetObjects, propagate);
     },
     changeActiveByNode: function (node, propagate) {
       if (node.primitives)
-        this.changeActiveByPrimitive(node.primitives[0], propagate);
+        this.changeActiveByPrimitives(node.primitives, propagate);
     },
     changeHoverByNode: function (node, propagate) {
       if (node.primitives)
-        this.changeHoverByPrimitive(node.primitives[0], propagate);
+        this.changeHoverByPrimitives(node.primitives, propagate);
     },
     /**
      * Unselect the current selected region.
      */
     removeActive: function (propagate) {
-      this.active.group = "";
-      this.active.regionPath = undefined;
+      this.active = [];
       this.$emit("object-selected", undefined, propagate);
     },
     /**
      * Unselect the current hover region.
      */
     removeHover: function (propagate) {
-      this.hover.group = "";
-      this.hover.regionPath = undefined;
+      this.hover = [];
       this.$emit("object-hovered", undefined, propagate);
     },
     /**
@@ -308,19 +325,6 @@ export default {
       this.$refs.regionTree.updateKeyChildren( "__r/", []);
       this.$emit("object-selected", undefined);
     },
-    getFirstZincObjectWithGroupName: function (region, name) {
-      if (region) {
-        let array = region.findGeometriesWithGroupName(name);
-        if (array.length > 0) return array[0];
-        array = region.findGlyphsetsWithGroupName(name);
-        if (array.length > 0) return array[0];
-        array = region.findLinesWithGroupName(name);
-        if (array.length > 0) return array[0];
-        array = region.findPointsetsWithGroupName(name);
-        if (array.length > 0) return array[0];
-      }
-      return undefined;
-    },
     getColour: function (nodeData) {
       if (nodeData) {
         let graphic = nodeData.primitives[0];
@@ -332,12 +336,11 @@ export default {
       return "#FFFFFF";
     },
     setColour: function (nodeData, value) {
-      if (nodeData) {
-        let graphic = nodeData.primitives[0];
-        if (graphic) {
+      if (nodeData && nodeData.primitives) {
+        nodeData.primitives.forEach(primitive => {
           let hexString = value.replace("#", "0x");
-          graphic.setColourHex(hexString);
-        }
+          primitive.setColourHex(hexString);
+        });
       }
     },
     viewAll: function () {
