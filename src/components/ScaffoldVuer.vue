@@ -1109,7 +1109,7 @@ export default {
     /**
      * Callback when drawer is toggled.
      */
-    drawerToggled: function(flag) {pppp
+    drawerToggled: function(flag) {
       this.drawerOpen = flag;
       this.adjustLayout();
     },
