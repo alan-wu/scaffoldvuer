@@ -364,6 +364,13 @@ export default {
       default: false
     },
     /**
+     * Format of the input URL
+     */
+    format: {
+      type: String,
+      default: "metadata"
+    },
+    /**
      * Settings for minimap position, size and alignment.
      */
     minimapSettings: {
@@ -473,10 +480,17 @@ export default {
         visible: false,
         x: 200,
         y: 200
-      }
+      },
+      fileFormat: "metadata",
     };
   },
   watch: {
+    format: {
+      handler: function(value) {
+        this.fileFormat = value;
+      },
+      immediate: true
+    },
     url: {
       handler: function(newValue) {
         if (this.state === undefined || this.state.url === undefined)
@@ -989,9 +1003,10 @@ export default {
      */
     getState: function() {
       let state = {
+        format: this.fileFormat,
         url: this._currentURL,
         viewport: undefined,
-        visibility: undefined
+        visibility: undefined,
       };
       if (this.$refs.treeControl)
         state.visibility = this.$refs.treeControl.getState();
@@ -1011,6 +1026,7 @@ export default {
       if (state) {
         if (state.url && state.url !== this._currentURL) {
           this.setURLAndState(state.url, {
+            fileFormat: state.fileFormat,
             viewport: state.viewport,
             visibility: state.visibility
           });
@@ -1047,6 +1063,7 @@ export default {
      */
     setURLAndState: function(newValue, state) {
       if (newValue != this._currentURL) {
+        if (state && state.format) this.fileFormat = state.format;
         let viewport = state && state.viewport ? state.viewport : undefined;
         let visibility =
           state && state.visibility ? state.visibility : undefined;
@@ -1063,13 +1080,18 @@ export default {
             visibility: visibility
           })
         );
-        this.$module.loadOrgansFromURL(
-          newValue,
-          undefined,
-          undefined,
-          "scene",
-          undefined
-        );
+        if (this.fileFormat === "gltf") {
+          this.$module.loadGLTFFromURL(newValue, "scene", true);
+        } else {
+          this.$module.loadOrgansFromURL(
+            newValue,
+            undefined,
+            undefined,
+            "scene",
+            undefined,
+            true
+          );
+        }
         this.$module.scene.displayMarkers = this.displayMarkers;
         this.$module.scene.displayMinimap = this.displayMinimap;
         this.updateMinimapScissor();
@@ -1086,9 +1108,8 @@ export default {
     },
     /**
      * Callback when drawer is toggled.
-     *
      */
-    drawerToggled: function(flag) {
+    drawerToggled: function(flag) {pppp
       this.drawerOpen = flag;
       this.adjustLayout();
     },
