@@ -1,90 +1,98 @@
 <template>
   <div
-    class="scaffold-container"
+    ref="scaffoldContainer"
     v-loading="loading"
+    class="scaffold-container"
     element-loading-text="Loading..."
     element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.3)"
-    ref="scaffoldContainer"
   >
-    <SvgSpriteColor />
+    <map-svg-sprite-color />
+    <scaffold-tooltip
+      :label="tData.label"
+      :visible="tData.visible"
+      :x="tData.x"
+      :y="tData.y"
+    />
     <div
       id="organsDisplayArea"
+      ref="display"
       tabindex="-1"
       style="height:100%;width:100%;"
-      ref="display"
       @keydown.66="backgroundChangeCallback"
-    ></div>
+    />
     <div v-show="displayUI && !isTransitioning">
       <el-popover
         v-if="displayWarning"
+        ref="warningPopover"
+        v-model="hoverVisabilities[6].value"
         :content="warningMessage"
         placement="right"
-        :appendToBody="false"
+        :append-to-body="false"
         trigger="manual"
         popper-class="warning-popper right-popper non-selectable"
-        v-model="hoverVisabilities[6].value"
-        ref="warningPopover"
-      ></el-popover>
+      />
       <i
-        class="el-icon-warning warning-icon"
         v-if="displayWarning"
+        v-popover:warningPopover
+        class="el-icon-warning warning-icon"
         @mouseover="showToolitip(6)"
         @mouseout="hideToolitip(6)"
-        v-popover:warningPopover
       >
         <span class="warning-text">Beta</span>
       </i>
       <el-popover
+        ref="checkBoxPopover"
+        v-model="hoverVisabilities[5].value"
         content="Change region visibility"
         placement="right"
-        :appendToBody="false"
+        :append-to-body="false"
         trigger="manual"
         popper-class="scaffold-popper right-popper non-selectable"
-        v-model="hoverVisabilities[5].value"
-        ref="checkBoxPopover"
-      ></el-popover>
-      <TraditionalControls
+      />
+      <tree-controls
+        ref="treeControl"
         v-popover:checkBoxPopover
-        :helpMode="helpMode"
+        :help-mode="helpMode"
         :module="$module"
+        :show-colour-picker="showColourPicker"
         @object-selected="objectSelected"
         @object-hovered="objectHovered"
         @drawer-toggled="drawerToggled"
-        :showColourPicker="showColourPicker"
-        ref="traditionalControl"
       />
-      <OpacityControls ref="opacityControl" />
+      <div class="opacity-box">
+        <opacity-controls ref="opacityControl" />
+      </div>
       <el-popover
         v-if="sceneData.timeVarying"
+        ref="sliderPopover"
+        v-model="hoverVisabilities[4].value"
         content="Move the slider to animate the region"
         placement="top"
-        :appendToBody="false"
+        :append-to-body="false"
         trigger="manual"
         popper-class="scaffold-popper top-popper non-selectable"
-        v-model="hoverVisabilities[4].value"
-        ref="sliderPopover"
-      ></el-popover>
+      />
       <div
+        v-if="sceneData.timeVarying"
+        v-popover:sliderPopover
         class="time-slider-container"
         :class="[ minimisedSlider ? 'minimised' : '', sliderPosition]"
-        v-popover:sliderPopover
-        v-if="sceneData.timeVarying"
       >
         <el-tabs type="card">
           <el-tab-pane label="Animate scaffold">
             <el-row class="tab-content">
-              <SvgIcon
+              <map-svg-icon
                 v-if="isPlaying"
                 icon="pause"
                 class="icon-button video-button"
                 @click.native="play(false)"
               />
-              <SvgIcon
+              <map-svg-icon
                 v-else
-                @click.native="play(true)"
                 icon="play"
                 class="video-button icon-button"
+                @click.native="play(true)"
               />
               <el-slider
                 :min="0"
@@ -96,18 +104,22 @@
                 :format-tooltip="formatTooltip"
                 :marks="timeStamps"
                 @input="timeChange($event)"
-              ></el-slider>
+              />
             </el-row>
           </el-tab-pane>
           <el-tab-pane label="Animation data">
             <el-row class="tab-content">
               <div class="animation-data">
                 Original duration:
-                <div class="purple">{{ orginalDuration }}</div>
+                <div class="purple">
+                  {{ orginalDuration }}
+                </div>
               </div>
               <div class="animation-data">
                 Animation duration:
-                <div class="purple">{{ animateDuration }}</div>
+                <div class="purple">
+                  {{ animateDuration }}
+                </div>
               </div>
               <div class="animation-data">
                 Playback speed
@@ -133,51 +145,55 @@
       </div>
       <div class="bottom-right-control">
         <el-popover
+          v-model="hoverVisabilities[0].value"
           content="Zoom in"
           placement="left"
-          :appendToBody="false"
+          :append-to-body="false"
           trigger="manual"
           popper-class="scaffold-popper left-popper non-selectable"
-          v-model="hoverVisabilities[0].value"
         >
-          <SvgIcon
+          <map-svg-icon
+            slot="reference"
             icon="zoomIn"
             class="icon-button zoomIn"
-            slot="reference"
             @click.native="zoomIn()"
             @mouseover.native="showToolitip(0)"
             @mouseout.native="hideToolitip(0)"
           />
         </el-popover>
         <el-popover
+          v-model="hoverVisabilities[1].value"
           content="Zoom out"
           placement="top-end"
-          :appendToBody="false"
+          :append-to-body="false"
           trigger="manual"
           popper-class="scaffold-popper popper-zoomout non-selectable"
-          v-model="hoverVisabilities[1].value"
         >
-          <SvgIcon
+          <map-svg-icon
+            slot="reference"
             icon="zoomOut"
             class="icon-button zoomOut"
-            slot="reference"
             @click.native="zoomOut()"
             @mouseover.native="showToolitip(1)"
             @mouseout.native="hideToolitip(1)"
           />
         </el-popover>
         <el-popover
+          v-model="hoverVisabilities[2].value"
           placement="top"
-          :appendToBody="false"
+          :append-to-body="false"
           trigger="manual"
           popper-class="scaffold-popper non-selectable"
-          v-model="hoverVisabilities[2].value"
         >
-          <div>Fit to<br>window</div>
-          <SvgIcon
+          <div>
+            Fit to
+            <br>
+            window
+          </div>
+          <map-svg-icon
+            slot="reference"
             icon="fitWindow"
             class="icon-button fitWindow"
-            slot="reference"
             @click.native="fitWindow()"
             @mouseover.native="showToolitip(2)"
             @mouseout.native="hideToolitip(2)"
@@ -188,11 +204,13 @@
         ref="backgroundPopover"
         placement="top-start"
         width="128"
-        :appendToBody="false"
+        :append-to-body="false"
         trigger="click"
         popper-class="background-popper non-selectable"
       >
-        <el-row class="backgroundText">Change background</el-row>
+        <el-row class="backgroundText">
+          Change background
+        </el-row>
         <el-row class="backgroundChooser">
           <div
             v-for="item in availableBackground"
@@ -203,18 +221,18 @@
         </el-row>
       </el-popover>
       <el-popover
+        v-model="hoverVisabilities[3].value"
         content="Change background color"
         placement="right"
-        :appendToBody="false"
+        :append-to-body="false"
         trigger="manual"
         popper-class="scaffold-popper right-popper non-selectable"
-        v-model="hoverVisabilities[3].value"
       >
-        <SvgIcon
+        <map-svg-icon
+          slot="reference"
           v-popover:backgroundPopover
           icon="changeBckgd"
           class="icon-button background-colour"
-          slot="reference"
           :class="{ open: drawerOpen, close: !drawerOpen }"
           @mouseover.native="showToolitip(3)"
           @mouseout.native="hideToolitip(3)"
@@ -228,11 +246,11 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import OpacityControls from "./OpacityControls";
-import TraditionalControls from "./TraditionalControls";
-import { SvgIcon, SvgSpriteColor } from "@abi-software/svg-sprite";
-
+import ScaffoldTooltip from "./ScaffoldTooltip";
+import TreeControls from "./TreeControls";
+import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
+import { findObjectsWithNames } from "../scripts/utilities.js";
 import {
-  Button,
   Col,
   Loading,
   Option,
@@ -245,8 +263,8 @@ import {
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
+
 locale.use(lang);
-Vue.use(Button);
 Vue.use(Col);
 Vue.use(Loading.directive);
 Vue.use(Option);
@@ -257,512 +275,23 @@ Vue.use(Slider);
 Vue.use(TabPane);
 Vue.use(Tabs);
 
-const OrgansViewer = require("physiomeportal/src/modules/organsRenderer")
-  .OrgansViewer;
-const EventNotifier = require("physiomeportal/src/utilities/eventNotifier")
-  .EventNotifier;
+const OrgansViewer = require("../scripts/organsRenderer").OrgansViewer;
+const EventNotifier = require("../scripts/eventNotifier").EventNotifier;
 
 /**
  * A vue component of the scaffold viewer.
  *
  * @requires ./OpacityControls.vue
- * @requires ./TraditionalControls.vue
+ * @requires ./TreeControls.vue
  */
 export default {
   name: "ScaffoldVuer",
   components: {
+    MapSvgIcon,
+    MapSvgSpriteColor,
     OpacityControls,
-    SvgIcon,
-    SvgSpriteColor,
-    TraditionalControls
-  },
-  beforeCreate: function() {
-    this.$module = new OrgansViewer();
-    this.isReady = false;
-    this.selectedObject = undefined;
-    this.hoveredObject = undefined;
-    this.currentBackground = "white";
-    this._currentURL = undefined;
-    this.availableBackground = ["white", "black", "lightskyblue"];
-  },
-  methods: {
-    /**
-     * This is called when a new organ is read into the scene.
-     */
-    organsAdded: function() {
-      this.loading = false;
-    },
-    /**
-     * This is called when Change backgspeedround colour button
-     * is pressed an causes the backgrouColornd colour to be changed
-     * to one of the three preset colour: white, black and
-     * lightskyblue.
-     */
-    backgroundChangeCallback: function(colour) {
-      this.currentBackground = colour;
-      this.$module.zincRenderer
-        .getThreeJSRenderer()
-        .setClearColor(this.currentBackground, 1);
-    },
-    /**
-     * This is called by captueeScreenshot and after the last render
-     * loop, it download a screenshot of the current scene with no UI.
-     */
-    captureScreenshotCallback: function() {
-      //Remove the callback, only needs to happen once
-      this.$module.zincRenderer.removePostRenderCallbackFunction(
-        this.captureID
-      );
-      let screenshot = this.$module.zincRenderer
-        .getThreeJSRenderer()
-        .domElement.toDataURL("image/png");
-      let hrefElement = document.createElement("a");
-      document.body.append(hrefElement);
-      if (!this.captureFilename) hrefElement.download = `screenshot.png`;
-      else hrefElement.download = this.captureFilename;
-      hrefElement.href = screenshot;
-      hrefElement.click();
-      hrefElement.remove();
-    },
-    /**
-     * Function for capturing a screenshot of the current rendering.
-     *
-     * @param {String} filename filename given to the screenshot.
-     *
-     * @public
-     */
-    captureScreenshot: function(filename) {
-      this.captureFilename = filename;
-      this.captureID = this.$module.zincRenderer.addPostRenderCallbackFunction(
-        this.captureScreenshotCallback
-      );
-    },
-    formatTooltip(val) {
-      if (this.timeMax >= 1000) {
-        if (val) {
-          let sec = ((val % 60000) / 1000).toFixed(2) + "s";
-          let min = val > 60000 ? (val / 60000).toFixed(0) + "m " : "";
-          return min + sec;
-        }
-      }
-      return val ? val.toFixed(2) + " ms" : "0 ms";
-    },
-    /**
-     * Function to reset the view to default.
-     * Also called when the associated button is pressed.
-     *
-     * @public
-     */
-    fitWindow: function() {
-      if (this.$module.scene) {
-        this.$module.scene.viewAll();
-      }
-    },
-    /**
-     * Function to zoom in.
-     * Also called when the associated button is pressed.
-     *
-     * @public
-     */
-    zoomIn: function() {
-      if (this.$module.scene) {
-        this.$module.scene.changeZoomByScrollRateUnit(-1);
-      }
-    },
-    /**
-     * Function to zoom out.
-     * Also called when the associated button is pressed.
-     *
-     * @public
-     */
-    zoomOut: function() {
-      if (this.$module.scene) {
-        this.$module.scene.changeZoomByScrollRateUnit(1);
-      }
-    },
-    /**
-     * Function to change the current play speed.
-     *
-     * @public
-     */
-    speedChanged: function(speed) {
-      this.currentSpeed = speed;
-      this.$module.setPlayRate(this.defaultRate * this.currentSpeed);
-    },
-    /**
-     * Function used to stop the free spin
-     *
-     * @public
-     */
-    stopFreeSpin: function() {
-      let cameracontrol = this.$module.scene.getZincCameraControls();
-      cameracontrol.stopAutoTumble();
-      this.isTransitioning = false;
-    },
-    /**
-     * Focus on named region
-     */
-    viewRegion: function(name) {
-      if ((name && name != "") && this.$module.scene) {
-        let objects = this.$module.scene.findObjectsWithGroupName(name);
-        let box = this.$module.scene.getBoundingBoxOfZincObjects(objects);
-        if (box) {
-          this.$module.scene.viewAllWithBoundingBox(box);
-        }
-      }
-    },
-    setFocusedRegion: function(name) {
-      if (name) {
-        if (this.isReady) {
-          this.viewRegion(name);
-        } else {
-          this.$module.setFinishDownloadCallback(
-            this.setURLFinishCallback({region: name}));
-        }
-      }
-    },
-    updateViewURL: function(viewURL) {
-      if (viewURL) {
-        if (this.isReady) {
-            const url = new URL(viewURL, this.url);
-            this.$module.scene.loadViewURL(url);
-        } else {
-          this.$module.setFinishDownloadCallback(
-            this.setURLFinishCallback({viewURL: viewURL}));
-        }
-      }
-    },
-    /**
-     * Function used to rotate the scene.
-     * Also called when the associated button is pressed.
-     *
-     * @public
-     */
-    freeSpin: function() {
-      if (this.$module.scene) {
-        let cameracontrol = this.$module.scene.getZincCameraControls();
-        this.isTransitioning = true;
-        cameracontrol.enableAutoTumble();
-        cameracontrol.autoTumble([1.0, 0.0], Math.PI, true);
-        setTimeout(this.stopFreeSpin, 4000);
-      }
-    },
-    /**
-     * Callback when a region is selected/highlighted.
-     * It will also update other controls.
-     */
-    eventNotifierCallback: function(event) {
-      if (event.eventType == 1) {
-        if (this.controls) {
-          if (event.identifiers[0]) {
-            let id = event.identifiers[0].data.id
-              ? event.identifiers[0].data.id
-              : event.identifiers[0].data.group;
-            this.controls.changeActiveByName(id);
-          } else {
-            this.controls.removeActive();
-          }
-        }
-        /**
-         * Triggers when an object has been selected
-         *
-         * @property {array} identifiers array of identifiers
-         * of selected object.
-         */
-        this.$emit("scaffold-selected", event.identifiers);
-      } else if (event.eventType == 2) {
-        if (this.controls) {
-          if (event.identifiers[0]) {
-            let id = event.identifiers[0].data.id
-              ? event.identifiers[0].data.id
-              : event.identifiers[0].data.group;
-            this.controls.changeHoverByName(id);
-          } else this.controls.removeHover();
-        }
-        /**
-         * Triggers when an object has been highlighted
-         *
-         * @property {array} identifiers array of identifiers
-         * of highlighted object.
-         */
-        this.$emit("scaffold-highlighted", event.identifiers);
-      }
-    },
-    /**
-     * Get the coordinates of the current selected region.
-     *
-     * @public
-     */
-    getCoordinatesOfSelected: function() {
-      if (this.selectedObject) {
-        return this.$module.scene.getObjectsScreenXY([this.selectedObject]);
-      }
-      return undefined;
-    },
-    /**
-     * Return an object containing the window coordinates of the
-     * current selected region which will be updated after each render
-     * loop.
-     *
-     * @public
-     */
-    getDynamicSelectedCoordinates: function() {
-      return this.$module.selectedScreenCoordinates;
-    },
-    /**
-     * Callback when time is changed through the UI.
-     */
-    timeChange: function(event) {
-      let normalizedTime = (event / this.timeMax) * 100;
-      if (normalizedTime != this.sceneData.currentTime)
-        this.$module.updateTime(normalizedTime);
-    },
-    /**
-     * Set the selected zinc object
-     *
-     * @param {object} object Zinc object
-     */
-    objectSelected: function(object) {
-      if (object !== this.selectedObject) {
-        this.selectedObject = object;
-        this.$refs.opacityControl.setObject(this.selectedObject);
-        if (object) this.$module.setSelectedByZincObject(object, true);
-        else this.$module.setSelectedByObjects([], true);
-      }
-    },
-    /**
-     * Set the highlighted zinc object
-     *
-     * @param {object} object Zinc object
-     */
-    objectHovered: function(object) {
-      if (object !== this.hoveredObject) {
-        this.hoveredObject = object;
-        if (object) this.$module.setHighlightedByZincObject(object, true);
-        else this.$module.setHighlightedByObjects([], true);
-      }
-    },
-    /**
-     * Start the animation.
-     *
-     * @param {object} object Zinc object
-     */
-    play: function(flag) {
-      this.$module.playAnimation(flag);
-      this.isPlaying = flag;
-    },
-    /**
-     * Function to toggle on/off overlay help.
-     */
-    setHelpMode: function(helpMode) {
-      if (helpMode) {
-        this.inHelp = true;
-        this.hoverVisabilities.forEach(item => {
-          item.value = true;
-        });
-      } else {
-        this.inHelp = false;
-        this.hoverVisabilities.forEach(item => {
-          item.value = false;
-        });
-      }
-    },
-    /**
-     * This is called when mouse cursor enters supported elements
-     * with help tootltips.
-     */
-    showToolitip: function(tooltipNumber) {
-      if (!this.inHelp) {
-        this.tooltipWait = setTimeout(() => {
-          this.hoverVisabilities[tooltipNumber].value = true;
-        }, 500);
-      }
-    },
-    /**
-     * This is called when mouse cursor exits supported element..
-     */
-    hideToolitip: function(tooltipNumber) {
-      if (!this.inHelp) {
-        this.hoverVisabilities[tooltipNumber].value = false;
-        clearTimeout(this.tooltipWait);
-      }
-    },
-    /**
-     * Called when minimap settings has changed. Pass the
-     * parameters to ZincJS and marked it for update.
-     */
-    updateMinimapScissor: function() {
-      Object.keys(this.minimapSettings).forEach(key => {
-        this.$module.scene.minimapScissor[key] = this.minimapSettings[key];
-      });
-      this.$module.scene.minimapScissor.updateRequired = true;
-    },
-    updateSettingsfromScene: function() {
-      this.currentSpeed = 1;
-      this.$module.setPlayRate(this.defaultRate);
-      this.orginalDuration = this.$module.scene.getMetadataTag(
-        "OriginalDuration"
-      );
-      this.animateDuration = this.$module.scene.getMetadataTag("Duration");
-      let timeStamps = this.$module.scene.getMetadataTag("TimeStamps");
-      this.timeStamps = {};
-      for (const key in timeStamps) {
-        this.timeStamps[timeStamps[key]] = key;
-      }
-      this.timeMax = this.$module.scene.getDuration();
-    },
-    setURLFinishCallback: function(options) {
-      return () => {
-        if (options) {
-          if (options.viewport) {
-            this.$module.scene
-              .getZincCameraControls()
-              .setCurrentCameraSettings(options.viewport);
-          } else if (options.viewURL && options.viewURL !== "") {
-            const url = new URL(options.viewURL, this.url);
-            this.$module.scene.loadViewURL(url);
-          } else if (options.region  && options.region !== "") {
-            this.viewRegion(options.region);
-          }
-          if (options.visibility) {
-            // Some UIs may not be ready at this time.
-            this.$nextTick(() => {
-              this.$refs.traditionalControl.setState(
-                options.visibility);
-            })
-          }
-        }
-        this.updateSettingsfromScene();
-        this.$module.updateTime(0.01);
-        this.$module.updateTime(0);
-        this.$module.unsetFinishDownloadCallback();
-        this.isReady = true;
-      };
-    },
-    /**
-     * Function used for getting the current states of the scene. This exported states
-     * can be imported using the importStates method.
-     *
-     * @public
-     */
-    getState: function() {
-      let state = {
-        url: this._currentURL,
-        viewport: undefined,
-        visibility: undefined
-      };
-      if (this.$refs.traditionalControl)
-        state.visibility = this.$refs.traditionalControl.getState();
-      if (this.$module.scene) {
-        let zincCameraControls = this.$module.scene.getZincCameraControls();
-        state.viewport = zincCameraControls.getCurrentViewport();
-      }
-      return state;
-    },
-    /**
-     * Function used for importing the states of the scene. This exported states
-     * can be imported using the read states method.
-     *
-     * @public
-     */
-    setState: function(state) {
-      if (state) {
-        if (state.url && (state.url !== this._currentURL)) {
-          this.setURLAndState(state.url, {viewport: state.viewport,
-            visibility: state.visibility});
-        } else {
-          if (state.viewport || state.visibility) {
-            if (this.isReady && this.$module.scene) {
-              if (state.viewport)
-                this.$module.scene
-                  .getZincCameraControls()
-                  .setCurrentCameraSettings(state.viewport);
-              if (state.visibility)
-                this.$refs.traditionalControl.setState(state.visibility);
-            } else {
-              this.$module.setFinishDownloadCallback(
-                this.setURLFinishCallback({viewport: state.viewport, 
-                visibility: state.visibility}));
-            }
-          }
-        }
-      }
-    },
-    /**
-     * Function used for reading in new scaffold metadata and a custom
-     * viewport. This function will ignore the state prop and 
-     * read in the new url.
-     *
-     * @public
-     */
-    setURLAndState: function(newValue, state) {
-      if (newValue != this._currentURL) {
-        let viewport = (state && state.viewport) ? state.viewport : undefined;
-        let visibility = (state && state.visibility) ? state.visibility : undefined;
-        this._currentURL = newValue;
-        if (this.$refs.traditionalControl)
-          this.$refs.traditionalControl.clear();
-        this.loading = true;
-        this.isReady = false;
-        this.$module.setFinishDownloadCallback(
-          this.setURLFinishCallback({viewport: viewport, region: this.region,
-           viewURL: this.viewURL, visibility: visibility}));
-        this.$module.loadOrgansFromURL(
-          newValue,
-          undefined,
-          undefined,
-          "scene",
-          undefined
-        );
-        this.$module.scene.displayMarkers = this.displayMarkers;
-        this.$module.scene.displayMinimap = this.displayMinimap;
-        this.updateMinimapScissor();
-      }
-    },
-    /**
-     * Function used for reading in new scaffold metadata. This function will ignore
-     * the state prop and read in the new url.
-     *
-     * @public
-     */
-    setURL: function(newValue) {
-      this.setURLAndState(newValue, undefined);
-    },
-    /**
-     * Callback when drawer is toggled.
-     *
-     */
-    drawerToggled: function(flag) {
-      this.drawerOpen = flag;
-      this.adjustLayout();
-    },
-    /**
-     * Callback using ResizeObserver.
-    
-     */
-    adjustLayout: function() {
-      let width = this.$refs.scaffoldContainer.clientWidth;
-      this.minimisedSlider = width < 812;
-      if (this.minimisedSlider) {
-        this.sliderPosition = this.drawerOpen ? "right" : "left";
-      } else {
-        this.sliderPosition = "";
-      }
-    },
-    toggleRendering: function(flag) {
-      if (this.$module.zincRenderer) {
-        if (flag) {
-          this.$module.zincRenderer.animate();
-        } else {
-          this.$module.zincRenderer.stopAnimate();
-        }
-      }
-    },
-    forceResize: function() {
-      if (this.$module.zincRenderer) {
-        this.$module.zincRenderer.onWindowResize();
-      }
-    }
+    ScaffoldTooltip,
+    TreeControls,
   },
   props: {
     /**
@@ -771,7 +300,10 @@ export default {
      * If the url needs to be updated with state present, please use
      * the setURL method.
      */
-    url: String,
+    url: {
+      type: String,
+      default: ""
+    },
     /**
      * Show the colour control of set to true.
      */
@@ -934,7 +466,14 @@ export default {
         }
       ],
       currentSpeed: 1,
-      timeStamps: {}
+      timeStamps: {},
+      defaultCheckedKeys: [],
+      tData: {
+        label: "",
+        visible: false,
+        x: 200,
+        y: 200
+      }
     };
   },
   watch: {
@@ -947,10 +486,9 @@ export default {
     },
     region: {
       handler: function(region) {
-        if (!(this.state || this.viewURL))
-          this.setFocusedRegion(region);
+        if (!(this.state || this.viewURL)) this.setFocusedRegion(region);
       },
-      immediate: true,
+      immediate: true
     },
     state: {
       handler: function(state) {
@@ -963,7 +501,7 @@ export default {
       handler: function(viewURL) {
         this.updateViewURL(viewURL);
       },
-      immediate: true,
+      immediate: true
     },
     helpMode: function(val) {
       this.setHelpMode(val);
@@ -994,6 +532,15 @@ export default {
       this.toggleRendering(val);
     }
   },
+  beforeCreate: function() {
+    this.$module = new OrgansViewer();
+    this.isReady = false;
+    this.selectedObjects = [];
+    this.hoveredObjects = [];
+    this.currentBackground = "white";
+    this._currentURL = undefined;
+    this.availableBackground = ["white", "black", "lightskyblue"];
+  },
   mounted: function() {
     let eventNotifier = new EventNotifier();
     eventNotifier.subscribe(this, this.eventNotifierCallback);
@@ -1001,7 +548,6 @@ export default {
     this.$module.addOrganPartAddedCallback(this.organsAdded);
     this.$module.initialiseRenderer(this.$refs.display);
     this.toggleRendering(this.render);
-    this.$module.toolTip = undefined;
     this.ro = new ResizeObserver(this.adjustLayout).observe(
       this.$refs.scaffoldContainer
     );
@@ -1011,41 +557,634 @@ export default {
     if (this.ro) this.ro.disconnect();
     this.$module.destroy();
     this.$module = undefined;
+  },
+  methods: {
+    /**
+     * This is called when a new organ is read into the scene.
+     */
+    organsAdded: function() {
+      this.loading = false;
+    },
+    /**
+     * This is called when Change backgspeedround colour button
+     * is pressed an causes the backgrouColornd colour to be changed
+     * to one of the three preset colour: white, black and
+     * lightskyblue.
+     */
+    backgroundChangeCallback: function(colour) {
+      this.currentBackground = colour;
+      this.$module.zincRenderer
+        .getThreeJSRenderer()
+        .setClearColor(this.currentBackground, 1);
+    },
+    /**
+     * This is called by captueeScreenshot and after the last render
+     * loop, it download a screenshot of the current scene with no UI.
+     */
+    captureScreenshotCallback: function() {
+      //Remove the callback, only needs to happen once
+      this.$module.zincRenderer.removePostRenderCallbackFunction(
+        this.captureID
+      );
+      let screenshot = this.$module.zincRenderer
+        .getThreeJSRenderer()
+        .domElement.toDataURL("image/png");
+      let hrefElement = document.createElement("a");
+      document.body.append(hrefElement);
+      if (!this.captureFilename) hrefElement.download = `screenshot.png`;
+      else hrefElement.download = this.captureFilename;
+      hrefElement.href = screenshot;
+      hrefElement.click();
+      hrefElement.remove();
+    },
+    /**
+     * Function for capturing a screenshot of the current rendering.
+     *
+     * @param {String} filename filename given to the screenshot.
+     *
+     * @public
+     */
+    captureScreenshot: function(filename) {
+      this.captureFilename = filename;
+      this.captureID = this.$module.zincRenderer.addPostRenderCallbackFunction(
+        this.captureScreenshotCallback
+      );
+    },
+    formatTooltip(val) {
+      if (this.timeMax >= 1000) {
+        if (val) {
+          let sec = ((val % 60000) / 1000).toFixed(2) + "s";
+          let min = val > 60000 ? (val / 60000).toFixed(0) + "m " : "";
+          return min + sec;
+        }
+      }
+      return val ? val.toFixed(2) + " ms" : "0 ms";
+    },
+    /**
+     * Function to reset the view to default.
+     * Also called when the associated button is pressed.
+     *
+     * @public
+     */
+    fitWindow: function() {
+      if (this.$module.scene) {
+        this.$module.scene.viewAll();
+      }
+    },
+    /**
+     * Function to zoom in.
+     * Also called when the associated button is pressed.
+     *
+     * @public
+     */
+    zoomIn: function() {
+      if (this.$module.scene) {
+        this.$module.scene.changeZoomByScrollRateUnit(-1);
+      }
+    },
+    /**
+     * Function to zoom out.
+     * Also called when the associated button is pressed.
+     *
+     * @public
+     */
+    zoomOut: function() {
+      if (this.$module.scene) {
+        this.$module.scene.changeZoomByScrollRateUnit(1);
+      }
+    },
+    /**
+     * Function to change the current play speed.
+     *
+     * @public
+     */
+    speedChanged: function(speed) {
+      this.currentSpeed = speed;
+      this.$module.setPlayRate(this.defaultRate * this.currentSpeed);
+    },
+    /**
+     * Function used to stop the free spin
+     *
+     * @public
+     */
+    stopFreeSpin: function() {
+      let cameracontrol = this.$module.scene.getZincCameraControls();
+      cameracontrol.stopAutoTumble();
+      this.isTransitioning = false;
+    },
+    findObjectsWithGroupName: function(name) {
+      let objects = [];
+      if (name && name != "" && this.$module.scene) {
+        objects = this.$module.scene.findObjectsWithGroupName(name);
+      }
+      return objects;
+    },
+    /**
+     * Focus on named region
+     */
+    viewRegion: function(names) {
+      const rootRegion = this.$module.scene.getRootRegion();
+      const groups = Array.isArray(names) ? names : [names];
+      const objects = findObjectsWithNames(rootRegion, groups, "");
+      let box = this.$module.scene.getBoundingBoxOfZincObjects(objects);
+      if (box) {
+        if (this.$module.isSyncControl()) {
+          this.$module.setSyncControlZoomToBox(box);
+        } else {
+          this.$module.scene.viewAllWithBoundingBox(box);
+        }
+        return true;
+      }
+      return false;
+    },
+    setFocusedRegion: function(name) {
+      if (name) {
+        if (this.isReady) {
+          this.viewRegion(name);
+        } else {
+          this.$module.setFinishDownloadCallback(
+            this.setURLFinishCallback({ region: name })
+          );
+        }
+      }
+    },
+    updateViewURL: function(viewURL) {
+      if (viewURL) {
+        if (this.isReady) {
+          const url = new URL(viewURL, this.url);
+          this.$module.scene.loadViewURL(url);
+        } else {
+          this.$module.setFinishDownloadCallback(
+            this.setURLFinishCallback({ viewURL: viewURL })
+          );
+        }
+      }
+    },
+    getRendererInfo: function() {
+      if (this.$module.zincRenderer) {
+        return this.$module.zincRenderer.getThreeJSRenderer().info;
+      }
+      return undefined;
+    },
+    /**
+     * Function used to rotate the scene.
+     * Also called when the associated button is pressed.
+     *
+     * @public
+     */
+    freeSpin: function() {
+      if (this.$module.scene) {
+        let cameracontrol = this.$module.scene.getZincCameraControls();
+        this.isTransitioning = true;
+        cameracontrol.enableAutoTumble();
+        cameracontrol.autoTumble([1.0, 0.0], Math.PI, true);
+        setTimeout(this.stopFreeSpin, 4000);
+      }
+    },
+    /**
+     * Callback when a region is selected/highlighted.
+     * It will also update other controls.
+     */
+    eventNotifierCallback: function(event) {
+      const names = [];
+      const region = undefined;
+      if (event.eventType == 1 || event.eventType == 2) {
+        event.identifiers.forEach(identifier => {
+          if (identifier) {
+            let id = identifier.data.id
+              ? identifier.data.id
+              : identifier.data.group;
+            names.push(id);
+          }
+        });
+      }
+      if (event.eventType == 1) {
+        if (this.$refs.treeControl) {
+          if (names.length > 0) {
+            this.$refs.treeControl.changeActiveByNames(names, region, false);
+          } else {
+            this.$refs.treeControl.removeActive(true);
+          }
+        }
+        // Triggers when an object has been selected
+        this.$emit("scaffold-selected", event.identifiers);
+      } else if (event.eventType == 2) {
+        this.tData.visible = false;
+       // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
+        if (this.$refs.treeControl) {
+          if (names.length > 0) {
+            this.$refs.treeControl.changeHoverByNames(names, region, false);
+          } else {
+            this.$refs.treeControl.removeHover(true);
+          }
+        }
+        if ((event.identifiers.length > 0) && event.identifiers[0]) {
+          let id = event.identifiers[0].data.id
+            ? event.identifiers[0].data.id
+            : event.identifiers[0].data.group;
+          if (event.identifiers[0].coords) {
+            this.tData.visible = true;
+            this.tData.label = id;
+            this.tData.x = event.identifiers[0].coords.x;
+            this.tData.y  = event.identifiers[0].coords.y;
+          }
+        }
+        // Triggers when an object has been highlighted
+        this.$emit("scaffold-highlighted", event.identifiers);
+      } else if (event.eventType == 3)  { //MOVE
+        if ((event.identifiers.length > 0) && event.identifiers[0]) {
+          if (event.identifiers[0].coords) {
+            const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
+            this.tData.x = event.identifiers[0].coords.x - offsets.left;
+            this.tData.y = event.identifiers[0].coords.y - offsets.top;
+          }
+        }
+      }
+    },
+    /**
+     * Get the coordinates of the current selected region.
+     *
+     * @public
+     */
+    getCoordinatesOfSelected: function() {
+      if (this.selectedObjects && this.selectedObjects.length > 0) {
+        return this.$module.scene.getObjectsScreenXY([this.selectedObjects]);
+      }
+      return undefined;
+    },
+    /**
+     * Return an object containing the window coordinates of the
+     * current selected region which will be updated after each render
+     * loop.
+     *
+     * @public
+     */
+    getDynamicSelectedCoordinates: function() {
+      return this.$module.selectedScreenCoordinates;
+    },
+    /**
+     * Callback when time is changed through the UI.
+     */
+    timeChange: function(event) {
+      let normalizedTime = (event / this.timeMax) * 100;
+      if (normalizedTime != this.sceneData.currentTime)
+        this.$module.updateTime(normalizedTime);
+    },
+    /**
+     * A callback used by children components. Set the selected zinc object
+     *
+     * @param {object} object Zinc object
+     */
+    objectSelected: function(objects, propagate) {
+      this.selectedObjects = objects;
+      if (this.selectedObjects)
+        this.$refs.opacityControl.setObject(this.selectedObjects[0]);
+      if (objects) this.$module.setSelectedByZincObjects(objects, undefined, propagate);
+      else this.$module.setSelectedByObjects([], undefined, propagate);
+    },
+    /**
+     * A callback used by children components. Set the highlighted zinc object
+     *
+     * @param {object} object Zinc object
+     */
+    objectHovered: function(objects, propagate) {
+      this.hoveredObjects = objects;
+      if (objects) this.$module.setHighlightedByZincObjects(objects, undefined, propagate);
+      else this.$module.setHighlightedByObjects([], undefined, propagate);
+    },
+    /**
+     * Set the selected by name.
+     *
+     * @param {} name Name of the group
+     */
+    changeActiveByName: function(names, region, propagate) {
+      const isArray = Array.isArray(names);
+      if (names === undefined || (isArray && names.length === 0)) {
+        this.$refs.treeControl.removeActive(propagate);
+      } else {
+        let array = names;
+        if (!isArray)
+          array = [array];
+        this.$refs.treeControl.changeActiveByNames(array, region, propagate);
+      }
+    },
+    /**
+     * Set the highlighted by name.
+     *
+     * @param {name} name Name of the group
+     */
+    changeHighlightedByName: function(names, region, propagate) {
+      const isArray = Array.isArray(names);
+      if (names === undefined || (isArray && names.length === 0)) {
+        this.$refs.treeControl.removeHover(propagate);
+      } else {
+        let array = names;
+        if (!isArray)
+          array = [array];
+        this.$refs.treeControl.changeHoverByNames(array, region, propagate);
+      }
+    },
+    /**
+     * Start the animation.
+     *
+     * @param {object} object Zinc object
+     */
+    play: function(flag) {
+      this.$module.playAnimation(flag);
+      this.isPlaying = flag;
+    },
+    /**
+     * Function to toggle on/off overlay help.
+     */
+    setHelpMode: function(helpMode) {
+      if (helpMode) {
+        this.inHelp = true;
+        this.hoverVisabilities.forEach(item => {
+          item.value = true;
+        });
+      } else {
+        this.inHelp = false;
+        this.hoverVisabilities.forEach(item => {
+          item.value = false;
+        });
+      }
+    },
+    /**
+     * This is called when mouse cursor enters supported elements
+     * with help tootltips.
+     */
+    showToolitip: function(tooltipNumber) {
+      if (!this.inHelp) {
+        this.tooltipWait = setTimeout(() => {
+          this.hoverVisabilities[tooltipNumber].value = true;
+        }, 500);
+      }
+    },
+    /**
+     * This is called when mouse cursor exits supported element..
+     */
+    hideToolitip: function(tooltipNumber) {
+      if (!this.inHelp) {
+        this.hoverVisabilities[tooltipNumber].value = false;
+        clearTimeout(this.tooltipWait);
+      }
+    },
+    /**
+     * Called when minimap settings has changed. Pass the
+     * parameters to ZincJS and marked it for update.
+     */
+    updateMinimapScissor: function() {
+      Object.keys(this.minimapSettings).forEach(key => {
+        this.$module.scene.minimapScissor[key] = this.minimapSettings[key];
+      });
+      this.$module.scene.minimapScissor.updateRequired = true;
+    },
+    updateSettingsfromScene: function() {
+      this.currentSpeed = 1;
+      this.$module.setPlayRate(this.defaultRate);
+      this.orginalDuration = this.$module.scene.getMetadataTag(
+        "OriginalDuration"
+      );
+      this.animateDuration = this.$module.scene.getMetadataTag("Duration");
+      let timeStamps = this.$module.scene.getMetadataTag("TimeStamps");
+      this.timeStamps = {};
+      for (const key in timeStamps) {
+        this.timeStamps[timeStamps[key]] = key;
+      }
+      this.timeMax = this.$module.scene.getDuration();
+    },
+    setURLFinishCallback: function(options) {
+      return () => {
+        if (options) {
+          if (options.viewport) {
+            this.$module.scene
+              .getZincCameraControls()
+              .setCurrentCameraSettings(options.viewport);
+          } else if (options.viewURL && options.viewURL !== "") {
+            const url = new URL(options.viewURL, this.url);
+            this.$module.scene.loadViewURL(url);
+          } else if (options.region && options.region !== "") {
+            this.viewRegion(options.region);
+          }
+          if (options.visibility) {
+            // Some UIs may not be ready at this time.
+            this.$nextTick(() => {
+              this.$refs.treeControl.setState(options.visibility);
+            });
+          }
+        }
+        this.updateSettingsfromScene();
+        this.$module.updateTime(0.01);
+        this.$module.updateTime(0);
+        this.$module.unsetFinishDownloadCallback();
+        this.$emit("on-ready");
+        this.isReady = true;
+      };
+    },
+    /**
+     * Function used for getting the current states of the scene. This exported states
+     * can be imported using the importStates method.
+     *
+     * @public
+     */
+    getState: function() {
+      let state = {
+        url: this._currentURL,
+        viewport: undefined,
+        visibility: undefined
+      };
+      if (this.$refs.treeControl)
+        state.visibility = this.$refs.treeControl.getState();
+      if (this.$module.scene) {
+        let zincCameraControls = this.$module.scene.getZincCameraControls();
+        state.viewport = zincCameraControls.getCurrentViewport();
+      }
+      return state;
+    },
+    /**
+     * Function used for importing the states of the scene. This exported states
+     * can be imported using the read states method.
+     *
+     * @public
+     */
+    setState: function(state) {
+      if (state) {
+        if (state.url && state.url !== this._currentURL) {
+          this.setURLAndState(state.url, {
+            viewport: state.viewport,
+            visibility: state.visibility
+          });
+        } else {
+          if (state.viewport || state.visibility) {
+            if (this.isReady && this.$module.scene) {
+              if (state.viewport)
+                this.$module.scene
+                  .getZincCameraControls()
+                  .setCurrentCameraSettings(state.viewport);
+              if (state.visibility)
+                this.$refs.treeControl.setState(state.visibility);
+            } else {
+              this.$module.setFinishDownloadCallback(
+                this.setURLFinishCallback({
+                  viewport: state.viewport,
+                  visibility: state.visibility
+                })
+              );
+            }
+          }
+        }
+      }
+    },
+    exportGLTF: function(binary) {
+      return this.$module.scene.exportGLTF(binary);
+    },
+    /**
+     * Function used for reading in new scaffold metadata and a custom
+     * viewport. This function will ignore the state prop and
+     * read in the new url.
+     *
+     * @public
+     */
+    setURLAndState: function(newValue, state) {
+      if (newValue != this._currentURL) {
+        let viewport = state && state.viewport ? state.viewport : undefined;
+        let visibility =
+          state && state.visibility ? state.visibility : undefined;
+        this._currentURL = newValue;
+        if (this.$refs.treeControl)
+          this.$refs.treeControl.clear();
+        this.loading = true;
+        this.isReady = false;
+        this.$module.setFinishDownloadCallback(
+          this.setURLFinishCallback({
+            viewport: viewport,
+            region: this.region,
+            viewURL: this.viewURL,
+            visibility: visibility
+          })
+        );
+        this.$module.loadOrgansFromURL(
+          newValue,
+          undefined,
+          undefined,
+          "scene",
+          undefined
+        );
+        this.$module.scene.displayMarkers = this.displayMarkers;
+        this.$module.scene.displayMinimap = this.displayMinimap;
+        this.updateMinimapScissor();
+      }
+    },
+    /**
+     * Function used for reading in new scaffold metadata. This function will ignore
+     * the state prop and read in the new url.
+     *
+     * @public
+     */
+    setURL: function(newValue) {
+      this.setURLAndState(newValue, undefined);
+    },
+    /**
+     * Callback when drawer is toggled.
+     *
+     */
+    drawerToggled: function(flag) {
+      this.drawerOpen = flag;
+      this.adjustLayout();
+    },
+    /**
+     * Callback using ResizeObserver.
+     */
+    adjustLayout: function() {
+      let width = this.$refs.scaffoldContainer.clientWidth;
+      this.minimisedSlider = width < 812;
+      if (this.minimisedSlider) {
+        this.sliderPosition = this.drawerOpen ? "right" : "left";
+      } else {
+        this.sliderPosition = "";
+      }
+    },
+    toggleRendering: function(flag) {
+      if (this.$module.zincRenderer) {
+        if (flag) {
+          this.$module.zincRenderer.animate();
+        } else {
+          this.$module.zincRenderer.stopAnimate();
+        }
+      }
+    },
+    forceResize: function() {
+      if (this.$module.zincRenderer) {
+        this.$module.zincRenderer.onWindowResize();
+      }
+    },
+    syncControlCallback: function() {
+      const payload = this.$module.NDCCameraControl.getPanZoom();
+      this.$emit("scaffold-navigated", payload);
+    },
+    /** 
+     * Rotate mode - "none", "horizontal", "vertical", "free" but
+     * it will be ignored if flag is set to false.
+     */
+    toggleSyncControl: function(flag, rotateMode) {
+      this.$module.toggleSyncControl(flag, rotateMode);
+      this.$module.setSyncControlCallback(this.syncControlCallback);
+    }
   }
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style scoped lang="scss">
+@import "~element-ui/packages/theme-chalk/src/col";
+@import "~element-ui/packages/theme-chalk/src/loading";
+@import "~element-ui/packages/theme-chalk/src/option";
+@import "~element-ui/packages/theme-chalk/src/popover";
+@import "~element-ui/packages/theme-chalk/src/row";
+@import "~element-ui/packages/theme-chalk/src/select";
+@import "~element-ui/packages/theme-chalk/src/slider";
+@import "~element-ui/packages/theme-chalk/src/tabs";
+@import "~element-ui/packages/theme-chalk/src/tab-pane";
+
 .warning-icon {
   position: absolute;
   top: 15px;
   left: 37px;
   text-align: left;
   font-size: 25px;
-  color: #ff8400;
+  color: $warning;
+
+  &:hover {
+    cursor: pointer;
+  }
 }
-.warning-icon:hover {
-  cursor: pointer;
-}
+
 .warning-text {
   font-size: 15px;
   vertical-align: 5px;
 }
->>> .warning-popper {
+
+::v-deep .warning-popper {
   padding: 9px 10px;
   min-width: 150px;
   font-size: 12px;
   color: #fff;
-  background-color: #ff8400;
-}
->>> .warning-popper.right-popper .popper__arrow::after {
-  border-right-color: #ff8400 !important;
+  background-color: $warning;
+
+  &.right-popper {
+    .popper__arrow {
+      &::after {
+        border-right-color: $warning !important;
+      }
+    }
+  }
 }
 
-#organsDisplayArea:focus {
-  outline: none !important;
-  border: 0px;
+#organsDisplayArea {
+  &:focus {
+    outline: none !important;
+    border: 0px;
+  }
 }
 
 .scaffold-container {
@@ -1062,17 +1201,20 @@ export default {
   bottom: 16px;
   transition: all 1s ease;
   outline: none;
-}
-.time-slider-container.minimised {
-  width: calc(40%);
-}
-.time-slider-container.left {
-  right: 155px;
-  width: calc(100% - 250px);
-}
-.time-slider-container.right {
-  right: 8px;
-  bottom: 54px;
+
+  &.minimised {
+    width: calc(40%);
+  }
+
+  &.left {
+    right: 155px;
+    width: calc(100% - 250px);
+  }
+
+  &.right {
+    right: 8px;
+    bottom: 54px;
+  }
 }
 
 .slider-display-text {
@@ -1092,47 +1234,45 @@ export default {
   font-size: 14px;
 }
 
-.tab-content >>> .el-slider__marks-text {
+.tab-content ::v-deep .el-slider__marks-text {
   margin-top: 12px;
   margin-left: 8px;
   font-size: 10px;
 }
 
-.tab-content >>> .el-slider__stop {
+.tab-content ::v-deep .el-slider__stop {
   width: 10px;
   height: 10px;
   top: -1px;
-  border: solid 1px #8300bf;
+  border: solid 1px $app-primary-color;
 }
 
 .animation-data {
   margin-left: 8px;
   line-height: 26px;
   display: flex;
-}
 
-.animation-data :not(:first-child) {
-  margin-left: 8px;
+  :not(:first-child) {
+    margin-left: 8px;
+  }
+  .purple {
+    padding-left: 2px;
+    color: $app-primary-color;
+  }
 }
-
-.animation-data .purple {
-  padding-left: 2px;
-  color: #8300bf;
-}
-
 .slider {
   margin-left: 30px;
   width: calc(100% - 88px);
   margin-top: -7px;
-}
 
-.slider >>> .el-slider__runway {
-  height: 10px;
-  margin: 14px 0;
-}
+  ::v-deep .el-slider__runway {
+    height: 10px;
+    margin: 14px 0;
+  }
 
-.slider >>> .el-slider__button-wrapper {
-  top: -13px;
+  ::v-deep .el-slider__button-wrapper {
+    top: -13px;
+  }
 }
 
 .zoomOut {
@@ -1143,31 +1283,41 @@ export default {
   padding-left: 8px;
 }
 
-
->>> .non-selectable{
+::v-deep .non-selectable {
   user-select: none;
 }
 
->>> .background-popper {
+::v-deep .background-popper {
   padding: 5px 12px;
   background-color: #ffffff;
-  border: 1px solid rgb(131, 0, 191);
+  border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
   height: 72px;
   width: 128px;
   min-width: 128px;
+
+  &.el-popper[x-placement^="top"] {
+    .popper__arrow {
+      border-top-color: $app-primary-color !important;
+      &:after {
+        border-top-color: #fff !important;
+      }
+    }
+  }
 }
 
 .background-colour {
   bottom: 16px;
   position: absolute;
   transition: all 1s ease;
-}
-.background-colour.open {
-  left: 322px;
-}
-.background-colour.close {
-  left: 24px;
+
+  &.open {
+    left: 322px;
+  }
+
+  &.close {
+    left: 24px;
+  }
 }
 
 .backgroundText {
@@ -1187,32 +1337,36 @@ export default {
   height: 20px;
   border: 1px solid rgb(144, 147, 153);
   margin-left: 20px;
-}
-.backgroundChoice.active {
-  border: 2px solid #8300bf;
-}
-.backgroundChoice:hover {
-  cursor: pointer;
-}
 
-.backgroundChoice.white {
-  background-color: white;
-  margin-left: 10px;
-}
-.backgroundChoice.black {
-  background-color: black;
-}
-.backgroundChoice.lightskyblue {
-  background-color: lightskyblue;
+  &.active {
+    border: 2px solid $app-primary-color;
+  }
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  &.white {
+    background-color: white;
+    margin-left: 10px;
+  }
+
+  &.black {
+    background-color: black;
+  }
+
+  &.lightskyblue {
+    background-color: lightskyblue;
+  }
 }
 
 .icon-button {
   height: 24px !important;
   width: 24px !important;
-}
 
-.icon-button:hover {
-  cursor: pointer;
+  &:hover {
+    cursor: pointer;
+  }
 }
 
 .bottom-right-control {
@@ -1225,116 +1379,113 @@ export default {
   margin-left: 8px;
 }
 
-.time-slider-container >>> .el-tabs__header {
-  margin: 0px;
-  border-bottom: 1px solid rgb(144, 147, 153);
+.time-slider-container {
+  ::v-deep .el-tabs__header {
+    margin: 0px;
+    border-bottom: 1px solid rgb(144, 147, 153);
+  }
+
+  .el-row {
+    margin-bottom: 5px;
+  }
+
+  ::v-deep .el-tabs__content {
+    border-left: 1px solid rgb(144, 147, 153);
+    border-bottom: 1px solid rgb(144, 147, 153);
+    border-right: 1px solid rgb(144, 147, 153);
+    border-radius: 0px 0px 4px 4px;
+    background-color: white;
+  }
+
+  ::v-deep .el-tabs--card {
+    > .el-tabs__header {
+      .el-tabs__nav {
+        border: 1px solid rgb(144, 147, 153);
+        border-bottom: none;
+        border-radius: 4px 4px 0px 0px;
+        background-color: white;
+      }
+
+      .el-tabs__item {
+        height: 24px;
+        line-height: 24px;
+        padding: 0 8px !important;
+        border-bottom: 1px solid;
+        border-left: 1px solid rgb(144, 147, 153);
+        &:first-child {
+          border-left: none;
+        }
+        &.is-active {
+          border-bottom: 1px solid white;
+          color: rgb(48, 49, 51);
+        }
+        &:hover {
+          color: $app-primary-color;
+        }
+      }
+    }
+  }
 }
 
-.time-slider-container >>> .el-tabs__content {
-  border-left: 1px solid rgb(144, 147, 153);
-  border-bottom: 1px solid rgb(144, 147, 153);
-  border-right: 1px solid rgb(144, 147, 153);
-  border-radius: 0px 0px 4px 4px;
-  background-color: white;
-}
-
-.time-slider-container >>> .el-tabs--card > .el-tabs__header .el-tabs__nav {
-  border: 1px solid rgb(144, 147, 153);
-  border-bottom: none;
-  border-radius: 4px 4px 0px 0px;
-  background-color: white;
-}
-.time-slider-container
-  >>> .el-tabs--card
-  > .el-tabs__header
-  .el-tabs__item:first-child {
-  border-left: none;
-}
-
-.time-slider-container >>> .el-tabs--card > .el-tabs__header .el-tabs__item {
-  border-bottom: 1px solid;
-  border-left: 1px solid rgb(144, 147, 153);
-}
-
-.time-slider-container
-  >>> .el-tabs--card
-  > .el-tabs__header
-  .el-tabs__item.is-active {
-  border-bottom: 1px solid white;
-}
-
-.time-slider-container >>> .el-tabs__item {
-  height: 24px;
-  line-height: 24px;
-  padding: 0 8px !important;
-}
-
-.time-slider-container >>> .el-tabs__item.is-active {
-  color: rgb(48, 49, 51);
-}
-
->>> .scaffold-popper {
+::v-deep .scaffold-popper {
   padding: 6px 4px;
   font-size: 12px;
   color: rgb(48, 49, 51);
   background-color: #f3ecf6;
-  border: 1px solid rgb(131, 0, 191);
+  border: 1px solid $app-primary-color;
   white-space: nowrap;
   min-width: unset;
   pointer-events: none;
+
+  &.left-popper {
+    .popper__arrow {
+      border-left-color: $app-primary-color !important;
+      &:after {
+        border-left-color: #f3ecf6 !important;
+      }
+    }
+  }
+
+  &.right-popper {
+    .popper__arrow {
+      border-right-color: $app-primary-color !important;
+      &:after {
+        border-right-color: #f3ecf6 !important;
+      }
+    }
+  }
+
+  &.el-popper[x-placement^="top"] {
+    .popper__arrow {
+      border-top-color: $app-primary-color !important;
+      &:after {
+        border-top-color: #f3ecf6 !important;
+      }
+    }
+  }
 }
 
->>> .el-slider__button {
-  border: 2px solid #8300bf;
+::v-deep .el-slider__button {
+  border: 2px solid $app-primary-color;
 }
 
->>> .el-slider__bar {
-  background-color: #8300bf;
+::v-deep .el-slider__bar {
+  background-color: $app-primary-color;
   height: 10px;
 }
 
->>> .scaffold-popper.left-popper .popper__arrow {
-  border-left-color: #8300bf !important;
+::v-deep .el-loading-spinner {
+  i, .el-loading-text {
+    color: $app-primary-color;
+  }
 }
 
->>> .scaffold-popper.left-popper .popper__arrow:after {
-  border-left-color: #f3ecf6 !important;
-}
-
->>> .scaffold-popper.right-popper .popper__arrow {
-  border-right-color: #8300bf !important;
-}
-
->>> .scaffold-popper.right-popper .popper__arrow:after {
-  border-right-color: #f3ecf6 !important;
-}
-
->>> .scaffold-popper.el-popper[x-placement^="top"] .popper__arrow {
-  border-top-color: #8300bf !important;
-}
-
->>> .scaffold-popper.el-popper[x-placement^="top"] .popper__arrow:after {
-  border-top-color: #f3ecf6 !important;
-}
-
->>> .popper-zoomout {
+::v-deep .popper-zoomout {
   padding-right: 11px;
   left: -21px !important;
-}
-
->>> .popper-zoomout .popper__arrow {
-  left: 53px !important;
-}
-
->>> .el-loading-spinner i {
-  color: #8300bf;
-}
->>> .el-loading-spinner .el-loading-text {
-  color: #8300bf;
-}
-
->>> .el-tabs__item:hover {
-  color: #8300bf;
+  .popper__arrow {
+    left: 53px !important;
+  }
 }
 
 .select-box {
@@ -1345,48 +1496,32 @@ export default {
   font-weight: 500;
   color: rgb(48, 49, 51);
   margin-left: 8px;
+
+  ::v-deep .el-input__inner {
+    color: $app-primary-color;
+    height: 22px;
+    padding-left: 8px;
+    padding-right: 8px;
+    border: none;
+    font-family: "Asap", sans-serif;
+    line-height: 22px;
+  }
+
+  ::v-deep .el-input,
+  ::v-deep .el-input__icon {
+    line-height: 22px;
+  }
 }
-
-.select-box >>> .el-input__inner {
-  color: rgb(131, 0, 191);
-  height: 22px;
-  padding-left: 8px;
-  padding-right: 8px;
-  border: none;
-  font-family: "Asap", sans-serif;
-  line-height:22px;
-}
-
-.select-box >>> .el-input__icon {
-  line-height: 22px;
-}
-
-.select-box >>> .el-input {
-   line-height: 22px;
-}
-
 </style>
 
-<style scoped src="../styles/purple/button.css">
-</style>
-<style scoped src="../styles/purple/select.css">
-</style>
-<style scoped src="../styles/purple/slider.css">
-</style>
-<style scoped src="../styles/purple/loading.css">
-</style>
-<style scoped src="../styles/purple/tabs.css">
-</style>
-<style scoped src="../styles/purple/tab-pane.css">
-</style>
-<style>
+<style lang="scss">
 .time-slider-tooltip {
   padding: 6px 4px !important;
   font-family: "Asap", sans-serif;
   font-size: 12px !important;
   color: rgb(48, 49, 51) !important;
   background-color: #f3ecf6 !important;
-  border: 1px solid #8300bf !important;
+  border: 1px solid $app-primary-color !important;
   white-space: nowrap !important;
   min-width: unset !important;
 }
@@ -1395,5 +1530,11 @@ export default {
   white-space: nowrap;
   text-align: left;
   font-family: "Asap", sans-serif;
+}
+
+.opacity-box {
+  right: 0px;
+  bottom:200px;
+  position:absolute;
 }
 </style>

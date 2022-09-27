@@ -1,7 +1,7 @@
 module.exports = {
 	// set your styleguidist configuration here
 	title: 'Scaffoldvuer API reference',
-	 components: 'src/components/ScaffoldVuer.vue',
+	components: 'src/components/ScaffoldVuer.vue',
 	// defaultExample: true,
 	// sections: [
 	//   {

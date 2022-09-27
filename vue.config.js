@@ -1,4 +1,4 @@
-const nodeExternals = require('webpack-node-externals');
+//const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
   chainWebpack: config => {
@@ -25,5 +25,11 @@ module.exports = {
   css: {
     sourceMap: true,
     extract: false,
+    //Import variables into all stylesheets.
+    loaderOptions: {
+      sass: {
+        prependData: `@import '@/assets/styles';`
+      }
+    }
   }
 }

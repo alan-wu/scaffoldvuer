@@ -3,92 +3,217 @@
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Asap:400,400i,500,600,700&display=swap"
-    />
-    <ScaffoldVuer
-      class="vuer"
-      :displayUI="displayUI"
-      :url="url"
-      ref="scaffold"
-      @scaffold-selected="onSelected"
-      :helpMode="helpMode"
-      :displayMinimap="displayMinimap"
-      :displayMarkers="displayMarkers"
-      :minimapSettings="minimapSettings"
-      :showColourPicker="showColourPicker"
-      @timeChanged="updateCurrentTime"
-      :render="render"
-      :region="region"
-      :viewURL="viewURL"
-    />
+    >
+    <drop-zone
+      ref="dropzone"
+      @files-drop="onFilesDrop"
+    >
+      <ScaffoldVuer
+        ref="scaffold"
+        class="vuer"
+        :display-u-i="displayUI"
+        :url="url"
+        :help-mode="helpMode"
+        :display-minimap="displayMinimap"
+        :display-markers="displayMarkers"
+        :minimap-settings="minimapSettings"
+        :show-colour-picker="showColourPicker"
+        :render="render"
+        :region="region"
+        :view-u-r-l="viewURL"
+        @on-ready="onReady"
+        @scaffold-selected="onSelected"
+        @scaffold-navigated="onNavigated"
+        @timeChanged="updateCurrentTime"
+      />
+    </drop-zone>
     <el-popover
       placement="bottom"
       trigger="click"
       width="500"
       class="popover"
-      :appendToBody="false"
+      :append-to-body="false"
     >
       <div class="options-container">
         <el-row :gutter="20">
           <p>{{ selectedCoordinates }}</p>
         </el-row>
-        <el-row :gutter="20">
-          <p v-if="currentTime!==0">time emited is: {{currentTime.toFixed(2)}}</p>
+        <el-row
+          class="app-row"
+          :gutter="20"
+        >
+          <p v-if="currentTime!==0">
+            time emited is: {{ currentTime.toFixed(2) }}
+          </p>
         </el-row>
         <el-row :gutter="20">
-          <el-col :span="6" :offset="2">
+          <el-col
+            :span="6"
+            :offset="2"
+          >
             <el-switch
-              class="app-switch"
+              v-model="displayMarkers"
               active-text="Markers"
               active-icon-class="el-icon-location"
               active-color="#8300bf"
-              v-model="displayMarkers"
-            ></el-switch>
+            />
           </el-col>
-          <el-col :span="6" :offset="2">
+          <el-col
+            :span="6"
+            :offset="2"
+          >
             <el-switch
-              class="app-switch"
+              v-model="displayMinimap"
               active-text="Minimap"
               active-icon-class="el-icon-discover"
               active-color="#8300bf"
-              v-model="displayMinimap"
-            ></el-switch>
+            />
           </el-col>
-          <el-col :span="6" :offset="2">
+          <el-col
+            :span="6"
+            :offset="2"
+          >
             <el-switch
-              class="app-switch"
+              v-model="tumbleOn"
               active-text="Tumble"
               active-color="#8300bf"
-              v-model="tumbleOn"
-            ></el-switch>
+            />
           </el-col>
         </el-row>
         <el-row :gutter="20">
-          <el-button @click="helpMode = !helpMode" size="mini">Help Mode</el-button>
-          <el-button @click="screenCapture()" size="mini">Capture</el-button>
+          <el-button
+            size="mini"
+            @click="helpMode = !helpMode"
+          >
+            Help Mode
+          </el-button>
+          <el-button
+            size="mini"
+            @click="screenCapture()"
+          >
+            Capture
+          </el-button>
         </el-row>
-        <el-row :gutter="20">
-          <el-button @click="saveSettings()" size="mini">Save Settings</el-button>
-          <el-button @click="restoreSettings()" size="mini">Restore Settings</el-button>
+        <el-row :gutter="10">
+          <el-button
+            size="mini"
+            @click="saveSettings()"
+          >
+            Save Settings
+          </el-button>
+          <el-button
+            size="mini"
+            @click="restoreSettings()"
+          >
+            Restore Settings
+          </el-button>
+          <el-button
+            size="mini"
+            @click="exportGLB()"
+          >
+            Export GLB
+          </el-button>
+          <el-button
+            size="mini"
+            @click="exportGLTF()"
+          >
+            Export GLTF
+          </el-button>
         </el-row>
-        <el-row :gutter="20">
-          <el-row :gutter="20">
+        <el-row :gutter="30">
+          <el-col
+            :span="7"
+            :offset="2"
+          >
             <el-switch
-              class="app-switch"
+              v-model="syncMode"
+              active-text="Sync Mode"
+              active-color="#8300bf"
+            />
+            <el-row v-if="syncMode">
+              <el-input-number
+                v-model="zoom"
+                :min="1.0"
+                :controls="false"
+                placeholder="Please input"
+                label="zoom"
+              />
+              <el-input-number
+                v-model="pos[0]"
+                :min="-1.0"
+                :max="1.0"
+                :controls="false"
+                placeholder="Please input"
+                label="x"
+              />
+              <el-input-number
+                v-model="pos[1]"
+                :min="-1.0"
+                :max="1.0"
+                :controls="false"
+                label="y"
+              />
+            </el-row>
+          </el-col>
+        </el-row>
+        <el-row :gutter="30">
+          <el-col
+            :span="7"
+            :offset="4"
+          >
+            <el-switch
+              v-model="render"
               active-text="Rendering"
               active-color="#8300bf"
-              v-model="render"
-            ></el-switch>
-          </el-row>
+            />
+          </el-col>
+          <el-col
+            :span="8"
+            :offset="1"
+          >
+            <el-switch
+              v-model="renderInfoOn"
+              active-text="Renderer Info"
+              active-color="#8300bf"
+            />
+          </el-col>
         </el-row>
+        <template v-if="renderInfoOn && rendererInfo">
+          <el-row>
+            <el-col
+              v-for="(value, name) in rendererInfo.memory"
+              :key="name"
+              :offset="4"
+              :span="6"
+            >
+              {{ name }} : {{ value }}
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col
+              v-for="(value, name) in rendererInfo.render"
+              :key="name"
+              :offset="1"
+              :span="6"
+            >
+              {{ name }} : {{ value }}
+            </el-col>
+          </el-row>
+        </template>
         <el-input
+          v-model="input"
           type="textarea"
           autosize
           placeholder="Please input"
-          v-model="input"
           style="padding-left:5%;width:90%;"
         />
       </div>
-      <el-button icon="el-icon-setting" slot="reference">Options</el-button>
+      <el-button
+        slot="reference"
+        icon="el-icon-setting"
+      >
+        Options
+      </el-button>
     </el-popover>
     <el-popover
       placement="bottom"
@@ -96,62 +221,124 @@
       width="800"
       class="models-popover"
       popper-class="table-popover"
-      :appendToBody="false"
+      :append-to-body="false"
     >
-      <ModelsTable @viewModelClicked="viewModelClicked"></ModelsTable>
-      <el-button icon="el-icon-folder-opened" slot="reference">Models</el-button>
+      <ModelsTable @viewModelClicked="viewModelClicked" />
+      <el-button
+        slot="reference"
+        icon="el-icon-folder-opened"
+      >
+        Models
+      </el-button>
     </el-popover>
   </div>
 </template>
 
 <script>
 /* eslint-disable no-alert, no-console */
-import ScaffoldVuer from "./components/ScaffoldVuer.vue";
+import { ScaffoldVuer } from "./components/index.js";
+import DropZone from "./components/DropZone.vue";
 import ModelsTable from "./components/ModelsTable.vue";
 import Vue from "vue";
-import { Button, Col, Icon, Input, Popover, Row, Switch } from "element-ui";
+import { Button, Col, Icon, Input, InputNumber, Popover, Row, Switch } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
+
 locale.use(lang);
 Vue.use(Button);
 Vue.use(Col);
 Vue.use(Icon);
 Vue.use(Input);
+Vue.use(InputNumber);
 Vue.use(Popover);
 Vue.use(Row);
 Vue.use(Switch);
 
-/*
-const alignToObject = function(cameracontrol, scene) {
-  var object = scene.findGeometriesWithGroupName("Endocardium of left atrium")[0];
-  const boundingBox = object.getBoundingBox();
-  if (boundingBox) {
-    const radius = boundingBox.min.distanceTo(boundingBox.max)/2.0;
-    const centreX = (boundingBox.min.x + boundingBox.max.x) / 2.0;
-    const centreY = (boundingBox.min.y + boundingBox.max.y) / 2.0;
-    const centreZ = (boundingBox.min.z + boundingBox.max.z) / 2.0;
-    const clip_factor = 8.0;
-    const endingViewport = cameracontrol.getViewportFromCentreAndRadius(centreX, centreY, centreZ, radius, 40, radius * clip_factor );
-    const startingViewport = cameracontrol.getCurrentViewport();
-    cameracontrol.cameraTransition(startingViewport, endingViewport, 1500);
-    cameracontrol.enableCameraTransition();
-  }
-  setTimeout(function(){ tumble(cameracontrol) }, 2000);
-}
-
-const tumble = function(cameracontrol) {
-  cameracontrol.enableAutoTumble();
-  cameracontrol.autoTumble([1.0, 0.0], Math.PI / 2, true);
-}
-*/
 export default {
-  name: "app",
+  name: "App",
   components: {
+    DropZone,
     ScaffoldVuer,
     ModelsTable
   },
+  data: function() {
+    return {
+      url: undefined,
+      input: undefined,
+      displayUI: true,
+      selectedCoordinates: undefined,
+      helpMode: false,
+      displayMarkers: false,
+      syncMode: false,
+      currentTime: 0,
+      displayMinimap: false,
+      tumbleOn: false,
+      showColourPicker: true,
+      minimapSettings: {
+        x_offset: 16,
+        y_offset: 50,
+        width: 128,
+        height: 128,
+        align: "top-right"
+      },
+      render: true,
+      region: "",
+      viewURL: "",
+      renderInfoOn: false,
+      rendererInfo: undefined,
+      zoom: 1,
+      pos: [0, 0],
+    };
+  },
+  watch: {
+    input: function() {
+      this.parseInput();
+    },
+    tumbleOn: function(val) {
+      this.autoTumble(val);
+    },
+    "$route.query": {
+      handler: "parseQuery",
+      deep: true,
+      immediate: true
+    },
+    syncMode: function(val) {
+      this.$refs.scaffold.toggleSyncControl(val);
+    }
+  },
+  mounted: function() {
+    this._sceneSettings = [];
+    this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
+    this.rendererInfo = this.$refs.scaffold.getRendererInfo();
+  },
   methods: {
+    exportGLTF: function() {
+      this.$refs.scaffold.exportGLTF(false)
+        .then(data =>{
+          let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+          let hrefElement = document.createElement("a");
+          document.body.append(hrefElement);
+          hrefElement.download = `export.gltf`;
+          hrefElement.href = dataStr;
+          hrefElement.click();
+          hrefElement.remove();
+        })
+    },
+    exportGLB: function() {
+      this.$refs.scaffold.exportGLTF(true)
+        .then(data =>{
+          let blob = new Blob([data], {type: "octet/stream"});
+          let url = window.URL.createObjectURL(blob);
+          let hrefElement = document.createElement("a");
+          document.body.append(hrefElement);
+          hrefElement.download = `export.glb`;
+          hrefElement.href = url;
+          hrefElement.click();
+          hrefElement.remove();
+        })
+    },
     saveSettings: function() {
+      const state = this.$refs.scaffold.getState();
       this._sceneSettings.push(this.$refs.scaffold.getState());
     },
     restoreSettings: function() {
@@ -175,19 +362,38 @@ export default {
         cameracontrol.stopAutoTumble();
       }
     },
+    onReady: function() {
+      console.log("ready")
+      this.$refs.dropzone.revokeURLs();
+      //const names = ["left ventricle.mesh2d", "right ventricle.mesh2d"];
+      //this.$refs.scaffold.changeActiveByName(names, "", true);
+    },
     onSelected: function(data) {
-      if (data && data[0].data.group) {
+      console.log(data)
+      if (data && (data.length > 0) && data[0].data.group) {
         delete this.$route.query["viewURL"];
         this.$router.replace({
           query: { ...this.$route.query, region: data[0].data.group }
         });
       }
     },
+    onNavigated: function(data) {
+      this.zoom = data.zoom;
+      this.pos[0] = data.target[0];
+      this.pos[1] = data.target[1];
+    },
+    onFilesDrop: function(metaURL) {
+      this.input = metaURL;
+    },
     parseInput: function() {
-      if (this.$route.query.url !== this.input)
+      if (this.$route.query.url !== this.input) {
+        const queries = {...this.$route.query};
+        if (this.input && this.input !== "")
+          queries.url = this.input;
         this.$router.replace({
           query: { ...this.$route.query, url: this.input }
         });
+      }
     },
     updateCurrentTime: function(val) {
       this.currentTime = val;
@@ -211,53 +417,19 @@ export default {
         this.viewURL = "";
       }
     }
-  },
-  data: function() {
-    return {
-      url: undefined,
-      input: undefined,
-      displayUI: true,
-      selectedCoordinates: undefined,
-      helpMode: false,
-      displayMarkers: true,
-      currentTime: 0,
-      displayMinimap: true,
-      tumbleOn: false,
-      showColourPicker: true,
-      minimapSettings: {
-        x_offset: 16,
-        y_offset: 50,
-        width: 128,
-        height: 128,
-        align: "top-right"
-      },
-      render: true,
-      region: "",
-      viewURL: ""
-    };
-  },
-
-  mounted: function() {
-    this._sceneSettings = [];
-    this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
-  },
-  watch: {
-    input: function() {
-      this.parseInput();
-    },
-    tumbleOn: function(val) {
-      this.autoTumble(val);
-    },
-    "$route.query": {
-      handler: "parseQuery",
-      deep: true,
-      immediate: true
-    }
   }
 };
 </script>
 
-<style>
+<style lang="scss">
+@import "~element-ui/packages/theme-chalk/src/button";
+@import "~element-ui/packages/theme-chalk/src/col";
+@import "~element-ui/packages/theme-chalk/src/icon";
+@import "~element-ui/packages/theme-chalk/src/input";
+@import "~element-ui/packages/theme-chalk/src/switch";
+@import "~element-ui/packages/theme-chalk/src/popover";
+@import "~element-ui/packages/theme-chalk/src/row";
+
 #app {
   font-family: "Asap", sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -276,6 +448,12 @@ body {
 
 .options-container {
   text-align: center;
+  .el-row {
+    margin-bottom: 8px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 }
 
 .vuer {
@@ -290,14 +468,12 @@ body {
   position: absolute;
 }
 
-.app-switch .el-switch__label.is-active span {
-  color: #8300bf;
-}
-
-.el-row {
-  margin-bottom: 5px;
-  &:last-child {
-    margin-bottom: 0;
+.app-row {
+  .el-row {
+    margin-bottom: 5px;
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
 }
 
@@ -309,13 +485,4 @@ body {
 .table-popover {
   opacity: 0.9;
 }
-</style>
-
-<style scoped src="./styles/purple/button.css">
-</style>
-<style scoped src="./styles/purple/icon.css">
-</style>
-<style scoped src="./styles/purple/input.css">
-</style>
-<style scoped src="./styles/purple/popover.css">
 </style>
