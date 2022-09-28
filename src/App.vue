@@ -288,6 +288,7 @@ export default {
       rendererInfo: undefined,
       zoom: 1,
       pos: [0, 0],
+      sceneSettings: [],
     };
   },
   watch: {
@@ -307,7 +308,6 @@ export default {
     }
   },
   mounted: function() {
-    this._sceneSettings = [];
     this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
     this.rendererInfo = this.$refs.scaffold.getRendererInfo();
   },
@@ -339,11 +339,11 @@ export default {
     },
     saveSettings: function() {
       const state = this.$refs.scaffold.getState();
-      this._sceneSettings.push(this.$refs.scaffold.getState());
+      this.sceneSettings.push(this.$refs.scaffold.getState());
     },
     restoreSettings: function() {
-      if (this._sceneSettings.length > 0)
-        this.$refs.scaffold.setState(this._sceneSettings.pop());
+      if (this.sceneSettings.length > 0)
+        this.$refs.scaffold.setState(this.sceneSettings.pop());
     },
     viewModelClicked: function(location) {
       this.input = location;

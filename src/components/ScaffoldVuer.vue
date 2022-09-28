@@ -339,7 +339,7 @@ export default {
      */
     displayWarning: {
       type: Boolean,
-      default: true
+      default: false
     },
     /**
      * Warning message for the hovered over text
@@ -354,7 +354,7 @@ export default {
      */
     displayMarkers: {
       type: Boolean,
-      default: true
+      default: false
     },
     /**
      * Show/hide minimap.
