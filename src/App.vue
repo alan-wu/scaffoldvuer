@@ -367,8 +367,8 @@ export default {
     onReady: function() {
       console.log("ready")
       this.$refs.dropzone.revokeURLs();
-      const names = ["left ventricle.mesh2d", "right ventricle.mesh2d"];
-      this.$refs.scaffold.changeActiveByName(names, "", false);
+      //const names = ["left ventricle.mesh2d", "right ventricle.mesh2d"];
+      //this.$refs.scaffold.changeActiveByName(names, "", false);
     },
     onSelected: function(data) {
       if (data && (data.length > 0) && data[0].data.group) {
