@@ -761,6 +761,7 @@ export default {
      */
     eventNotifierCallback: function(event) {
       const names = [];
+      let zincObjects = [];
       const region = undefined;
       if (event.eventType == 1 || event.eventType == 2) {
         event.identifiers.forEach(identifier => {
@@ -771,13 +772,15 @@ export default {
             names.push(id);
           }
         });
+        zincObjects = event.zincObjects;
       }
       if (event.eventType == 1) {
         if (this.$refs.treeControl) {
           if (names.length > 0) {
-            this.$refs.treeControl.changeActiveByNames(names, region, false);
+            //this.$refs.treeControl.changeActiveByNames(names, region, false);
+            this.$refs.treeControl.updateActiveUI(zincObjects);
           } else {
-            this.$refs.treeControl.removeActive(true);
+            this.$refs.treeControl.removeActive(true)
           }
         }
         // Triggers when an object has been selected
@@ -787,7 +790,8 @@ export default {
        // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
         if (this.$refs.treeControl) {
           if (names.length > 0) {
-            this.$refs.treeControl.changeHoverByNames(names, region, false);
+            //this.$refs.treeControl.changeHoverByNames(names, region, false);
+            this.$refs.treeControl.updateHoverUI(zincObjects);
           } else {
             this.$refs.treeControl.removeHover(true);
           }
