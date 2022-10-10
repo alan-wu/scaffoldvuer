@@ -239,19 +239,15 @@ export default {
       }
     },
     checkChanged: function (node, data) {
-      const rootRegion = this.module.scene.getRootRegion();
-      rootRegion.hideAllChildren();
-      data.checkedNodes.forEach(localNode => {
-        if (localNode.region) localNode.region.setVisibility(true);
-        if (localNode.primitives) {
-          localNode.primitives.forEach(primitive => {
-            primitive.setVisibility(true);
-          });
-        }
-      });
-      data.halfCheckedNodes.forEach(localNode => {
-        if (localNode.region) localNode.region.setVisibility(true);
-      });
+      const isRegion = node.region;
+      const isPrimitives = node.primitives;
+      const isChecked = data.checkedKeys.includes(node.id);
+      if (isRegion)
+        isChecked ? node.region.showAllPrimitives() : node.region.hideAllPrimitives();
+      if (isPrimitives)
+        node.primitives.forEach(primitive => {
+          primitive.setVisibility(isChecked);
+        });
     },
     updateActiveUI: function (primitives) {
       this.active = [];
