@@ -14,7 +14,7 @@
       <div class="tree-container">
         <el-tree
           ref="regionTree"
-          default-expand-all
+          :default-expanded-keys="['__r/']"
           node-key="id"
           show-checkbox
           :check-strictly="false"
@@ -123,18 +123,18 @@ export default {
   },
   created: function () {
     this.module.sceneData.geometries.forEach(zincObject => {
-      this.organsAdded(zincObject);
+      this.zincObjectAdded(zincObject);
     });
     this.module.sceneData.lines.forEach(zincObject => {
-      this.organsAdded(zincObject);
+      this.zincObjectAdded(zincObject);
     });
     this.module.sceneData.glyphsets.forEach(zincObject => {
-      this.organsAdded(zincObject);
+      this.zincObjectAdded(zincObject);
     });
     this.module.sceneData.pointsets.forEach(zincObject => {
-      this.organsAdded(zincObject);
+      this.zincObjectAdded(zincObject);
     });
-    this.module.addOrganPartAddedCallback(this.organsAdded);
+    this.module.addOrganPartAddedCallback(this.zincObjectAdded);
     this.__nodeNumbers = 1;
   },
   destroyed: function () {
@@ -194,7 +194,7 @@ export default {
       for (let i = 0; i < this.active.length; i++) {
         let item = this.active[i];
         if (item.group === data.label && 
-          ((item.regionPath === item.regionPath) || 
+          ((item.regionPath === data.regionPath) || 
           item.regionPath === undefined)) {
           return true;
         }
@@ -205,7 +205,7 @@ export default {
       for (let i = 0; i < this.hover.length; i++) {
         let item = this.hover[i];
         if (item.group === data.label && 
-          ((item.regionPath === item.regionPath) || 
+          ((item.regionPath === data.regionPath) || 
           item.regionPath === undefined)) {
           return true;
         }
@@ -213,9 +213,9 @@ export default {
       return false;
     },
     /**
-     * This is called when a new organ is read into the scene.
+     * This is called when a new zinc object is read into the scene.
      */
-    organsAdded: function (zincObject) {
+    zincObjectAdded: function (zincObject) {
       const region = zincObject.region;
       if (region) {
         const paths = region.getFullSeparatedPath();
@@ -239,36 +239,38 @@ export default {
       }
     },
     checkChanged: function (node, data) {
-      const rootRegion = this.module.scene.getRootRegion();
-      rootRegion.hideAllChildren();
-      data.checkedNodes.forEach(localNode => {
-        if (localNode.region) localNode.region.setVisibility(true);
-        if (localNode.primitives) {
-          localNode.primitives.forEach(primitive => {
-            primitive.setVisibility(true);
-          });
-        }
-      });
-      data.halfCheckedNodes.forEach(localNode => {
-        if (localNode.region) localNode.region.setVisibility(true);
-      });
+      const isRegion = node.region;
+      const isPrimitives = node.primitives;
+      const isChecked = data.checkedKeys.includes(node.id);
+      if (isRegion)
+        isChecked ? node.region.showAllPrimitives() : node.region.hideAllPrimitives();
+      if (isPrimitives)
+        node.primitives.forEach(primitive => {
+          primitive.setVisibility(isChecked);
+        });
+    },
+    updateActiveUI: function (primitives) {
+      this.active = [];
+      const list = createListFromPrimitives(primitives);
+      this.active.push(...list);
     },
     changeActiveByPrimitives: function (primitives, propagate) {
       if (primitives && primitives.length > 0) {
-        this.active = [];
-        const list = createListFromPrimitives(primitives);
-        this.active.push(...list);
+        this.updateActiveUI(primitives);
         this.$emit("object-selected", primitives, propagate);
       } else {
         this.removeActive(propagate);
       }
       this.removeHover(propagate);
     },
+    updateHoverUI: function (primitives) {
+      this.hover = [];
+      const list = createListFromPrimitives(primitives);
+      this.hover.push(...list);
+    },
     changeHoverByPrimitives: function (primitives, propagate) {
       if (primitives && primitives.length > 0) {
-        this.hover = [];
-        const list = createListFromPrimitives(primitives);
-        this.hover.push(...list);
+        this.updateHoverUI(primitives);
         this.$emit("object-hovered", primitives, propagate);
       } else {
         this.removeHover(propagate);

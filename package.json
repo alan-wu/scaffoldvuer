@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/scaffoldvuer",
-  "version": "0.1.53-wc-1",
+  "version": "0.1.54-wc-1",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -35,12 +35,12 @@
     "vue-custom-element": "^3.3.0",
     "vue-drag-resize": "^1.3.2",
     "vue-router": "^3.5.1",
-    "zincjs": "^1.0.3"
+    "zincjs": "^1.0.7"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.0.0",
     "@vue/cli-plugin-eslint": "^4.5.15",
-    "@vue/cli-service": "^4.5.13",
+    "@vue/cli-service": "^5.0.8",
     "babel-eslint": "^10.0.3",
     "babel-plugin-component": "^1.1.1",
     "base64-inline-loader": "^1.1.1",

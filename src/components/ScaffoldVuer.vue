@@ -364,6 +364,13 @@ export default {
       default: false
     },
     /**
+     * Format of the input URL
+     */
+    format: {
+      type: String,
+      default: "metadata"
+    },
+    /**
      * Settings for minimap position, size and alignment.
      */
     minimapSettings: {
@@ -473,10 +480,17 @@ export default {
         visible: false,
         x: 200,
         y: 200
-      }
+      },
+      fileFormat: "metadata",
     };
   },
   watch: {
+    format: {
+      handler: function(value) {
+        this.fileFormat = value;
+      },
+      immediate: true
+    },
     url: {
       handler: function(newValue) {
         if (this.state === undefined || this.state.url === undefined)
@@ -508,6 +522,8 @@ export default {
     },
     displayMarkers: function(val) {
       this.$module.scene.displayMarkers = val;
+      //Update pickable objects
+      this.$module.scene.forcePickableObjectsUpdate = true;
     },
     displayMinimap: function(val) {
       this.$module.scene.displayMinimap = val;
@@ -685,6 +701,7 @@ export default {
     viewRegion: function(names) {
       const rootRegion = this.$module.scene.getRootRegion();
       const groups = Array.isArray(names) ? names : [names];
+      const dist = this.$module.scene.camera.far - this.$module.scene.camera.near;
       const objects = findObjectsWithNames(rootRegion, groups, "");
       let box = this.$module.scene.getBoundingBoxOfZincObjects(objects);
       if (box) {
@@ -692,6 +709,7 @@ export default {
           this.$module.setSyncControlZoomToBox(box);
         } else {
           this.$module.scene.viewAllWithBoundingBox(box);
+          this.$module.scene.camera.far = this.$module.scene.camera.near + dist;
         }
         return true;
       }
@@ -747,6 +765,7 @@ export default {
      */
     eventNotifierCallback: function(event) {
       const names = [];
+      let zincObjects = [];
       const region = undefined;
       if (event.eventType == 1 || event.eventType == 2) {
         event.identifiers.forEach(identifier => {
@@ -757,13 +776,15 @@ export default {
             names.push(id);
           }
         });
+        zincObjects = event.zincObjects;
       }
       if (event.eventType == 1) {
         if (this.$refs.treeControl) {
           if (names.length > 0) {
-            this.$refs.treeControl.changeActiveByNames(names, region, false);
+            //this.$refs.treeControl.changeActiveByNames(names, region, false);
+            this.$refs.treeControl.updateActiveUI(zincObjects);
           } else {
-            this.$refs.treeControl.removeActive(true);
+            this.$refs.treeControl.removeActive(true)
           }
         }
         // Triggers when an object has been selected
@@ -773,7 +794,8 @@ export default {
        // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
         if (this.$refs.treeControl) {
           if (names.length > 0) {
-            this.$refs.treeControl.changeHoverByNames(names, region, false);
+            //this.$refs.treeControl.changeHoverByNames(names, region, false);
+            this.$refs.treeControl.updateHoverUI(zincObjects);
           } else {
             this.$refs.treeControl.removeHover(true);
           }
@@ -989,9 +1011,10 @@ export default {
      */
     getState: function() {
       let state = {
+        format: this.fileFormat,
         url: this._currentURL,
         viewport: undefined,
-        visibility: undefined
+        visibility: undefined,
       };
       if (this.$refs.treeControl)
         state.visibility = this.$refs.treeControl.getState();
@@ -1011,6 +1034,7 @@ export default {
       if (state) {
         if (state.url && state.url !== this._currentURL) {
           this.setURLAndState(state.url, {
+            fileFormat: state.fileFormat,
             viewport: state.viewport,
             visibility: state.visibility
           });
@@ -1047,6 +1071,7 @@ export default {
      */
     setURLAndState: function(newValue, state) {
       if (newValue != this._currentURL) {
+        if (state && state.format) this.fileFormat = state.format;
         let viewport = state && state.viewport ? state.viewport : undefined;
         let visibility =
           state && state.visibility ? state.visibility : undefined;
@@ -1063,14 +1088,20 @@ export default {
             visibility: visibility
           })
         );
-        this.$module.loadOrgansFromURL(
-          newValue,
-          undefined,
-          undefined,
-          "scene",
-          undefined
-        );
+        if (this.fileFormat === "gltf") {
+          this.$module.loadGLTFFromURL(newValue, "scene", true);
+        } else {
+          this.$module.loadOrgansFromURL(
+            newValue,
+            undefined,
+            undefined,
+            "scene",
+            undefined,
+            true
+          );
+        }
         this.$module.scene.displayMarkers = this.displayMarkers;
+        this.$module.scene.forcePickableObjectsUpdate = true;
         this.$module.scene.displayMinimap = this.displayMinimap;
         this.updateMinimapScissor();
       }
@@ -1086,7 +1117,6 @@ export default {
     },
     /**
      * Callback when drawer is toggled.
-     *
      */
     drawerToggled: function(flag) {
       this.drawerOpen = flag;

@@ -40,9 +40,9 @@ BaseModule.prototype.importSettings = function(settings) {
 	return false;
 }
 
-BaseModule.prototype.publishChanges = function(annotations, eventType) {
+BaseModule.prototype.publishChanges = function(annotations, eventType, zincObjects) {
   for (let i = 0; i < this.eventNotifiers.length; i++) {
-    this.eventNotifiers[i].publish(this, eventType, annotations);
+    this.eventNotifiers[i].publish(this, eventType, annotations, zincObjects);
   }
 }
 

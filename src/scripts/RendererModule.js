@@ -90,6 +90,7 @@ RendererModule.prototype.getAnnotationsFromObjects = function(objects) {
 RendererModule.prototype.setHighlightedByObjects = function(
   objects, coords, propagateChanges) {
   const changed = this.graphicsHighlight.setHighlighted(objects);
+  const zincObjects = this.objectsToZincObjects(objects);
   if (propagateChanges) {
     eventType = require("./eventNotifier").EVENT_TYPE.MOVE;
     if (changed)
@@ -97,7 +98,7 @@ RendererModule.prototype.setHighlightedByObjects = function(
     const annotations = this.getAnnotationsFromObjects(objects);
     if (annotations.length > 0)
       annotations[0].coords = coords;
-    this.publishChanges(annotations, eventType);
+    this.publishChanges(annotations, eventType, zincObjects);
   }
   return changed;
 }
@@ -162,7 +163,7 @@ RendererModule.prototype.setSelectedByObjects = function(
       const annotations = this.getAnnotationsFromObjects(objects);
       if (annotations.length > 0)
         annotations[0].coords = coords;
-      this.publishChanges(annotations, eventType);
+      this.publishChanges(annotations, eventType, zincObjects);
     }
   }
   return changed;
