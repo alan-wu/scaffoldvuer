@@ -194,7 +194,7 @@ export default {
       for (let i = 0; i < this.active.length; i++) {
         let item = this.active[i];
         if (item.group === data.label && 
-          ((item.regionPath === item.regionPath) || 
+          ((item.regionPath === data.regionPath) || 
           item.regionPath === undefined)) {
           return true;
         }
@@ -205,7 +205,7 @@ export default {
       for (let i = 0; i < this.hover.length; i++) {
         let item = this.hover[i];
         if (item.group === data.label && 
-          ((item.regionPath === item.regionPath) || 
+          ((item.regionPath === data.regionPath) || 
           item.regionPath === undefined)) {
           return true;
         }

@@ -522,6 +522,8 @@ export default {
     },
     displayMarkers: function(val) {
       this.$module.scene.displayMarkers = val;
+      //Update pickable objects
+      this.$module.scene.forcePickableObjectsUpdate = true;
     },
     displayMinimap: function(val) {
       this.$module.scene.displayMinimap = val;
@@ -699,6 +701,7 @@ export default {
     viewRegion: function(names) {
       const rootRegion = this.$module.scene.getRootRegion();
       const groups = Array.isArray(names) ? names : [names];
+      const dist = this.$module.scene.camera.far - this.$module.scene.camera.near;
       const objects = findObjectsWithNames(rootRegion, groups, "");
       let box = this.$module.scene.getBoundingBoxOfZincObjects(objects);
       if (box) {
@@ -706,6 +709,7 @@ export default {
           this.$module.setSyncControlZoomToBox(box);
         } else {
           this.$module.scene.viewAllWithBoundingBox(box);
+          this.$module.scene.camera.far = this.$module.scene.camera.near + dist;
         }
         return true;
       }
@@ -1097,6 +1101,7 @@ export default {
           );
         }
         this.$module.scene.displayMarkers = this.displayMarkers;
+        this.$module.scene.forcePickableObjectsUpdate = true;
         this.$module.scene.displayMinimap = this.displayMinimap;
         this.updateMinimapScissor();
       }
