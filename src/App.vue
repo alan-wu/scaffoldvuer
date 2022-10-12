@@ -21,6 +21,7 @@
         :render="render"
         :region="region"
         :view-u-r-l="viewURL"
+        :format="format"
         @on-ready="onReady"
         @scaffold-selected="onSelected"
         @scaffold-navigated="onNavigated"
@@ -288,6 +289,8 @@ export default {
       rendererInfo: undefined,
       zoom: 1,
       pos: [0, 0],
+      format: "metadata",
+      sceneSettings: [],
     };
   },
   watch: {
@@ -307,7 +310,6 @@ export default {
     }
   },
   mounted: function() {
-    this._sceneSettings = [];
     this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
     this.rendererInfo = this.$refs.scaffold.getRendererInfo();
   },
@@ -339,11 +341,11 @@ export default {
     },
     saveSettings: function() {
       const state = this.$refs.scaffold.getState();
-      this._sceneSettings.push(this.$refs.scaffold.getState());
+      this.sceneSettings.push(this.$refs.scaffold.getState());
     },
     restoreSettings: function() {
-      if (this._sceneSettings.length > 0)
-        this.$refs.scaffold.setState(this._sceneSettings.pop());
+      if (this.sceneSettings.length > 0)
+        this.$refs.scaffold.setState(this.sceneSettings.pop());
     },
     viewModelClicked: function(location) {
       this.input = location;
@@ -366,10 +368,9 @@ export default {
       console.log("ready")
       this.$refs.dropzone.revokeURLs();
       //const names = ["left ventricle.mesh2d", "right ventricle.mesh2d"];
-      //this.$refs.scaffold.changeActiveByName(names, "", true);
+      //this.$refs.scaffold.changeActiveByName(names, "", false);
     },
     onSelected: function(data) {
-      console.log(data)
       if (data && (data.length > 0) && data[0].data.group) {
         delete this.$route.query["viewURL"];
         this.$router.replace({
@@ -382,8 +383,10 @@ export default {
       this.pos[0] = data.target[0];
       this.pos[1] = data.target[1];
     },
-    onFilesDrop: function(metaURL) {
-      this.input = metaURL;
+    onFilesDrop: function(payload) {
+      if (payload.format == "gltf") this.format = "gltf";
+      else this.format = "metadata";
+      this.input = payload.url;
     },
     parseInput: function() {
       if (this.$route.query.url !== this.input) {
@@ -404,6 +407,11 @@ export default {
       } else {
         this.url =
           "https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json";
+      }
+      if (this.url.includes(".gltf") || this.url.includes(".glb")) {
+        this.format = "gltf";
+      } else if (this.url.includes(".json")) {
+        this.format = "metadata";
       }
       this.input = this.url;
       if (query.region) {

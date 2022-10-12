@@ -474,14 +474,15 @@ const OrgansSceneData = function() {
       _this.sceneData.currentName = name;
 	  }
 
-	  this.loadOrgansFromURL = function(url, speciesName, systemName, partName, viewURL) {
+	  this.loadOrgansFromURL = function(url, speciesName, systemName, partName, viewURL, clearFirst) {
 		  if (_this.zincRenderer) {
 			  if (partName && (_this.sceneData.metaURL !== url)) {
 			      setSceneData(speciesName, systemName, partName, undefined);
 			      const name = _this.sceneData.currentName;
 			      let organScene = _this.zincRenderer.getSceneByName(name);
 			      if (organScene) {
-			    	  organScene.clearAll();
+              if (clearFirst)
+			    	    organScene.clearAll();
 			      } else {
 			    	  organScene = _this.zincRenderer.createScene(name);
 			      }
@@ -497,6 +498,36 @@ const OrgansSceneData = function() {
 			      _this.sceneData.metaURL = url;
 			      organScene.loadMetadataURL(url, _addOrganPartCallback(systemName, partName, false),
 			    	  downloadCompletedCallback());	      
+			      _this.scene = organScene;
+			      _this.zincRenderer.setCurrentScene(organScene);
+			      _this.graphicsHighlight.reset();
+			      const zincCameraControl = organScene.getZincCameraControls();
+			      zincCameraControl.enableRaycaster(organScene, _pickingCallback(), _hoverCallback());
+			      zincCameraControl.setMouseButtonAction("AUXILIARY", "ZOOM");
+			      zincCameraControl.setMouseButtonAction("SECONDARY", "PAN");
+			  }
+		  }
+	  }
+
+    this.loadGLTFFromURL = function(url, partName, clearFirst) {
+		  if (_this.zincRenderer) {
+			  if (partName && (_this.sceneData.metaURL !== url)) {
+			      setSceneData(undefined, undefined, partName, undefined);
+			      const name = _this.sceneData.currentName;
+			      let organScene = _this.zincRenderer.getSceneByName(name);
+			      if (organScene) {
+              if (clearFirst)
+			    	    organScene.clearAll();
+			      } else {
+			    	  organScene = _this.zincRenderer.createScene(name);
+			      }
+			      for (let i = 0; i < sceneChangedCallbacks.length;i++) {
+			    	  sceneChangedCallbacks[i](_this.sceneData);
+			      }
+  	    	  _this.sceneData.viewURL = undefined;
+			      _this.sceneData.metaURL = url;
+			      organScene.loadGLTF(url, _addOrganPartCallback(undefined, partName, false),
+              downloadCompletedCallback());
 			      _this.scene = organScene;
 			      _this.zincRenderer.setCurrentScene(organScene);
 			      _this.graphicsHighlight.reset();
@@ -536,7 +567,7 @@ const OrgansSceneData = function() {
 			  _this.setName(settings.name);
 			  if (settings.metaURL !== undefined && settings.metaURL != "") {
 				  _this.loadOrgansFromURL(settings.metaURL, settings.species,
-					settings.system, settings.part, settings.viewURL);
+					  settings.system, settings.part, settings.viewURL, true);
 			  } else {
 				  _this.loadOrgans(settings.species, settings.system, settings.part);
 			  }

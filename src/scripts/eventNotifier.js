@@ -1,8 +1,9 @@
 const EVENT_TYPE = { ALL: 0, SELECTED: 1, HIGHLIGHTED: 2, MOVE: 3 };
 
-const SelectionEvent = function(eventTypeIn, identifiersIn) {
+const SelectionEvent = function(eventTypeIn, identifiersIn, zincObjects) {
   this.eventType = eventTypeIn;
   this.identifiers = identifiersIn;
+  this.zincObjects = zincObjects;
 }
 
 const returnFullID = function(sourceId) {
@@ -23,12 +24,12 @@ const Subscription = function(subscriberIn, callbackIn, eventType) {
     return eventType;
   }
   
-  this.notify = function(source, eventType, ids) {
+  this.notify = function(source, eventType, ids, zincObjects) {
     if (source !== subscriber && (_this.targetEventType ===  EVENT_TYPE.ALL ||
         _this.targetEventType === eventType)) {
       //should support different type of id e.g lyph, name, fmas...
       //need a function that finds all relavant ids
-      const event = new SelectionEvent(eventType, ids);
+      const event = new SelectionEvent(eventType, ids, zincObjects);
       callback(event);
     }
   }
@@ -37,9 +38,9 @@ const Subscription = function(subscriberIn, callbackIn, eventType) {
 exports.EventNotifier = function() {
   const subscriptions = [];
   
-  this.publish = function(source, eventType, id) {
+  this.publish = function(source, eventType, id, zincObjects) {
     for (let i = 0; i < subscriptions.length;i++) {
-      subscriptions[i].notify(source, eventType, id);
+      subscriptions[i].notify(source, eventType, id, zincObjects);
     }
   }
   
