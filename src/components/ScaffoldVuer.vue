@@ -339,7 +339,7 @@ export default {
      */
     displayWarning: {
       type: Boolean,
-      default: false
+      default: true
     },
     /**
      * Warning message for the hovered over text
