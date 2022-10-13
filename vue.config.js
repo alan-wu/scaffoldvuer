@@ -1,3 +1,4 @@
+
 const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
@@ -28,6 +29,8 @@ module.exports = {
       .end()
   },
   css: {
+    sourceMap: process.env.NODE_ENV === 'wc',
+    extract: process.env.NODE_ENV !== 'wc',
     //Import variables into all stylesheets.
     loaderOptions: {
       sass: {
