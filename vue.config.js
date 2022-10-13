@@ -1,6 +1,12 @@
-//const nodeExternals = require('webpack-node-externals');
+
+const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
+  configureWebpack: config => {
+    if(process.env.NODE_ENV === 'production') {
+      config.externals =  [ nodeExternals({allowlist: [/^element-ui/]}) ];
+    }
+  },
   chainWebpack: config => {
     // GraphQL Loader
     config.module
@@ -23,8 +29,8 @@ module.exports = {
       .end()
   },
   css: {
-    sourceMap: true,
-    extract: false,
+    sourceMap: process.env.NODE_ENV === 'wc',
+    extract: process.env.NODE_ENV !== 'wc',
     //Import variables into all stylesheets.
     loaderOptions: {
       sass: {

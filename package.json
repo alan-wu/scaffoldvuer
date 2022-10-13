@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/scaffoldvuer",
-  "version": "0.1.54-wc-1",
+  "version": "0.1.54-beta-4",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -9,12 +9,13 @@
   "scripts": {
     "serve": "vue-cli-service serve --port 8081",
     "lint": "vue-cli-service lint --ext .js,.vue src",
-    "build-bundle": "vue-cli-service build --target lib --name scaffoldvuer ./src/components/index.js",
-    "build-wc": "vue-cli-service build --target lib --name scaffoldvuer-wc ./src/ScaffoldVuer-wc.js --mode production --env bundle",
+    "build-bundle": "npm run build:bundle && npm run build:wc",
+    "build:bundle": "vue-cli-service build --target lib --name scaffoldvuer ./src/components/index.js",
+    "build:wc": "vue-cli-service build --target lib --name scaffoldvuer-wc ./src/ScaffoldVuer-wc.js --mode wc --env bundle --no-clean",
     "styleguide": "vue-cli-service styleguidist",
     "styleguide:build": "vue-cli-service styleguidist:build"
   },
-  "main": "./dist/scaffoldvuer-wc.umd.min.js",
+  "main": "./dist/scaffoldvuer.common.js",
   "files": [
     "dist/*",
     "src/*",
@@ -40,7 +41,7 @@
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.0.0",
     "@vue/cli-plugin-eslint": "^4.5.15",
-    "@vue/cli-service": "^5.0.8",
+    "@vue/cli-service": "^4.5.18",
     "babel-eslint": "^10.0.3",
     "babel-plugin-component": "^1.1.1",
     "base64-inline-loader": "^1.1.1",
