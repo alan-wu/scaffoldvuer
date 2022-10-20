@@ -250,9 +250,8 @@ export default {
         });
     },
     updateActiveUI: function (primitives) {
-      this.active = [];
-      const list = createListFromPrimitives(primitives);
-      this.active.push(...list);
+      this.active.length = 0;
+      createListFromPrimitives(primitives, this.active);
     },
     changeActiveByPrimitives: function (primitives, propagate) {
       if (primitives && primitives.length > 0) {
@@ -264,9 +263,8 @@ export default {
       this.removeHover(propagate);
     },
     updateHoverUI: function (primitives) {
-      this.hover = [];
-      const list = createListFromPrimitives(primitives);
-      this.hover.push(...list);
+      this.hover.length = 0;
+      createListFromPrimitives(primitives, this.hover);
     },
     changeHoverByPrimitives: function (primitives, propagate) {
       if (primitives && primitives.length > 0) {

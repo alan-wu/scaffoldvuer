@@ -1,5 +1,4 @@
-export const createListFromPrimitives = primitives => {
-  const list = [];
+export const createListFromPrimitives = (primitives, list) => {
   if (primitives) {
     primitives.forEach(primitive => {
       if (primitive && primitive.getVisibility()) {

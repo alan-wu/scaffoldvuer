@@ -12,6 +12,8 @@ exports.GraphicsHighlight = function() {
   this.highlightColour = [1, 0, 0];
   this.selectColour = [0, 1, 0];
   this.originalColour = [0, 0, 0];
+  const _temp1 = [];
+  const _temp2 = [];
   const _this = this;
 
   const isDifferent = function(array1, array2) {
@@ -41,7 +43,7 @@ exports.GraphicsHighlight = function() {
   }
   
   const getUnmatchingObjects = function(objectsArray1, objectsArray2) {
-    const unmatchingObjects = [];
+    _temp1.length = 0;
     if (objectsArray2.length == 0)
       return objectsArray1;
     for (let i = 0; i < objectsArray1.length; i++) {
@@ -52,9 +54,9 @@ exports.GraphicsHighlight = function() {
         }
       }
       if (!matched)
-        unmatchingObjects.push(objectsArray1[i]);
+      _temp1.push(objectsArray1[i]);
     }
-    return unmatchingObjects;
+    return _temp1;
   }
   
   this.setHighlighted = function(objects) {
@@ -87,12 +89,12 @@ exports.GraphicsHighlight = function() {
   }
 
   const getFullListOfObjects = function(objects) {
-    let fullList = [];
+    _temp2.length = 0;
     for (let i = 0; i < objects.length; i++) {
       if (objects[i].material)
-        fullList.push(objects[i]);
+        _temp2.push(objects[i]);
     }
-    return fullList;
+    return _temp2;
   }
   
   this.resetHighlighted = function() {
