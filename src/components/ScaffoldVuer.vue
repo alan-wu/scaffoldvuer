@@ -354,7 +354,7 @@ export default {
      */
     displayMarkers: {
       type: Boolean,
-      default: true
+      default: false
     },
     /**
      * Show/hide minimap.
@@ -701,15 +701,16 @@ export default {
     viewRegion: function(names) {
       const rootRegion = this.$module.scene.getRootRegion();
       const groups = Array.isArray(names) ? names : [names];
-      const dist = this.$module.scene.camera.far - this.$module.scene.camera.near;
       const objects = findObjectsWithNames(rootRegion, groups, "");
       let box = this.$module.scene.getBoundingBoxOfZincObjects(objects);
       if (box) {
         if (this.$module.isSyncControl()) {
           this.$module.setSyncControlZoomToBox(box);
         } else {
+          const dist = this.$module.scene.camera.far - this.$module.scene.camera.near;
           this.$module.scene.viewAllWithBoundingBox(box);
           this.$module.scene.camera.far = this.$module.scene.camera.near + dist;
+          this.$module.scene.camera.updateProjectionMatrix();
         }
         return true;
       }
