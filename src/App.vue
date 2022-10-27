@@ -49,8 +49,17 @@
         </el-row>
         <el-row :gutter="20">
           <el-col
-            :span="6"
-            :offset="2"
+            :span="4"
+            :offset="1"
+          >
+            <el-switch
+              v-model="displayUI"
+              active-text="UI"
+            />
+          </el-col>
+          <el-col
+            :span="4"
+            :offset="1"
           >
             <el-switch
               v-model="displayMarkers"
@@ -60,8 +69,8 @@
             />
           </el-col>
           <el-col
-            :span="6"
-            :offset="2"
+            :span="4"
+            :offset="1"
           >
             <el-switch
               v-model="displayMinimap"
@@ -72,7 +81,7 @@
           </el-col>
           <el-col
             :span="6"
-            :offset="2"
+            :offset="1"
           >
             <el-switch
               v-model="tumbleOn"
@@ -340,7 +349,6 @@ export default {
         })
     },
     saveSettings: function() {
-      const state = this.$refs.scaffold.getState();
       this.sceneSettings.push(this.$refs.scaffold.getState());
     },
     restoreSettings: function() {

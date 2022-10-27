@@ -21,6 +21,7 @@
           :data="treeData"
           :default-checked-keys="['__r/']"
           :expand-on-click-node="false"
+          :renderAfterExpand="false"
           @check="checkChanged"
         >
           <span
@@ -142,6 +143,7 @@ export default {
   },
   methods: {
     addTreeItem: function (parentContainer, item) {
+      //The following block prevent duplicate graphics with the same name
       for (let i = 0; i < parentContainer.length; i++) {
         if (parentContainer[i].id === item.id) {
           if (item.primitives && parentContainer[i].primitives) {
@@ -231,7 +233,7 @@ export default {
               label: zincObject.groupName,
               id: id,
               primitives: [zincObject],
-              regionPath: zincObject.region.getFullPath()
+              regionPath: zincObject.region.getFullPath(),
             };
             this.addTreeItem(regionData.children, child);
           }
@@ -250,9 +252,8 @@ export default {
         });
     },
     updateActiveUI: function (primitives) {
-      this.active = [];
-      const list = createListFromPrimitives(primitives);
-      this.active.push(...list);
+      this.active.length = 0;
+      createListFromPrimitives(primitives, this.active);
     },
     changeActiveByPrimitives: function (primitives, propagate) {
       if (primitives && primitives.length > 0) {
@@ -264,9 +265,8 @@ export default {
       this.removeHover(propagate);
     },
     updateHoverUI: function (primitives) {
-      this.hover = [];
-      const list = createListFromPrimitives(primitives);
-      this.hover.push(...list);
+      this.hover.length = 0;
+      createListFromPrimitives(primitives, this.hover);
     },
     changeHoverByPrimitives: function (primitives, propagate) {
       if (primitives && primitives.length > 0) {

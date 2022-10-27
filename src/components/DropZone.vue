@@ -38,7 +38,8 @@ export default {
       for (const [key, file] of Object.entries(list)) {
         if (content.includes(key)) {
           const objectURL = URL.createObjectURL(file);
-          content = content.replace(key, objectURL);
+          const re = new RegExp(key, "g");
+          content = content.replace(re, objectURL);
           this.objectURLs.push(objectURL);
         }
       }
