@@ -593,9 +593,8 @@ export default {
   height: 40px;
   z-index: 8;
   margin-top: calc(50% - 52px);
-  border: solid 1px #e4e7ed;
-  border-left: 0;
-  background-color: #ffffff;
+  border: solid 1px $app-primary-color;
+  background-color: #F9F2FC;
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
@@ -604,18 +603,19 @@ export default {
 
 .drawer-button {
   i {
+    font-weight:600;
     margin-top: 12px;
     color: $app-primary-color;
     transition-delay: 0.9s;
   }
   &.open {
     i {
-      transform: rotate(0deg) scaleY(2.5);
+      transform: rotate(0deg) scaleY(2);
     }
   }
   &.close {
     i {
-      transform: rotate(180deg) scaleY(2.5);
+      transform: rotate(180deg) scaleY(2);
     }
   }
 }
