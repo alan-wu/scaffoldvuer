@@ -8,7 +8,8 @@
       trigger="manual"
       popper-class="tooltip-popper non-selectable"
     >
-      <div>{{ label }}</div>
+      <div class="tooltip-text">{{ label }}</div>
+      <div class="tooltip-text" v-if="region">Region: {{ region }}</div>
       <i v-popover:tooltip />
     </el-popover>
   </div>
@@ -31,6 +32,10 @@ export default {
   name: "ScaffoldTooltip",
   props: {
     label: {
+      type: String,
+      default: "",
+    },
+    region: {
       type: String,
       default: "",
     },
@@ -116,6 +121,10 @@ export default {
         }
       }
     }
+  }
+
+  .tooltip-text {
+    text-align: center;
   }
 
   ::v-deep .non-selectable {
