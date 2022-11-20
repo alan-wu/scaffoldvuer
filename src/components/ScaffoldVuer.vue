@@ -10,6 +10,7 @@
     <map-svg-sprite-color />
     <scaffold-tooltip
       :label="tData.label"
+      :region="tData.region"
       :visible="tData.visible"
       :x="tData.x"
       :y="tData.y"
@@ -477,6 +478,7 @@ export default {
       defaultCheckedKeys: [],
       tData: {
         label: "",
+        region: "",
         visible: false,
         x: 200,
         y: 200
@@ -808,6 +810,10 @@ export default {
           if (event.identifiers[0].coords) {
             this.tData.visible = true;
             this.tData.label = id;
+            if (event.identifiers[0].data.region)
+              this.tData.region = event.identifiers[0].data.region;
+            else
+              this.tData.region = "Root";
             this.tData.x = event.identifiers[0].coords.x;
             this.tData.y  = event.identifiers[0].coords.y;
           }
