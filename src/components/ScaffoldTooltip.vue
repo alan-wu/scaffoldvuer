@@ -59,7 +59,12 @@ export default {
   },
   computed: {
     position: function () {
-      return { left: this.x + "px", top: this.y - 30 + "px" };
+      let yOffset = 30;
+      if (this.region) {
+        yOffset = 45;
+      }
+
+      return { left: this.x + "px", top: this.y - yOffset + "px" };
     },
   },
   watch: {

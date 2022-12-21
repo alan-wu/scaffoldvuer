@@ -816,7 +816,6 @@ export default {
               this.tData.region = "Root";
             this.tData.x = event.identifiers[0].coords.x;
             this.tData.y  = event.identifiers[0].coords.y;
-            console.log(this.tData.x, this.tData.y )
           }
         }
         // Triggers when an object has been highlighted
@@ -944,10 +943,8 @@ export default {
         const rootRegion = this.$module.scene.getRootRegion();
         const groups = [name];
         const objects = findObjectsWithNames(rootRegion, groups, "");
-        console.log(objects)
         if (objects.length > 0) {
-          const position = objects[0].getClosestVertexNDC(this.$module.scene);
-          console.log(position)
+          const position = objects[0].getClosestVertexDOMElementCoords(this.$module.scene);
           if (position) {
             this.tData.visible = true;
             this.tData.label = name;
