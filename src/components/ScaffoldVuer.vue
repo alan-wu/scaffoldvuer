@@ -37,8 +37,8 @@
         v-if="displayWarning"
         v-popover:warningPopover
         class="el-icon-warning warning-icon"
-        @mouseover="showToolitip(6)"
-        @mouseout="hideToolitip(6)"
+        @mouseover="showHelpText(6)"
+        @mouseout="hideHelpText(6)"
       >
         <span class="warning-text">Beta</span>
       </i>
@@ -158,8 +158,8 @@
             icon="zoomIn"
             class="icon-button zoomIn"
             @click.native="zoomIn()"
-            @mouseover.native="showToolitip(0)"
-            @mouseout.native="hideToolitip(0)"
+            @mouseover.native="showHelpText(0)"
+            @mouseout.native="hideHelpText(0)"
           />
         </el-popover>
         <el-popover
@@ -175,8 +175,8 @@
             icon="zoomOut"
             class="icon-button zoomOut"
             @click.native="zoomOut()"
-            @mouseover.native="showToolitip(1)"
-            @mouseout.native="hideToolitip(1)"
+            @mouseover.native="showHelpText(1)"
+            @mouseout.native="hideHelpText(1)"
           />
         </el-popover>
         <el-popover
@@ -196,8 +196,8 @@
             icon="fitWindow"
             class="icon-button fitWindow"
             @click.native="fitWindow()"
-            @mouseover.native="showToolitip(2)"
-            @mouseout.native="hideToolitip(2)"
+            @mouseover.native="showHelpText(2)"
+            @mouseout.native="hideHelpText(2)"
           />
         </el-popover>
       </div>
@@ -235,8 +235,8 @@
           icon="changeBckgd"
           class="icon-button background-colour"
           :class="{ open: drawerOpen, close: !drawerOpen }"
-          @mouseover.native="showToolitip(3)"
-          @mouseout.native="hideToolitip(3)"
+          @mouseover.native="showHelpText(3)"
+          @mouseout.native="hideHelpText(3)"
         />
       </el-popover>
     </div>
@@ -816,6 +816,7 @@ export default {
               this.tData.region = "Root";
             this.tData.x = event.identifiers[0].coords.x;
             this.tData.y  = event.identifiers[0].coords.y;
+            console.log(this.tData.x, this.tData.y )
           }
         }
         // Triggers when an object has been highlighted
@@ -938,24 +939,48 @@ export default {
         });
       }
     },
+    showRegionTooltip: function(name) {
+      if (name) {
+        const rootRegion = this.$module.scene.getRootRegion();
+        const groups = [name];
+        const objects = findObjectsWithNames(rootRegion, groups, "");
+        console.log(objects)
+        if (objects.length > 0) {
+          const position = objects[0].getClosestVertexNDC(this.$module.scene);
+          console.log(position)
+          if (position) {
+            this.tData.visible = true;
+            this.tData.label = name;
+            this.tData.x = position.x;
+            this.tData.y = position.y;
+            const regionPath = objects[0].getRegion().getFullPath();
+            if (regionPath)
+              this.tData.region = regionPath;
+            else
+              this.tData.region = "Root";
+          }
+        }
+      }
+    },
+
     /**
      * This is called when mouse cursor enters supported elements
      * with help tootltips.
      */
-    showToolitip: function(tooltipNumber) {
+    showHelpText: function(helpTextNumber) {
       if (!this.inHelp) {
-        this.tooltipWait = setTimeout(() => {
-          this.hoverVisabilities[tooltipNumber].value = true;
+        this.helpTextWait = setTimeout(() => {
+          this.hoverVisabilities[helpTextNumber].value = true;
         }, 500);
       }
     },
     /**
      * This is called when mouse cursor exits supported element..
      */
-    hideToolitip: function(tooltipNumber) {
+    hideHelpText: function(helpTextNumber) {
       if (!this.inHelp) {
-        this.hoverVisabilities[tooltipNumber].value = false;
-        clearTimeout(this.tooltipWait);
+        this.hoverVisabilities[helpTextNumber].value = false;
+        clearTimeout(this.helpTextWait);
       }
     },
     /**
