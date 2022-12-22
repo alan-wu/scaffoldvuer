@@ -123,16 +123,16 @@ export default {
     },
   },
   created: function () {
-    this.module.sceneData.geometries.forEach(zincObject => {
+    this.module.primitiveData.geometries.forEach(zincObject => {
       this.zincObjectAdded(zincObject);
     });
-    this.module.sceneData.lines.forEach(zincObject => {
+    this.module.primitiveData.lines.forEach(zincObject => {
       this.zincObjectAdded(zincObject);
     });
-    this.module.sceneData.glyphsets.forEach(zincObject => {
+    this.module.primitiveData.glyphsets.forEach(zincObject => {
       this.zincObjectAdded(zincObject);
     });
-    this.module.sceneData.pointsets.forEach(zincObject => {
+    this.module.primitiveData.pointsets.forEach(zincObject => {
       this.zincObjectAdded(zincObject);
     });
     this.module.addOrganPartAddedCallback(this.zincObjectAdded);
