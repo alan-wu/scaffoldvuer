@@ -52,10 +52,9 @@
         popper-class="scaffold-popper right-popper non-selectable"
       />
       <tree-controls
-        ref="treeControl"
+        ref="treeControls"
         v-popover:checkBoxPopover
         :help-mode="helpMode"
-        :module="$module"
         :show-colour-picker="showColourPicker"
         @object-selected="objectSelected"
         @object-hovered="objectHovered"
@@ -560,6 +559,7 @@ export default {
     this.availableBackground = ["white", "black", "lightskyblue"];
   },
   mounted: function() {
+    this.$refs.treeControls.setModule(this.$module);
     let eventNotifier = new EventNotifier();
     eventNotifier.subscribe(this, this.eventNotifierCallback);
     this.$module.addNotifier(eventNotifier);
@@ -782,12 +782,12 @@ export default {
         zincObjects = event.zincObjects;
       }
       if (event.eventType == 1) {
-        if (this.$refs.treeControl) {
+        if (this.$refs.treeControls) {
           if (names.length > 0) {
-            //this.$refs.treeControl.changeActiveByNames(names, region, false);
-            this.$refs.treeControl.updateActiveUI(zincObjects);
+            //this.$refs.treeControls.changeActiveByNames(names, region, false);
+            this.$refs.treeControls.updateActiveUI(zincObjects);
           } else {
-            this.$refs.treeControl.removeActive(true)
+            this.$refs.treeControls.removeActive(true)
           }
         }
         // Triggers when an object has been selected
@@ -795,12 +795,12 @@ export default {
       } else if (event.eventType == 2) {
         this.tData.visible = false;
        // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
-        if (this.$refs.treeControl) {
+        if (this.$refs.treeControls) {
           if (names.length > 0) {
-            //this.$refs.treeControl.changeHoverByNames(names, region, false);
-            this.$refs.treeControl.updateHoverUI(zincObjects);
+            //this.$refs.treeControls.changeHoverByNames(names, region, false);
+            this.$refs.treeControls.updateHoverUI(zincObjects);
           } else {
-            this.$refs.treeControl.removeHover(true);
+            this.$refs.treeControls.removeHover(true);
           }
         }
         if ((event.identifiers.length > 0) && event.identifiers[0]) {
@@ -889,12 +889,12 @@ export default {
     changeActiveByName: function(names, region, propagate) {
       const isArray = Array.isArray(names);
       if (names === undefined || (isArray && names.length === 0)) {
-        this.$refs.treeControl.removeActive(propagate);
+        this.$refs.treeControls.removeActive(propagate);
       } else {
         let array = names;
         if (!isArray)
           array = [array];
-        this.$refs.treeControl.changeActiveByNames(array, region, propagate);
+        this.$refs.treeControls.changeActiveByNames(array, region, propagate);
       }
     },
     /**
@@ -905,12 +905,12 @@ export default {
     changeHighlightedByName: function(names, region, propagate) {
       const isArray = Array.isArray(names);
       if (names === undefined || (isArray && names.length === 0)) {
-        this.$refs.treeControl.removeHover(propagate);
+        this.$refs.treeControls.removeHover(propagate);
       } else {
         let array = names;
         if (!isArray)
           array = [array];
-        this.$refs.treeControl.changeHoverByNames(array, region, propagate);
+        this.$refs.treeControls.changeHoverByNames(array, region, propagate);
       }
     },
     /**
@@ -1020,7 +1020,7 @@ export default {
           if (options.visibility) {
             // Some UIs may not be ready at this time.
             this.$nextTick(() => {
-              this.$refs.treeControl.setState(options.visibility);
+              this.$refs.treeControls.setState(options.visibility);
             });
           }
         }
@@ -1045,8 +1045,8 @@ export default {
         viewport: undefined,
         visibility: undefined,
       };
-      if (this.$refs.treeControl)
-        state.visibility = this.$refs.treeControl.getState();
+      if (this.$refs.treeControls)
+        state.visibility = this.$refs.treeControls.getState();
       if (this.$module.scene) {
         let zincCameraControls = this.$module.scene.getZincCameraControls();
         state.viewport = zincCameraControls.getCurrentViewport();
@@ -1075,7 +1075,7 @@ export default {
                   .getZincCameraControls()
                   .setCurrentCameraSettings(state.viewport);
               if (state.visibility)
-                this.$refs.treeControl.setState(state.visibility);
+                this.$refs.treeControls.setState(state.visibility);
             } else {
               this.$module.setFinishDownloadCallback(
                 this.setURLFinishCallback({
@@ -1105,8 +1105,8 @@ export default {
         let visibility =
           state && state.visibility ? state.visibility : undefined;
         this._currentURL = newValue;
-        if (this.$refs.treeControl)
-          this.$refs.treeControl.clear();
+        if (this.$refs.treeControls)
+          this.$refs.treeControls.clear();
         this.loading = true;
         this.isReady = false;
         this.$module.setFinishDownloadCallback(

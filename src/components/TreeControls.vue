@@ -93,13 +93,6 @@ export default {
   name: "TreeControls",
   props: {
     /**
-     * @ignore
-     */
-    module: {
-      type: Object,
-      default: undefined,
-    },
-    /**
      * Enable/disable colour picker
      */
     showColourPicker: Boolean,
@@ -121,22 +114,6 @@ export default {
         else this.myPopperClass = "hide-scaffold-colour-popup";
       },
     },
-  },
-  created: function () {
-    this.module.primitiveData.geometries.forEach(zincObject => {
-      this.zincObjectAdded(zincObject);
-    });
-    this.module.primitiveData.lines.forEach(zincObject => {
-      this.zincObjectAdded(zincObject);
-    });
-    this.module.primitiveData.glyphsets.forEach(zincObject => {
-      this.zincObjectAdded(zincObject);
-    });
-    this.module.primitiveData.pointsets.forEach(zincObject => {
-      this.zincObjectAdded(zincObject);
-    });
-    this.module.addOrganPartAddedCallback(this.zincObjectAdded);
-    this.__nodeNumbers = 1;
   },
   destroyed: function () {
     this.sortedPrimitiveGroups = undefined;
@@ -165,8 +142,8 @@ export default {
     // '__r/'
     findOrCreateRegion: function (data, paths, prefix) {
       //check if root region has been set
-      if (!this.treeData[0].region && this.module && this.module.scene) {
-        this.treeData[0].region = this.module.scene.getRootRegion();
+      if (!this.treeData[0].region && this.$module && this.$module.scene) {
+        this.treeData[0].region = this.$module.scene.getRootRegion();
       }
 
       if (paths.length > 0) {
@@ -280,7 +257,7 @@ export default {
      * Select a region by its name.
      */
     changeActiveByNames: function (names, regionPath, propagate) {
-      const rootRegion = this.module.scene.getRootRegion();
+      const rootRegion = this.$module.scene.getRootRegion();
       const targetObjects = findObjectsWithNames(rootRegion, names,
         regionPath);
       this.changeActiveByPrimitives(targetObjects, propagate);
@@ -289,7 +266,7 @@ export default {
      * Hover a region by its name.
      */
     changeHoverByNames: function (names, regionPath, propagate) {
-      const rootRegion = this.module.scene.getRootRegion();
+      const rootRegion = this.$module.scene.getRootRegion();
       const targetObjects = findObjectsWithNames(rootRegion, names,
         regionPath);
       this.changeHoverByPrimitives(targetObjects, propagate);
@@ -337,6 +314,24 @@ export default {
       }
       return "#FFFFFF";
     },
+    //Set this right at the beginning.
+    setModule: function (moduleIn) {
+      this.$module = moduleIn;
+      this.$module.primitiveData.geometries.forEach(zincObject => {
+        this.zincObjectAdded(zincObject);
+      });
+      this.$module.primitiveData.lines.forEach(zincObject => {
+        this.zincObjectAdded(zincObject);
+      });
+      this.$module.primitiveData.glyphsets.forEach(zincObject => {
+        this.zincObjectAdded(zincObject);
+      });
+      this.$module.primitiveData.pointsets.forEach(zincObject => {
+        this.zincObjectAdded(zincObject);
+      });
+      this.$module.addOrganPartAddedCallback(this.zincObjectAdded);
+      this.__nodeNumbers = 1;
+    },
     setColour: function (nodeData, value) {
       if (nodeData && nodeData.primitives) {
         nodeData.primitives.forEach(primitive => {
@@ -346,10 +341,10 @@ export default {
       }
     },
     viewAll: function () {
-      this.module.viewAll();
+      this.$module.viewAll();
     },
     visibilityToggle: function (item, event) {
-      this.module.changeOrganPartsVisibility(item, event);
+      this.$module.changeOrganPartsVisibility(item, event);
       if (event == false) {
         if (this.activeRegion === item) {
           this.removeActive(true);
