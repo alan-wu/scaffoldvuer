@@ -21,7 +21,7 @@
           :data="treeData"
           :default-checked-keys="['__r/']"
           :expand-on-click-node="false"
-          :renderAfterExpand="false"
+          :render-after-expand="false"
           @check="checkChanged"
         >
           <span
@@ -35,7 +35,7 @@
             @mouseover="changeHoverByNode(data, true)"
           >
             <el-color-picker
-              v-if="data.primitives"
+              v-if="data.isPrimitives"
               :class="{ 'show-picker': showColourPicker }"
               :value="getColour(data)"
               size="small"
@@ -123,8 +123,7 @@ export default {
       //The following block prevent duplicate graphics with the same name
       for (let i = 0; i < parentContainer.length; i++) {
         if (parentContainer[i].id === item.id) {
-          if (item.primitives && parentContainer[i].primitives) {
-            parentContainer[i].primitives.push(...item.primitives);
+          if (item.isPrimitives && parentContainer[i].isPrimitives) {
             return;
           }
         }
@@ -142,10 +141,10 @@ export default {
     // '__r/'
     findOrCreateRegion: function (data, paths, prefix) {
       //check if root region has been set
-      if (!this.treeData[0].region && this.$module && this.$module.scene) {
-        this.treeData[0].region = this.$module.scene.getRootRegion();
+      if ((this.treeData[0].regionPath === undefined) && this.$module && this.$module.scene) {
+        this.treeData[0].regionPath = "";
+        this.treeData[0].isRegion = true;
       }
-
       if (paths.length > 0) {
         const _paths = [...paths];
         let childRegion = data.children.find(
@@ -154,12 +153,12 @@ export default {
         const path = prefix + "/" + paths[0];
         const id = "__r" + path;
         if (!childRegion) {
-          const region = this.treeData[0].region.findChildFromPath(path);
           childRegion = {
             label: _paths[0],
             id: id,
             children: [],
-            region: region,
+            regionPath: path,
+            isRegion: true,
           };
           this.addTreeItem(data.children, childRegion);
         }
@@ -209,7 +208,7 @@ export default {
             const child = {
               label: zincObject.groupName,
               id: id,
-              primitives: [zincObject],
+              isPrimitives: true,
               regionPath: zincObject.region.getFullPath(),
             };
             this.addTreeItem(regionData.children, child);
@@ -218,15 +217,19 @@ export default {
       }
     },
     checkChanged: function (node, data) {
-      const isRegion = node.region;
-      const isPrimitives = node.primitives;
+      const isRegion = node.isRegion;
+      const isPrimitives = node.isPrimitives;
       const isChecked = data.checkedKeys.includes(node.id);
-      if (isRegion)
-        isChecked ? node.region.showAllPrimitives() : node.region.hideAllPrimitives();
-      if (isPrimitives)
-        node.primitives.forEach(primitive => {
+      const region = this.$module.scene.getRootRegion().findChildFromPath(node.regionPath);
+      if (isRegion) {
+        isChecked ? region.showAllPrimitives() : region.hideAllPrimitives();
+      }
+      if (isPrimitives) {
+        const primitives = region.findObjectsWithGroupName(node.label);
+        primitives.forEach(primitive => {
           primitive.setVisibility(isChecked);
         });
+      }
     },
     updateActiveUI: function (primitives) {
       this.active.length = 0;
@@ -259,7 +262,7 @@ export default {
     changeActiveByNames: function (names, regionPath, propagate) {
       const rootRegion = this.$module.scene.getRootRegion();
       const targetObjects = findObjectsWithNames(rootRegion, names,
-        regionPath);
+        regionPath, true);
       this.changeActiveByPrimitives(targetObjects, propagate);
     },
     /**
@@ -268,16 +271,20 @@ export default {
     changeHoverByNames: function (names, regionPath, propagate) {
       const rootRegion = this.$module.scene.getRootRegion();
       const targetObjects = findObjectsWithNames(rootRegion, names,
-        regionPath);
+        regionPath, true);
       this.changeHoverByPrimitives(targetObjects, propagate);
     },
     changeActiveByNode: function (node, propagate) {
-      if (node.primitives)
-        this.changeActiveByPrimitives(node.primitives, propagate);
+      if (node.isPrimitives) {
+        const targetObjects = this.getZincObjectsFromNode(node, false);
+        this.changeActiveByPrimitives(targetObjects, propagate);
+      }
     },
     changeHoverByNode: function (node, propagate) {
-      if (node.primitives)
-        this.changeHoverByPrimitives(node.primitives, propagate);
+      if (node.isPrimitives) {
+        const targetObjects = this.getZincObjectsFromNode(node, false);
+        this.changeHoverByPrimitives(targetObjects, propagate);
+      }
     },
     /**
      * Unselect the current selected region.
@@ -305,14 +312,21 @@ export default {
       this.$emit("object-selected", undefined);
     },
     getColour: function (nodeData) {
+      //Do not need to check for primitives as this is checked on the template
       if (nodeData) {
-        let graphic = nodeData.primitives[0];
+        const targetObjects = this.getZincObjectsFromNode(nodeData, false);
+        let graphic = targetObjects[0];
         if (graphic) {
           let hex = graphic.getColourHex();
           if (hex) return "#" + hex;
         }
       }
       return "#FFFFFF";
+    },
+    getZincObjectsFromNode: function(node, transverse) {
+      const rootRegion = this.$module.scene.getRootRegion();
+      return findObjectsWithNames(rootRegion, node.label,
+        node.regionPath, transverse);
     },
     //Set this right at the beginning.
     setModule: function (moduleIn) {
@@ -333,8 +347,9 @@ export default {
       this.__nodeNumbers = 1;
     },
     setColour: function (nodeData, value) {
-      if (nodeData && nodeData.primitives) {
-        nodeData.primitives.forEach(primitive => {
+      if (nodeData && nodeData.isPrimitives) {
+        const targetObjects = this.getZincObjectsFromNode(nodeData, false);
+        targetObjects.forEach(primitive => {
           let hexString = value.replace("#", "0x");
           primitive.setColourHex(hexString);
         });
@@ -361,9 +376,15 @@ export default {
     setTreeVisibility: function(node, list) {
       let flag = false;
       if (list.includes(node.id)) flag = true;
-      if (node.region) node.region.setVisibility(flag);
-      if (node.primitives) node.primitives.forEach(primitive => primitive.setVisibility(flag))
-      if (node.children) node.children.forEach(child => this.setTreeVisibility(child, list));
+      const region = this.$module.scene.getRootRegion().findChildFromPath(node.regionPath);
+      if (node.isRegion)
+        region.setVisibility(flag);
+      if (node.isPrimitives) {
+        const primitives = region.findObjectsWithGroupName(node.label);
+        primitives.forEach(primitive => primitive.setVisibility(flag))
+      }
+      if (node.children)
+        node.children.forEach(child => this.setTreeVisibility(child, list));
     },
     checkAllKeys: function () {
       const keysList = [];

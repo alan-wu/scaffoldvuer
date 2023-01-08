@@ -18,14 +18,18 @@ export const extractAllIds = (item, list) => {
     item.children.forEach(child => extractAllIds(child, list));
 }
 
-export const findObjectsWithNames = (rootRegion, names, regionPath) => {
+export const findObjectsWithNames = (rootRegion, names, regionPath, transverse) => {
   let targetRegion = rootRegion;
   const targetObjects = [];
   if (regionPath)
     targetRegion = rootRegion.findChildFromPath(regionPath);
   if (targetRegion) {
-    names.forEach(name => {
-      const temp = targetRegion.findObjectsWithGroupName(name, true);
+    const isArray = Array.isArray(names);
+    let array = names;
+    if (!isArray)
+      array = [array];
+      array.forEach(name => {
+      const temp = targetRegion.findObjectsWithGroupName(name, transverse);
       targetObjects.push(...temp);
     });
   }

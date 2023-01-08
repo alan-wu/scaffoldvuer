@@ -703,7 +703,7 @@ export default {
     viewRegion: function(names) {
       const rootRegion = this.$module.scene.getRootRegion();
       const groups = Array.isArray(names) ? names : [names];
-      const objects = findObjectsWithNames(rootRegion, groups, "");
+      const objects = findObjectsWithNames(rootRegion, groups, "", true);
       let box = this.$module.scene.getBoundingBoxOfZincObjects(objects);
       if (box) {
         if (this.$module.isSyncControl()) {
@@ -942,7 +942,7 @@ export default {
       if (name) {
         const rootRegion = this.$module.scene.getRootRegion();
         const groups = [name];
-        const objects = findObjectsWithNames(rootRegion, groups, "");
+        const objects = findObjectsWithNames(rootRegion, groups, "", true);
         if (objects.length > 0) {
           const position = objects[0].getClosestVertexDOMElementCoords(this.$module.scene);
           if (position) {
