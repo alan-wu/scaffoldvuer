@@ -9,12 +9,15 @@ const OrgansSceneData = function() {
   this.currentSpecies  = "";
   this.metaURL = "";
   this.viewURL = "";
+  this.currentTime = 0.0;
+  this.timeVarying = false;
+}
+
+const PrimitiveData = function () {
   this.geometries = [];
   this.lines = [];
   this.glyphsets = [];
   this.pointsets = [];
-  this.currentTime = 0.0;
-  this.timeVarying = false;
 }
 
 /**
@@ -36,6 +39,7 @@ const OrgansSceneData = function() {
   const _this = this;
 	let pickerScene = undefined;
 	this.sceneData = new OrgansSceneData();
+  this.primitiveData = new PrimitiveData();
 	const timeChangedCallbacks = new Array();
 	const sceneChangedCallbacks = new Array();
   const organPartAddedCallbacks = new Array();
@@ -350,15 +354,15 @@ const OrgansSceneData = function() {
 		}
 	}
 
-	const addOrganPartToSceneData = function(zincObject) {
+	const addOrganPartToPrimitiveData = function(zincObject) {
     if (zincObject.isGeometry) {
-      _this.sceneData.geometries.push(zincObject);
+      _this.primitiveData.geometries.push(zincObject);
     } else if (zincObject.isGlyphset) {
-      _this.sceneData.glyphsets.push(zincObject);
+      _this.primitiveData.glyphsets.push(zincObject);
     } else if (zincObject.isLines) {
-      _this.sceneData.lines.push(zincObject);
+      _this.primitiveData.lines.push(zincObject);
     } else if (zincObject.isPointset) {
-      _this.sceneData.pointsets.push(zincObject);
+      _this.primitiveData.pointsets.push(zincObject);
     }
 	}
 
@@ -368,7 +372,7 @@ const OrgansSceneData = function() {
     }
     if (useDefautColour)
       modelsLoader.setGeometryColour(zincObject, systemName, partName);
-    addOrganPartToSceneData(zincObject);
+    addOrganPartToPrimitiveData(zincObject);
 		const annotation = new (require('./annotation').annotation)();
     const region = zincObject.region.getFullPath();
 		annotation.data = {species:_this.sceneData.currentSpecies, system:systemName,
@@ -458,10 +462,10 @@ const OrgansSceneData = function() {
       _this.sceneData.currentSystem = systemName;
 			_this.sceneData.currentPart = partName;
 			_this.sceneData.currentTime = 0.0;
-			_this.sceneData.geometries.splice(0);
-			_this.sceneData.lines.splice(0);
-			_this.sceneData.glyphsets.splice(0);
-			_this.sceneData.pointsets.splice(0);
+			_this.primitiveData.geometries.splice(0);
+			_this.primitiveData.lines.splice(0);
+			_this.primitiveData.glyphsets.splice(0);
+			_this.primitiveData.pointsets.splice(0);
 			_this.sceneData.timeVarying = false;
       // This is used as title
       let name = "";

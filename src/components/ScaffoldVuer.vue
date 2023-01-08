@@ -37,8 +37,8 @@
         v-if="displayWarning"
         v-popover:warningPopover
         class="el-icon-warning warning-icon"
-        @mouseover="showToolitip(6)"
-        @mouseout="hideToolitip(6)"
+        @mouseover="showHelpText(6)"
+        @mouseout="hideHelpText(6)"
       >
         <span class="warning-text">Beta</span>
       </i>
@@ -52,10 +52,9 @@
         popper-class="scaffold-popper right-popper non-selectable"
       />
       <tree-controls
-        ref="treeControl"
+        ref="treeControls"
         v-popover:checkBoxPopover
         :help-mode="helpMode"
-        :module="$module"
         :show-colour-picker="showColourPicker"
         @object-selected="objectSelected"
         @object-hovered="objectHovered"
@@ -158,8 +157,8 @@
             icon="zoomIn"
             class="icon-button zoomIn"
             @click.native="zoomIn()"
-            @mouseover.native="showToolitip(0)"
-            @mouseout.native="hideToolitip(0)"
+            @mouseover.native="showHelpText(0)"
+            @mouseout.native="hideHelpText(0)"
           />
         </el-popover>
         <el-popover
@@ -175,8 +174,8 @@
             icon="zoomOut"
             class="icon-button zoomOut"
             @click.native="zoomOut()"
-            @mouseover.native="showToolitip(1)"
-            @mouseout.native="hideToolitip(1)"
+            @mouseover.native="showHelpText(1)"
+            @mouseout.native="hideHelpText(1)"
           />
         </el-popover>
         <el-popover
@@ -196,8 +195,8 @@
             icon="fitWindow"
             class="icon-button fitWindow"
             @click.native="fitWindow()"
-            @mouseover.native="showToolitip(2)"
-            @mouseout.native="hideToolitip(2)"
+            @mouseover.native="showHelpText(2)"
+            @mouseout.native="hideHelpText(2)"
           />
         </el-popover>
       </div>
@@ -235,8 +234,8 @@
           icon="changeBckgd"
           class="icon-button background-colour"
           :class="{ open: drawerOpen, close: !drawerOpen }"
-          @mouseover.native="showToolitip(3)"
-          @mouseout.native="hideToolitip(3)"
+          @mouseover.native="showHelpText(3)"
+          @mouseout.native="hideHelpText(3)"
         />
       </el-popover>
     </div>
@@ -560,6 +559,7 @@ export default {
     this.availableBackground = ["white", "black", "lightskyblue"];
   },
   mounted: function() {
+    this.$refs.treeControls.setModule(this.$module);
     let eventNotifier = new EventNotifier();
     eventNotifier.subscribe(this, this.eventNotifierCallback);
     this.$module.addNotifier(eventNotifier);
@@ -703,7 +703,7 @@ export default {
     viewRegion: function(names) {
       const rootRegion = this.$module.scene.getRootRegion();
       const groups = Array.isArray(names) ? names : [names];
-      const objects = findObjectsWithNames(rootRegion, groups, "");
+      const objects = findObjectsWithNames(rootRegion, groups, "", true);
       let box = this.$module.scene.getBoundingBoxOfZincObjects(objects);
       if (box) {
         if (this.$module.isSyncControl()) {
@@ -782,12 +782,12 @@ export default {
         zincObjects = event.zincObjects;
       }
       if (event.eventType == 1) {
-        if (this.$refs.treeControl) {
+        if (this.$refs.treeControls) {
           if (names.length > 0) {
-            //this.$refs.treeControl.changeActiveByNames(names, region, false);
-            this.$refs.treeControl.updateActiveUI(zincObjects);
+            //this.$refs.treeControls.changeActiveByNames(names, region, false);
+            this.$refs.treeControls.updateActiveUI(zincObjects);
           } else {
-            this.$refs.treeControl.removeActive(true)
+            this.$refs.treeControls.removeActive(true)
           }
         }
         // Triggers when an object has been selected
@@ -795,12 +795,12 @@ export default {
       } else if (event.eventType == 2) {
         this.tData.visible = false;
        // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
-        if (this.$refs.treeControl) {
+        if (this.$refs.treeControls) {
           if (names.length > 0) {
-            //this.$refs.treeControl.changeHoverByNames(names, region, false);
-            this.$refs.treeControl.updateHoverUI(zincObjects);
+            //this.$refs.treeControls.changeHoverByNames(names, region, false);
+            this.$refs.treeControls.updateHoverUI(zincObjects);
           } else {
-            this.$refs.treeControl.removeHover(true);
+            this.$refs.treeControls.removeHover(true);
           }
         }
         if ((event.identifiers.length > 0) && event.identifiers[0]) {
@@ -889,12 +889,12 @@ export default {
     changeActiveByName: function(names, region, propagate) {
       const isArray = Array.isArray(names);
       if (names === undefined || (isArray && names.length === 0)) {
-        this.$refs.treeControl.removeActive(propagate);
+        this.$refs.treeControls.removeActive(propagate);
       } else {
         let array = names;
         if (!isArray)
           array = [array];
-        this.$refs.treeControl.changeActiveByNames(array, region, propagate);
+        this.$refs.treeControls.changeActiveByNames(array, region, propagate);
       }
     },
     /**
@@ -905,12 +905,12 @@ export default {
     changeHighlightedByName: function(names, region, propagate) {
       const isArray = Array.isArray(names);
       if (names === undefined || (isArray && names.length === 0)) {
-        this.$refs.treeControl.removeHover(propagate);
+        this.$refs.treeControls.removeHover(propagate);
       } else {
         let array = names;
         if (!isArray)
           array = [array];
-        this.$refs.treeControl.changeHoverByNames(array, region, propagate);
+        this.$refs.treeControls.changeHoverByNames(array, region, propagate);
       }
     },
     /**
@@ -938,24 +938,46 @@ export default {
         });
       }
     },
+    showRegionTooltip: function(name) {
+      if (name) {
+        const rootRegion = this.$module.scene.getRootRegion();
+        const groups = [name];
+        const objects = findObjectsWithNames(rootRegion, groups, "", true);
+        if (objects.length > 0) {
+          const position = objects[0].getClosestVertexDOMElementCoords(this.$module.scene);
+          if (position) {
+            this.tData.visible = true;
+            this.tData.label = name;
+            this.tData.x = position.x;
+            this.tData.y = position.y;
+            const regionPath = objects[0].getRegion().getFullPath();
+            if (regionPath)
+              this.tData.region = regionPath;
+            else
+              this.tData.region = "Root";
+          }
+        }
+      }
+    },
+
     /**
      * This is called when mouse cursor enters supported elements
      * with help tootltips.
      */
-    showToolitip: function(tooltipNumber) {
+    showHelpText: function(helpTextNumber) {
       if (!this.inHelp) {
-        this.tooltipWait = setTimeout(() => {
-          this.hoverVisabilities[tooltipNumber].value = true;
+        this.helpTextWait = setTimeout(() => {
+          this.hoverVisabilities[helpTextNumber].value = true;
         }, 500);
       }
     },
     /**
      * This is called when mouse cursor exits supported element..
      */
-    hideToolitip: function(tooltipNumber) {
+    hideHelpText: function(helpTextNumber) {
       if (!this.inHelp) {
-        this.hoverVisabilities[tooltipNumber].value = false;
-        clearTimeout(this.tooltipWait);
+        this.hoverVisabilities[helpTextNumber].value = false;
+        clearTimeout(this.helpTextWait);
       }
     },
     /**
@@ -998,7 +1020,7 @@ export default {
           if (options.visibility) {
             // Some UIs may not be ready at this time.
             this.$nextTick(() => {
-              this.$refs.treeControl.setState(options.visibility);
+              this.$refs.treeControls.setState(options.visibility);
             });
           }
         }
@@ -1023,8 +1045,8 @@ export default {
         viewport: undefined,
         visibility: undefined,
       };
-      if (this.$refs.treeControl)
-        state.visibility = this.$refs.treeControl.getState();
+      if (this.$refs.treeControls)
+        state.visibility = this.$refs.treeControls.getState();
       if (this.$module.scene) {
         let zincCameraControls = this.$module.scene.getZincCameraControls();
         state.viewport = zincCameraControls.getCurrentViewport();
@@ -1053,7 +1075,7 @@ export default {
                   .getZincCameraControls()
                   .setCurrentCameraSettings(state.viewport);
               if (state.visibility)
-                this.$refs.treeControl.setState(state.visibility);
+                this.$refs.treeControls.setState(state.visibility);
             } else {
               this.$module.setFinishDownloadCallback(
                 this.setURLFinishCallback({
@@ -1083,8 +1105,8 @@ export default {
         let visibility =
           state && state.visibility ? state.visibility : undefined;
         this._currentURL = newValue;
-        if (this.$refs.treeControl)
-          this.$refs.treeControl.clear();
+        if (this.$refs.treeControls)
+          this.$refs.treeControls.clear();
         this.loading = true;
         this.isReady = false;
         this.$module.setFinishDownloadCallback(

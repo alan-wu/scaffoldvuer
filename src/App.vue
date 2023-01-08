@@ -374,6 +374,7 @@ export default {
     },
     onReady: function() {
       console.log("ready")
+      window.scaffoldvuer = this.$refs.scaffold;
       this.$refs.dropzone.revokeURLs();
       //const names = ["left ventricle.mesh2d", "right ventricle.mesh2d"];
       //this.$refs.scaffold.changeActiveByName(names, "", false);
