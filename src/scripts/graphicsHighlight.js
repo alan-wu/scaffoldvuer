@@ -60,7 +60,7 @@ exports.GraphicsHighlight = function() {
   }
   
   this.setHighlighted = function(objects) {
-    const previousHighlightedObjects = currentHighlightedObjects;
+    const previousHighlightedObjects = [...currentHighlightedObjects];
     _this.resetHighlighted();
     // Selected object cannot be highlighted
     const array = getUnmatchingObjects(objects, currentSelectedObjects);
@@ -75,9 +75,9 @@ exports.GraphicsHighlight = function() {
 
   this.setSelected = function(objects) {
     // first find highlighted object that are not selected
-    const previousHSelectedObjects = currentSelectedObjects;
+    const previousHSelectedObjects = [...currentSelectedObjects];
     const array = getUnmatchingObjects(currentHighlightedObjects, objects);
-    currentHighlightedObjects = array;
+    _this.resetHighlighted();
     _this.resetSelected();
     const fullList = getFullListOfObjects(objects);
     for (let i = 0; i < fullList.length; i++) {

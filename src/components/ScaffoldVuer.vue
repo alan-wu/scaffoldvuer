@@ -480,7 +480,8 @@ export default {
         region: "",
         visible: false,
         x: 200,
-        y: 200
+        y: 200,
+        external: false,
       },
       fileFormat: "metadata",
     };
@@ -765,6 +766,7 @@ export default {
     /**
      * Callback when a region is selected/highlighted.
      * It will also update other controls.
+     * 
      */
     eventNotifierCallback: function(event) {
       const names = [];
@@ -781,6 +783,11 @@ export default {
         });
         zincObjects = event.zincObjects;
       }
+      /*
+       * Event Type 1: Selected
+       * Event Type 2: Highlighted
+       * Event Type 1: Move
+       */
       if (event.eventType == 1) {
         if (this.$refs.treeControls) {
           if (names.length > 0) {
@@ -808,6 +815,7 @@ export default {
             ? event.identifiers[0].data.id
             : event.identifiers[0].data.group;
           if (event.identifiers[0].coords) {
+            this.tData.external = false;
             this.tData.visible = true;
             this.tData.label = id;
             if (event.identifiers[0].data.region)
@@ -938,28 +946,64 @@ export default {
         });
       }
     },
-    showRegionTooltip: function(name) {
-      if (name) {
+    /**
+     * Callback function used by showRegionTooltip in the case when the tooltip
+     * is out of view.
+     */
+    showRegionTooltipCallback: function(name) {
+      const instance = this;
+      return function() {
+        instance.$module.zincRenderer.removePostRenderCallbackFunction(instance.$_regionTooltipCallback);
+        instance.showRegionTooltip(name, false);
+      }
+    },
+    /**
+     * Display the tooltip. Reset view if the tooltip is not
+     * in view.
+     */
+    showRegionTooltip: function(name, resetView) {
+      if (name && this.$module.scene) {
         const rootRegion = this.$module.scene.getRootRegion();
         const groups = [name];
         const objects = findObjectsWithNames(rootRegion, groups, "", true);
         if (objects.length > 0) {
-          const position = objects[0].getClosestVertexDOMElementCoords(this.$module.scene);
-          if (position) {
-            this.tData.visible = true;
-            this.tData.label = name;
-            this.tData.x = position.x;
-            this.tData.y = position.y;
-            const regionPath = objects[0].getRegion().getFullPath();
-            if (regionPath)
-              this.tData.region = regionPath;
-            else
-              this.tData.region = "Root";
+          let coords = objects[0].getClosestVertexDOMElementCoords(this.$module.scene);
+          if (coords) {
+            //The coords is not in view, view all if resetView flag is true
+            if (!coords.inView) {
+              this.hideRegionTooltip();
+              if (resetView) {
+                this.$module.scene.viewAll();
+                //Use the post render callback to make sure the scene has been updated
+                //before getting the position of the tooltip.
+                this.$_regionTooltipCallback = 
+                  this.$module.zincRenderer.addPostRenderCallbackFunction(
+                    this.showRegionTooltipCallback(name)
+                  );
+              }
+              return;
+            } else {
+              this.tData.external = true;
+              this.tData.visible = true;
+              this.tData.label = name;
+              this.tData.x = coords.position.x;
+              this.tData.y = coords.position.y;
+              const regionPath = objects[0].getRegion().getFullPath();
+              if (regionPath)
+                this.tData.region = regionPath;
+              else
+                this.tData.region = "Root";
+            }
           }
+        } else {
+          this.hideRegionTooltip();
         }
       }
     },
-
+    hideRegionTooltip: function() {
+      this.tData.visible = false;
+      this.tData.region = "Root";
+    },
     /**
      * This is called when mouse cursor enters supported elements
      * with help tootltips.
@@ -1179,6 +1223,9 @@ export default {
     },
     syncControlCallback: function() {
       const payload = this.$module.NDCCameraControl.getPanZoom();
+      if (this.tData.visible) {
+        this.showRegionTooltip(this.tData.label);
+      }
       this.$emit("scaffold-navigated", payload);
     },
     /** 
