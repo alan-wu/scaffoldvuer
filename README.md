@@ -86,3 +86,38 @@ npm run serve
 ## Example
 The following example showcases ScaffoldVuer in action: https://mapcore-demo.org/current/scaffoldvuer/
 
+## Scaffoldvuer release process:
+
+### Versioning
+
+Scaffoldvuer uses [semantic versioning](https://semver.org/).
+
+If any changes are expiremental or parallel to the main development, [npm dist tags](https://docs.npmjs.com/cli/v9/commands/npm-dist-tag) are used to keep this version from being the default when `npm install @abi-software/scaffoldvuer` is used.
+
+Dist tags can be used like so:
+```
+npm publish --tag <tag>
+```
+
+`<tag>` is the dist tag to add. In example: `npm publish --tag beta`
+
+
+#### Publishing 
+
+1. Update the package number in [package.json](https://github.com/ABI-Software/scaffoldvuer/blob/main/package.json)
+2. Bundles for scaffoldvuer can be built by using 
+```
+npm run build-bundle
+```
+
+This builds the package to be digested by other vue packages by using
+```
+import { ScaffoldVuer } from "@abi-software/scaffoldvuer/src/components/index.js";
+```
+3. Publish with `npm publish` in the package directory
+
+
+
+
+
+
