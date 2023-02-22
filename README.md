@@ -119,7 +119,12 @@ import { ScaffoldVuer } from "@abi-software/scaffoldvuer/src/components/index.js
 ### Testing
 
 #### Testng [`zincjs`](https://github.com/alan-wu/ZincJS)
-Check that the version of zinjs used is running correctly and passing the tests.
+Check that the version of zincjs used is running correctly and passing the tests.
+
+Test runs can be found here:
+https://autotest.bioeng.auckland.ac.nz/jenkins/blue/organizations/jenkins/ZincJS/activity
+
+Click on the latest test and search for `zincjs@` to find the zincjs version number.
 
 #### Visual check
 Open the links below, checking that the load in, render correctly and are usable:
