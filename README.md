@@ -88,6 +88,15 @@ The following example showcases ScaffoldVuer in action: https://mapcore-demo.org
 
 ## Scaffoldvuer release process:
 
+
+#### Publishing 
+
+1. Update the package number in [package.json](https://github.com/ABI-Software/scaffoldvuer/blob/main/package.json)
+2. Bundles for scaffoldvuer can be built by using 
+```
+npm run build-bundle
+```
+
 ### Versioning
 
 Scaffoldvuer uses [semantic versioning](https://semver.org/).
@@ -101,23 +110,42 @@ npm publish --tag <tag>
 
 `<tag>` is the dist tag to add. In example: `npm publish --tag beta`
 
-
-#### Publishing 
-
-1. Update the package number in [package.json](https://github.com/ABI-Software/scaffoldvuer/blob/main/package.json)
-2. Bundles for scaffoldvuer can be built by using 
-```
-npm run build-bundle
-```
-
 This builds the package to be digested by other vue packages by using
 ```
 import { ScaffoldVuer } from "@abi-software/scaffoldvuer/src/components/index.js";
 ```
 3. Publish with `npm publish` in the package directory
 
+### Testing
 
+#### Testng [`zincjs`](https://github.com/alan-wu/ZincJS)
+Check that the version of zinjs used is running correctly and passing the tests.
 
+#### Visual check
+Open the links below, checking that the load in, render correctly and are usable:
 
+Region
+http://localhost:8081/#/?url=https://mapcore-bucket1.s3.us-west-2.amazonaws.com/format-testing/MyExport_metadata.json
 
+Glyph small
+http://localhost:8081/#/?url=https://mapcore-bucket1.s3.us-west-2.amazonaws.com/format-testing/TimeGlyphs/timeGlyphs_1.json
 
+Lines
+http://localhost:8081/#/?url=https://mapcore-bucket1.s3.us-west-2.amazonaws.com/format-testing/Lines/lines_metadata.json
+
+Glyph large
+http://localhost:8081/#/?url=https://mapcore-bucket1.s3.us-west-2.amazonaws.com/format-testing/TimeGlyphs/timeGlyphs_large_metadata.json
+
+Points
+http://localhost:8081/#/?url=https://mapcore-bucket1.s3.us-west-2.amazonaws.com/format-testing/Points/point_time_metadata.json
+
+Surfaces
+http://localhost:8081/#/?url=https://mapcore-bucket1.s3.us-west-2.amazonaws.com/format-testing/Surfaces/beating_heart_metadata.json
+
+#### Testing the build bundle in other packages
+Use on of the following methods for testing the scaffoldvuer build in apps that depend on this package:
+ 1. Use [`npm link`](https://docs.npmjs.com/cli/v8/commands/npm-link) to test scaffoldvuer works in apps that import it
+ 2. Use symlink or copy and paste the `/dist` directore
+ 3. Modify the package.json to <your-npm-account>/scaffoldvuer and publish (Careful! If this is not done the version will need to be [deprecated](https://docs.npmjs.com/cli/v8/commands/npm-deprecate)
+
+This often will need to be done in [abi-software/mapintegratedvuer](https://github.com/abi-Software/mapintegratedvuer)
