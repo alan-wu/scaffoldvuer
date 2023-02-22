@@ -101,7 +101,7 @@ npm run build-bundle
 
 Scaffoldvuer uses [semantic versioning](https://semver.org/).
 
-If any changes are expiremental or parallel to the main development, [npm dist tags](https://docs.npmjs.com/cli/v9/commands/npm-dist-tag) are used to keep this version from being the default when `npm install @abi-software/scaffoldvuer` is used.
+If any changes are experimental or parallel to the main development, [npm dist tags](https://docs.npmjs.com/cli/v9/commands/npm-dist-tag) are used to keep this version from being the default when `npm install @abi-software/scaffoldvuer` is used.
 
 Dist tags can be used like so:
 ```
@@ -118,7 +118,7 @@ import { ScaffoldVuer } from "@abi-software/scaffoldvuer/src/components/index.js
 
 ### Testing
 
-#### Testng [`zincjs`](https://github.com/alan-wu/ZincJS)
+#### Testing [`zincjs`](https://github.com/alan-wu/ZincJS)
 Check that the version of zincjs used is running correctly and passing the tests.
 
 Test runs can be found here:
@@ -127,7 +127,7 @@ https://autotest.bioeng.auckland.ac.nz/jenkins/blue/organizations/jenkins/ZincJS
 Click on the latest test and search for `zincjs@` to find the zincjs version number.
 
 #### Visual check
-Open the links below, checking that the load in, render correctly and are usable:
+Open the links below, checking that they load in, render correctly and are usable:
 
 Region
 http://localhost:8081/#/?url=https://mapcore-bucket1.s3.us-west-2.amazonaws.com/format-testing/MyExport_metadata.json
@@ -148,9 +148,9 @@ Surfaces
 http://localhost:8081/#/?url=https://mapcore-bucket1.s3.us-west-2.amazonaws.com/format-testing/Surfaces/beating_heart_metadata.json
 
 #### Testing the build bundle in other packages
-Use on of the following methods for testing the scaffoldvuer build in apps that depend on this package:
- 1. Use [`npm link`](https://docs.npmjs.com/cli/v8/commands/npm-link) to test scaffoldvuer works in apps that import it
- 2. Use symlink or copy and paste the `/dist` directore
- 3. Modify the package.json to <your-npm-account>/scaffoldvuer and publish (Careful! If this is not done the version will need to be [deprecated](https://docs.npmjs.com/cli/v8/commands/npm-deprecate)
+Use one of the following methods for testing the scaffoldvuer build in apps that depend on this package:
+ 1. Use [`npm link`](https://docs.npmjs.com/cli/v8/commands/npm-link) to test scaffoldvuer works in apps that import it.
+ 2. Use symlink, or copy and paste the `/dist` directory.
+ 3. Modify the package.json to <your-npm-account>/scaffoldvuer and publish. (Careful! If this is not done the version will need to be [deprecated](https://docs.npmjs.com/cli/v8/commands/npm-deprecate)
 
-This often will need to be done in [abi-software/mapintegratedvuer](https://github.com/abi-Software/mapintegratedvuer)
+One of the above methods will often need to be used in [abi-software/mapintegratedvuer](https://github.com/abi-Software/mapintegratedvuer)
