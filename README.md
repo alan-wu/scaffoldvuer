@@ -113,6 +113,7 @@ npm publish --tag <tag>
 This builds the package to be digested by other vue packages by using
 ```
 import { ScaffoldVuer } from "@abi-software/scaffoldvuer/src/components/index.js";
+import '@abi-software/scaffoldvuer/dist/map-side-bar.css';
 ```
 3. Publish with `npm publish` in the package directory
 
