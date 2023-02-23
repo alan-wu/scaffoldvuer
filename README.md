@@ -88,15 +88,6 @@ The following example showcases ScaffoldVuer in action: https://mapcore-demo.org
 
 ## Scaffoldvuer release process:
 
-
-#### Publishing 
-
-1. Update the package number in [package.json](https://github.com/ABI-Software/scaffoldvuer/blob/main/package.json)
-2. Bundles for scaffoldvuer can be built by using 
-```
-npm run build-bundle
-```
-
 ### Versioning
 
 Scaffoldvuer uses [semantic versioning](https://semver.org/).
@@ -110,12 +101,28 @@ npm publish --tag <tag>
 
 `<tag>` is the dist tag to add. In example: `npm publish --tag beta`
 
-This builds the package to be digested by other vue packages by using
+### Publishing 
+
+#### 1. Update the package number in [package.json](https://github.com/ABI-Software/scaffoldvuer/blob/main/package.json)
+#### 2. Bundles for scaffoldvuer can be built by using 
 ```
-import { ScaffoldVuer } from "@abi-software/scaffoldvuer/src/components/index.js";
+npm run build-bundle
+```
+
+This builds the package to be digested by other vue packages by importing either the build or the source.
+
+##### Build import 
+```
+import { ScaffoldVuer } from "@abi-software/scaffoldvuer";
 import '@abi-software/scaffoldvuer/dist/map-side-bar.css';
 ```
-3. Publish with `npm publish` in the package directory
+
+##### Source import (used in  [abi-software/mapintegratedvuer](https://github.com/abi-Software/mapintegratedvuer))
+```
+import { ScaffoldVuer } from "@abi-software/scaffoldvuer/src/components/index.js";
+```
+
+#### 3. Publish with `npm publish` in the package directory
 
 ### Testing
 
