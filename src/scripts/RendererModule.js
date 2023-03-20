@@ -10,8 +10,8 @@ const createRenderer = function () {
   const localContainer = document.createElement( 'div' );
   let localRenderer = undefined;;
   localContainer.style.height = "100%";
+  const Zinc = require('zincjs');
   if (WEBGL.isWebGLAvailable()) {
-    const Zinc = require('zincjs');
     localRenderer = new Zinc.Renderer(localContainer, window);
     Zinc.defaultMaterialColor = 0xFFFF9C;
     localRenderer.initialiseVisualisation();
@@ -20,7 +20,7 @@ const createRenderer = function () {
     const warning = WEBGL.getWebGLErrorMessage();
     localContainer.appendChild(warning);
   }
-  return {"renderer":localRenderer, "container":localContainer};
+  return {Zinc, "renderer":localRenderer, "container":localContainer};
 }
 
 const RendererModule = function()  {
@@ -264,6 +264,7 @@ RendererModule.prototype.getPlayRate = function(value) {
 RendererModule.prototype.initialiseRenderer = function(displayAreaIn) {
   if (this.zincRenderer === undefined || this.rendererContainer === undefined) {
     let returnedValue = createRenderer();
+    this.Zinc = returnedValue["Zinc"];
     this.zincRenderer = returnedValue["renderer"];
     this.rendererContainer = returnedValue["container"];
   }
