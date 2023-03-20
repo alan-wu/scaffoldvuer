@@ -564,7 +564,7 @@ export default {
     let eventNotifier = new EventNotifier();
     eventNotifier.subscribe(this, this.eventNotifierCallback);
     this.$module.addNotifier(eventNotifier);
-    this.$module.addOrganPartAddedCallback(this.organsAdded);
+    this.$module.addOrganPartAddedCallback(this.zincObjectAdded);
     this.$module.initialiseRenderer(this.$refs.display);
     this.toggleRendering(this.render);
     this.ro = new ResizeObserver(this.adjustLayout).observe(
@@ -579,10 +579,11 @@ export default {
   },
   methods: {
     /**
-     * This is called when a new organ is read into the scene.
+     * This is called when a new zinc object is read into the scene.
      */
-    organsAdded: function() {
+    zincObjectAdded: function(zincObject) {
       this.loading = false;
+      this.$emit("zinc-object-added", zincObject);
     },
     /**
      * This is called when Change backgspeedround colour button
