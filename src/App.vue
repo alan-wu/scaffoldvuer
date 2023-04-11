@@ -26,6 +26,7 @@
         @scaffold-selected="onSelected"
         @scaffold-navigated="onNavigated"
         @timeChanged="updateCurrentTime"
+        @zinc-object-added="objectAdded"
       />
     </drop-zone>
     <el-popover
@@ -102,6 +103,18 @@
             @click="screenCapture()"
           >
             Capture
+          </el-button>
+          <el-button
+            size="mini"
+            @click="featureTesting()"
+          >
+            Test 1
+          </el-button>
+          <el-button
+            size="mini"
+            @click="featureTesting2()"
+          >
+            Test 2
           </el-button>
         </el-row>
         <el-row :gutter="10">
@@ -253,6 +266,9 @@ import Vue from "vue";
 import { Button, Col, Icon, Input, InputNumber, Popover, Row, Switch } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
+import taShader from "zincjs/src/shaders/textureArray.js"
+import volumeRender from "zincjs/src/shaders/volumeRender.js"
+import volumeTexture from "zincjs/src/shaders/volumeTexture.js"
 
 locale.use(lang);
 Vue.use(Button);
@@ -264,12 +280,120 @@ Vue.use(Popover);
 Vue.use(Row);
 Vue.use(Switch);
 
+let texture_prefix = undefined;
+
+const getVolumeRender = (texture) => {
+  const myUniforms = volumeRender.getUniforms();
+  console.log(myUniforms)
+  myUniforms.u_size.value.set(texture.size.width, texture.size.height, texture.size.depth);
+  myUniforms.u_data.value = texture.impl;
+  const options = {
+    fs: volumeRender.fs,
+    vs: volumeRender.vs,
+    uniforms: myUniforms,
+    glslVersion: volumeRender.glslVersion
+  };
+  return options;
+}
+
+const getVolumeTexture = (texture) => {
+  const myUniforms = volumeTexture.getUniforms();
+  console.log(myUniforms)
+  myUniforms.volume_scale.value.set(texture.size.width / texture.size.depth, texture.size.height / texture.size.depth, 1);
+  myUniforms.diffuse.value = texture.impl;
+  myUniforms.depth.value = texture.size.depth;
+  myUniforms.volume_dims.value = [200, 200, 200];
+  const options = {
+    fs: volumeTexture.fs,
+    vs: volumeTexture.vs,
+    uniforms: myUniforms,
+    glslVersion: volumeTexture.glslVersion
+  };
+  return options;
+}
+
+const getTestShader = (texture) => {
+  const myUniforms = taShader.getUniforms();
+  myUniforms.depth.value = texture.size.depth;
+  myUniforms.diffuse.value = texture.impl;
+  const options = {
+    fs: taShader.fs,
+    vs: taShader.vs,
+    uniforms: myUniforms,
+    glslVersion: taShader.glslVersion
+  };
+  console.log(options)
+  return options;
+}
+
+const getTexture = async (scaffoldModule) => {
+  const imgArray = [];
+  const texture = new scaffoldModule.Zinc.TextureArray();
+  for (let i = 1733; i < 1860; i++) {
+    imgArray.push(`${texture_prefix}/foot${i}.jpg`);
+    //imgArray.push(`${process.env.VUE_APP_TEXTURE_FOOT_PREFIX}/foot${i}.jpg`);
+  }
+  await texture.loadFromImages(imgArray);
+  return texture;
+}
+
+const testVolume = async (scaffoldModule, objects) => {
+  if (objects) {
+    const texture = await getTexture(scaffoldModule);
+    //const options = getTestShader(texture);
+    const options = getVolumeTexture(texture);
+    const material = texture.getMaterial(options);
+    console.log(material, texture, objects);
+    objects[0].morph.material = material;
+  }
+}
+
+const testSlides = async (scaffoldModule) => {
+  const texture = await getTexture(scaffoldModule);
+  const textureSlides = new scaffoldModule.Zinc.TextureSlides(texture);
+  textureSlides.createSlides([
+    {
+      direction: "y",
+      value: 0.1
+    },
+    {
+      direction: "y",
+      value: 0.3
+    },
+    {
+      direction: "y",
+      value: 0.5
+    },
+    {
+      direction: "y",
+      value: 0.7
+    },
+    {
+      direction: "y",
+      value: 0.9
+    },
+    {
+      direction: "x",
+      value: 0.5
+    },
+    {
+      direction: "z",
+      value: 0.5
+    },
+  ]);
+  scaffoldModule.scene.addZincObject(textureSlides);
+}
+
+
 export default {
   name: "App",
   components: {
     DropZone,
     ScaffoldVuer,
     ModelsTable
+  },
+  created: function() {
+    texture_prefix = process.env.VUE_APP_TEXTURE_FOOT_PREFIX;
   },
   data: function() {
     return {
@@ -300,6 +424,7 @@ export default {
       pos: [0, 0],
       format: "metadata",
       sceneSettings: [],
+      
     };
   },
   watch: {
@@ -319,6 +444,7 @@ export default {
     }
   },
   mounted: function() {
+    this._objects = [];
     this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
     this.rendererInfo = this.$refs.scaffold.getRendererInfo();
   },
@@ -347,6 +473,21 @@ export default {
           hrefElement.click();
           hrefElement.remove();
         })
+    },
+    objectAdded: function(zincObject) {
+      console.log(zincObject)
+      this._objects.push(zincObject);
+    },
+    featureTesting: async function() {
+      //Test texture
+      testVolume(this.$refs.scaffold.$module, this._objects);
+
+      
+    },
+    featureTesting2: async function() {
+      //Test texture
+      //testVolume(this.$refs.scaffold.$module, this._objects);
+      testSlides(this.$refs.scaffold.$module);
     },
     saveSettings: function() {
       this.sceneSettings.push(this.$refs.scaffold.getState());
@@ -411,6 +552,9 @@ export default {
       this.currentTime = val;
     },
     parseQuery: function(query) {
+      if (query.url != this.url) {
+        this._objects = [];
+      }
       if (query.url) {
         this.url = query.url;
       } else {
@@ -502,4 +646,10 @@ body {
 .table-popover {
   opacity: 0.9;
 }
+
+svg.map-icon {
+  color: $app-primary-color;
+}
+
+
 </style>
