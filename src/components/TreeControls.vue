@@ -307,6 +307,7 @@ export default {
       this.hover.group = "";
       this.hover.regionPath = undefined;
       this.$refs.regionTree.updateKeyChildren( "__r/", []);
+      this.treeData[0].children.length = 0;
       this.$emit("object-selected", undefined);
     },
     getColour: function (nodeData) {
