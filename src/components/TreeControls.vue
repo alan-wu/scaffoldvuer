@@ -14,12 +14,10 @@
       <div class="tree-container">
         <el-tree
           ref="regionTree"
-          :default-expanded-keys="['__r/']"
           node-key="id"
           show-checkbox
           :check-strictly="false"
-          :data="treeData"
-          :default-checked-keys="['__r/']"
+          :data="treeData[0].children"
           :expand-on-click-node="false"
           :render-after-expand="false"
           @check="checkChanged"
@@ -309,6 +307,7 @@ export default {
       this.hover.group = "";
       this.hover.regionPath = undefined;
       this.$refs.regionTree.updateKeyChildren( "__r/", []);
+      this.treeData[0].children.length = 0;
       this.$emit("object-selected", undefined);
     },
     getColour: function (nodeData) {
