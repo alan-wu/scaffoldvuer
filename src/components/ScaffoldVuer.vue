@@ -955,6 +955,7 @@ export default {
       const instance = this;
       return function() {
         instance.$module.zincRenderer.removePostRenderCallbackFunction(instance.$_regionTooltipCallback);
+        instance.$_regionTooltipCallback = undefined;
         instance.showRegionTooltip(name, false);
       }
     },
@@ -977,12 +978,14 @@ export default {
                 this.$module.scene.viewAll();
                 //Use the post render callback to make sure the scene has been updated
                 //before getting the position of the tooltip.
+                if (this.$_regionTooltipCallback) {
+                  this.$module.zincRenderer.removePostRenderCallbackFunction(this.$_regionTooltipCallback);
+                }
                 this.$_regionTooltipCallback = 
                   this.$module.zincRenderer.addPostRenderCallbackFunction(
                     this.showRegionTooltipCallback(name)
                   );
               }
-              return;
             } else {
               this.tData.external = true;
               this.tData.visible = true;
@@ -995,11 +998,12 @@ export default {
               else
                 this.tData.region = "Root";
             }
+            return true;
           }
-        } else {
-          this.hideRegionTooltip();
         }
       }
+      this.hideRegionTooltip();
+      return false;
     },
     hideRegionTooltip: function() {
       this.tData.visible = false;

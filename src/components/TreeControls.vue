@@ -487,6 +487,7 @@ export default {
   border-radius: 4px;
   background: #ffffff;
   margin-top: 6px;
+  scrollbar-width: thin;
 
   ::v-deep .el-tree {
     max-height: 240px;
