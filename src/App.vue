@@ -29,6 +29,7 @@
         @zinc-object-added="objectAdded"
       />
     </drop-zone>
+
     <el-popover
       placement="bottom"
       trigger="click"
@@ -234,6 +235,7 @@
       <el-button
         slot="reference"
         icon="el-icon-setting"
+        @click="setSceneToWindo"
       >
         Options
       </el-button>
@@ -253,6 +255,15 @@
       >
         Models
       </el-button>
+      <el-autocomplete class="search-box" placeholder="Search"
+        slot="reference"
+        v-model="searchText"
+        :fetch-suggestions="fetchSuggestions"
+        @keyup.enter.native="search(searchText)"
+        @select="search(searchText)"
+        :popper-append-to-body=false
+        popper-class="autocomplete-popper">
+      </el-autocomplete>
     </el-popover>
   </div>
 </template>
@@ -263,7 +274,7 @@ import { ScaffoldVuer } from "./components/index.js";
 import DropZone from "./components/DropZone.vue";
 import ModelsTable from "./components/ModelsTable.vue";
 import Vue from "vue";
-import { Button, Col, Icon, Input, InputNumber, Popover, Row, Switch } from "element-ui";
+import { Button, Col, Icon, Input, InputNumber, Popover, Row, Switch, stopAutoTumble, Autocomplete } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 import taShader from "zincjs/src/shaders/textureArray.js"
@@ -279,6 +290,7 @@ Vue.use(InputNumber);
 Vue.use(Popover);
 Vue.use(Row);
 Vue.use(Switch);
+Vue.use(Autocomplete);
 
 let texture_prefix = undefined;
 
@@ -424,7 +436,8 @@ export default {
       pos: [0, 0],
       format: "metadata",
       sceneSettings: [],
-      
+      searchInput: "",
+      searchText: ""
     };
   },
   watch: {
@@ -501,6 +514,25 @@ export default {
     },
     screenCapture: function() {
       this.$refs.scaffold.captureScreenshot("capture.png");
+    },
+    setSceneToWindo: function(){
+      window.scene = this.$refs.scaffold.$module.scene
+    },
+    search: function(term){
+      this.$refs.scaffold.search(term);
+    },
+    fetchSuggestions: function(term, cb){
+      if (term === "" || !this.$refs.scaffold && !this.$refs.scaffold.fetchSuggestions) {
+        cb([]);
+      } else {
+        cb(this.$refs.scaffold.fetchSuggestions(term).map((item) => {
+          return {
+            value: item.suggestion,
+            label: item.suggestion
+          }
+        }));
+        console.log('found suggestions', this.$refs.scaffold.fetchSuggestions(term))
+      }
     },
     autoTumble: function(flag) {
       let cameracontrol = this.$refs.scaffold.$module.scene.getZincCameraControls();
