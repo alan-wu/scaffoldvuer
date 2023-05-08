@@ -481,9 +481,8 @@ export default {
         visible: false,
         x: 200,
         y: 200,
-        external: false,
       },
-      fileFormat: "metadata",
+      fileFormat: "metadata"
     };
   },
   watch: {
@@ -801,7 +800,7 @@ export default {
         // Triggers when an object has been selected
         this.$emit("scaffold-selected", event.identifiers);
       } else if (event.eventType == 2) {
-        this.tData.visible = false;
+        this.hideRegionTooltip();
        // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
         if (this.$refs.treeControls) {
           if (names.length > 0) {
@@ -816,7 +815,6 @@ export default {
             ? event.identifiers[0].data.id
             : event.identifiers[0].data.group;
           if (event.identifiers[0].coords) {
-            this.tData.external = false;
             this.tData.visible = true;
             this.tData.label = id;
             if (event.identifiers[0].data.region)
@@ -930,6 +928,8 @@ export default {
     play: function(flag) {
       this.$module.playAnimation(flag);
       this.isPlaying = flag;
+      //Hide tooltip as location may
+      //this.hideRegionTooltip();
     },
     /**
      * Function to toggle on/off overlay help.
@@ -951,61 +951,87 @@ export default {
      * Callback function used by showRegionTooltip in the case when the tooltip
      * is out of view.
      */
-    showRegionTooltipCallback: function(name) {
+    displayTooltipOfObjectsCallback: function(name, objects, resetView, liveUpdates) {
       const instance = this;
       return function() {
         instance.$module.zincRenderer.removePostRenderCallbackFunction(instance.$_regionTooltipCallback);
         instance.$_regionTooltipCallback = undefined;
-        instance.showRegionTooltip(name, false);
+        instance.displayTooltipOfObjects(name, objects, resetView, liveUpdates);
       }
     },
-    /**
-     * Display the tooltip. Reset view if the tooltip is not
-     * in view.
-     */
-    showRegionTooltip: function(name, resetView) {
-      if (name && this.$module.scene) {
-        const rootRegion = this.$module.scene.getRootRegion();
-        const groups = [name];
-        const objects = findObjectsWithNames(rootRegion, groups, "", true);
-        if (objects.length > 0) {
-          let coords = objects[0].getClosestVertexDOMElementCoords(this.$module.scene);
-          if (coords) {
-            //The coords is not in view, view all if resetView flag is true
-            if (!coords.inView) {
-              this.hideRegionTooltip();
-              if (resetView) {
-                this.$module.scene.viewAll();
-                //Use the post render callback to make sure the scene has been updated
-                //before getting the position of the tooltip.
-                if (this.$_regionTooltipCallback) {
-                  this.$module.zincRenderer.removePostRenderCallbackFunction(this.$_regionTooltipCallback);
-                }
-                this.$_regionTooltipCallback = 
-                  this.$module.zincRenderer.addPostRenderCallbackFunction(
-                    this.showRegionTooltipCallback(name)
-                  );
+    liveUpdateTooltipPosition: function() {
+      if (this.$module.selectedCenter) {
+        this.tData.x = this.$module.selectedScreenCoordinates.x;
+        this.tData.y = this.$module.selectedScreenCoordinates.y;
+      }
+    },
+    displayTooltipOfObjects: function(name, objects, resetView, liveUpdates) {
+      if (objects.length > 0) {
+        let coords = objects[0].getClosestVertexDOMElementCoords(this.$module.scene);
+        if (coords) {
+          //The coords is not in view, view all if resetView flag is true
+          if (!coords.inView) {
+            this.hideRegionTooltip();
+            if (resetView) {
+              this.$module.scene.viewAll();
+              //Use the post render callback to make sure the scene has been updated
+              //before getting the position of the tooltip.
+              if (this.$_regionTooltipCallback) {
+                this.$module.zincRenderer.removePostRenderCallbackFunction(this.$_regionTooltipCallback);
               }
-            } else {
-              this.tData.external = true;
-              this.tData.visible = true;
-              this.tData.label = name;
-              this.tData.x = coords.position.x;
-              this.tData.y = coords.position.y;
-              const regionPath = objects[0].getRegion().getFullPath();
-              if (regionPath)
-                this.tData.region = regionPath;
-              else
-                this.tData.region = "Root";
+              this.$_regionTooltipCallback = 
+                this.$module.zincRenderer.addPostRenderCallbackFunction(
+                  this.displayTooltipOfObjectsCallback(name, objects, resetView, liveUpdates)
+                );
             }
-            return true;
+          } else {
+            this.tData.visible = true;
+            this.tData.label = name;
+            this.tData.x = coords.position.x;
+            this.tData.y = coords.position.y;
+            const regionPath = objects[0].getRegion().getFullPath();
+            if (regionPath)
+              this.tData.region = regionPath;
+            else
+              this.tData.region = "Root";
+            if (liveUpdates) {
+              this.$module.setupLiveCoordinates(objects);
+              if (this.$_liveCoordinatesUpdated) {
+                this.$module.zincRenderer.removePostRenderCallbackFunction(this.$_liveCoordinatesUpdated);
+              }
+              this.$_liveCoordinatesUpdated = 
+                this.$module.zincRenderer.addPostRenderCallbackFunction(
+                  this.liveUpdateTooltipPosition);
+            }
           }
+          return true;
         }
       }
       this.hideRegionTooltip();
       return false;
     },
+    /**
+     * Display the tooltip. When resetView is set to true, it will 
+     * reset view if the tooltip is not in view.
+     * Setting liveUpdates to true will update the tooltip location 
+     * at every rendering loop.
+     */
+    showRegionTooltip: function(name, resetView, liveUpdates) {
+      if (name && this.$module.scene) {
+        const rootRegion = this.$module.scene.getRootRegion();
+        const groups = [name];
+        const objects = findObjectsWithNames(rootRegion, groups, "", true);
+        return this.displayTooltipOfObjects(name, objects, resetView, liveUpdates);
+      }
+      this.hideRegionTooltip();
+      return false;
+    },
     hideRegionTooltip: function() {
+      if (this.$_liveCoordinatesUpdated) {
+        this.$module.zincRenderer.removePostRenderCallbackFunction(this.$_liveCoordinatesUpdated);
+        //Unset the tracking
+        this.$module.setupLiveCoordinates(undefined);
+      }
       this.tData.visible = false;
       this.tData.region = "Root";
     },

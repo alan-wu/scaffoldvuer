@@ -124,6 +124,10 @@ const PrimitiveData = function () {
   }
   
   const postRenderSelectedCoordinatesUpdate = function() {
+    //It is animating, the coordinates may have been updated
+    if (_this.zincRenderer.playAnimation && _this.liveUpdatesObjects) {
+      _this.setupLiveCoordinates(_this.liveUpdatesObjects);
+    }
     if (_this.selectedCenter) {
       const vector = new THREE.Vector3();
       vector.copy(_this.selectedCenter);

@@ -392,9 +392,6 @@ export default {
     ScaffoldVuer,
     ModelsTable
   },
-  created: function() {
-    texture_prefix = process.env.VUE_APP_TEXTURE_FOOT_PREFIX;
-  },
   data: function() {
     return {
       url: undefined,
@@ -447,6 +444,9 @@ export default {
     this._objects = [];
     this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
     this.rendererInfo = this.$refs.scaffold.getRendererInfo();
+  },
+  created: function() {
+    texture_prefix = process.env.VUE_APP_TEXTURE_FOOT_PREFIX;
   },
   methods: {
     exportGLTF: function() {
@@ -519,13 +519,16 @@ export default {
       this.$refs.dropzone.revokeURLs();
       const names = ["left ventricle.mesh2d", "right ventricle.mesh2d"];
       this.$refs.scaffold.changeActiveByName(names, "", false);
+      this.$refs.scaffold.showRegionTooltip("heart", true, true);
     },
     onSelected: function(data) {
+      console.log(data)
       if (data && (data.length > 0) && data[0].data.group) {
         delete this.$route.query["viewURL"];
-        this.$router.replace({
-          query: { ...this.$route.query, region: data[0].data.group }
-        });
+        this.$refs.scaffold.showRegionTooltip(data[0].data.group, true, true);
+        //this.$router.replace({
+        //  query: { ...this.$route.query, region: data[0].data.group }
+        //});
       }
     },
     onNavigated: function(data) {
