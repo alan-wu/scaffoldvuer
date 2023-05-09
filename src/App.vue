@@ -541,26 +541,22 @@ export default {
       this.$refs.scaffold.search(term, true);
     },
     fetchSuggestions: function (term, cb) {
-      if (
-        term === "" ||
-        (!this.$refs.scaffold && !this.$refs.scaffold.fetchSuggestions)
-      ) {
+      if ( term === "" || !this.$refs.scaffold ) {
         cb([]);
-      } else {
-        cb(
-          this.$refs.scaffold.fetchSuggestions(term).map((item) => {
-            return {
-              value: item.suggestion,
-              label: item.suggestion,
-            };
-          })
-        );
-        console.log(
-          "found suggestions",
-          this.$refs.scaffold.fetchSuggestions(term)
-        );
       }
-    },
+      cb(
+        this.$refs.scaffold.fetchSuggestions(term).map((item) => {
+          return {
+            value: item.suggestion,
+            label: item.suggestion,
+          };
+        })
+      );
+      console.log(
+        "found suggestions",
+        this.$refs.scaffold.fetchSuggestions(term)
+      );
+  },
     autoTumble: function (flag) {
       let cameracontrol =
         this.$refs.scaffold.$module.scene.getZincCameraControls();

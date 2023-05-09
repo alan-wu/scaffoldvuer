@@ -42,7 +42,7 @@ export class SearchIndex
         this._searchEngine =  new MiniSearch({
             fields: ['groupName'],
             storeFields: ['groupName'],
-            tokenize: (string, _fieldName) => string.split(' ')
+            tokenize: (string, _fieldName) => string.split('"'), // indexing tokenizer
         });
         this._featureIds = [];
         this.zincObjects = [];
@@ -66,14 +66,14 @@ export class SearchIndex
     addZincObject(zincObject)
     //=======================
     {
-        this._searchEngine.add(zincObject);
+        this._searchEngine.add(zincObject, {fields: ['groupName']});
         this.zincObjects.push(zincObject);
     }
 
     addZincObjects(zincObjects)
     //=======================
     {
-        this._searchEngine.addAll(zincObjects);
+        this._searchEngine.addAll(zincObjects, {fields: ['groupName']});
         this.zincObjects.push(...zincObjects);
     }
 
