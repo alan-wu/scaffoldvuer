@@ -46,7 +46,7 @@
           class="app-row"
           :gutter="20"
         >
-          <p v-if="currentTime!==0">
+          <p v-if="currentTime !== 0">
             time emited is: {{ currentTime.toFixed(2) }}
           </p>
         </el-row>
@@ -230,7 +230,7 @@
           type="textarea"
           autosize
           placeholder="Please input"
-          style="padding-left:5%;width:90%;"
+          style="padding-left: 5%; width: 90%"
         />
       </div>
       <el-button
@@ -256,15 +256,17 @@
       >
         Models
       </el-button>
-      <el-autocomplete class="search-box" placeholder="Search"
+      <el-autocomplete
         slot="reference"
         v-model="searchText"
+        class="search-box"
+        placeholder="Search"
         :fetch-suggestions="fetchSuggestions"
+        :popper-append-to-body="false"
+        popper-class="autocomplete-popper"
         @keyup.enter.native="search(searchText)"
         @select="search(searchText)"
-        :popper-append-to-body=false
-        popper-class="autocomplete-popper">
-      </el-autocomplete>
+      />
     </el-popover>
   </div>
 </template>
@@ -275,12 +277,22 @@ import { ScaffoldVuer } from "./components/index.js";
 import DropZone from "./components/DropZone.vue";
 import ModelsTable from "./components/ModelsTable.vue";
 import Vue from "vue";
-import { Button, Col, Icon, Input, InputNumber, Popover, Row, Switch, Autocomplete } from "element-ui";
+import {
+  Button,
+  Col,
+  Icon,
+  Input,
+  InputNumber,
+  Popover,
+  Row,
+  Switch,
+  Autocomplete,
+} from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
-import taShader from "zincjs/src/shaders/textureArray.js"
-import volumeRender from "zincjs/src/shaders/volumeRender.js"
-import volumeTexture from "zincjs/src/shaders/volumeTexture.js"
+import taShader from "zincjs/src/shaders/textureArray.js";
+import volumeRender from "zincjs/src/shaders/volumeRender.js";
+import volumeTexture from "zincjs/src/shaders/volumeTexture.js";
 
 locale.use(lang);
 Vue.use(Button);
@@ -297,22 +309,30 @@ let texture_prefix = undefined;
 
 const getVolumeRender = (texture) => {
   const myUniforms = volumeRender.getUniforms();
-  console.log(myUniforms)
-  myUniforms.u_size.value.set(texture.size.width, texture.size.height, texture.size.depth);
+  console.log(myUniforms);
+  myUniforms.u_size.value.set(
+    texture.size.width,
+    texture.size.height,
+    texture.size.depth
+  );
   myUniforms.u_data.value = texture.impl;
   const options = {
     fs: volumeRender.fs,
     vs: volumeRender.vs,
     uniforms: myUniforms,
-    glslVersion: volumeRender.glslVersion
+    glslVersion: volumeRender.glslVersion,
   };
   return options;
-}
+};
 
 const getVolumeTexture = (texture) => {
   const myUniforms = volumeTexture.getUniforms();
-  console.log(myUniforms)
-  myUniforms.volume_scale.value.set(texture.size.width / texture.size.depth, texture.size.height / texture.size.depth, 1);
+  console.log(myUniforms);
+  myUniforms.volume_scale.value.set(
+    texture.size.width / texture.size.depth,
+    texture.size.height / texture.size.depth,
+    1
+  );
   myUniforms.diffuse.value = texture.impl;
   myUniforms.depth.value = texture.size.depth;
   myUniforms.volume_dims.value = [200, 200, 200];
@@ -320,10 +340,10 @@ const getVolumeTexture = (texture) => {
     fs: volumeTexture.fs,
     vs: volumeTexture.vs,
     uniforms: myUniforms,
-    glslVersion: volumeTexture.glslVersion
+    glslVersion: volumeTexture.glslVersion,
   };
   return options;
-}
+};
 
 const getTestShader = (texture) => {
   const myUniforms = taShader.getUniforms();
@@ -333,11 +353,11 @@ const getTestShader = (texture) => {
     fs: taShader.fs,
     vs: taShader.vs,
     uniforms: myUniforms,
-    glslVersion: taShader.glslVersion
+    glslVersion: taShader.glslVersion,
   };
-  console.log(options)
+  console.log(options);
   return options;
-}
+};
 
 const getTexture = async (scaffoldModule) => {
   const imgArray = [];
@@ -348,7 +368,7 @@ const getTexture = async (scaffoldModule) => {
   }
   await texture.loadFromImages(imgArray);
   return texture;
-}
+};
 
 const testVolume = async (scaffoldModule, objects) => {
   if (objects) {
@@ -359,7 +379,7 @@ const testVolume = async (scaffoldModule, objects) => {
     console.log(material, texture, objects);
     objects[0].morph.material = material;
   }
-}
+};
 
 const testSlides = async (scaffoldModule) => {
   const texture = await getTexture(scaffoldModule);
@@ -367,45 +387,44 @@ const testSlides = async (scaffoldModule) => {
   textureSlides.createSlides([
     {
       direction: "y",
-      value: 0.1
+      value: 0.1,
     },
     {
       direction: "y",
-      value: 0.3
+      value: 0.3,
     },
     {
       direction: "y",
-      value: 0.5
+      value: 0.5,
     },
     {
       direction: "y",
-      value: 0.7
+      value: 0.7,
     },
     {
       direction: "y",
-      value: 0.9
+      value: 0.9,
     },
     {
       direction: "x",
-      value: 0.5
+      value: 0.5,
     },
     {
       direction: "z",
-      value: 0.5
+      value: 0.5,
     },
   ]);
   scaffoldModule.scene.addZincObject(textureSlides);
-}
-
+};
 
 export default {
   name: "App",
   components: {
     DropZone,
     ScaffoldVuer,
-    ModelsTable
+    ModelsTable,
   },
-  data: function() {
+  data: function () {
     return {
       url: undefined,
       input: undefined,
@@ -423,7 +442,7 @@ export default {
         y_offset: 50,
         width: 128,
         height: 128,
-        align: "top-right"
+        align: "top-right",
       },
       render: true,
       region: "",
@@ -435,108 +454,116 @@ export default {
       format: "metadata",
       sceneSettings: [],
       searchInput: "",
-      searchText: ""
+      searchText: "",
     };
   },
   watch: {
-    input: function() {
+    input: function () {
       this.parseInput();
     },
-    tumbleOn: function(val) {
+    tumbleOn: function (val) {
       this.autoTumble(val);
     },
     "$route.query": {
       handler: "parseQuery",
       deep: true,
-      immediate: true
+      immediate: true,
     },
-    syncMode: function(val) {
+    syncMode: function (val) {
       this.$refs.scaffold.toggleSyncControl(val);
-    }
+    },
   },
-  mounted: function() {
+  mounted: function () {
     this._objects = [];
-    this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
+    this.selectedCoordinates =
+      this.$refs.scaffold.getDynamicSelectedCoordinates();
     this.rendererInfo = this.$refs.scaffold.getRendererInfo();
   },
-  created: function() {
+  created: function () {
     texture_prefix = process.env.VUE_APP_TEXTURE_FOOT_PREFIX;
   },
   methods: {
-    exportGLTF: function() {
-      this.$refs.scaffold.exportGLTF(false)
-        .then(data =>{
-          let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-          let hrefElement = document.createElement("a");
-          document.body.append(hrefElement);
-          hrefElement.download = `export.gltf`;
-          hrefElement.href = dataStr;
-          hrefElement.click();
-          hrefElement.remove();
-        })
+    exportGLTF: function () {
+      this.$refs.scaffold.exportGLTF(false).then((data) => {
+        let dataStr =
+          "data:text/json;charset=utf-8," +
+          encodeURIComponent(JSON.stringify(data));
+        let hrefElement = document.createElement("a");
+        document.body.append(hrefElement);
+        hrefElement.download = `export.gltf`;
+        hrefElement.href = dataStr;
+        hrefElement.click();
+        hrefElement.remove();
+      });
     },
-    exportGLB: function() {
-      this.$refs.scaffold.exportGLTF(true)
-        .then(data =>{
-          let blob = new Blob([data], {type: "octet/stream"});
-          let url = window.URL.createObjectURL(blob);
-          let hrefElement = document.createElement("a");
-          document.body.append(hrefElement);
-          hrefElement.download = `export.glb`;
-          hrefElement.href = url;
-          hrefElement.click();
-          hrefElement.remove();
-        })
+    exportGLB: function () {
+      this.$refs.scaffold.exportGLTF(true).then((data) => {
+        let blob = new Blob([data], { type: "octet/stream" });
+        let url = window.URL.createObjectURL(blob);
+        let hrefElement = document.createElement("a");
+        document.body.append(hrefElement);
+        hrefElement.download = `export.glb`;
+        hrefElement.href = url;
+        hrefElement.click();
+        hrefElement.remove();
+      });
     },
-    objectAdded: function(zincObject) {
-      console.log(zincObject)
+    objectAdded: function (zincObject) {
+      console.log(zincObject);
       this._objects.push(zincObject);
     },
-    featureTesting: async function() {
+    featureTesting: async function () {
       //Test texture
       testVolume(this.$refs.scaffold.$module, this._objects);
-
-      
     },
-    featureTesting2: async function() {
+    featureTesting2: async function () {
       //Test texture
       //testVolume(this.$refs.scaffold.$module, this._objects);
       testSlides(this.$refs.scaffold.$module);
     },
-    saveSettings: function() {
+    saveSettings: function () {
       this.sceneSettings.push(this.$refs.scaffold.getState());
     },
-    restoreSettings: function() {
+    restoreSettings: function () {
       if (this.sceneSettings.length > 0)
         this.$refs.scaffold.setState(this.sceneSettings.pop());
     },
-    viewModelClicked: function(location) {
+    viewModelClicked: function (location) {
       this.input = location;
     },
-    screenCapture: function() {
+    screenCapture: function () {
       this.$refs.scaffold.captureScreenshot("capture.png");
     },
-    setSceneToWindo: function(){
-      window.scene = this.$refs.scaffold.$module.scene
+    setSceneToWindo: function () {
+      window.scene = this.$refs.scaffold.$module.scene;
     },
-    search: function(term){
+    search: function (term) {
       this.$refs.scaffold.search(term);
     },
-    fetchSuggestions: function(term, cb){
-      if (term === "" || !this.$refs.scaffold && !this.$refs.scaffold.fetchSuggestions) {
+    fetchSuggestions: function (term, cb) {
+      if (
+        term === "" ||
+        (!this.$refs.scaffold && !this.$refs.scaffold.fetchSuggestions)
+      ) {
         cb([]);
       } else {
-        cb(this.$refs.scaffold.fetchSuggestions(term).map((item) => {
-          return {
-            value: item.suggestion,
-            label: item.suggestion
-          }
-        }));
-        console.log('found suggestions', this.$refs.scaffold.fetchSuggestions(term))
+        cb(
+          this.$refs.scaffold.fetchSuggestions(term).map((item) => {
+            return {
+              value: item.suggestion,
+              label: item.suggestion,
+            };
+          })
+        );
+        console.log(
+          "found suggestions",
+          this.$refs.scaffold.fetchSuggestions(term)
+        );
       }
     },
-    autoTumble: function(flag) {
-      let cameracontrol = this.$refs.scaffold.$module.scene.getZincCameraControls();
+    autoTumble: function (flag) {
+      let cameracontrol =
+        this.$refs.scaffold.$module.scene.getZincCameraControls();
       if (flag) {
         this.displayUI = false;
         cameracontrol.enableAutoTumble();
@@ -546,17 +573,17 @@ export default {
         cameracontrol.stopAutoTumble();
       }
     },
-    onReady: function() {
-      console.log("ready")
+    onReady: function () {
+      console.log("ready");
       //window.scaffoldvuer = this.$refs.scaffold;
       this.$refs.dropzone.revokeURLs();
       const names = ["left ventricle.mesh2d", "right ventricle.mesh2d"];
       this.$refs.scaffold.changeActiveByName(names, "", false);
       this.$refs.scaffold.showRegionTooltip("heart", true, true);
     },
-    onSelected: function(data) {
-      console.log(data)
-      if (data && (data.length > 0) && data[0].data.group) {
+    onSelected: function (data) {
+      console.log(data);
+      if (data && data.length > 0 && data[0].data.group) {
         delete this.$route.query["viewURL"];
         this.$refs.scaffold.showRegionTooltip(data[0].data.group, true, true);
         //this.$router.replace({
@@ -564,30 +591,29 @@ export default {
         //});
       }
     },
-    onNavigated: function(data) {
+    onNavigated: function (data) {
       this.zoom = data.zoom;
       this.pos[0] = data.target[0];
       this.pos[1] = data.target[1];
     },
-    onFilesDrop: function(payload) {
+    onFilesDrop: function (payload) {
       if (payload.format == "gltf") this.format = "gltf";
       else this.format = "metadata";
       this.input = payload.url;
     },
-    parseInput: function() {
+    parseInput: function () {
       if (this.$route.query.url !== this.input) {
-        const queries = {...this.$route.query};
-        if (this.input && this.input !== "")
-          queries.url = this.input;
+        const queries = { ...this.$route.query };
+        if (this.input && this.input !== "") queries.url = this.input;
         this.$router.replace({
-          query: { ...this.$route.query, url: this.input }
+          query: { ...this.$route.query, url: this.input },
         });
       }
     },
-    updateCurrentTime: function(val) {
+    updateCurrentTime: function (val) {
       this.currentTime = val;
     },
-    parseQuery: function(query) {
+    parseQuery: function (query) {
       if (query.url != this.url) {
         this._objects = [];
       }
@@ -613,8 +639,8 @@ export default {
       } else {
         this.viewURL = "";
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -686,6 +712,4 @@ body {
 svg.map-icon {
   color: $app-primary-color;
 }
-
-
 </style>
