@@ -586,7 +586,7 @@ export default {
     this.currentBackground = "white";
     this._currentURL = undefined;
     this.availableBackground = ["white", "black", "lightskyblue"];
-    this.$_searchIndex = undefined;
+    this.$_searchIndex = new SearchIndex();;
     this.$_tempId = 1;
   },
   mounted: function() {
@@ -613,8 +613,8 @@ export default {
      */
     zincObjectAdded: function(zincObject) {
       this.loading = false;
-      zincObject.id = ++this.$_tempId;
-      this.$_searchIndex.addZincObject(zincObject);
+      zincObject.searchIndexId = ++this.$_tempId;
+      this.$_searchIndex.addZincObject(zincObject, zincObject.searchIndexId);
       this.$emit("zinc-object-added", zincObject);
     },
     /**
@@ -1270,8 +1270,9 @@ export default {
             true
           );
         }
-        this.$_searchIndex = new SearchIndex();
+        this.$_searchIndex.removeAll();
         this.$_tempId = 1;
+        this.hideRegionTooltip();
         this.$module.scene.displayMarkers = this.displayMarkers;
         this.$module.scene.forcePickableObjectsUpdate = true;
         this.$module.scene.displayMinimap = this.displayMinimap;

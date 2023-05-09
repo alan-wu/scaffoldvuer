@@ -63,24 +63,25 @@ export class SearchIndex
         }
     }
 
-    addZincObject(zincObject)
+    addZincObject(zincObject, id)
     //=======================
     {
-        this._searchEngine.add(zincObject, {fields: ['groupName']});
+        const item = { groupName: zincObject.groupName, id };
+        this._searchEngine.add(item, {fields: ['groupName']});
         this.zincObjects.push(zincObject);
-    }
-
-    addZincObjects(zincObjects)
-    //=======================
-    {
-        this._searchEngine.addAll(zincObjects, {fields: ['groupName']});
-        this.zincObjects.push(...zincObjects);
     }
 
     clearResults()
     //============
     {
         this._;
+    }
+
+    removeAll()
+    //=======================
+    {
+        this._searchEngine.removeAll();
+        this.zincObjects.length = 0;
     }
 
     auto_suggest(text)
@@ -91,7 +92,7 @@ export class SearchIndex
 
     search(text){
         let results = this._searchEngine.search(text, {prefix: true});
-        let zincResults = this.zincObjects.filter(zincObject => results.map(r => r.id).includes(zincObject.id));
+        let zincResults = this.zincObjects.filter(zincObject => results.map(r => r.id).includes(zincObject.searchIndexId));
         return zincResults;
     }
 
