@@ -274,7 +274,7 @@ import { ScaffoldVuer } from "./components/index.js";
 import DropZone from "./components/DropZone.vue";
 import ModelsTable from "./components/ModelsTable.vue";
 import Vue from "vue";
-import { Button, Col, Icon, Input, InputNumber, Popover, Row, Switch, stopAutoTumble, Autocomplete } from "element-ui";
+import { Button, Col, Icon, Input, InputNumber, Popover, Row, Switch, Autocomplete } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 import taShader from "zincjs/src/shaders/textureArray.js"

@@ -485,8 +485,6 @@ export default {
         external: false,
       },
       fileFormat: "metadata",
-      searchIndex: undefined,
-      searchTooltipActive: false,
     };
   },
   watch: {
@@ -1039,7 +1037,6 @@ export default {
       zincObjectResults.forEach(item => {
         this.showRegionTooltip(item.groupName)
       });
-      this.searchTooltipActive = true;
     },
         /**
      * Get the list of suggested terms
