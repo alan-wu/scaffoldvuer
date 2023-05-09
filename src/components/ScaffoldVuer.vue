@@ -26,25 +26,44 @@
       <el-popover
         v-if="displayWarning"
         ref="warningPopover"
-        v-model="hoverVisabilities[6].value"
+        v-model="hoverVisibilities[6].value"
         :content="warningMessage"
         placement="right"
         :append-to-body="false"
         trigger="manual"
-        popper-class="warning-popper right-popper non-selectable"
+        popper-class="warning-popper message-popper right-popper non-selectable"
       />
       <i
         v-if="displayWarning"
         v-popover:warningPopover
-        class="el-icon-warning warning-icon"
+        class="el-icon-warning message-icon warning-icon"
         @mouseover="showHelpText(6)"
         @mouseout="hideHelpText(6)"
       >
-        <span class="warning-text">Beta</span>
+        <span class="message-text">Beta</span>
+      </i>
+      <el-popover
+        v-if="displayLatestChanges"
+        ref="latestChangesPopover"
+        v-model="hoverVisibilities[7].value"
+        :content="latestChangesMessage"
+        placement="right"
+        :append-to-body="false"
+        trigger="manual"
+        popper-class="latest-popper message-popper right-popper non-selectable"
+      />
+      <i
+        v-if="displayLatestChanges && latestChangesMessage"
+        v-popover:latestChangesPopover
+        class="el-icon-warning message-icon latest-changesicon"
+        @mouseover="showHelpText(7)"
+        @mouseout="hideHelpText(7)"
+      >
+        <span class="message-text">What's new?</span>
       </i>
       <el-popover
         ref="checkBoxPopover"
-        v-model="hoverVisabilities[5].value"
+        v-model="hoverVisibilities[5].value"
         content="Change region visibility"
         placement="right"
         :append-to-body="false"
@@ -66,7 +85,7 @@
       <el-popover
         v-if="sceneData.timeVarying"
         ref="sliderPopover"
-        v-model="hoverVisabilities[4].value"
+        v-model="hoverVisibilities[4].value"
         content="Move the slider to animate the region"
         placement="top"
         :append-to-body="false"
@@ -145,7 +164,7 @@
       </div>
       <div class="bottom-right-control">
         <el-popover
-          v-model="hoverVisabilities[0].value"
+          v-model="hoverVisibilities[0].value"
           content="Zoom in"
           placement="left"
           :append-to-body="false"
@@ -162,7 +181,7 @@
           />
         </el-popover>
         <el-popover
-          v-model="hoverVisabilities[1].value"
+          v-model="hoverVisibilities[1].value"
           content="Zoom out"
           placement="top-end"
           :append-to-body="false"
@@ -179,7 +198,7 @@
           />
         </el-popover>
         <el-popover
-          v-model="hoverVisabilities[2].value"
+          v-model="hoverVisibilities[2].value"
           placement="top"
           :append-to-body="false"
           trigger="manual"
@@ -221,7 +240,7 @@
         </el-row>
       </el-popover>
       <el-popover
-        v-model="hoverVisabilities[3].value"
+        v-model="hoverVisibilities[3].value"
         content="Change background color"
         placement="right"
         :append-to-body="false"
@@ -350,6 +369,14 @@ export default {
       type: String,
       default: "Beta feature - under active development"
     },
+    displayLatestChanges: {
+      type: Boolean,
+      default: false,
+    },
+    latestChangesMessage: {
+      type: String,
+      default: "New feature - Local search is now available",
+    },
     /**
      * Show/hide pickable markers for regions.
      */
@@ -427,14 +454,15 @@ export default {
        */
       isTransitioning: false,
       tooltipAppendToBody: false,
-      hoverVisabilities: [
+      hoverVisibilities: [
         { value: false },
         { value: false },
         { value: false },
         { value: false },
         { value: false },
         { value: false },
-        { value: false }
+        { value: false },
+        { value: false },
       ],
       inHelp: false,
       loading: false,
@@ -482,9 +510,8 @@ export default {
         visible: false,
         x: 200,
         y: 200,
-        external: false,
       },
-      fileFormat: "metadata",
+      fileFormat: "metadata"
     };
   },
   watch: {
@@ -559,6 +586,8 @@ export default {
     this.currentBackground = "white";
     this._currentURL = undefined;
     this.availableBackground = ["white", "black", "lightskyblue"];
+    this.$_searchIndex = new SearchIndex();;
+    this.$_tempId = 1;
   },
   mounted: function() {
     this.$refs.treeControls.setModule(this.$module);
@@ -584,6 +613,8 @@ export default {
      */
     zincObjectAdded: function(zincObject) {
       this.loading = false;
+      zincObject.searchIndexId = ++this.$_tempId;
+      this.$_searchIndex.addZincObject(zincObject, zincObject.searchIndexId);
       this.$emit("zinc-object-added", zincObject);
     },
     /**
@@ -796,40 +827,42 @@ export default {
             //this.$refs.treeControls.changeActiveByNames(names, region, false);
             this.$refs.treeControls.updateActiveUI(zincObjects);
           } else {
-            this.$refs.treeControls.removeActive(true)
+            this.hideRegionTooltip();
+            this.$refs.treeControls.removeActive(true);
           }
         }
         // Triggers when an object has been selected
         this.$emit("scaffold-selected", event.identifiers);
       } else if (event.eventType == 2) {
-        this.tData.visible = false;
-       // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
-        if (this.$refs.treeControls) {
-          if (names.length > 0) {
-            //this.$refs.treeControls.changeHoverByNames(names, region, false);
-            this.$refs.treeControls.updateHoverUI(zincObjects);
-          } else {
-            this.$refs.treeControls.removeHover(true);
+        if (this.selectedObjects.length === 0) {
+          this.hideRegionTooltip();
+        // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
+          if (this.$refs.treeControls) {
+            if (names.length > 0) {
+              //this.$refs.treeControls.changeHoverByNames(names, region, false);
+              this.$refs.treeControls.updateHoverUI(zincObjects);
+            } else {
+              this.$refs.treeControls.removeHover(true);
+            }
           }
-        }
-        if ((event.identifiers.length > 0) && event.identifiers[0]) {
-          let id = event.identifiers[0].data.id
-            ? event.identifiers[0].data.id
-            : event.identifiers[0].data.group;
-          if (event.identifiers[0].coords) {
-            this.tData.external = false;
-            this.tData.visible = true;
-            this.tData.label = id;
-            if (event.identifiers[0].data.region)
-              this.tData.region = event.identifiers[0].data.region;
-            else
-              this.tData.region = "Root";
-            this.tData.x = event.identifiers[0].coords.x;
-            this.tData.y  = event.identifiers[0].coords.y;
+          if ((event.identifiers.length > 0) && event.identifiers[0]) {
+            let id = event.identifiers[0].data.id
+              ? event.identifiers[0].data.id
+              : event.identifiers[0].data.group;
+            if (event.identifiers[0].coords) {
+              this.tData.visible = true;
+              this.tData.label = id;
+              if (event.identifiers[0].data.region)
+                this.tData.region = event.identifiers[0].data.region;
+              else
+                this.tData.region = "Root";
+              this.tData.x = event.identifiers[0].coords.x;
+              this.tData.y  = event.identifiers[0].coords.y;
+            }
           }
+          // Triggers when an object has been highlighted
+          this.$emit("scaffold-highlighted", event.identifiers);
         }
-        // Triggers when an object has been highlighted
-        this.$emit("scaffold-highlighted", event.identifiers);
       } else if (event.eventType == 3)  { //MOVE
         if ((event.identifiers.length > 0) && event.identifiers[0]) {
           if (event.identifiers[0].coords) {
@@ -847,7 +880,7 @@ export default {
      */
     getCoordinatesOfSelected: function() {
       if (this.selectedObjects && this.selectedObjects.length > 0) {
-        return this.$module.scene.getObjectsScreenXY([this.selectedObjects]);
+        return this.$module.scene.getObjectsScreenXY(this.selectedObjects);
       }
       return undefined;
     },
@@ -876,10 +909,9 @@ export default {
      */
     objectSelected: function(objects, propagate) {
       this.selectedObjects = objects;
-      if (this.selectedObjects)
+      if (this.selectedObjects && this.selectedObjects.length > 0)
         this.$refs.opacityControl.setObject(this.selectedObjects[0]);
-      if (objects) this.$module.setSelectedByZincObjects(objects, undefined, propagate);
-      else this.$module.setSelectedByObjects([], undefined, propagate);
+      this.$module.setSelectedByZincObjects(objects, undefined, propagate);
     },
     /**
      * A callback used by children components. Set the highlighted zinc object
@@ -888,8 +920,7 @@ export default {
      */
     objectHovered: function(objects, propagate) {
       this.hoveredObjects = objects;
-      if (objects) this.$module.setHighlightedByZincObjects(objects, undefined, propagate);
-      else this.$module.setHighlightedByObjects([], undefined, propagate);
+      this.$module.setHighlightedByZincObjects(objects, undefined, propagate);
     },
     /**
      * Set the selected by name.
@@ -931,6 +962,8 @@ export default {
     play: function(flag) {
       this.$module.playAnimation(flag);
       this.isPlaying = flag;
+      //Hide tooltip as location may
+      //this.hideRegionTooltip();
     },
     /**
      * Function to toggle on/off overlay help.
@@ -938,12 +971,12 @@ export default {
     setHelpMode: function(helpMode) {
       if (helpMode) {
         this.inHelp = true;
-        this.hoverVisabilities.forEach(item => {
+        this.hoverVisibilities.forEach(item => {
           item.value = true;
         });
       } else {
         this.inHelp = false;
-        this.hoverVisabilities.forEach(item => {
+        this.hoverVisibilities.forEach(item => {
           item.value = false;
         });
       }
@@ -952,61 +985,87 @@ export default {
      * Callback function used by showRegionTooltip in the case when the tooltip
      * is out of view.
      */
-    showRegionTooltipCallback: function(name) {
+    displayTooltipOfObjectsCallback: function(name, objects, resetView, liveUpdates) {
       const instance = this;
       return function() {
         instance.$module.zincRenderer.removePostRenderCallbackFunction(instance.$_regionTooltipCallback);
         instance.$_regionTooltipCallback = undefined;
-        instance.showRegionTooltip(name, false);
+        instance.displayTooltipOfObjects(name, objects, resetView, liveUpdates);
       }
     },
-    /**
-     * Display the tooltip. Reset view if the tooltip is not
-     * in view.
-     */
-    showRegionTooltip: function(name, resetView) {
-      if (name && this.$module.scene) {
-        const rootRegion = this.$module.scene.getRootRegion();
-        const groups = [name];
-        const objects = findObjectsWithNames(rootRegion, groups, "", true);
-        if (objects.length > 0) {
-          let coords = objects[0].getClosestVertexDOMElementCoords(this.$module.scene);
-          if (coords) {
-            //The coords is not in view, view all if resetView flag is true
-            if (!coords.inView) {
-              this.hideRegionTooltip();
-              if (resetView) {
-                this.$module.scene.viewAll();
-                //Use the post render callback to make sure the scene has been updated
-                //before getting the position of the tooltip.
-                if (this.$_regionTooltipCallback) {
-                  this.$module.zincRenderer.removePostRenderCallbackFunction(this.$_regionTooltipCallback);
-                }
-                this.$_regionTooltipCallback = 
-                  this.$module.zincRenderer.addPostRenderCallbackFunction(
-                    this.showRegionTooltipCallback(name)
-                  );
+    liveUpdateTooltipPosition: function() {
+      if (this.$module.selectedCenter) {
+        this.tData.x = this.$module.selectedScreenCoordinates.x;
+        this.tData.y = this.$module.selectedScreenCoordinates.y;
+      }
+    },
+    displayTooltipOfObjects: function(name, objects, resetView, liveUpdates) {
+      if (objects.length > 0) {
+        let coords = objects[0].getClosestVertexDOMElementCoords(this.$module.scene);
+        if (coords) {
+          //The coords is not in view, view all if resetView flag is true
+          if (!coords.inView) {
+            this.hideRegionTooltip();
+            if (resetView) {
+              this.$module.scene.viewAll();
+              //Use the post render callback to make sure the scene has been updated
+              //before getting the position of the tooltip.
+              if (this.$_regionTooltipCallback) {
+                this.$module.zincRenderer.removePostRenderCallbackFunction(this.$_regionTooltipCallback);
               }
-            } else {
-              this.tData.external = true;
-              this.tData.visible = true;
-              this.tData.label = name;
-              this.tData.x = coords.position.x;
-              this.tData.y = coords.position.y;
-              const regionPath = objects[0].getRegion().getFullPath();
-              if (regionPath)
-                this.tData.region = regionPath;
-              else
-                this.tData.region = "Root";
+              this.$_regionTooltipCallback = 
+                this.$module.zincRenderer.addPostRenderCallbackFunction(
+                  this.displayTooltipOfObjectsCallback(name, objects, resetView, liveUpdates)
+                );
             }
-            return true;
+          } else {
+            this.tData.visible = true;
+            this.tData.label = name;
+            this.tData.x = coords.position.x;
+            this.tData.y = coords.position.y;
+            const regionPath = objects[0].getRegion().getFullPath();
+            if (regionPath)
+              this.tData.region = regionPath;
+            else
+              this.tData.region = "Root";
+            if (liveUpdates) {
+              this.$module.setupLiveCoordinates(objects);
+              if (this.$_liveCoordinatesUpdated) {
+                this.$module.zincRenderer.removePostRenderCallbackFunction(this.$_liveCoordinatesUpdated);
+              }
+              this.$_liveCoordinatesUpdated = 
+                this.$module.zincRenderer.addPostRenderCallbackFunction(
+                  this.liveUpdateTooltipPosition);
+            }
           }
+          return true;
         }
       }
       this.hideRegionTooltip();
       return false;
     },
+    /**
+     * Display the tooltip. When resetView is set to true, it will 
+     * reset view if the tooltip is not in view.
+     * Setting liveUpdates to true will update the tooltip location 
+     * at every rendering loop.
+     */
+    showRegionTooltip: function(name, resetView, liveUpdates) {
+      if (name && this.$module.scene) {
+        const rootRegion = this.$module.scene.getRootRegion();
+        const groups = [name];
+        const objects = findObjectsWithNames(rootRegion, groups, "", true);
+        return this.displayTooltipOfObjects(name, objects, resetView, liveUpdates);
+      }
+      this.hideRegionTooltip();
+      return false;
+    },
     hideRegionTooltip: function() {
+      if (this.$_liveCoordinatesUpdated) {
+        this.$module.zincRenderer.removePostRenderCallbackFunction(this.$_liveCoordinatesUpdated);
+        //Unset the tracking
+        this.$module.setupLiveCoordinates(undefined);
+      }
       this.tData.visible = false;
       this.tData.region = "Root";
     },
@@ -1017,7 +1076,7 @@ export default {
     showHelpText: function(helpTextNumber) {
       if (!this.inHelp) {
         this.helpTextWait = setTimeout(() => {
-          this.hoverVisabilities[helpTextNumber].value = true;
+          this.hoverVisibilities[helpTextNumber].value = true;
         }, 500);
       }
     },
@@ -1026,25 +1085,41 @@ export default {
      */
     hideHelpText: function(helpTextNumber) {
       if (!this.inHelp) {
-        this.hoverVisabilities[helpTextNumber].value = false;
+        this.hoverVisibilities[helpTextNumber].value = false;
         clearTimeout(this.helpTextWait);
       }
     },
-    search: function(text) {
-      let zincObjectResults = this.searchIndex.search(text);
-      this.objectSelected(zincObjectResults, true);
-      this.objectHovered(zincObjectResults, true);
-      zincObjectResults.forEach(item => {
-        this.showRegionTooltip(item.groupName)
-      });
+    search: function(text, displayLabel) {
+      if (this.$_searchIndex) {
+        if (text === undefined || text === "") {
+          this.objectSelected([], true);
+          return false;
+        } else {
+          let zincObjectResults = this.$_searchIndex.search(text);
+          if (zincObjectResults.length > 0) {
+            this.objectSelected(zincObjectResults, true);
+            if (displayLabel) {
+              for (let i = 0; i < zincObjectResults.length; i++) {
+                if (zincObjectResults[i] && zincObjectResults[i].groupName) {
+                  this.showRegionTooltip(zincObjectResults[i].groupName, true, true)
+                }
+              }
+            }
+            return true;
+          } else {
+            this.objectSelected([], true);
+          }
+        }
+      }
+      return false;
     },
-        /**
+    /**
      * Get the list of suggested terms
      */
     fetchSuggestions: function(term) {
-      if(this.searchIndex === undefined)
+      if(this.$_searchIndex === undefined)
         return [];
-      return this.searchIndex.auto_suggest(term);
+      return this.$_searchIndex.auto_suggest(term);
     },
     /**
      * Called when minimap settings has changed. Pass the
@@ -1096,11 +1171,6 @@ export default {
         this.$module.unsetFinishDownloadCallback();
         this.$emit("on-ready");
         this.isReady = true;
-        let sceneObjects = getAllObjects(this.$module.scene);
-        console.log('group names', sceneObjects);
-        this.searchIndex = new SearchIndex();
-        window.search = this.searchIndex;
-        this.searchIndex.addZincObjects(sceneObjects);
       };
     },
     /**
@@ -1200,6 +1270,9 @@ export default {
             true
           );
         }
+        this.$_searchIndex.removeAll();
+        this.$_tempId = 1;
+        this.hideRegionTooltip();
         this.$module.scene.displayMarkers = this.displayMarkers;
         this.$module.scene.forcePickableObjectsUpdate = true;
         this.$module.scene.displayMinimap = this.displayMinimap;
@@ -1279,7 +1352,8 @@ export default {
 @import "~element-ui/packages/theme-chalk/src/tabs";
 @import "~element-ui/packages/theme-chalk/src/tab-pane";
 
-.warning-icon {
+
+.message-icon {
   position: absolute;
   top: 15px;
   left: 37px;
@@ -1292,22 +1366,45 @@ export default {
   }
 }
 
-.warning-text {
+.warning-icon {
+  color: $warning;
+  top: 15px;
+}
+
+.latest-changesicon {
+  color: $success;
+  top: 45px;
+}
+
+.message-text {
   font-size: 15px;
   vertical-align: 5px;
 }
 
-::v-deep .warning-popper {
+::v-deep .message-popper {
   padding: 9px 10px;
   min-width: 150px;
   font-size: 12px;
   color: #fff;
-  background-color: $warning;
+}
 
+::v-deep .warning-popper {
+  background-color: $warning;
   &.right-popper {
     .popper__arrow {
       &::after {
         border-right-color: $warning !important;
+      }
+    }
+  }
+}
+
+::v-deep .latest-popper {
+  background-color: $success;
+  &.right-popper {
+    .popper__arrow {
+      &::after {
+        border-right-color: $success !important;
       }
     }
   }

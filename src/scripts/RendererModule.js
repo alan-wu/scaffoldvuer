@@ -32,6 +32,7 @@ const RendererModule = function()  {
   this.zincRenderer = null;
   this.selectedScreenCoordinates = new THREE.Vector3();
   this.selectedCenter = undefined;
+  this.liveUpdatesObjects = undefined;
 }
 
 RendererModule.prototype = Object.create((require('./BaseModule').BaseModule).prototype);
@@ -118,6 +119,7 @@ RendererModule.prototype.setHighlightedByZincObjects = function(
 }
 
 RendererModule.prototype.setupLiveCoordinates = function(zincObjects) {
+  this.liveUpdatesObjects = zincObjects;
   if (zincObjects && (zincObjects.length > 0)) {
     const boundingBox = this.scene.getBoundingBoxOfZincObjects(zincObjects);
     let newSelectedCenter = new THREE.Vector3();
