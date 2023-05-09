@@ -289,14 +289,14 @@ export default {
      */
     removeActive: function (propagate) {
       this.active = [];
-      this.$emit("object-selected", undefined, propagate);
+      this.$emit("object-selected", [], propagate);
     },
     /**
      * Unselect the current hover region.
      */
     removeHover: function (propagate) {
       this.hover = [];
-      this.$emit("object-hovered", undefined, propagate);
+      this.$emit("object-hovered", [], propagate);
     },
     /**
      * Reset the controls.

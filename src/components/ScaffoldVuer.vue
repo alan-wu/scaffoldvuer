@@ -586,6 +586,7 @@ export default {
     this.currentBackground = "white";
     this._currentURL = undefined;
     this.availableBackground = ["white", "black", "lightskyblue"];
+    this.$_searchIndex = undefined;
   },
   mounted: function() {
     this.$refs.treeControls.setModule(this.$module);
@@ -823,39 +824,42 @@ export default {
             //this.$refs.treeControls.changeActiveByNames(names, region, false);
             this.$refs.treeControls.updateActiveUI(zincObjects);
           } else {
-            this.$refs.treeControls.removeActive(true)
+            this.hideRegionTooltip();
+            this.$refs.treeControls.removeActive(true);
           }
         }
         // Triggers when an object has been selected
         this.$emit("scaffold-selected", event.identifiers);
       } else if (event.eventType == 2) {
-        this.hideRegionTooltip();
-       // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
-        if (this.$refs.treeControls) {
-          if (names.length > 0) {
-            //this.$refs.treeControls.changeHoverByNames(names, region, false);
-            this.$refs.treeControls.updateHoverUI(zincObjects);
-          } else {
-            this.$refs.treeControls.removeHover(true);
+        if (this.selectedObjects.length === 0) {
+          this.hideRegionTooltip();
+        // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
+          if (this.$refs.treeControls) {
+            if (names.length > 0) {
+              //this.$refs.treeControls.changeHoverByNames(names, region, false);
+              this.$refs.treeControls.updateHoverUI(zincObjects);
+            } else {
+              this.$refs.treeControls.removeHover(true);
+            }
           }
-        }
-        if ((event.identifiers.length > 0) && event.identifiers[0]) {
-          let id = event.identifiers[0].data.id
-            ? event.identifiers[0].data.id
-            : event.identifiers[0].data.group;
-          if (event.identifiers[0].coords) {
-            this.tData.visible = true;
-            this.tData.label = id;
-            if (event.identifiers[0].data.region)
-              this.tData.region = event.identifiers[0].data.region;
-            else
-              this.tData.region = "Root";
-            this.tData.x = event.identifiers[0].coords.x;
-            this.tData.y  = event.identifiers[0].coords.y;
+          if ((event.identifiers.length > 0) && event.identifiers[0]) {
+            let id = event.identifiers[0].data.id
+              ? event.identifiers[0].data.id
+              : event.identifiers[0].data.group;
+            if (event.identifiers[0].coords) {
+              this.tData.visible = true;
+              this.tData.label = id;
+              if (event.identifiers[0].data.region)
+                this.tData.region = event.identifiers[0].data.region;
+              else
+                this.tData.region = "Root";
+              this.tData.x = event.identifiers[0].coords.x;
+              this.tData.y  = event.identifiers[0].coords.y;
+            }
           }
+          // Triggers when an object has been highlighted
+          this.$emit("scaffold-highlighted", event.identifiers);
         }
-        // Triggers when an object has been highlighted
-        this.$emit("scaffold-highlighted", event.identifiers);
       } else if (event.eventType == 3)  { //MOVE
         if ((event.identifiers.length > 0) && event.identifiers[0]) {
           if (event.identifiers[0].coords) {
@@ -873,7 +877,7 @@ export default {
      */
     getCoordinatesOfSelected: function() {
       if (this.selectedObjects && this.selectedObjects.length > 0) {
-        return this.$module.scene.getObjectsScreenXY([this.selectedObjects]);
+        return this.$module.scene.getObjectsScreenXY(this.selectedObjects);
       }
       return undefined;
     },
@@ -902,10 +906,9 @@ export default {
      */
     objectSelected: function(objects, propagate) {
       this.selectedObjects = objects;
-      if (this.selectedObjects)
+      if (this.selectedObjects && this.selectedObjects.length > 0)
         this.$refs.opacityControl.setObject(this.selectedObjects[0]);
-      if (objects) this.$module.setSelectedByZincObjects(objects, undefined, propagate);
-      else this.$module.setSelectedByObjects([], undefined, propagate);
+      this.$module.setSelectedByZincObjects(objects, undefined, propagate);
     },
     /**
      * A callback used by children components. Set the highlighted zinc object
@@ -914,8 +917,7 @@ export default {
      */
     objectHovered: function(objects, propagate) {
       this.hoveredObjects = objects;
-      if (objects) this.$module.setHighlightedByZincObjects(objects, undefined, propagate);
-      else this.$module.setHighlightedByObjects([], undefined, propagate);
+      this.$module.setHighlightedByZincObjects(objects, undefined, propagate);
     },
     /**
      * Set the selected by name.
@@ -1085,20 +1087,23 @@ export default {
       }
     },
     search: function(text) {
-      let zincObjectResults = this.searchIndex.search(text);
-      this.objectSelected(zincObjectResults, true);
-      this.objectHovered(zincObjectResults, true);
-      zincObjectResults.forEach(item => {
-        this.showRegionTooltip(item.groupName)
-      });
+      if (this.$_searchIndex) {
+        let zincObjectResults = this.$_searchIndex.search(text);
+        this.objectSelected(zincObjectResults, true);
+        for (let i = 0; i < zincObjectResults.length; i++) {
+          if (zincObjectResults[i] && zincObjectResults[i].groupName) {
+            this.showRegionTooltip(item.groupName, true, true)
+          }
+        }
+      }
     },
-        /**
+    /**
      * Get the list of suggested terms
      */
     fetchSuggestions: function(term) {
-      if(this.searchIndex === undefined)
+      if(this.$_searchIndex === undefined)
         return [];
-      return this.searchIndex.auto_suggest(term);
+      return this.$_searchIndex.auto_suggest(term);
     },
     /**
      * Called when minimap settings has changed. Pass the
@@ -1151,10 +1156,8 @@ export default {
         this.$emit("on-ready");
         this.isReady = true;
         let sceneObjects = getAllObjects(this.$module.scene);
-        console.log('group names', sceneObjects);
-        this.searchIndex = new SearchIndex();
-        window.search = this.searchIndex;
-        this.searchIndex.addZincObjects(sceneObjects);
+        this.$_searchIndex = new SearchIndex();
+        this.$_searchIndex.addZincObjects(sceneObjects);
       };
     },
     /**
