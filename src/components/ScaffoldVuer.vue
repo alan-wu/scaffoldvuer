@@ -268,7 +268,8 @@ import OpacityControls from "./OpacityControls";
 import ScaffoldTooltip from "./ScaffoldTooltip";
 import TreeControls from "./TreeControls";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
-import { findObjectsWithNames } from "../scripts/utilities.js";
+import { findObjectsWithNames, getAllObjects } from "../scripts/utilities.js";
+import { SearchIndex } from "../scripts/search.js";
 import {
   Col,
   Loading,
@@ -1083,6 +1084,22 @@ export default {
         clearTimeout(this.helpTextWait);
       }
     },
+    search: function(text) {
+      let zincObjectResults = this.searchIndex.search(text);
+      this.objectSelected(zincObjectResults, true);
+      this.objectHovered(zincObjectResults, true);
+      zincObjectResults.forEach(item => {
+        this.showRegionTooltip(item.groupName)
+      });
+    },
+        /**
+     * Get the list of suggested terms
+     */
+    fetchSuggestions: function(term) {
+      if(this.searchIndex === undefined)
+        return [];
+      return this.searchIndex.auto_suggest(term);
+    },
     /**
      * Called when minimap settings has changed. Pass the
      * parameters to ZincJS and marked it for update.
@@ -1133,6 +1150,11 @@ export default {
         this.$module.unsetFinishDownloadCallback();
         this.$emit("on-ready");
         this.isReady = true;
+        let sceneObjects = getAllObjects(this.$module.scene);
+        console.log('group names', sceneObjects);
+        this.searchIndex = new SearchIndex();
+        window.search = this.searchIndex;
+        this.searchIndex.addZincObjects(sceneObjects);
       };
     },
     /**
