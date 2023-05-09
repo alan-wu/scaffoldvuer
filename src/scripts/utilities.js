@@ -35,3 +35,9 @@ export const findObjectsWithNames = (rootRegion, names, regionPath, transverse) 
   }
   return targetObjects;
 }
+
+export const getAllObjects = (scene) => {
+  let objects = scene.getRootRegion().getAllObjects(true);
+  let id = 1;
+  return objects.map(object => Object.assign(object, { id: id++ })); // Add id to each object
+}
