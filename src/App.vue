@@ -14,6 +14,7 @@
         :display-u-i="displayUI"
         :url="url"
         :help-mode="helpMode"
+        :display-latest-changes="true"
         :display-minimap="displayMinimap"
         :display-markers="displayMarkers"
         :minimap-settings="minimapSettings"

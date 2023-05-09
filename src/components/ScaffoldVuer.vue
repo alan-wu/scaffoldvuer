@@ -26,25 +26,44 @@
       <el-popover
         v-if="displayWarning"
         ref="warningPopover"
-        v-model="hoverVisabilities[6].value"
+        v-model="hoverVisibilities[6].value"
         :content="warningMessage"
         placement="right"
         :append-to-body="false"
         trigger="manual"
-        popper-class="warning-popper right-popper non-selectable"
+        popper-class="warning-popper message-popper right-popper non-selectable"
       />
       <i
         v-if="displayWarning"
         v-popover:warningPopover
-        class="el-icon-warning warning-icon"
+        class="el-icon-warning message-icon warning-icon"
         @mouseover="showHelpText(6)"
         @mouseout="hideHelpText(6)"
       >
-        <span class="warning-text">Beta</span>
+        <span class="message-text">Beta</span>
+      </i>
+      <el-popover
+        v-if="displayLatestChanges"
+        ref="latestChangesPopover"
+        v-model="hoverVisibilities[7].value"
+        :content="latestChangesMessage"
+        placement="right"
+        :append-to-body="false"
+        trigger="manual"
+        popper-class="latest-popper message-popper right-popper non-selectable"
+      />
+      <i
+        v-if="displayLatestChanges && latestChangesMessage"
+        v-popover:latestChangesPopover
+        class="el-icon-warning message-icon latest-changesicon"
+        @mouseover="showHelpText(7)"
+        @mouseout="hideHelpText(7)"
+      >
+        <span class="message-text">What's new?</span>
       </i>
       <el-popover
         ref="checkBoxPopover"
-        v-model="hoverVisabilities[5].value"
+        v-model="hoverVisibilities[5].value"
         content="Change region visibility"
         placement="right"
         :append-to-body="false"
@@ -66,7 +85,7 @@
       <el-popover
         v-if="sceneData.timeVarying"
         ref="sliderPopover"
-        v-model="hoverVisabilities[4].value"
+        v-model="hoverVisibilities[4].value"
         content="Move the slider to animate the region"
         placement="top"
         :append-to-body="false"
@@ -145,7 +164,7 @@
       </div>
       <div class="bottom-right-control">
         <el-popover
-          v-model="hoverVisabilities[0].value"
+          v-model="hoverVisibilities[0].value"
           content="Zoom in"
           placement="left"
           :append-to-body="false"
@@ -162,7 +181,7 @@
           />
         </el-popover>
         <el-popover
-          v-model="hoverVisabilities[1].value"
+          v-model="hoverVisibilities[1].value"
           content="Zoom out"
           placement="top-end"
           :append-to-body="false"
@@ -179,7 +198,7 @@
           />
         </el-popover>
         <el-popover
-          v-model="hoverVisabilities[2].value"
+          v-model="hoverVisibilities[2].value"
           placement="top"
           :append-to-body="false"
           trigger="manual"
@@ -221,7 +240,7 @@
         </el-row>
       </el-popover>
       <el-popover
-        v-model="hoverVisabilities[3].value"
+        v-model="hoverVisibilities[3].value"
         content="Change background color"
         placement="right"
         :append-to-body="false"
@@ -349,6 +368,14 @@ export default {
       type: String,
       default: "Beta feature - under active development"
     },
+    displayLatestChanges: {
+      type: Boolean,
+      default: false,
+    },
+    latestChangesMessage: {
+      type: String,
+      default: "New feature - Local search is now available",
+    },
     /**
      * Show/hide pickable markers for regions.
      */
@@ -426,14 +453,15 @@ export default {
        */
       isTransitioning: false,
       tooltipAppendToBody: false,
-      hoverVisabilities: [
+      hoverVisibilities: [
         { value: false },
         { value: false },
         { value: false },
         { value: false },
         { value: false },
         { value: false },
-        { value: false }
+        { value: false },
+        { value: false },
       ],
       inHelp: false,
       loading: false,
@@ -937,12 +965,12 @@ export default {
     setHelpMode: function(helpMode) {
       if (helpMode) {
         this.inHelp = true;
-        this.hoverVisabilities.forEach(item => {
+        this.hoverVisibilities.forEach(item => {
           item.value = true;
         });
       } else {
         this.inHelp = false;
-        this.hoverVisabilities.forEach(item => {
+        this.hoverVisibilities.forEach(item => {
           item.value = false;
         });
       }
@@ -1042,7 +1070,7 @@ export default {
     showHelpText: function(helpTextNumber) {
       if (!this.inHelp) {
         this.helpTextWait = setTimeout(() => {
-          this.hoverVisabilities[helpTextNumber].value = true;
+          this.hoverVisibilities[helpTextNumber].value = true;
         }, 500);
       }
     },
@@ -1051,7 +1079,7 @@ export default {
      */
     hideHelpText: function(helpTextNumber) {
       if (!this.inHelp) {
-        this.hoverVisabilities[helpTextNumber].value = false;
+        this.hoverVisibilities[helpTextNumber].value = false;
         clearTimeout(this.helpTextWait);
       }
     },
@@ -1283,7 +1311,8 @@ export default {
 @import "~element-ui/packages/theme-chalk/src/tabs";
 @import "~element-ui/packages/theme-chalk/src/tab-pane";
 
-.warning-icon {
+
+.message-icon {
   position: absolute;
   top: 15px;
   left: 37px;
@@ -1296,22 +1325,45 @@ export default {
   }
 }
 
-.warning-text {
+.warning-icon {
+  color: $warning;
+  top: 15px;
+}
+
+.latest-changesicon {
+  color: $success;
+  top: 45px;
+}
+
+.message-text {
   font-size: 15px;
   vertical-align: 5px;
 }
 
-::v-deep .warning-popper {
+::v-deep .message-popper {
   padding: 9px 10px;
   min-width: 150px;
   font-size: 12px;
   color: #fff;
-  background-color: $warning;
+}
 
+::v-deep .warning-popper {
+  background-color: $warning;
   &.right-popper {
     .popper__arrow {
       &::after {
         border-right-color: $warning !important;
+      }
+    }
+  }
+}
+
+::v-deep .latest-popper {
+  background-color: $success;
+  &.right-popper {
+    .popper__arrow {
+      &::after {
+        border-right-color: $success !important;
       }
     }
   }
