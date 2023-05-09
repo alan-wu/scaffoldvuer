@@ -538,7 +538,7 @@ export default {
       window.scene = this.$refs.scaffold.$module.scene;
     },
     search: function (term) {
-      this.$refs.scaffold.search(term);
+      this.$refs.scaffold.search(term, true);
     },
     fetchSuggestions: function (term, cb) {
       if (

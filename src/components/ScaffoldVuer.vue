@@ -587,6 +587,7 @@ export default {
     this._currentURL = undefined;
     this.availableBackground = ["white", "black", "lightskyblue"];
     this.$_searchIndex = undefined;
+    this.$_tempId = 1;
   },
   mounted: function() {
     this.$refs.treeControls.setModule(this.$module);
@@ -612,6 +613,8 @@ export default {
      */
     zincObjectAdded: function(zincObject) {
       this.loading = false;
+      zincObject.id = ++this.$_tempId;
+      this.$_searchIndex.addZincObject(zincObject);
       this.$emit("zinc-object-added", zincObject);
     },
     /**
@@ -1086,16 +1089,29 @@ export default {
         clearTimeout(this.helpTextWait);
       }
     },
-    search: function(text) {
+    search: function(text, displayLabel) {
       if (this.$_searchIndex) {
-        let zincObjectResults = this.$_searchIndex.search(text);
-        this.objectSelected(zincObjectResults, true);
-        for (let i = 0; i < zincObjectResults.length; i++) {
-          if (zincObjectResults[i] && zincObjectResults[i].groupName) {
-            this.showRegionTooltip(item.groupName, true, true)
+        if (text === undefined || text === "") {
+          this.objectSelected([], true);
+          return false;
+        } else {
+          let zincObjectResults = this.$_searchIndex.search(text);
+          if (zincObjectResults.length > 0) {
+            this.objectSelected(zincObjectResults, true);
+            if (displayLabel) {
+              for (let i = 0; i < zincObjectResults.length; i++) {
+                if (zincObjectResults[i] && zincObjectResults[i].groupName) {
+                  this.showRegionTooltip(zincObjectResults[i].groupName, true, true)
+                }
+              }
+            }
+            return true;
+          } else {
+            this.objectSelected([], true);
           }
         }
       }
+      return false;
     },
     /**
      * Get the list of suggested terms
@@ -1155,9 +1171,6 @@ export default {
         this.$module.unsetFinishDownloadCallback();
         this.$emit("on-ready");
         this.isReady = true;
-        let sceneObjects = getAllObjects(this.$module.scene);
-        this.$_searchIndex = new SearchIndex();
-        this.$_searchIndex.addZincObjects(sceneObjects);
       };
     },
     /**
@@ -1257,6 +1270,8 @@ export default {
             true
           );
         }
+        this.$_searchIndex = new SearchIndex();
+        this.$_tempId = 1;
         this.$module.scene.displayMarkers = this.displayMarkers;
         this.$module.scene.forcePickableObjectsUpdate = true;
         this.$module.scene.displayMinimap = this.displayMinimap;

@@ -45,6 +45,7 @@ export class SearchIndex
             tokenize: (string, _fieldName) => string.split(' ')
         });
         this._featureIds = [];
+        this.zincObjects = [];
     }
 
     indexMetadata(featureId, metadata)
@@ -62,11 +63,18 @@ export class SearchIndex
         }
     }
 
+    addZincObject(zincObject)
+    //=======================
+    {
+        this._searchEngine.add(zincObject);
+        this.zincObjects.push(zincObject);
+    }
+
     addZincObjects(zincObjects)
     //=======================
     {
         this._searchEngine.addAll(zincObjects);
-        this.zincObjects = zincObjects;
+        this.zincObjects.push(...zincObjects);
     }
 
     clearResults()
