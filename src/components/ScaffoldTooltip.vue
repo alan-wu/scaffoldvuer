@@ -107,7 +107,7 @@ export default {
     white-space: nowrap;
     min-width: unset;
     pointer-events: none;
-    top: -15px!important;
+    top: -15px !important;
 
     &.el-popper[x-placement^="top"] {
       .popper__arrow {
