@@ -13,7 +13,11 @@
     "build:bundle": "vue-cli-service build --target lib --name scaffoldvuer ./src/components/index.js",
     "build:wc": "vue-cli-service build --target lib --name scaffoldvuer-wc ./src/ScaffoldVuer-wc.js --mode wc --env bundle --no-clean",
     "styleguide": "vue-cli-service styleguidist",
-    "styleguide:build": "vue-cli-service styleguidist:build"
+    "styleguide:build": "vue-cli-service styleguidist:build",
+    "version": "npm run build-bundle",
+    "release:beta": "npm version prerelease --preid=beta; npm publish --tag beta",
+    "release:minor": "npm version minor; npm publish",
+    "release:patch": "npm version patch;  npm publish"
   },
   "main": "./dist/scaffoldvuer.common.js",
   "files": [
