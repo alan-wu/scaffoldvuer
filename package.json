@@ -14,7 +14,8 @@
     "build:wc": "vue-cli-service build --target lib --name scaffoldvuer-wc ./src/ScaffoldVuer-wc.js --mode wc --env bundle --no-clean",
     "styleguide": "vue-cli-service styleguidist",
     "styleguide:build": "vue-cli-service styleguidist:build",
-    "version": "npm run build-bundle",
+    "changelog": "auto-changelog -p --output CHANGELOG.md --template keepachangelog",
+    "version": "npm run build-bundle;npm run changelog; git add CHANGELOG.md",
     "release:beta": "npm version prerelease --preid=beta; npm publish --tag beta",
     "release:minor": "npm version minor; npm publish",
     "release:patch": "npm version patch;  npm publish"
@@ -29,6 +30,7 @@
   ],
   "dependencies": {
     "@abi-software/svg-sprite": "^0.1.15",
+    "auto-changelog": "^2.4.0",
     "axios": "^0.21.2",
     "core-js": "^3.30.1",
     "current-script-polyfill": "^1.0.0",
