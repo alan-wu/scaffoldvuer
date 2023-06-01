@@ -31,7 +31,7 @@
         placement="right"
         :append-to-body="false"
         trigger="manual"
-        popper-class="warning-popper message-popper right-popper non-selectable"
+        popper-class="scaffold-popper message-popper right-popper non-selectable"
       />
       <i
         v-if="displayWarning"
@@ -50,7 +50,7 @@
         placement="right"
         :append-to-body="false"
         trigger="manual"
-        popper-class="latest-popper message-popper right-popper non-selectable"
+        popper-class="scaffold-popper message-popper right-popper non-selectable"
       />
       <i
         v-if="displayLatestChanges && latestChangesMessage"
@@ -1386,28 +1386,6 @@ export default {
   min-width: 150px;
   font-size: 12px;
   color: #fff;
-}
-
-::v-deep .warning-popper {
-  background-color: $warning;
-  &.right-popper {
-    .popper__arrow {
-      &::after {
-        border-right-color: $warning !important;
-      }
-    }
-  }
-}
-
-::v-deep .latest-popper {
-  background-color: $success;
-  &.right-popper {
-    .popper__arrow {
-      &::after {
-        border-right-color: $success !important;
-      }
-    }
-  }
 }
 
 #organsDisplayArea {
