@@ -4,6 +4,7 @@
       ref="tooltip"
       v-model="display"
       placement="top"
+      :visibleArrow="false"
       :append-to-body="false"
       trigger="manual"
       popper-class="tooltip-popper non-selectable"
@@ -59,9 +60,9 @@ export default {
   },
   computed: {
     position: function () {
-      let yOffset = 30;
+      let yOffset = 40;
       if (this.region) {
-        yOffset = 45;
+        yOffset = 55;
       }
 
       return { left: this.x + "px", top: this.y - yOffset + "px" };
