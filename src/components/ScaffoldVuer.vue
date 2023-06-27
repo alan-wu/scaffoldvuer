@@ -14,6 +14,7 @@
       :visible="tData.visible"
       :x="tData.x"
       :y="tData.y"
+      :showProvenance="tData.showProvenance"
     />
     <div
       id="organsDisplayArea"
@@ -257,6 +258,7 @@
           @mouseout.native="hideHelpText(3)"
         />
       </el-popover>
+
     </div>
   </div>
 </template>
@@ -268,7 +270,7 @@ import OpacityControls from "./OpacityControls";
 import ScaffoldTooltip from "./ScaffoldTooltip";
 import TreeControls from "./TreeControls";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
-import { findObjectsWithNames, getAllObjects } from "../scripts/utilities.js";
+import { findObjectsWithNames } from "../scripts/utilities.js";
 import { SearchIndex } from "../scripts/search.js";
 import {
   Col,
@@ -510,8 +512,9 @@ export default {
         visible: false,
         x: 200,
         y: 200,
+        showProvenance: false,
       },
-      fileFormat: "metadata"
+      fileFormat: "metadata",
     };
   },
   watch: {
@@ -819,11 +822,12 @@ export default {
       /*
        * Event Type 1: Selected
        * Event Type 2: Highlighted
-       * Event Type 1: Move
+       * Event Type 3: Move
        */
       if (event.eventType == 1) {
         if (this.$refs.treeControls) {
           if (names.length > 0) {
+            this.tData.showProvenance = true;
             //this.$refs.treeControls.changeActiveByNames(names, region, false);
             this.$refs.treeControls.updateActiveUI(zincObjects);
           } else {
@@ -852,6 +856,7 @@ export default {
             if (event.identifiers[0].coords) {
               this.tData.visible = true;
               this.tData.label = id;
+              this.tData.showProvenance = false;
               if (event.identifiers[0].data.region)
                 this.tData.region = event.identifiers[0].data.region;
               else
@@ -1023,6 +1028,7 @@ export default {
             this.tData.label = name;
             this.tData.x = coords.position.x;
             this.tData.y = coords.position.y;
+            this.tData.showProvenance = true;
             const regionPath = objects[0].getRegion().getFullPath();
             if (regionPath)
               this.tData.region = regionPath;

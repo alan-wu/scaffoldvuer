@@ -29,6 +29,7 @@
     "*.js"
   ],
   "dependencies": {
+    "@abi-software/flatmapvuer": "^0.5.2",
     "@abi-software/svg-sprite": "^0.1.15",
     "axios": "^0.21.2",
     "core-js": "^3.22.5",
