@@ -74,6 +74,7 @@
         ref="treeControls"
         v-popover:checkBoxPopover
         :help-mode="helpMode"
+        :isReady="isReady"
         :show-colour-picker="showColourPicker"
         @object-selected="objectSelected"
         @object-hovered="objectHovered"
@@ -449,6 +450,7 @@ export default {
     return {
       sceneData: this.$module.sceneData,
       isPlaying: false,
+      isReady: false,
       /**
        * This is set when scene is transitioning.
        */
@@ -580,7 +582,6 @@ export default {
   },
   beforeCreate: function() {
     this.$module = new OrgansViewer();
-    this.isReady = false;
     this.selectedObjects = [];
     this.hoveredObjects = [];
     this.currentBackground = "white";
