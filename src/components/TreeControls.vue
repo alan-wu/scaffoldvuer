@@ -6,9 +6,7 @@
     <div class="traditional-container">
       <el-row>
         <el-col :span="12">
-          <div class="regions-display-text">
-            Regions
-          </div>
+          <div class="regions-display-text">Regions</div>
         </el-col>
       </el-row>
       <div class="tree-container">
@@ -16,6 +14,9 @@
           ref="regionTree"
           node-key="id"
           show-checkbox
+          v-loading="!isReady"
+          element-loading-spinner="el-icon-loading"
+          element-loading-background="rgba(0, 0, 0, 0.3)"
           :check-strictly="false"
           :data="treeData[0].children"
           :expand-on-click-node="false"
@@ -58,10 +59,21 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
-import { Checkbox, CheckboxGroup, ColorPicker, Row, Tree } from "element-ui";
+import {
+  Checkbox,
+  CheckboxGroup,
+  ColorPicker,
+  Loading,
+  Row,
+  Tree,
+} from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
-import { createListFromPrimitives, extractAllIds, findObjectsWithNames } from "../scripts/utilities.js";
+import {
+  createListFromPrimitives,
+  extractAllIds,
+  findObjectsWithNames,
+} from "../scripts/utilities.js";
 
 const orderBy = require("lodash/orderBy");
 const uniq = require("lodash/uniq");
@@ -69,6 +81,7 @@ locale.use(lang);
 Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
 Vue.use(ColorPicker);
+Vue.use(Loading);
 Vue.use(Row);
 Vue.use(Tree);
 
@@ -94,12 +107,13 @@ export default {
      * Enable/disable colour picker
      */
     showColourPicker: Boolean,
+    isReady: Boolean,
   },
   data: function () {
     return {
       treeData: [{ label: "Root", id: "__r/", children: [] }],
-      active: [{group: "", regionPath: undefined}],
-      hover: [{group: "", regionPath: undefined}],
+      active: [{ group: "", regionPath: undefined }],
+      hover: [{ group: "", regionPath: undefined }],
       myPopperClass: "hide-scaffold-colour-popup",
       drawerOpen: true,
     };
@@ -139,7 +153,11 @@ export default {
     // '__r/'
     findOrCreateRegion: function (data, paths, prefix) {
       //check if root region has been set
-      if ((this.treeData[0].regionPath === undefined) && this.$module && this.$module.scene) {
+      if (
+        this.treeData[0].regionPath === undefined &&
+        this.$module &&
+        this.$module.scene
+      ) {
         this.treeData[0].regionPath = "";
         this.treeData[0].isRegion = true;
       }
@@ -166,23 +184,25 @@ export default {
         return data;
       }
     },
-    nodeIsActive: function(data) {
+    nodeIsActive: function (data) {
       for (let i = 0; i < this.active.length; i++) {
         let item = this.active[i];
-        if (item.group === data.label && 
-          ((item.regionPath === data.regionPath) || 
-          item.regionPath === undefined)) {
+        if (
+          item.group === data.label &&
+          (item.regionPath === data.regionPath || item.regionPath === undefined)
+        ) {
           return true;
         }
       }
       return false;
     },
-    nodeIsHover: function(data) {
+    nodeIsHover: function (data) {
       for (let i = 0; i < this.hover.length; i++) {
         let item = this.hover[i];
-        if (item.group === data.label && 
-          ((item.regionPath === data.regionPath) || 
-          item.regionPath === undefined)) {
+        if (
+          item.group === data.label &&
+          (item.regionPath === data.regionPath || item.regionPath === undefined)
+        ) {
           return true;
         }
       }
@@ -218,13 +238,15 @@ export default {
       const isRegion = node.isRegion;
       const isPrimitives = node.isPrimitives;
       const isChecked = data.checkedKeys.includes(node.id);
-      const region = this.$module.scene.getRootRegion().findChildFromPath(node.regionPath);
+      const region = this.$module.scene
+        .getRootRegion()
+        .findChildFromPath(node.regionPath);
       if (isRegion) {
         isChecked ? region.showAllPrimitives() : region.hideAllPrimitives();
       }
       if (isPrimitives) {
         const primitives = region.findObjectsWithGroupName(node.label);
-        primitives.forEach(primitive => {
+        primitives.forEach((primitive) => {
           primitive.setVisibility(isChecked);
         });
       }
@@ -259,8 +281,12 @@ export default {
      */
     changeActiveByNames: function (names, regionPath, propagate) {
       const rootRegion = this.$module.scene.getRootRegion();
-      const targetObjects = findObjectsWithNames(rootRegion, names,
-        regionPath, true);
+      const targetObjects = findObjectsWithNames(
+        rootRegion,
+        names,
+        regionPath,
+        true
+      );
       this.changeActiveByPrimitives(targetObjects, propagate);
     },
     /**
@@ -268,8 +294,12 @@ export default {
      */
     changeHoverByNames: function (names, regionPath, propagate) {
       const rootRegion = this.$module.scene.getRootRegion();
-      const targetObjects = findObjectsWithNames(rootRegion, names,
-        regionPath, true);
+      const targetObjects = findObjectsWithNames(
+        rootRegion,
+        names,
+        regionPath,
+        true
+      );
       this.changeHoverByPrimitives(targetObjects, propagate);
     },
     changeActiveByNode: function (node, propagate) {
@@ -306,7 +336,7 @@ export default {
       this.active.regionPath = undefined;
       this.hover.group = "";
       this.hover.regionPath = undefined;
-      this.$refs.regionTree.updateKeyChildren( "__r/", []);
+      this.$refs.regionTree.updateKeyChildren("__r/", []);
       this.treeData[0].children.length = 0;
       this.$emit("object-selected", undefined);
     },
@@ -322,24 +352,28 @@ export default {
       }
       return "#FFFFFF";
     },
-    getZincObjectsFromNode: function(node, transverse) {
+    getZincObjectsFromNode: function (node, transverse) {
       const rootRegion = this.$module.scene.getRootRegion();
-      return findObjectsWithNames(rootRegion, node.label,
-        node.regionPath, transverse);
+      return findObjectsWithNames(
+        rootRegion,
+        node.label,
+        node.regionPath,
+        transverse
+      );
     },
     //Set this right at the beginning.
     setModule: function (moduleIn) {
       this.$module = moduleIn;
-      this.$module.primitiveData.geometries.forEach(zincObject => {
+      this.$module.primitiveData.geometries.forEach((zincObject) => {
         this.zincObjectAdded(zincObject);
       });
-      this.$module.primitiveData.lines.forEach(zincObject => {
+      this.$module.primitiveData.lines.forEach((zincObject) => {
         this.zincObjectAdded(zincObject);
       });
-      this.$module.primitiveData.glyphsets.forEach(zincObject => {
+      this.$module.primitiveData.glyphsets.forEach((zincObject) => {
         this.zincObjectAdded(zincObject);
       });
-      this.$module.primitiveData.pointsets.forEach(zincObject => {
+      this.$module.primitiveData.pointsets.forEach((zincObject) => {
         this.zincObjectAdded(zincObject);
       });
       this.$module.addOrganPartAddedCallback(this.zincObjectAdded);
@@ -348,7 +382,7 @@ export default {
     setColour: function (nodeData, value) {
       if (nodeData && nodeData.isPrimitives) {
         const targetObjects = this.getZincObjectsFromNode(nodeData, false);
-        targetObjects.forEach(primitive => {
+        targetObjects.forEach((primitive) => {
           let hexString = value.replace("#", "0x");
           primitive.setColourHex(hexString);
         });
@@ -372,18 +406,19 @@ export default {
       this.drawerOpen = !this.drawerOpen;
       this.$emit("drawer-toggled", this.drawerOpen);
     },
-    setTreeVisibility: function(node, list) {
+    setTreeVisibility: function (node, list) {
       let flag = false;
       if (list.includes(node.id)) flag = true;
-      const region = this.$module.scene.getRootRegion().findChildFromPath(node.regionPath);
-      if (node.isRegion)
-        region.setVisibility(flag);
+      const region = this.$module.scene
+        .getRootRegion()
+        .findChildFromPath(node.regionPath);
+      if (node.isRegion) region.setVisibility(flag);
       if (node.isPrimitives) {
         const primitives = region.findObjectsWithGroupName(node.label);
-        primitives.forEach(primitive => primitive.setVisibility(flag))
+        primitives.forEach((primitive) => primitive.setVisibility(flag));
       }
       if (node.children)
-        node.children.forEach(child => this.setTreeVisibility(child, list));
+        node.children.forEach((child) => this.setTreeVisibility(child, list));
     },
     checkAllKeys: function () {
       const keysList = [];
@@ -400,11 +435,11 @@ export default {
     setState: function (state) {
       if (state) {
         if (state.checkAll) {
-          this.checkAllKeys(); 
+          this.checkAllKeys();
         } else if (state.checkedItems) {
           let list = [];
           if (state.version !== "2.0") {
-            list = state.checkedItems.map(item => "/" + item);
+            list = state.checkedItems.map((item) => "/" + item);
             list.shift("__r/");
           } else {
             list.push(...state.checkedItems);
@@ -422,6 +457,7 @@ export default {
 <style scoped lang="scss">
 @import "~element-ui/packages/theme-chalk/src/checkbox";
 @import "~element-ui/packages/theme-chalk/src/color-picker";
+@import "~element-ui/packages/theme-chalk/src/loading";
 @import "~element-ui/packages/theme-chalk/src/row";
 @import "~element-ui/packages/theme-chalk/src/tree";
 
@@ -610,7 +646,7 @@ export default {
   z-index: 8;
   margin-top: calc(50% - 52px);
   border: solid 1px $app-primary-color;
-  background-color: #F9F2FC;
+  background-color: #f9f2fc;
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
@@ -619,7 +655,7 @@ export default {
 
 .drawer-button {
   i {
-    font-weight:600;
+    font-weight: 600;
     margin-top: 12px;
     color: $app-primary-color;
     transition-delay: 0.9s;
