@@ -19,7 +19,7 @@
       id="organsDisplayArea"
       ref="display"
       tabindex="-1"
-      style="height:100%;width:100%;"
+      style="height: 100%; width: 100%"
       @keydown.66="backgroundChangeCallback"
     />
     <div v-show="displayUI && !isTransitioning">
@@ -97,7 +97,7 @@
         v-if="sceneData.timeVarying"
         v-popover:sliderPopover
         class="time-slider-container"
-        :class="[ minimisedSlider ? 'minimised' : '', sliderPosition]"
+        :class="[minimisedSlider ? 'minimised' : '', sliderPosition]"
       >
         <el-tabs type="card">
           <el-tab-pane label="Animate scaffold">
@@ -117,7 +117,7 @@
               <el-slider
                 :min="0"
                 :max="timeMax"
-                :value="sceneData.currentTime / 100 * timeMax"
+                :value="(sceneData.currentTime / 100) * timeMax"
                 :step="0.1"
                 tooltip-class="time-slider-tooltip"
                 class="slider"
@@ -207,7 +207,7 @@
         >
           <div>
             Fit to
-            <br>
+            <br />
             window
           </div>
           <map-svg-icon
@@ -221,6 +221,42 @@
         </el-popover>
       </div>
       <el-popover
+        ref="open-map-popover"
+        placement="top-start"
+        width="128"
+        :append-to-body="false"
+        trigger="click"
+        popper-class="open-map-popper non-selectable"
+      >
+        <el-row>
+          <el-button
+            type="primary"
+            plain
+            @click="$emit('open-map', 'AC')"
+          >
+            Open AC Map
+          </el-button>
+        </el-row>
+        <el-row>
+          <el-button
+            type="primary"
+            plain
+            @click="$emit('open-map', 'FC')"
+          >
+            Open FC Map
+          </el-button>
+        </el-row>
+        <el-row>
+          <el-button
+            type="primary"
+            plain
+            @click="$emit('open-map', '3D')"
+          >
+            Open 3D Map
+          </el-button>
+        </el-row>
+      </el-popover>
+      <el-popover
         ref="backgroundPopover"
         placement="top-start"
         width="128"
@@ -228,36 +264,64 @@
         trigger="click"
         popper-class="background-popper non-selectable"
       >
-        <el-row class="backgroundText">
-          Change background
-        </el-row>
+        <el-row class="backgroundText"> Change background </el-row>
         <el-row class="backgroundChooser">
           <div
             v-for="item in availableBackground"
             :key="item"
-            :class="['backgroundChoice', item, item == currentBackground ? 'active' :'']"
+            :class="[
+              'backgroundChoice',
+              item,
+              item == currentBackground ? 'active' : '',
+            ]"
             @click="backgroundChangeCallback(item)"
           />
         </el-row>
       </el-popover>
-      <el-popover
-        v-model="hoverVisibilities[3].value"
-        content="Change background color"
-        placement="right"
-        :append-to-body="false"
-        trigger="manual"
-        popper-class="scaffold-popper right-popper non-selectable"
+      <div
+        class="settings-group"
+        :class="{ open: drawerOpen, close: !drawerOpen }"
       >
-        <map-svg-icon
-          slot="reference"
-          v-popover:backgroundPopover
-          icon="changeBckgd"
-          class="icon-button background-colour"
-          :class="{ open: drawerOpen, close: !drawerOpen }"
-          @mouseover.native="showHelpText(3)"
-          @mouseout.native="hideHelpText(3)"
-        />
-      </el-popover>
+        <el-row>
+          <el-popover
+            v-model="hoverVisibilities[8].value"
+            content="Open new map"
+            placement="right"
+            :append-to-body="false"
+            trigger="manual"
+            popper-class="scaffold-popper right-popper non-selectable"
+          >
+            <map-svg-icon
+              v-if="enableOpenMapUI"
+              slot="reference"
+              v-popover:open-map-popover
+              icon="openMap"
+              class="icon-button"
+              @mouseover.native="showHelpText(8)"
+              @mouseout.native="hideHelpText(8)"
+            />
+          </el-popover>
+        </el-row>
+        <el-row>
+          <el-popover
+            v-model="hoverVisibilities[3].value"
+            content="Change background color"
+            placement="right"
+            :append-to-body="false"
+            trigger="manual"
+            popper-class="scaffold-popper right-popper non-selectable"
+          >
+            <map-svg-icon
+              slot="reference"
+              v-popover:backgroundPopover
+              icon="changeBckgd"
+              class="icon-button"
+              @mouseover.native="showHelpText(3)"
+              @mouseout.native="hideHelpText(3)"
+            />
+          </el-popover>
+        </el-row>
+      </div>
     </div>
   </div>
 </template>
@@ -272,6 +336,7 @@ import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
 import { findObjectsWithNames, getAllObjects } from "../scripts/utilities.js";
 import { SearchIndex } from "../scripts/search.js";
 import {
+  Button,
   Col,
   Loading,
   Option,
@@ -280,12 +345,13 @@ import {
   Select,
   Slider,
   TabPane,
-  Tabs
+  Tabs,
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 
 locale.use(lang);
+Vue.use(Button);
 Vue.use(Col);
 Vue.use(Loading.directive);
 Vue.use(Option);
@@ -323,21 +389,21 @@ export default {
      */
     url: {
       type: String,
-      default: ""
+      default: "",
     },
     /**
      * Show the colour control of set to true.
      */
     showColourPicker: {
       type: Boolean,
-      default: false
+      default: false,
     },
     /**
      * Flag to show/hide the UI.
      */
     displayUI: {
       type: Boolean,
-      default: true
+      default: true,
     },
     /**
      * Display all graphics at start.
@@ -346,21 +412,21 @@ export default {
      */
     displayAtStartUp: {
       type: Boolean,
-      default: true
+      default: true,
     },
     /**
      * Use for toggling the help tooltips.
      */
     helpMode: {
       type: Boolean,
-      default: false
+      default: false,
     },
     /**
      * Use for show/display beta warning icon.
      */
     displayWarning: {
       type: Boolean,
-      default: true
+      default: true,
     },
     /**
      * Warning message for the hovered over text
@@ -368,7 +434,7 @@ export default {
      */
     warningMessage: {
       type: String,
-      default: "Beta feature - under active development"
+      default: "Beta feature - under active development",
     },
     displayLatestChanges: {
       type: Boolean,
@@ -383,43 +449,51 @@ export default {
      */
     displayMarkers: {
       type: Boolean,
-      default: false
+      default: false,
     },
     /**
      * Show/hide minimap.
      */
     displayMinimap: {
       type: Boolean,
-      default: false
+      default: false,
     },
     /**
      * Format of the input URL
      */
     format: {
       type: String,
-      default: "metadata"
+      default: "metadata",
     },
     /**
      * Settings for minimap position, size and alignment.
      */
     minimapSettings: {
       type: Object,
-      default: function() {
+      default: function () {
         return {
           x_offset: 16,
           y_offset: 16,
           width: 128,
           height: 128,
-          align: "top-right"
+          align: "top-right",
         };
-      }
+      },
+    },
+    /**
+     * Flag to determine rather open map UI should be
+     * presented or not.
+     */
+    enableOpenMapUI: {
+      type: Boolean,
+      default: false,
     },
     /**
      * State containing state of the scaffold.
      */
     state: {
       type: Object,
-      default: undefined
+      default: undefined,
     },
     /**
      * Optional prop for the name of the region to focus on,
@@ -427,7 +501,7 @@ export default {
      */
     region: {
       type: String,
-      default: ""
+      default: "",
     },
     /**
      * Optional prop for an URL of containing information of a viewport.
@@ -436,17 +510,17 @@ export default {
      */
     viewURL: {
       type: String,
-      default: ""
+      default: "",
     },
     /**
      * Settings for turning on/off rendering
      */
     render: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
-  data: function() {
+  data: function () {
     return {
       sceneData: this.$module.sceneData,
       isPlaying: false,
@@ -457,6 +531,7 @@ export default {
       isTransitioning: false,
       tooltipAppendToBody: false,
       hoverVisibilities: [
+        { value: false },
         { value: false },
         { value: false },
         { value: false },
@@ -480,28 +555,28 @@ export default {
       playSpeed: [
         {
           value: 0.1,
-          label: "0.1x"
+          label: "0.1x",
         },
         {
           value: 0.5,
-          label: "0.5x"
+          label: "0.5x",
         },
         {
           value: 1,
-          label: "1x"
+          label: "1x",
         },
         {
           value: 2,
-          label: "2x"
+          label: "2x",
         },
         {
           value: 5,
-          label: "5x"
+          label: "5x",
         },
         {
           value: 10,
-          label: "10x"
-        }
+          label: "10x",
+        },
       ],
       currentSpeed: 1,
       timeStamps: {},
@@ -513,54 +588,54 @@ export default {
         x: 200,
         y: 200,
       },
-      fileFormat: "metadata"
+      fileFormat: "metadata",
     };
   },
   watch: {
     format: {
-      handler: function(value) {
+      handler: function (value) {
         this.fileFormat = value;
       },
-      immediate: true
+      immediate: true,
     },
     url: {
-      handler: function(newValue) {
+      handler: function (newValue) {
         if (this.state === undefined || this.state.url === undefined)
           this.setURL(newValue);
       },
-      immediate: true
+      immediate: true,
     },
     region: {
-      handler: function(region) {
+      handler: function (region) {
         if (!(this.state || this.viewURL)) this.setFocusedRegion(region);
       },
-      immediate: true
+      immediate: true,
     },
     state: {
-      handler: function(state) {
+      handler: function (state) {
         this.setState(state);
       },
       immediate: true,
-      deep: true
+      deep: true,
     },
     viewURL: {
-      handler: function(viewURL) {
+      handler: function (viewURL) {
         this.updateViewURL(viewURL);
       },
-      immediate: true
+      immediate: true,
     },
-    helpMode: function(val) {
+    helpMode: function (val) {
       this.setHelpMode(val);
     },
-    displayMarkers: function(val) {
+    displayMarkers: function (val) {
       this.$module.scene.displayMarkers = val;
       //Update pickable objects
       this.$module.scene.forcePickableObjectsUpdate = true;
     },
-    displayMinimap: function(val) {
+    displayMinimap: function (val) {
       this.$module.scene.displayMinimap = val;
     },
-    "sceneData.currentTime": function() {
+    "sceneData.currentTime": function () {
       /**
        * Triggers when scene time changes.
        *
@@ -569,28 +644,28 @@ export default {
        */
       this.$emit("timeChanged", this.sceneData.currentTime);
     },
-    duration: function() {
+    duration: function () {
       this.$module.scene.setDuration(this.duration);
     },
     minimapSettings: {
       deep: true,
-      handler: "updateMinimapScissor"
+      handler: "updateMinimapScissor",
     },
-    render: function(val) {
+    render: function (val) {
       this.toggleRendering(val);
-    }
+    },
   },
-  beforeCreate: function() {
+  beforeCreate: function () {
     this.$module = new OrgansViewer();
     this.selectedObjects = [];
     this.hoveredObjects = [];
     this.currentBackground = "white";
     this._currentURL = undefined;
     this.availableBackground = ["white", "black", "lightskyblue"];
-    this.$_searchIndex = new SearchIndex();;
+    this.$_searchIndex = new SearchIndex();
     this.$_tempId = 1;
   },
-  mounted: function() {
+  mounted: function () {
     this.$refs.treeControls.setModule(this.$module);
     let eventNotifier = new EventNotifier();
     eventNotifier.subscribe(this, this.eventNotifierCallback);
@@ -603,7 +678,7 @@ export default {
     );
     this.defaultRate = this.$module.getPlayRate();
   },
-  beforeDestroy: function() {
+  beforeDestroy: function () {
     if (this.ro) this.ro.disconnect();
     this.$module.destroy();
     this.$module = undefined;
@@ -612,7 +687,7 @@ export default {
     /**
      * This is called when a new zinc object is read into the scene.
      */
-    zincObjectAdded: function(zincObject) {
+    zincObjectAdded: function (zincObject) {
       this.loading = false;
       zincObject.searchIndexId = ++this.$_tempId;
       this.$_searchIndex.addZincObject(zincObject, zincObject.searchIndexId);
@@ -624,7 +699,7 @@ export default {
      * to one of the three preset colour: white, black and
      * lightskyblue.
      */
-    backgroundChangeCallback: function(colour) {
+    backgroundChangeCallback: function (colour) {
       this.currentBackground = colour;
       this.$module.zincRenderer
         .getThreeJSRenderer()
@@ -634,7 +709,7 @@ export default {
      * This is called by captueeScreenshot and after the last render
      * loop, it download a screenshot of the current scene with no UI.
      */
-    captureScreenshotCallback: function() {
+    captureScreenshotCallback: function () {
       //Remove the callback, only needs to happen once
       this.$module.zincRenderer.removePostRenderCallbackFunction(
         this.captureID
@@ -657,7 +732,7 @@ export default {
      *
      * @public
      */
-    captureScreenshot: function(filename) {
+    captureScreenshot: function (filename) {
       this.captureFilename = filename;
       this.captureID = this.$module.zincRenderer.addPostRenderCallbackFunction(
         this.captureScreenshotCallback
@@ -679,7 +754,7 @@ export default {
      *
      * @public
      */
-    fitWindow: function() {
+    fitWindow: function () {
       if (this.$module.scene) {
         this.$module.scene.viewAll();
       }
@@ -690,7 +765,7 @@ export default {
      *
      * @public
      */
-    zoomIn: function() {
+    zoomIn: function () {
       if (this.$module.scene) {
         this.$module.scene.changeZoomByScrollRateUnit(-1);
       }
@@ -701,7 +776,7 @@ export default {
      *
      * @public
      */
-    zoomOut: function() {
+    zoomOut: function () {
       if (this.$module.scene) {
         this.$module.scene.changeZoomByScrollRateUnit(1);
       }
@@ -711,7 +786,7 @@ export default {
      *
      * @public
      */
-    speedChanged: function(speed) {
+    speedChanged: function (speed) {
       this.currentSpeed = speed;
       this.$module.setPlayRate(this.defaultRate * this.currentSpeed);
     },
@@ -720,12 +795,12 @@ export default {
      *
      * @public
      */
-    stopFreeSpin: function() {
+    stopFreeSpin: function () {
       let cameracontrol = this.$module.scene.getZincCameraControls();
       cameracontrol.stopAutoTumble();
       this.isTransitioning = false;
     },
-    findObjectsWithGroupName: function(name) {
+    findObjectsWithGroupName: function (name) {
       let objects = [];
       if (name && name != "" && this.$module.scene) {
         objects = this.$module.scene.findObjectsWithGroupName(name);
@@ -735,7 +810,7 @@ export default {
     /**
      * Focus on named region
      */
-    viewRegion: function(names) {
+    viewRegion: function (names) {
       const rootRegion = this.$module.scene.getRootRegion();
       const groups = Array.isArray(names) ? names : [names];
       const objects = findObjectsWithNames(rootRegion, groups, "", true);
@@ -744,7 +819,8 @@ export default {
         if (this.$module.isSyncControl()) {
           this.$module.setSyncControlZoomToBox(box);
         } else {
-          const dist = this.$module.scene.camera.far - this.$module.scene.camera.near;
+          const dist =
+            this.$module.scene.camera.far - this.$module.scene.camera.near;
           this.$module.scene.viewAllWithBoundingBox(box);
           this.$module.scene.camera.far = this.$module.scene.camera.near + dist;
           this.$module.scene.camera.updateProjectionMatrix();
@@ -753,7 +829,7 @@ export default {
       }
       return false;
     },
-    setFocusedRegion: function(name) {
+    setFocusedRegion: function (name) {
       if (name) {
         if (this.isReady) {
           this.viewRegion(name);
@@ -764,7 +840,7 @@ export default {
         }
       }
     },
-    updateViewURL: function(viewURL) {
+    updateViewURL: function (viewURL) {
       if (viewURL) {
         if (this.isReady) {
           const url = new URL(viewURL, this.url);
@@ -776,7 +852,7 @@ export default {
         }
       }
     },
-    getRendererInfo: function() {
+    getRendererInfo: function () {
       if (this.$module.zincRenderer) {
         return this.$module.zincRenderer.getThreeJSRenderer().info;
       }
@@ -788,7 +864,7 @@ export default {
      *
      * @public
      */
-    freeSpin: function() {
+    freeSpin: function () {
       if (this.$module.scene) {
         let cameracontrol = this.$module.scene.getZincCameraControls();
         this.isTransitioning = true;
@@ -800,14 +876,14 @@ export default {
     /**
      * Callback when a region is selected/highlighted.
      * It will also update other controls.
-     * 
+     *
      */
-    eventNotifierCallback: function(event) {
+    eventNotifierCallback: function (event) {
       const names = [];
       let zincObjects = [];
       const region = undefined;
       if (event.eventType == 1 || event.eventType == 2) {
-        event.identifiers.forEach(identifier => {
+        event.identifiers.forEach((identifier) => {
           if (identifier) {
             let id = identifier.data.id
               ? identifier.data.id
@@ -837,7 +913,7 @@ export default {
       } else if (event.eventType == 2) {
         if (this.selectedObjects.length === 0) {
           this.hideRegionTooltip();
-        // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
+          // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
           if (this.$refs.treeControls) {
             if (names.length > 0) {
               //this.$refs.treeControls.changeHoverByNames(names, region, false);
@@ -846,7 +922,7 @@ export default {
               this.$refs.treeControls.removeHover(true);
             }
           }
-          if ((event.identifiers.length > 0) && event.identifiers[0]) {
+          if (event.identifiers.length > 0 && event.identifiers[0]) {
             let id = event.identifiers[0].data.id
               ? event.identifiers[0].data.id
               : event.identifiers[0].data.group;
@@ -855,19 +931,20 @@ export default {
               this.tData.label = id;
               if (event.identifiers[0].data.region)
                 this.tData.region = event.identifiers[0].data.region;
-              else
-                this.tData.region = "Root";
+              else this.tData.region = "Root";
               this.tData.x = event.identifiers[0].coords.x;
-              this.tData.y  = event.identifiers[0].coords.y;
+              this.tData.y = event.identifiers[0].coords.y;
             }
           }
           // Triggers when an object has been highlighted
           this.$emit("scaffold-highlighted", event.identifiers);
         }
-      } else if (event.eventType == 3)  { //MOVE
-        if ((event.identifiers.length > 0) && event.identifiers[0]) {
+      } else if (event.eventType == 3) {
+        //MOVE
+        if (event.identifiers.length > 0 && event.identifiers[0]) {
           if (event.identifiers[0].coords) {
-            const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
+            const offsets =
+              this.$refs.scaffoldContainer.getBoundingClientRect();
             this.tData.x = event.identifiers[0].coords.x - offsets.left;
             this.tData.y = event.identifiers[0].coords.y - offsets.top;
           }
@@ -879,7 +956,7 @@ export default {
      *
      * @public
      */
-    getCoordinatesOfSelected: function() {
+    getCoordinatesOfSelected: function () {
       if (this.selectedObjects && this.selectedObjects.length > 0) {
         return this.$module.scene.getObjectsScreenXY(this.selectedObjects);
       }
@@ -892,13 +969,13 @@ export default {
      *
      * @public
      */
-    getDynamicSelectedCoordinates: function() {
+    getDynamicSelectedCoordinates: function () {
       return this.$module.selectedScreenCoordinates;
     },
     /**
      * Callback when time is changed through the UI.
      */
-    timeChange: function(event) {
+    timeChange: function (event) {
       let normalizedTime = (event / this.timeMax) * 100;
       if (normalizedTime != this.sceneData.currentTime)
         this.$module.updateTime(normalizedTime);
@@ -908,7 +985,7 @@ export default {
      *
      * @param {object} object Zinc object
      */
-    objectSelected: function(objects, propagate) {
+    objectSelected: function (objects, propagate) {
       this.selectedObjects = objects;
       if (this.selectedObjects && this.selectedObjects.length > 0)
         this.$refs.opacityControl.setObject(this.selectedObjects[0]);
@@ -919,7 +996,7 @@ export default {
      *
      * @param {object} object Zinc object
      */
-    objectHovered: function(objects, propagate) {
+    objectHovered: function (objects, propagate) {
       this.hoveredObjects = objects;
       this.$module.setHighlightedByZincObjects(objects, undefined, propagate);
     },
@@ -928,14 +1005,13 @@ export default {
      *
      * @param {} name Name of the group
      */
-    changeActiveByName: function(names, region, propagate) {
+    changeActiveByName: function (names, region, propagate) {
       const isArray = Array.isArray(names);
       if (names === undefined || (isArray && names.length === 0)) {
         this.$refs.treeControls.removeActive(propagate);
       } else {
         let array = names;
-        if (!isArray)
-          array = [array];
+        if (!isArray) array = [array];
         this.$refs.treeControls.changeActiveByNames(array, region, propagate);
       }
     },
@@ -944,14 +1020,13 @@ export default {
      *
      * @param {name} name Name of the group
      */
-    changeHighlightedByName: function(names, region, propagate) {
+    changeHighlightedByName: function (names, region, propagate) {
       const isArray = Array.isArray(names);
       if (names === undefined || (isArray && names.length === 0)) {
         this.$refs.treeControls.removeHover(propagate);
       } else {
         let array = names;
-        if (!isArray)
-          array = [array];
+        if (!isArray) array = [array];
         this.$refs.treeControls.changeHoverByNames(array, region, propagate);
       }
     },
@@ -960,7 +1035,7 @@ export default {
      *
      * @param {object} object Zinc object
      */
-    play: function(flag) {
+    play: function (flag) {
       this.$module.playAnimation(flag);
       this.isPlaying = flag;
       //Hide tooltip as location may
@@ -969,15 +1044,15 @@ export default {
     /**
      * Function to toggle on/off overlay help.
      */
-    setHelpMode: function(helpMode) {
+    setHelpMode: function (helpMode) {
       if (helpMode) {
         this.inHelp = true;
-        this.hoverVisibilities.forEach(item => {
+        this.hoverVisibilities.forEach((item) => {
           item.value = true;
         });
       } else {
         this.inHelp = false;
-        this.hoverVisibilities.forEach(item => {
+        this.hoverVisibilities.forEach((item) => {
           item.value = false;
         });
       }
@@ -986,23 +1061,32 @@ export default {
      * Callback function used by showRegionTooltip in the case when the tooltip
      * is out of view.
      */
-    displayTooltipOfObjectsCallback: function(name, objects, resetView, liveUpdates) {
+    displayTooltipOfObjectsCallback: function (
+      name,
+      objects,
+      resetView,
+      liveUpdates
+    ) {
       const instance = this;
-      return function() {
-        instance.$module.zincRenderer.removePostRenderCallbackFunction(instance.$_regionTooltipCallback);
+      return function () {
+        instance.$module.zincRenderer.removePostRenderCallbackFunction(
+          instance.$_regionTooltipCallback
+        );
         instance.$_regionTooltipCallback = undefined;
         instance.displayTooltipOfObjects(name, objects, resetView, liveUpdates);
-      }
+      };
     },
-    liveUpdateTooltipPosition: function() {
+    liveUpdateTooltipPosition: function () {
       if (this.$module.selectedCenter) {
         this.tData.x = this.$module.selectedScreenCoordinates.x;
         this.tData.y = this.$module.selectedScreenCoordinates.y;
       }
     },
-    displayTooltipOfObjects: function(name, objects, resetView, liveUpdates) {
+    displayTooltipOfObjects: function (name, objects, resetView, liveUpdates) {
       if (objects.length > 0) {
-        let coords = objects[0].getClosestVertexDOMElementCoords(this.$module.scene);
+        let coords = objects[0].getClosestVertexDOMElementCoords(
+          this.$module.scene
+        );
         if (coords) {
           //The coords is not in view, view all if resetView flag is true
           if (!coords.inView) {
@@ -1012,11 +1096,18 @@ export default {
               //Use the post render callback to make sure the scene has been updated
               //before getting the position of the tooltip.
               if (this.$_regionTooltipCallback) {
-                this.$module.zincRenderer.removePostRenderCallbackFunction(this.$_regionTooltipCallback);
+                this.$module.zincRenderer.removePostRenderCallbackFunction(
+                  this.$_regionTooltipCallback
+                );
               }
-              this.$_regionTooltipCallback = 
+              this.$_regionTooltipCallback =
                 this.$module.zincRenderer.addPostRenderCallbackFunction(
-                  this.displayTooltipOfObjectsCallback(name, objects, resetView, liveUpdates)
+                  this.displayTooltipOfObjectsCallback(
+                    name,
+                    objects,
+                    resetView,
+                    liveUpdates
+                  )
                 );
             }
           } else {
@@ -1025,18 +1116,19 @@ export default {
             this.tData.x = coords.position.x;
             this.tData.y = coords.position.y;
             const regionPath = objects[0].getRegion().getFullPath();
-            if (regionPath)
-              this.tData.region = regionPath;
-            else
-              this.tData.region = "Root";
+            if (regionPath) this.tData.region = regionPath;
+            else this.tData.region = "Root";
             if (liveUpdates) {
               this.$module.setupLiveCoordinates(objects);
               if (this.$_liveCoordinatesUpdated) {
-                this.$module.zincRenderer.removePostRenderCallbackFunction(this.$_liveCoordinatesUpdated);
+                this.$module.zincRenderer.removePostRenderCallbackFunction(
+                  this.$_liveCoordinatesUpdated
+                );
               }
-              this.$_liveCoordinatesUpdated = 
+              this.$_liveCoordinatesUpdated =
                 this.$module.zincRenderer.addPostRenderCallbackFunction(
-                  this.liveUpdateTooltipPosition);
+                  this.liveUpdateTooltipPosition
+                );
             }
           }
           return true;
@@ -1046,24 +1138,31 @@ export default {
       return false;
     },
     /**
-     * Display the tooltip. When resetView is set to true, it will 
+     * Display the tooltip. When resetView is set to true, it will
      * reset view if the tooltip is not in view.
-     * Setting liveUpdates to true will update the tooltip location 
+     * Setting liveUpdates to true will update the tooltip location
      * at every rendering loop.
      */
-    showRegionTooltip: function(name, resetView, liveUpdates) {
+    showRegionTooltip: function (name, resetView, liveUpdates) {
       if (name && this.$module.scene) {
         const rootRegion = this.$module.scene.getRootRegion();
         const groups = [name];
         const objects = findObjectsWithNames(rootRegion, groups, "", true);
-        return this.displayTooltipOfObjects(name, objects, resetView, liveUpdates);
+        return this.displayTooltipOfObjects(
+          name,
+          objects,
+          resetView,
+          liveUpdates
+        );
       }
       this.hideRegionTooltip();
       return false;
     },
-    hideRegionTooltip: function() {
+    hideRegionTooltip: function () {
       if (this.$_liveCoordinatesUpdated) {
-        this.$module.zincRenderer.removePostRenderCallbackFunction(this.$_liveCoordinatesUpdated);
+        this.$module.zincRenderer.removePostRenderCallbackFunction(
+          this.$_liveCoordinatesUpdated
+        );
         //Unset the tracking
         this.$module.setupLiveCoordinates(undefined);
       }
@@ -1074,7 +1173,7 @@ export default {
      * This is called when mouse cursor enters supported elements
      * with help tootltips.
      */
-    showHelpText: function(helpTextNumber) {
+    showHelpText: function (helpTextNumber) {
       if (!this.inHelp) {
         this.helpTextWait = setTimeout(() => {
           this.hoverVisibilities[helpTextNumber].value = true;
@@ -1084,13 +1183,13 @@ export default {
     /**
      * This is called when mouse cursor exits supported element..
      */
-    hideHelpText: function(helpTextNumber) {
+    hideHelpText: function (helpTextNumber) {
       if (!this.inHelp) {
         this.hoverVisibilities[helpTextNumber].value = false;
         clearTimeout(this.helpTextWait);
       }
     },
-    search: function(text, displayLabel) {
+    search: function (text, displayLabel) {
       if (this.$_searchIndex) {
         if (text === undefined || text === "") {
           this.objectSelected([], true);
@@ -1102,7 +1201,11 @@ export default {
             if (displayLabel) {
               for (let i = 0; i < zincObjectResults.length; i++) {
                 if (zincObjectResults[i] && zincObjectResults[i].groupName) {
-                  this.showRegionTooltip(zincObjectResults[i].groupName, true, true)
+                  this.showRegionTooltip(
+                    zincObjectResults[i].groupName,
+                    true,
+                    true
+                  );
                 }
               }
             }
@@ -1117,27 +1220,25 @@ export default {
     /**
      * Get the list of suggested terms
      */
-    fetchSuggestions: function(term) {
-      if(this.$_searchIndex === undefined)
-        return [];
+    fetchSuggestions: function (term) {
+      if (this.$_searchIndex === undefined) return [];
       return this.$_searchIndex.auto_suggest(term);
     },
     /**
      * Called when minimap settings has changed. Pass the
      * parameters to ZincJS and marked it for update.
      */
-    updateMinimapScissor: function() {
-      Object.keys(this.minimapSettings).forEach(key => {
+    updateMinimapScissor: function () {
+      Object.keys(this.minimapSettings).forEach((key) => {
         this.$module.scene.minimapScissor[key] = this.minimapSettings[key];
       });
       this.$module.scene.minimapScissor.updateRequired = true;
     },
-    updateSettingsfromScene: function() {
+    updateSettingsfromScene: function () {
       this.currentSpeed = 1;
       this.$module.setPlayRate(this.defaultRate);
-      this.orginalDuration = this.$module.scene.getMetadataTag(
-        "OriginalDuration"
-      );
+      this.orginalDuration =
+        this.$module.scene.getMetadataTag("OriginalDuration");
       this.animateDuration = this.$module.scene.getMetadataTag("Duration");
       let timeStamps = this.$module.scene.getMetadataTag("TimeStamps");
       this.timeStamps = {};
@@ -1146,7 +1247,7 @@ export default {
       }
       this.timeMax = this.$module.scene.getDuration();
     },
-    setURLFinishCallback: function(options) {
+    setURLFinishCallback: function (options) {
       return () => {
         if (options) {
           if (options.viewport) {
@@ -1180,7 +1281,7 @@ export default {
      *
      * @public
      */
-    getState: function() {
+    getState: function () {
       let state = {
         format: this.fileFormat,
         url: this._currentURL,
@@ -1201,13 +1302,13 @@ export default {
      *
      * @public
      */
-    setState: function(state) {
+    setState: function (state) {
       if (state) {
         if (state.url && state.url !== this._currentURL) {
           this.setURLAndState(state.url, {
             fileFormat: state.fileFormat,
             viewport: state.viewport,
-            visibility: state.visibility
+            visibility: state.visibility,
           });
         } else {
           if (state.viewport || state.visibility) {
@@ -1222,7 +1323,7 @@ export default {
               this.$module.setFinishDownloadCallback(
                 this.setURLFinishCallback({
                   viewport: state.viewport,
-                  visibility: state.visibility
+                  visibility: state.visibility,
                 })
               );
             }
@@ -1230,7 +1331,7 @@ export default {
         }
       }
     },
-    exportGLTF: function(binary) {
+    exportGLTF: function (binary) {
       return this.$module.scene.exportGLTF(binary);
     },
     /**
@@ -1240,15 +1341,14 @@ export default {
      *
      * @public
      */
-    setURLAndState: function(newValue, state) {
+    setURLAndState: function (newValue, state) {
       if (newValue != this._currentURL) {
         if (state && state.format) this.fileFormat = state.format;
         let viewport = state && state.viewport ? state.viewport : undefined;
         let visibility =
           state && state.visibility ? state.visibility : undefined;
         this._currentURL = newValue;
-        if (this.$refs.treeControls)
-          this.$refs.treeControls.clear();
+        if (this.$refs.treeControls) this.$refs.treeControls.clear();
         this.loading = true;
         this.isReady = false;
         this.$module.setFinishDownloadCallback(
@@ -1256,7 +1356,7 @@ export default {
             viewport: viewport,
             region: this.region,
             viewURL: this.viewURL,
-            visibility: visibility
+            visibility: visibility,
           })
         );
         if (this.fileFormat === "gltf") {
@@ -1286,20 +1386,20 @@ export default {
      *
      * @public
      */
-    setURL: function(newValue) {
+    setURL: function (newValue) {
       this.setURLAndState(newValue, undefined);
     },
     /**
      * Callback when drawer is toggled.
      */
-    drawerToggled: function(flag) {
+    drawerToggled: function (flag) {
       this.drawerOpen = flag;
       this.adjustLayout();
     },
     /**
      * Callback using ResizeObserver.
      */
-    adjustLayout: function() {
+    adjustLayout: function () {
       let width = this.$refs.scaffoldContainer.clientWidth;
       this.minimisedSlider = width < 812;
       if (this.minimisedSlider) {
@@ -1308,7 +1408,7 @@ export default {
         this.sliderPosition = "";
       }
     },
-    toggleRendering: function(flag) {
+    toggleRendering: function (flag) {
       if (this.$module.zincRenderer) {
         if (flag) {
           this.$module.zincRenderer.animate();
@@ -1317,32 +1417,33 @@ export default {
         }
       }
     },
-    forceResize: function() {
+    forceResize: function () {
       if (this.$module.zincRenderer) {
         this.$module.zincRenderer.onWindowResize();
       }
     },
-    syncControlCallback: function() {
+    syncControlCallback: function () {
       const payload = this.$module.NDCCameraControl.getPanZoom();
       if (this.tData.visible) {
         this.showRegionTooltip(this.tData.label);
       }
       this.$emit("scaffold-navigated", payload);
     },
-    /** 
+    /**
      * Rotate mode - "none", "horizontal", "vertical", "free" but
      * it will be ignored if flag is set to false.
      */
-    toggleSyncControl: function(flag, rotateMode) {
+    toggleSyncControl: function (flag, rotateMode) {
       this.$module.toggleSyncControl(flag, rotateMode);
       this.$module.setSyncControlCallback(this.syncControlCallback);
-    }
-  }
+    },
+  },
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
+@import "~element-ui/packages/theme-chalk/src/button";
 @import "~element-ui/packages/theme-chalk/src/col";
 @import "~element-ui/packages/theme-chalk/src/loading";
 @import "~element-ui/packages/theme-chalk/src/option";
@@ -1352,7 +1453,6 @@ export default {
 @import "~element-ui/packages/theme-chalk/src/slider";
 @import "~element-ui/packages/theme-chalk/src/tabs";
 @import "~element-ui/packages/theme-chalk/src/tab-pane";
-
 
 .message-icon {
   position: absolute;
@@ -1515,7 +1615,35 @@ export default {
   }
 }
 
-.background-colour {
+::v-deep .open-map-popper {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  background-color: #ffffff;
+  border: 1px solid $app-primary-color;
+  box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
+  width: 128px;
+  min-width: 128px;
+
+  .el-row ~ .el-row {
+    margin-top: 8px;
+  }
+
+  .el-button {
+    padding-top:5px;
+    padding-bottom:5px;
+  }
+
+  &.el-popper[x-placement^="top"] {
+    .popper__arrow {
+      border-top-color: $app-primary-color !important;
+      &:after {
+        border-top-color: #fff !important;
+      }
+    }
+  }
+}
+
+.settings-group {
   bottom: 16px;
   position: absolute;
   transition: all 1s ease;
@@ -1684,7 +1812,8 @@ export default {
 }
 
 ::v-deep .el-loading-spinner {
-  i, .el-loading-text {
+  i,
+  .el-loading-text {
     color: $app-primary-color;
   }
 }
@@ -1743,7 +1872,7 @@ export default {
 
 .opacity-box {
   right: 0px;
-  bottom:200px;
-  position:absolute;
+  bottom: 200px;
+  position: absolute;
 }
 </style>

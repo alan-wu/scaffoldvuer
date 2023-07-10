@@ -6,15 +6,17 @@
     <div class="traditional-container">
       <el-row>
         <el-col :span="12">
-          <div class="regions-display-text">Regions</div>
+          <div class="regions-display-text">
+            Regions
+          </div>
         </el-col>
       </el-row>
       <div class="tree-container">
         <el-tree
           ref="regionTree"
           node-key="id"
-          show-checkbox
           v-loading="!isReady"
+          show-checkbox
           element-loading-spinner="el-icon-loading"
           element-loading-background="rgba(0, 0, 0, 0.3)"
           :check-strictly="false"

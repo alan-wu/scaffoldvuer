@@ -17,12 +17,14 @@
         :display-latest-changes="true"
         :display-minimap="displayMinimap"
         :display-markers="displayMarkers"
+        :enableOpenMapUI="true"
         :minimap-settings="minimapSettings"
         :show-colour-picker="showColourPicker"
         :render="render"
         :region="region"
         :view-u-r-l="viewURL"
         :format="format"
+        @open-map="openMap"
         @on-ready="onReady"
         @scaffold-selected="onSelected"
         @scaffold-navigated="onNavigated"
@@ -511,6 +513,10 @@ export default {
     objectAdded: function (zincObject) {
       console.log(zincObject);
       this._objects.push(zincObject);
+    },
+    openMap: function (map) {
+
+      console.log(map)
     },
     featureTesting: async function () {
       //Test texture
