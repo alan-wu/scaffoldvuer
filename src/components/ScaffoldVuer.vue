@@ -1192,11 +1192,19 @@ export default {
     },
     search: function (text, displayLabel) {
       if (this.$_searchIndex) {
-        if (text === undefined || text === "") {
-          this.objectSelected([], true);
+        if (text === undefined || text === "" ||
+          ((Array.isArray(text) && text.length === 0))
+        ) {
+          this.objectSelected([], true); 
           return false;
         } else {
-          let zincObjectResults = this.$_searchIndex.search(text);
+          let zincObjectResults = [];
+          if (Array.isArray(text)) {
+            //zincObjectResults = this.$_searchIndex.search("Heart");
+            zincObjectResults = this.$_searchIndex.searchTerms(text);
+          } else {
+            zincObjectResults = this.$_searchIndex.search(text);
+          }
           if (zincObjectResults.length > 0) {
             this.objectSelected(zincObjectResults, true);
             if (displayLabel) {
