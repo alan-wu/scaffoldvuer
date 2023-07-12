@@ -274,7 +274,7 @@
             popper-class="scaffold-popper right-popper non-selectable"
           >
             <map-svg-icon
-              v-if="enableOpenMapUI && openMapOptions.lenght > 0"
+              v-if="enableOpenMapUI && openMapOptions.length > 0"
               slot="reference"
               v-popover:open-map-popover
               icon="openMap"
