@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/scaffoldvuer",
-  "version": "0.2.1",
+  "version": "0.2.2-beta.2",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -29,7 +29,7 @@
     "*.js"
   ],
   "dependencies": {
-    "@abi-software/svg-sprite": "^0.1.15",
+    "@abi-software/svg-sprite": "^0.3.0",
     "axios": "^0.21.2",
     "core-js": "^3.22.5",
     "current-script-polyfill": "^1.0.0",
