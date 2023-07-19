@@ -163,7 +163,6 @@ export default {
   mounted: function () {
     this.flatmapQueries = new FlatmapQueries();
     this.flatmapQueries.initialise("", this.flatmapAPI);
-    window.flatmapQueries = this.flatmapQueries;
   },
 };
 </script>
