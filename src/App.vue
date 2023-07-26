@@ -612,6 +612,9 @@ export default {
       if (flag) {
         this.displayUI = false;
         cameracontrol.enableAutoTumble();
+        if (this.tumbleDirection[0] === 0 && this.tumbleDirection[1] === 0) {
+          this.tumbleDirection[0] = 1;
+        }
         cameracontrol.autoTumble(this.tumbleDirection, Math.PI / 2, true);
       } else {
         this.displayUI = true;
