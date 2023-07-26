@@ -96,6 +96,16 @@ export class SearchIndex
         return zincResults;
     }
 
+    searchTerms(terms){
+      let results = [];
+      terms.forEach(term => {
+        const result = this.search(term);
+        results.push(...result);
+      });
+    
+      return results;
+    }
+
     // search(text)
     // //==========
     // {

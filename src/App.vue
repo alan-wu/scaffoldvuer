@@ -17,12 +17,14 @@
         :display-latest-changes="true"
         :display-minimap="displayMinimap"
         :display-markers="displayMarkers"
+        :enableOpenMapUI="true"
         :minimap-settings="minimapSettings"
         :show-colour-picker="showColourPicker"
         :render="render"
         :region="region"
         :view-u-r-l="viewURL"
         :format="format"
+        @open-map="openMap"
         @on-ready="onReady"
         @scaffold-selected="onSelected"
         @scaffold-navigated="onNavigated"
@@ -82,14 +84,56 @@
               active-color="#8300bf"
             />
           </el-col>
+        </el-row>
+        <el-row :gutter="20">
           <el-col
             :span="6"
-            :offset="1"
           >
             <el-switch
               v-model="tumbleOn"
               active-text="Tumble"
               active-color="#8300bf"
+            />
+          </el-col>
+          <el-col
+            :span="1"
+          >
+            x:
+          </el-col>
+          <el-col
+            :span="3"
+          >
+            <el-input-number
+              class="tumble-direction"
+              controls-position="right"
+              v-model="tumbleDirection[0]"
+              :min="-1.0"
+              :max="1.0"
+              :controls="false"
+              placeholder="Please input"
+              label="x"
+              @change="autoTumble"
+            />
+          </el-col>
+          <el-col
+            :span="1"
+            :offset="1"
+          >
+            y:
+          </el-col>
+          <el-col
+            :span="3"
+          >
+            <el-input-number
+              class="tumble-direction"
+              controls-position="right"
+              v-model="tumbleDirection[1]"
+              :min="-1.0"
+              :max="1.0"
+              :controls="false"
+              placeholder="Please input"
+              label="y"
+              @change="autoTumble"
             />
           </el-col>
         </el-row>
@@ -436,6 +480,7 @@ export default {
       currentTime: 0,
       displayMinimap: false,
       tumbleOn: false,
+      tumbleDirection: [1.0, 0.0],
       showColourPicker: true,
       minimapSettings: {
         x_offset: 16,
@@ -461,8 +506,8 @@ export default {
     input: function () {
       this.parseInput();
     },
-    tumbleOn: function (val) {
-      this.autoTumble(val);
+    tumbleOn: function () {
+      this.autoTumble();
     },
     "$route.query": {
       handler: "parseQuery",
@@ -512,6 +557,9 @@ export default {
       console.log(zincObject);
       this._objects.push(zincObject);
     },
+    openMap: function (map) {
+      console.log(map)
+    },
     featureTesting: async function () {
       //Test texture
       testVolume(this.$refs.scaffold.$module, this._objects);
@@ -557,13 +605,14 @@ export default {
         this.$refs.scaffold.fetchSuggestions(term)
       );
   },
-    autoTumble: function (flag) {
+    autoTumble: function () {
+      const flag = this.tumbleOn;
       let cameracontrol =
         this.$refs.scaffold.$module.scene.getZincCameraControls();
       if (flag) {
         this.displayUI = false;
         cameracontrol.enableAutoTumble();
-        cameracontrol.autoTumble([1.0, 0.0], Math.PI / 2, true);
+        cameracontrol.autoTumble(this.tumbleDirection, Math.PI / 2, true);
       } else {
         this.displayUI = true;
         cameracontrol.stopAutoTumble();
@@ -642,6 +691,7 @@ export default {
 @import "~element-ui/packages/theme-chalk/src/col";
 @import "~element-ui/packages/theme-chalk/src/icon";
 @import "~element-ui/packages/theme-chalk/src/input";
+@import "~element-ui/packages/theme-chalk/src/input-number";
 @import "~element-ui/packages/theme-chalk/src/switch";
 @import "~element-ui/packages/theme-chalk/src/popover";
 @import "~element-ui/packages/theme-chalk/src/row";
@@ -696,6 +746,20 @@ body {
 .models-popover {
   top: 5px;
   position: absolute;
+}
+
+.tumble-direction {
+  height: 20px;
+  .el-input {
+    width: 80px;
+    height: 20px;
+    padding: 0;
+    input {
+      padding: 0px;
+      height: 20px;
+      vertical-align: top;
+    }
+  }
 }
 
 .table-popover {
