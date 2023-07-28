@@ -234,7 +234,7 @@
             plain
             @click="$emit('open-map', item.key)"
           >
-            {{item.display}}
+            {{ item.display }}
           </el-button>
         </el-row>
       </el-popover>
@@ -685,6 +685,13 @@ export default {
     this.$module = undefined;
   },
   methods: {
+    addZincObject: function (zincObject) {
+      if (this.$module.scene) {
+        this.$module.scene.addZincObject(zincObject);
+        this.zincObjectAdded(zincObject);
+        if (this.$refs.treeControls) this.$refs.treeControls.zincObjectAdded(zincObject);
+      }
+    },
     /**
      * This is called when a new zinc object is read into the scene.
      */
@@ -738,6 +745,16 @@ export default {
       this.captureID = this.$module.zincRenderer.addPostRenderCallbackFunction(
         this.captureScreenshotCallback
       );
+    },
+    /**
+     * Function to clear current scene, the tree controls and the search index.
+     *
+     * @public
+     */
+    clearScene: function () {
+      if (this.$refs.treeControls) this.$refs.treeControls.clear();
+      if (this.$_searchIndex) this.$_searchIndex.removeAll();
+      if (this.$module.scene) this.$module.scene.clearAll();
     },
     formatTooltip(val) {
       if (this.timeMax >= 1000) {

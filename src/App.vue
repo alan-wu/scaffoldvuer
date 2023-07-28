@@ -425,9 +425,11 @@ const testVolume = async (scaffoldModule, objects) => {
   }
 };
 
-const testSlides = async (scaffoldModule) => {
+const testSlides = async (scaffoldVuer) => {
+  const scaffoldModule = scaffoldVuer.$module;
   const texture = await getTexture(scaffoldModule);
   const textureSlides = new scaffoldModule.Zinc.TextureSlides(texture);
+  textureSlides.setName("Texture slides");
   textureSlides.createSlides([
     {
       direction: "y",
@@ -458,7 +460,7 @@ const testSlides = async (scaffoldModule) => {
       value: 0.5,
     },
   ]);
-  scaffoldModule.scene.addZincObject(textureSlides);
+  scaffoldVuer.addZincObject(textureSlides);
 };
 
 export default {
@@ -567,7 +569,8 @@ export default {
     featureTesting2: async function () {
       //Test texture
       //testVolume(this.$refs.scaffold.$module, this._objects);
-      testSlides(this.$refs.scaffold.$module);
+      this.$refs.scaffold.clearScene();
+      testSlides(this.$refs.scaffold);
     },
     saveSettings: function () {
       this.sceneSettings.push(this.$refs.scaffold.getState());

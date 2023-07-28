@@ -334,11 +334,14 @@ export default {
      * Reset the controls.
      */
     clear: function () {
+      console.log("clear")
       this.active.group = "";
       this.active.regionPath = undefined;
       this.hover.group = "";
       this.hover.regionPath = undefined;
-      this.$refs.regionTree.updateKeyChildren("__r/", []);
+      this.treeData[0].children.forEach(child => {
+        this.$refs.regionTree.remove(child.id);
+      });
       this.treeData[0].children.length = 0;
       this.$emit("object-selected", undefined);
     },
