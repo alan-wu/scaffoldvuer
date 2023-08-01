@@ -45,7 +45,6 @@
           <p>{{ selectedCoordinates }}</p>
         </el-row>
         <el-row
-          class="app-row"
           :gutter="20"
         >
           <p v-if="currentTime !== 0">
@@ -149,18 +148,6 @@
             @click="screenCapture()"
           >
             Capture
-          </el-button>
-          <el-button
-            size="mini"
-            @click="featureTesting()"
-          >
-            Test 1
-          </el-button>
-          <el-button
-            size="mini"
-            @click="featureTesting2()"
-          >
-            Test 2
           </el-button>
         </el-row>
         <el-row :gutter="10">
@@ -269,13 +256,42 @@
             </el-col>
           </el-row>
         </template>
-        <el-input
-          v-model="input"
-          type="textarea"
-          autosize
-          placeholder="Please input"
-          style="padding-left: 5%; width: 90%"
-        />
+        <el-row :gutter="20">
+          Feature Demo:
+          <el-button
+            size="mini"
+            @click="featureTextureVolume(false)"
+          >
+            Texture volume
+          </el-button>
+          <el-button
+            size="mini"
+            @click="featureTextureSlides(false)"
+          >
+            Texture slides
+          </el-button>
+          <el-button
+            size="mini"
+            @click="featureTextureVolume(true)"
+          >
+            Body volume
+          </el-button>
+          <el-button
+            size="mini"
+            @click="featureTextureSlides(true)"
+          >
+            Body slides
+          </el-button>
+        </el-row>
+        <el-row :gutter="20">
+          <el-input
+            v-model="input"
+            type="textarea"
+            autosize
+            placeholder="Please input"
+            style="padding-left: 5%; width: 90%"
+          />
+        </el-row>
       </div>
       <el-button
         slot="reference"
@@ -414,15 +430,23 @@ const getTexture = async (scaffoldModule) => {
   return texture;
 };
 
-const testVolume = async (scaffoldModule, objects) => {
-  if (objects) {
-    const texture = await getTexture(scaffoldModule);
-    //const options = getTestShader(texture);
-    const options = getVolumeTexture(texture);
-    const material = texture.getMaterial(options);
-    console.log(material, texture, objects);
-    objects[0].morph.material = material;
-  }
+const testVolume = async (scaffoldVuer) => {
+  const cube = new scaffoldVuer.$module.Zinc.THREE.BoxGeometry(1, 1, 1);
+  const zincObject = new scaffoldVuer.$module.Zinc.Geometry();
+  zincObject.setName("Texture volume");
+  cube.translate(0.5, 0.5, 0.5);
+  let meshOptions = {};
+  meshOptions.opacity = 1.0;
+  meshOptions.localTimeEnabled = false;
+  meshOptions.localMorphColour = false
+  const texture = await getTexture(scaffoldVuer.$module);
+  const options = getVolumeTexture(texture);
+  const material = texture.getMaterial(options);
+  zincObject.createMesh(cube, material, meshOptions);
+  scaffoldVuer.addZincObject(zincObject);
+  zincObject.morph.matrix.set( -100, 0, 0, -60, 0, -100, 0, -100, 0, 0, -100, 30, 0, 0, 0, 1 );
+  console.log(zincObject.morph.matrix)
+  window.texture = zincObject;
 };
 
 const testSlides = async (scaffoldVuer) => {
@@ -460,7 +484,15 @@ const testSlides = async (scaffoldVuer) => {
       value: 0.5,
     },
   ]);
+  //textureSlides.morph.matrix.set(-100, 0, 0, 0, 0, -100, 0, 0, 0, 0, -100, 0, -60, -100, 30, 1);
+  //textureSlides.morph.matrix.set( -100, 0, 0, -60, 0, -100, 0, -100, 0, 0, -100, 30, 0, 0, 0, 1 );
   scaffoldVuer.addZincObject(textureSlides);
+  const n = textureSlides.morph.matrix.clone();
+  n.set( -100, 0, 0, -10, 0, -200, 0, 0, 0, 0, -100, 0, 0, 0, 10, 1 );
+  textureSlides.morph.applyMatrix4(n);
+  console.log(textureSlides.morph.matrix)
+  //scaffoldVuer.fitWindow();
+  window.texture = textureSlides;
 };
 
 export default {
@@ -502,6 +534,8 @@ export default {
       sceneSettings: [],
       searchInput: "",
       searchText: "",
+      loadTextureVolumeOnReady: false,
+      readyCallback: undefined,
     };
   },
   watch: {
@@ -562,13 +596,37 @@ export default {
     openMap: function (map) {
       console.log(map)
     },
-    featureTesting: async function () {
-      //Test texture
-      testVolume(this.$refs.scaffold.$module, this._objects);
+    featureTextureVolume: async function (overlap) {
+      //this.$refs.scaffold.clearScene();
+      //volume matrix to fit the human body
+      //[-100, 0, 0, 0, 0, -100, 0, 0, 0, 0, -100, 0, -60, -100, 30, 1]
+      if (overlap) {
+        const url = "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/WholeBody/6-match-2023/human/nerve_metadata.json";
+        if (this.$route.query.url !== encodeURI(url)) {
+          this.$router.replace({query: {url}});
+          this.readyCallback = testVolume;
+          return;
+        } else {
+          testVolume(this.$refs.scaffold);
+          return;
+        }
+      }
+      this.$refs.scaffold.clearScene();
+      testVolume(this.$refs.scaffold);
     },
-    featureTesting2: async function () {
+    featureTextureSlides: async function (overlap) {
       //Test texture
-      //testVolume(this.$refs.scaffold.$module, this._objects);
+      if (overlap) {
+        const url = "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/WholeBody/6-match-2023/human/nerve_metadata.json";
+        if (this.$route.query.url !== encodeURI(url)) {
+          this.$router.replace({query: {url}});
+          this.readyCallback = testSlides;
+          return;
+        } else {
+          testSlides(this.$refs.scaffold);
+          return;
+        }
+      }
       this.$refs.scaffold.clearScene();
       testSlides(this.$refs.scaffold);
     },
@@ -628,6 +686,10 @@ export default {
       console.log("ready");
       //window.scaffoldvuer = this.$refs.scaffold;
       this.$refs.dropzone.revokeURLs();
+      if (this.readyCallback) {
+        this.readyCallback(this.$refs.scaffold);
+        this.readyCallback = undefined;
+      }
     },
     onSelected: function (data) {
       console.log(data);
@@ -740,9 +802,9 @@ body {
   position: absolute;
 }
 
-.app-row {
+.options-container {
   .el-row {
-    margin-bottom: 5px;
+    margin-bottom: 10px;
     &:last-child {
       margin-bottom: 0;
     }
@@ -775,4 +837,5 @@ body {
 svg.map-icon {
   color: $app-primary-color;
 }
+
 </style>
