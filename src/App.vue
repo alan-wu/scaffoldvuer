@@ -3,11 +3,8 @@
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Asap:400,400i,500,600,700&display=swap"
-    >
-    <drop-zone
-      ref="dropzone"
-      @files-drop="onFilesDrop"
-    >
+    />
+    <drop-zone ref="dropzone" @files-drop="onFilesDrop">
       <ScaffoldVuer
         ref="scaffold"
         class="vuer"
@@ -44,28 +41,16 @@
         <el-row :gutter="20">
           <p>{{ selectedCoordinates }}</p>
         </el-row>
-        <el-row
-          class="app-row"
-          :gutter="20"
-        >
+        <el-row :gutter="20">
           <p v-if="currentTime !== 0">
             time emited is: {{ currentTime.toFixed(2) }}
           </p>
         </el-row>
         <el-row :gutter="20">
-          <el-col
-            :span="4"
-            :offset="1"
-          >
-            <el-switch
-              v-model="displayUI"
-              active-text="UI"
-            />
+          <el-col :span="4" :offset="1">
+            <el-switch v-model="displayUI" active-text="UI" />
           </el-col>
-          <el-col
-            :span="4"
-            :offset="1"
-          >
+          <el-col :span="4" :offset="1">
             <el-switch
               v-model="displayMarkers"
               active-text="Markers"
@@ -73,10 +58,7 @@
               active-color="#8300bf"
             />
           </el-col>
-          <el-col
-            :span="4"
-            :offset="1"
-          >
+          <el-col :span="4" :offset="1">
             <el-switch
               v-model="displayMinimap"
               active-text="Minimap"
@@ -86,23 +68,15 @@
           </el-col>
         </el-row>
         <el-row :gutter="20">
-          <el-col
-            :span="6"
-          >
+          <el-col :span="6">
             <el-switch
               v-model="tumbleOn"
               active-text="Tumble"
               active-color="#8300bf"
             />
           </el-col>
-          <el-col
-            :span="1"
-          >
-            x:
-          </el-col>
-          <el-col
-            :span="3"
-          >
+          <el-col :span="1"> x: </el-col>
+          <el-col :span="3">
             <el-input-number
               class="tumble-direction"
               controls-position="right"
@@ -115,15 +89,8 @@
               @change="autoTumble"
             />
           </el-col>
-          <el-col
-            :span="1"
-            :offset="1"
-          >
-            y:
-          </el-col>
-          <el-col
-            :span="3"
-          >
+          <el-col :span="1" :offset="1"> y: </el-col>
+          <el-col :span="3">
             <el-input-number
               class="tumble-direction"
               controls-position="right"
@@ -138,62 +105,23 @@
           </el-col>
         </el-row>
         <el-row :gutter="20">
-          <el-button
-            size="mini"
-            @click="helpMode = !helpMode"
-          >
+          <el-button size="mini" @click="helpMode = !helpMode">
             Help Mode
           </el-button>
-          <el-button
-            size="mini"
-            @click="screenCapture()"
-          >
-            Capture
-          </el-button>
-          <el-button
-            size="mini"
-            @click="featureTesting()"
-          >
-            Test 1
-          </el-button>
-          <el-button
-            size="mini"
-            @click="featureTesting2()"
-          >
-            Test 2
-          </el-button>
+          <el-button size="mini" @click="screenCapture()"> Capture </el-button>
         </el-row>
         <el-row :gutter="10">
-          <el-button
-            size="mini"
-            @click="saveSettings()"
-          >
+          <el-button size="mini" @click="saveSettings()">
             Save Settings
           </el-button>
-          <el-button
-            size="mini"
-            @click="restoreSettings()"
-          >
+          <el-button size="mini" @click="restoreSettings()">
             Restore Settings
           </el-button>
-          <el-button
-            size="mini"
-            @click="exportGLB()"
-          >
-            Export GLB
-          </el-button>
-          <el-button
-            size="mini"
-            @click="exportGLTF()"
-          >
-            Export GLTF
-          </el-button>
+          <el-button size="mini" @click="exportGLB()"> Export GLB </el-button>
+          <el-button size="mini" @click="exportGLTF()"> Export GLTF </el-button>
         </el-row>
         <el-row :gutter="30">
-          <el-col
-            :span="7"
-            :offset="2"
-          >
+          <el-col :span="7" :offset="2">
             <el-switch
               v-model="syncMode"
               active-text="Sync Mode"
@@ -226,20 +154,14 @@
           </el-col>
         </el-row>
         <el-row :gutter="30">
-          <el-col
-            :span="7"
-            :offset="4"
-          >
+          <el-col :span="7" :offset="4">
             <el-switch
               v-model="render"
               active-text="Rendering"
               active-color="#8300bf"
             />
           </el-col>
-          <el-col
-            :span="8"
-            :offset="1"
-          >
+          <el-col :span="8" :offset="1">
             <el-switch
               v-model="renderInfoOn"
               active-text="Renderer Info"
@@ -269,13 +191,30 @@
             </el-col>
           </el-row>
         </template>
-        <el-input
-          v-model="input"
-          type="textarea"
-          autosize
-          placeholder="Please input"
-          style="padding-left: 5%; width: 90%"
-        />
+        <el-row :gutter="20">
+          Feature Demo:
+          <el-button size="mini" @click="featureTextureVolume(false)">
+            Texture volume
+          </el-button>
+          <el-button size="mini" @click="featureTextureSlides(false)">
+            Texture slides
+          </el-button>
+          <el-button size="mini" @click="featureTextureVolume(true)">
+            Body volume
+          </el-button>
+          <el-button size="mini" @click="featureTextureSlides(true)">
+            Body slides
+          </el-button>
+        </el-row>
+        <el-row :gutter="20">
+          <el-input
+            v-model="input"
+            type="textarea"
+            autosize
+            placeholder="Please input"
+            style="padding-left: 5%; width: 90%"
+          />
+        </el-row>
       </div>
       <el-button
         slot="reference"
@@ -294,10 +233,7 @@
       :append-to-body="false"
     >
       <ModelsTable @viewModelClicked="viewModelClicked" />
-      <el-button
-        slot="reference"
-        icon="el-icon-folder-opened"
-      >
+      <el-button slot="reference" icon="el-icon-folder-opened">
         Models
       </el-button>
       <el-autocomplete
@@ -318,8 +254,9 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import { ScaffoldVuer } from "./components/index.js";
-import DropZone from "./components/DropZone.vue";
-import ModelsTable from "./components/ModelsTable.vue";
+import DropZone from "./app/DropZone.vue";
+import ModelsTable from "./app/ModelsTable.vue";
+import {testSlides, testVolume} from "./app/TextureDemos.js";
 import Vue from "vue";
 import {
   Button,
@@ -334,9 +271,6 @@ import {
 } from "element-ui";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
-import taShader from "zincjs/src/shaders/textureArray.js";
-import volumeRender from "zincjs/src/shaders/volumeRender.js";
-import volumeTexture from "zincjs/src/shaders/volumeTexture.js";
 
 locale.use(lang);
 Vue.use(Button);
@@ -350,116 +284,6 @@ Vue.use(Switch);
 Vue.use(Autocomplete);
 
 let texture_prefix = undefined;
-
-const getVolumeRender = (texture) => {
-  const myUniforms = volumeRender.getUniforms();
-  console.log(myUniforms);
-  myUniforms.u_size.value.set(
-    texture.size.width,
-    texture.size.height,
-    texture.size.depth
-  );
-  myUniforms.u_data.value = texture.impl;
-  const options = {
-    fs: volumeRender.fs,
-    vs: volumeRender.vs,
-    uniforms: myUniforms,
-    glslVersion: volumeRender.glslVersion,
-  };
-  return options;
-};
-
-const getVolumeTexture = (texture) => {
-  const myUniforms = volumeTexture.getUniforms();
-  console.log(myUniforms);
-  myUniforms.volume_scale.value.set(
-    texture.size.width / texture.size.depth,
-    texture.size.height / texture.size.depth,
-    1
-  );
-  myUniforms.diffuse.value = texture.impl;
-  myUniforms.depth.value = texture.size.depth;
-  myUniforms.volume_dims.value = [200, 200, 200];
-  const options = {
-    fs: volumeTexture.fs,
-    vs: volumeTexture.vs,
-    uniforms: myUniforms,
-    glslVersion: volumeTexture.glslVersion,
-  };
-  return options;
-};
-
-const getTestShader = (texture) => {
-  const myUniforms = taShader.getUniforms();
-  myUniforms.depth.value = texture.size.depth;
-  myUniforms.diffuse.value = texture.impl;
-  const options = {
-    fs: taShader.fs,
-    vs: taShader.vs,
-    uniforms: myUniforms,
-    glslVersion: taShader.glslVersion,
-  };
-  console.log(options);
-  return options;
-};
-
-const getTexture = async (scaffoldModule) => {
-  const imgArray = [];
-  const texture = new scaffoldModule.Zinc.TextureArray();
-  for (let i = 1733; i < 1860; i++) {
-    imgArray.push(`${texture_prefix}/foot${i}.jpg`);
-    //imgArray.push(`${process.env.VUE_APP_TEXTURE_FOOT_PREFIX}/foot${i}.jpg`);
-  }
-  await texture.loadFromImages(imgArray);
-  return texture;
-};
-
-const testVolume = async (scaffoldModule, objects) => {
-  if (objects) {
-    const texture = await getTexture(scaffoldModule);
-    //const options = getTestShader(texture);
-    const options = getVolumeTexture(texture);
-    const material = texture.getMaterial(options);
-    console.log(material, texture, objects);
-    objects[0].morph.material = material;
-  }
-};
-
-const testSlides = async (scaffoldModule) => {
-  const texture = await getTexture(scaffoldModule);
-  const textureSlides = new scaffoldModule.Zinc.TextureSlides(texture);
-  textureSlides.createSlides([
-    {
-      direction: "y",
-      value: 0.1,
-    },
-    {
-      direction: "y",
-      value: 0.3,
-    },
-    {
-      direction: "y",
-      value: 0.5,
-    },
-    {
-      direction: "y",
-      value: 0.7,
-    },
-    {
-      direction: "y",
-      value: 0.9,
-    },
-    {
-      direction: "x",
-      value: 0.5,
-    },
-    {
-      direction: "z",
-      value: 0.5,
-    },
-  ]);
-  scaffoldModule.scene.addZincObject(textureSlides);
-};
 
 export default {
   name: "App",
@@ -500,6 +324,8 @@ export default {
       sceneSettings: [],
       searchInput: "",
       searchText: "",
+      loadTextureVolumeOnReady: false,
+      readyCallback: undefined,
     };
   },
   watch: {
@@ -558,16 +384,43 @@ export default {
       this._objects.push(zincObject);
     },
     openMap: function (map) {
-      console.log(map)
+      console.log(map);
     },
-    featureTesting: async function () {
-      //Test texture
-      testVolume(this.$refs.scaffold.$module, this._objects);
+    featureTextureVolume: async function (overlap) {
+      //this.$refs.scaffold.clearScene();
+      //volume matrix to fit the human body
+      //[-100, 0, 0, 0, 0, -100, 0, 0, 0, 0, -100, 0, -60, -100, 30, 1]
+      if (overlap) {
+        const url =
+          "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/WholeBody/6-match-2023/human/nerve_metadata.json";
+        if (this.$route.query.url !== encodeURI(url)) {
+          this.$router.replace({ query: { url } });
+          this.readyCallback = testVolume;
+          return;
+        } else {
+          testVolume(this.$refs.scaffold, texture_prefix);
+          return;
+        }
+      }
+      this.$refs.scaffold.clearScene();
+      testVolume(this.$refs.scaffold, texture_prefix);
     },
-    featureTesting2: async function () {
+    featureTextureSlides: async function (overlap) {
       //Test texture
-      //testVolume(this.$refs.scaffold.$module, this._objects);
-      testSlides(this.$refs.scaffold.$module);
+      if (overlap) {
+        const url =
+          "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/WholeBody/6-match-2023/human/nerve_metadata.json";
+        if (this.$route.query.url !== encodeURI(url)) {
+          this.$router.replace({ query: { url } });
+          this.readyCallback = testSlides;
+          return;
+        } else {
+          testSlides(this.$refs.scaffold, texture_prefix);
+          return;
+        }
+      }
+      this.$refs.scaffold.clearScene();
+      testSlides(this.$refs.scaffold, texture_prefix);
     },
     saveSettings: function () {
       this.sceneSettings.push(this.$refs.scaffold.getState());
@@ -589,7 +442,7 @@ export default {
       this.$refs.scaffold.search(term, true);
     },
     fetchSuggestions: function (term, cb) {
-      if ( term === "" || !this.$refs.scaffold ) {
+      if (term === "" || !this.$refs.scaffold) {
         cb([]);
       }
       cb(
@@ -604,7 +457,7 @@ export default {
         "found suggestions",
         this.$refs.scaffold.fetchSuggestions(term)
       );
-  },
+    },
     autoTumble: function () {
       const flag = this.tumbleOn;
       let cameracontrol =
@@ -625,6 +478,10 @@ export default {
       console.log("ready");
       //window.scaffoldvuer = this.$refs.scaffold;
       this.$refs.dropzone.revokeURLs();
+      if (this.readyCallback) {
+        this.readyCallback(this.$refs.scaffold, texture_prefix);
+        this.readyCallback = undefined;
+      }
     },
     onSelected: function (data) {
       console.log(data);
@@ -737,9 +594,9 @@ body {
   position: absolute;
 }
 
-.app-row {
+.options-container {
   .el-row {
-    margin-bottom: 5px;
+    margin-bottom: 10px;
     &:last-child {
       margin-bottom: 0;
     }

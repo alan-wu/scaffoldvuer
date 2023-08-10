@@ -42,7 +42,7 @@
     "vue-custom-element": "^3.3.0",
     "vue-drag-resize": "^1.3.2",
     "vue-router": "^3.5.1",
-    "zincjs": "^1.0.16"
+    "zincjs": "^1.0.17"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.0.0",
