@@ -124,11 +124,10 @@ RendererModule.prototype.setupLiveCoordinates = function(zincObjects) {
     const boundingBox = this.scene.getBoundingBoxOfZincObjects(zincObjects);
     let newSelectedCenter = new THREE.Vector3();
     boundingBox.getCenter(newSelectedCenter);
-    if (this.selectedCenter == undefined)
+    if (this.selectedCenter == undefined) {
       this.selectedCenter = newSelectedCenter;
-    else {
-      this.selectedCenter.x = newSelectedCenter.x;
-      this.selectedCenter.y = newSelectedCenter.y;
+    } else {
+      this.selectedCenter.copy(newSelectedCenter);
     }
   } else {
     this.selectedCenter = undefined;

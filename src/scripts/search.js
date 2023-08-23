@@ -40,12 +40,13 @@ export class SearchIndex
     constructor()
     {
         this._searchEngine =  new MiniSearch({
-            fields: ['groupName'],
-            storeFields: ['groupName'],
+            fields: ['path', 'name'],
+            storeFields: ['path'],
             tokenize: (string, _fieldName) => string.split('"'), // indexing tokenizer
         });
         this._featureIds = [];
         this.zincObjects = [];
+        this.regions = [];
     }
 
     indexMetadata(featureId, metadata)
@@ -66,9 +67,19 @@ export class SearchIndex
     addZincObject(zincObject, id)
     //=======================
     {
-        const item = { groupName: zincObject.groupName, id };
-        this._searchEngine.add(item, {fields: ['groupName']});
+        const path = zincObject.getRegion().getFullPath();
+        const fullPath = path ? `path/${zincObject.groupName}` : zincObject.groupName;
+        const item = { path: fullPath, name: zincObject.groupName, id };
+        this._searchEngine.add(item, {fields: ['path']});
         this.zincObjects.push(zincObject);
+    }
+
+    addRegion(region, id)
+    //=======================
+    {
+        const item = { path: region.getFullPath(), name: region.getName(), id };
+        this._searchEngine.add(item, {fields: ['path', 'name']});
+        this.regions.push(region);
     }
 
     clearResults()
@@ -82,21 +93,60 @@ export class SearchIndex
     {
         this._searchEngine.removeAll();
         this.zincObjects.length = 0;
+        this.regions.length = 0;
     }
 
     auto_suggest(text)
     //================
     {
-        return this._searchEngine.autoSuggest(text, {prefix: true});
+        const results = this._searchEngine.autoSuggest(text, {prefix: true});
+        return results;
     }
 
-    search(text){
-        let results = this._searchEngine.search(text, {prefix: true});
-        let zincResults = this.zincObjects.filter(zincObject => results.map(r => r.id).includes(zincObject.searchIndexId));
+    processResults(zincObjects, searchText) {
+      const expanded = [];
+      const result = {
+        regionPath: undefined,
+        label: `Search Results for \"`,
+      };
+      if (Array.isArray(searchText)) {
+        //zincObjectResults = this.$_searchIndex.search("Heart");
+        result.label += ','.join(searchText);
+      } else {
+        result.label += searchText;
+      }
+      result.label += `\"`;
+      if (zincObjects.length === 1) {
+        if (zincObjects[0].isRegion) {
+          result.regionPath = zincObjects[0].getFullPath();
+        } else if (zincObjects[0].isZincObject) {
+          result.regionPath = zincObjects[0].getRegion().getFullPath();
+          result.label = zincObjects[0].groupName;
+        }
+      }
+      zincObjects.forEach(obj => {
+        if (obj.isZincObject) {
+          expanded.push(obj);
+        } else if (obj.isRegion) {
+          expanded.push(...obj.getAllObjects(true));
+        }
+      });
+      const uniq = Object.values(
+        expanded.reduce((acc, obj) => ({ ...acc, [obj.searchIndexId]: obj }), {})
+      );
+      result["zincObjects"] = uniq;
+      return result;
+    } 
+
+    search(text) {
+        const results = this._searchEngine.search(text, {prefix: true});
+        const zincResults = this.zincObjects.filter(zincObject => results.map(r => r.id).includes(zincObject.searchIndexId));
+        const regionResults = this.regions.filter(region => results.map(r => r.id).includes(region.searchIndexId));
+        zincResults.push(...regionResults);
         return zincResults;
     }
 
-    searchTerms(terms){
+    searchTerms(terms) {
       let results = [];
       terms.forEach(term => {
         const result = this.search(term);

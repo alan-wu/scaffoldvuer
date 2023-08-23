@@ -315,7 +315,7 @@ import OpacityControls from "./OpacityControls";
 import ScaffoldTooltip from "./ScaffoldTooltip";
 import TreeControls from "./TreeControls";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
-import { findObjectsWithNames, getAllObjects } from "../scripts/utilities.js";
+import { findObjectsWithNames } from "../scripts/utilities.js";
 import { SearchIndex } from "../scripts/search.js";
 import {
   Button,
@@ -695,6 +695,17 @@ export default {
       this.$emit("zinc-object-added", zincObject);
     },
     /**
+     * 
+     */
+    addRegionsToSearchIndex: function () {
+      const rootRegion = this.$module.scene.getRootRegion();
+      const regions = rootRegion.getChildRegions(true);
+      regions.forEach(region => {
+        region.searchIndexId = ++this.$_tempId;
+        this.$_searchIndex.addRegion(region, region.searchIndexId);
+      });
+    },
+    /**
      * This is called when Change backgspeedround colour button
      * is pressed an causes the backgrouColornd colour to be changed
      * to one of the three preset colour: white, black and
@@ -932,7 +943,7 @@ export default {
               this.tData.label = id;
               if (event.identifiers[0].data.region)
                 this.tData.region = event.identifiers[0].data.region;
-              else this.tData.region = "Root";
+              else this.tData.region = undefined;
               this.tData.x = event.identifiers[0].coords.x;
               this.tData.y = event.identifiers[0].coords.y;
             }
@@ -1065,6 +1076,7 @@ export default {
     displayTooltipOfObjectsCallback: function (
       name,
       objects,
+      regionPath,
       resetView,
       liveUpdates
     ) {
@@ -1074,7 +1086,7 @@ export default {
           instance.$_regionTooltipCallback
         );
         instance.$_regionTooltipCallback = undefined;
-        instance.displayTooltipOfObjects(name, objects, resetView, liveUpdates);
+        instance.displayTooltipOfObjects(name, objects, regionPath, resetView, liveUpdates);
       };
     },
     liveUpdateTooltipPosition: function () {
@@ -1083,11 +1095,12 @@ export default {
         this.tData.y = this.$module.selectedScreenCoordinates.y;
       }
     },
-    displayTooltipOfObjects: function (name, objects, resetView, liveUpdates) {
+    displayTooltipOfObjects: function (name, objects, regionPath, resetView, liveUpdates) {
       if (objects.length > 0) {
         let coords = objects[0].getClosestVertexDOMElementCoords(
           this.$module.scene
         );
+        console.log(objects[0].groupName, coords.position.x, coords.position.y)
         if (coords) {
           //The coords is not in view, view all if resetView flag is true
           if (!coords.inView) {
@@ -1106,6 +1119,7 @@ export default {
                   this.displayTooltipOfObjectsCallback(
                     name,
                     objects,
+                    regionPath,
                     resetView,
                     liveUpdates
                   )
@@ -1116,16 +1130,14 @@ export default {
             this.tData.label = name;
             this.tData.x = coords.position.x;
             this.tData.y = coords.position.y;
-            const regionPath = objects[0].getRegion().getFullPath();
-            if (regionPath) this.tData.region = regionPath;
-            else this.tData.region = "Root";
+            this.tData.region = regionPath;
+            if (this.$_liveCoordinatesUpdated) {
+              this.$module.zincRenderer.removePostRenderCallbackFunction(
+                this.$_liveCoordinatesUpdated
+              );
+            }
             if (liveUpdates) {
               this.$module.setupLiveCoordinates(objects);
-              if (this.$_liveCoordinatesUpdated) {
-                this.$module.zincRenderer.removePostRenderCallbackFunction(
-                  this.$_liveCoordinatesUpdated
-                );
-              }
               this.$_liveCoordinatesUpdated =
                 this.$module.zincRenderer.addPostRenderCallbackFunction(
                   this.liveUpdateTooltipPosition
@@ -1134,6 +1146,26 @@ export default {
           }
           return true;
         }
+      }
+      this.hideRegionTooltip();
+      return false;
+    },
+    /**
+     * Display the tooltip used for displaying search result.
+     * When resetView is set to true, it will
+     * reset view if the tooltip is not in view.
+     * Setting liveUpdates to true will update the tooltip location
+     * at every rendering loop.
+     */
+    showRegionTooltipWithObjects: function (label, zincObjects, regionPath, resetView, liveUpdates) {
+      if (label && zincObjects && zincObjects.length > 0 && this.$module.scene) {
+        return this.displayTooltipOfObjects(
+          label,
+          zincObjects,
+          regionPath,
+          resetView,
+          liveUpdates
+        );
       }
       this.hideRegionTooltip();
       return false;
@@ -1149,9 +1181,14 @@ export default {
         const rootRegion = this.$module.scene.getRootRegion();
         const groups = [name];
         const objects = findObjectsWithNames(rootRegion, groups, "", true);
-        return this.displayTooltipOfObjects(
+        let regionPath = undefined;
+        if (objects && objects.length > 0) {
+          regionPath = objects[0].getRegion().getFullPath();
+        }
+        return this.showRegionTooltipWithObjects(
           name,
           objects,
+          regionPath,
           resetView,
           liveUpdates
         );
@@ -1168,7 +1205,7 @@ export default {
         this.$module.setupLiveCoordinates(undefined);
       }
       this.tData.visible = false;
-      this.tData.region = "Root";
+      this.tData.region = undefined;
     },
     /**
      * This is called when mouse cursor enters supported elements
@@ -1205,13 +1242,17 @@ export default {
           } else {
             zincObjectResults = this.$_searchIndex.search(text);
           }
-          if (zincObjectResults.length > 0) {
-            this.objectSelected(zincObjectResults, true);
+          const result = this.$_searchIndex.processResults(zincObjectResults, text);
+          const zincObjects = result.zincObjects;
+          if (zincObjects.length > 0) {
+            this.objectSelected(zincObjects, true);
             if (displayLabel) {
-              for (let i = 0; i < zincObjectResults.length; i++) {
-                if (zincObjectResults[i] && zincObjectResults[i].groupName) {
-                  this.showRegionTooltip(
-                    zincObjectResults[i].groupName,
+              for (let i = 0; i < zincObjects.length; i++) {
+                if (zincObjects[i] && zincObjects[i].groupName) {
+                  this.showRegionTooltipWithObjects(
+                    result.label,
+                    zincObjects,
+                    result.regionPath,
                     true,
                     true
                   );
@@ -1280,6 +1321,7 @@ export default {
         this.$module.updateTime(0.01);
         this.$module.updateTime(0);
         this.$module.unsetFinishDownloadCallback();
+        this.addRegionsToSearchIndex();
         this.$emit("on-ready");
         this.isReady = true;
       };
@@ -1360,6 +1402,9 @@ export default {
         if (this.$refs.treeControls) this.$refs.treeControls.clear();
         this.loading = true;
         this.isReady = false;
+        this.$_searchIndex.removeAll();
+        this.$_tempId = 1;
+        this.hideRegionTooltip();
         this.$module.setFinishDownloadCallback(
           this.setURLFinishCallback({
             viewport: viewport,
@@ -1380,9 +1425,6 @@ export default {
             true
           );
         }
-        this.$_searchIndex.removeAll();
-        this.$_tempId = 1;
-        this.hideRegionTooltip();
         this.$module.scene.displayMarkers = this.displayMarkers;
         this.$module.scene.forcePickableObjectsUpdate = true;
         this.$module.scene.displayMinimap = this.displayMinimap;
@@ -1434,7 +1476,7 @@ export default {
     syncControlCallback: function () {
       const payload = this.$module.NDCCameraControl.getPanZoom();
       if (this.tData.visible) {
-        this.showRegionTooltip(this.tData.label);
+        this.showRegionTooltip(this.tData.label, true, true);
       }
       this.$emit("scaffold-navigated", payload);
     },
