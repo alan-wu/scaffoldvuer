@@ -68,9 +68,9 @@ export class SearchIndex
     //=======================
     {
         const path = zincObject.getRegion().getFullPath();
-        const fullPath = path ? `path/${zincObject.groupName}` : zincObject.groupName;
+        const fullPath = path ? `${path}/${zincObject.groupName}` : zincObject.groupName;
         const item = { path: fullPath, name: zincObject.groupName, id };
-        this._searchEngine.add(item, {fields: ['path']});
+        this._searchEngine.add(item, {fields: ['path', 'name']});
         this.zincObjects.push(zincObject);
     }
 
