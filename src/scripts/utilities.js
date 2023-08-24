@@ -26,9 +26,10 @@ export const findObjectsWithNames = (rootRegion, names, regionPath, transverse) 
   if (targetRegion) {
     const isArray = Array.isArray(names);
     let array = names;
-    if (!isArray)
+    if (!isArray) {
       array = [array];
-      array.forEach(name => {
+    }
+    array.forEach(name => {
       const temp = targetRegion.findObjectsWithGroupName(name, transverse);
       targetObjects.push(...temp);
     });

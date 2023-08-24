@@ -305,8 +305,9 @@ export default {
       this.changeHoverByPrimitives(targetObjects, propagate);
     },
     changeActiveByNode: function (node, propagate) {
-      if (node.isPrimitives) {
-        const targetObjects = this.getZincObjectsFromNode(node, false);
+      if (node.isPrimitives || node.isRegion) {
+        const transverse = node.isRegion ? true : false;
+        const targetObjects = this.getZincObjectsFromNode(node, transverse);
         this.changeActiveByPrimitives(targetObjects, propagate);
       }
     },
@@ -356,12 +357,22 @@ export default {
     },
     getZincObjectsFromNode: function (node, transverse) {
       const rootRegion = this.$module.scene.getRootRegion();
-      return findObjectsWithNames(
-        rootRegion,
-        node.label,
-        node.regionPath,
-        transverse
-      );
+      if (node.isPrimitives) {
+        return findObjectsWithNames(
+          rootRegion,
+          node.label,
+          node.regionPath,
+          transverse
+        );
+      } else if (node.isRegion) {
+        if (node.regionPath) {
+          let targetRegion = rootRegion.findChildFromPath(node.regionPath);
+          if (targetRegion) {
+            return targetRegion.getAllObjects(transverse);
+          }
+        }
+      }
+      return [];
     },
     //Set this right at the beginning.
     setModule: function (moduleIn) {

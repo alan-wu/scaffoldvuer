@@ -1100,7 +1100,6 @@ export default {
         let coords = objects[0].getClosestVertexDOMElementCoords(
           this.$module.scene
         );
-        console.log(objects[0].groupName, coords.position.x, coords.position.y)
         if (coords) {
           //The coords is not in view, view all if resetView flag is true
           if (!coords.inView) {
