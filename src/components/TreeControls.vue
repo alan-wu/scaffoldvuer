@@ -29,8 +29,8 @@
             slot-scope="{ node, data }"
             class="region-tree-node"
             :class="{
-              activeItem: nodeIsActive(data),
-              hoverItem: nodeIsHover(data),
+              activeItem: active.includes(data.id),
+              hoverItem: hover.includes(data.id),
             }"
             @click="changeActiveByNode(data, true)"
             @mouseover="changeHoverByNode(data, true)"
@@ -72,8 +72,9 @@ import {
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 import {
+  convertUUIDsToFullPaths,
   createListFromPrimitives,
-  extractAllIds,
+  extractAllFullPaths,
   findObjectsWithNames,
 } from "../scripts/utilities.js";
 
@@ -113,9 +114,9 @@ export default {
   },
   data: function () {
     return {
-      treeData: [{ label: "Root", id: "__r/", children: [] }],
-      active: [{ group: "", regionPath: undefined }],
-      hover: [{ group: "", regionPath: undefined }],
+      treeData: [{ label: "Root", regionPath: "", id: undefined, children: [] }],
+      active: [],
+      hover: [],
       myPopperClass: "hide-scaffold-colour-popup",
       drawerOpen: true,
     };
@@ -135,12 +136,8 @@ export default {
   methods: {
     addTreeItem: function (parentContainer, item) {
       //The following block prevent duplicate graphics with the same name
-      for (let i = 0; i < parentContainer.length; i++) {
-        if (parentContainer[i].id === item.id) {
-          if (item.isPrimitives && parentContainer[i].isPrimitives) {
-            return;
-          }
-        }
+      if (parentContainer.some(child => child.label === item.label)) {
+        return;
       }
       parentContainer.push(item);
       parentContainer.sort((a, b) => {
@@ -156,11 +153,11 @@ export default {
     findOrCreateRegion: function (data, paths, prefix) {
       //check if root region has been set
       if (
-        this.treeData[0].regionPath === undefined &&
+        this.rootID === undefined &&
         this.$module &&
         this.$module.scene
       ) {
-        this.treeData[0].regionPath = "";
+        this.treeData[0].id = this.$module.scene.getRootRegion().uuid;
         this.treeData[0].isRegion = true;
       }
       if (paths.length > 0) {
@@ -169,11 +166,11 @@ export default {
           (child) => child.label == _paths[0]
         );
         const path = prefix + "/" + paths[0];
-        const id = "__r" + path;
+        const region = this.$module.scene.getRootRegion().findChildFromPath(path);
         if (!childRegion) {
           childRegion = {
             label: _paths[0],
-            id: id,
+            id: region.uuid,
             children: [],
             regionPath: path,
             isRegion: true,
@@ -186,34 +183,14 @@ export default {
         return data;
       }
     },
-    nodeIsActive: function (data) {
-      for (let i = 0; i < this.active.length; i++) {
-        let item = this.active[i];
-        if (
-          item.group === data.label &&
-          (item.regionPath === data.regionPath || item.regionPath === undefined)
-        ) {
-          return true;
-        }
-      }
-      return false;
-    },
-    nodeIsHover: function (data) {
-      for (let i = 0; i < this.hover.length; i++) {
-        let item = this.hover[i];
-        if (
-          item.group === data.label &&
-          (item.regionPath === data.regionPath || item.regionPath === undefined)
-        ) {
-          return true;
-        }
-      }
-      return false;
-    },
     /**
      * This is called when a new zinc object is read into the scene.
      */
     zincObjectAdded: function (zincObject) {
+      // Using the new uuid, the cavaet of that is graphics with
+      // same groupName will have different uuid. So in the tree control
+      // We use the first uuid found for a group of primitives with same
+      // group names to represent all of them.
       const region = zincObject.region;
       if (region) {
         const paths = region.getFullSeparatedPath();
@@ -223,11 +200,9 @@ export default {
             if (!regionData.children) {
               regionData.children = [];
             }
-            let id =
-              regionData.id.replace("__r/", "") + "/" + zincObject.groupName;
             const child = {
               label: zincObject.groupName,
-              id: id,
+              id: region.uuid + "/" + zincObject.uuid,
               isPrimitives: true,
               regionPath: zincObject.region.getFullPath(),
             };
@@ -335,12 +310,12 @@ export default {
      * Reset the controls.
      */
     clear: function () {
-      this.active.group = "";
-      this.active.regionPath = undefined;
-      this.hover.group = "";
-      this.hover.regionPath = undefined;
-      this.$refs.regionTree.updateKeyChildren("__r/", []);
+      this.active.length = 0;
+      this.hover.length = 0;
+      this.__nodeNumbers = 0;
+      this.$refs.regionTree.updateKeyChildren(this.treeData[0].id, []);
       this.treeData[0].children.length = 0;
+      this.treeData[0].id = undefined;
       this.$emit("object-selected", undefined);
     },
     getColour: function (nodeData) {
@@ -390,7 +365,7 @@ export default {
         this.zincObjectAdded(zincObject);
       });
       this.$module.addOrganPartAddedCallback(this.zincObjectAdded);
-      this.__nodeNumbers = 1;
+      this.__nodeNumbers = 0;
     },
     setColour: function (nodeData, value) {
       if (nodeData && nodeData.isPrimitives) {
@@ -419,31 +394,58 @@ export default {
       this.drawerOpen = !this.drawerOpen;
       this.$emit("drawer-toggled", this.drawerOpen);
     },
-    setTreeVisibility: function (node, list) {
+    //Set visibility using full paths and add found id to the ids list
+    //and remove item from list if remove is set to true.
+    setTreeVisibilityWithFullPaths: function (node, list, ids, remove) {
       let flag = false;
-      if (list.includes(node.id)) flag = true;
+      let nodeName = "";
+      if (node.isRegion) {
+        nodeName = `__r${node.regionPath}`;
+      }
+      if (node.isPrimitives) {
+        nodeName = `${node.regionPath}/${node.label}`;
+      }
+      //Find the node in list, remove it from list if remove flag is on
+      const index = list.indexOf(nodeName);
+      if (index > -1) {
+        flag = true;
+        list.splice(index, 1);
+        ids.push(node.id);
+      }
       const region = this.$module.scene
         .getRootRegion()
         .findChildFromPath(node.regionPath);
-      if (node.isRegion) region.setVisibility(flag);
-      if (node.isPrimitives) {
-        const primitives = region.findObjectsWithGroupName(node.label);
-        primitives.forEach((primitive) => primitive.setVisibility(flag));
+      if (nodeName && (nodeName !== "__r")) {
+        if (node.isPrimitives) {
+          const primitives = region.findObjectsWithGroupName(node.label);
+          primitives.forEach((primitive) => primitive.setVisibility(flag));
+        }
       }
-      if (node.children)
-        node.children.forEach((child) => this.setTreeVisibility(child, list));
+      if (node.children) {
+        node.children.forEach((child) => {
+          this.setTreeVisibilityWithFullPaths(child, list, ids, true);
+        });
+      }
     },
     checkAllKeys: function () {
       const keysList = [];
-      extractAllIds(this.treeData[0], keysList);
-      this.setTreeVisibility(this.treeData[0], keysList);
-      this.$refs.regionTree.setCheckedKeys(keysList);
+      const ids = [];
+      extractAllFullPaths(this.treeData[0], keysList);
+      this.setTreeVisibilityWithFullPaths(this.treeData[0],
+        keysList, ids, true);
+      this.$refs.regionTree.setCheckedKeys(ids);
     },
     getState: function () {
       let checkedItems = this.$refs.regionTree.getCheckedKeys();
-      if (checkedItems.length === this.__nodeNumbers)
+      if (checkedItems.length === this.__nodeNumbers) {
         return { checkAll: true, version: "2.0" };
-      return { checkedItems: checkedItems, version: "2.0" };
+      } else {
+        //We cannot use the generated uuid as the identifier for permastate,
+        //convert it back to paths
+        let paths = convertUUIDsToFullPaths(this.$module.scene.getRootRegion(),
+          checkedItems);
+        return { checkedItems: paths, version: "2.0" };
+      }
     },
     setState: function (state) {
       if (state) {
@@ -457,8 +459,10 @@ export default {
           } else {
             list.push(...state.checkedItems);
           }
-          this.setTreeVisibility(this.treeData[0], list);
-          this.$refs.regionTree.setCheckedKeys(list);
+          const ids = [];
+          this.setTreeVisibilityWithFullPaths(this.treeData[0], list,
+            ids, true);
+          this.$refs.regionTree.setCheckedKeys(ids);
         }
       }
     },
@@ -699,4 +703,3 @@ export default {
   display: none;
 }
 </style>
-

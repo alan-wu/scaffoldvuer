@@ -140,8 +140,9 @@ export class SearchIndex
 
     search(text) {
         const results = this._searchEngine.search(text, {prefix: true});
-        const zincResults = this.zincObjects.filter(zincObject => results.map(r => r.id).includes(zincObject.searchIndexId));
-        const regionResults = this.regions.filter(region => results.map(r => r.id).includes(region.searchIndexId));
+        console.log(results)
+        const zincResults = this.zincObjects.filter(zincObject => results.map(r => r.id).includes(zincObject.uuid));
+        const regionResults = this.regions.filter(region => results.map(r => r.id).includes(region.uuid));
         zincResults.push(...regionResults);
         return zincResults;
     }
@@ -154,6 +155,17 @@ export class SearchIndex
       });
     
       return results;
+    }
+
+    searchAndProcessResult(terms) {
+      let zincObjectResults = [];
+      if (Array.isArray(terms)) {
+        //zincObjectResults = this.$_searchIndex.search("Heart");
+        zincObjectResults = this.searchTerms(terms);
+      } else {
+        zincObjectResults = this.search(terms);
+      }
+      return this.processResults(zincObjectResults, terms);
     }
 
     // search(text)

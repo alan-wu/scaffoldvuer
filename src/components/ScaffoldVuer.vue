@@ -690,8 +690,7 @@ export default {
      */
     zincObjectAdded: function (zincObject) {
       this.loading = false;
-      zincObject.searchIndexId = ++this.$_tempId;
-      this.$_searchIndex.addZincObject(zincObject, zincObject.searchIndexId);
+      this.$_searchIndex.addZincObject(zincObject, zincObject.uuid);
       this.$emit("zinc-object-added", zincObject);
     },
     /**
@@ -701,8 +700,7 @@ export default {
       const rootRegion = this.$module.scene.getRootRegion();
       const regions = rootRegion.getChildRegions(true);
       regions.forEach(region => {
-        region.searchIndexId = ++this.$_tempId;
-        this.$_searchIndex.addRegion(region, region.searchIndexId);
+        this.$_searchIndex.addRegion(region, region.uuid);
       });
     },
     /**
@@ -1234,14 +1232,7 @@ export default {
           this.objectSelected([], true); 
           return false;
         } else {
-          let zincObjectResults = [];
-          if (Array.isArray(text)) {
-            //zincObjectResults = this.$_searchIndex.search("Heart");
-            zincObjectResults = this.$_searchIndex.searchTerms(text);
-          } else {
-            zincObjectResults = this.$_searchIndex.search(text);
-          }
-          const result = this.$_searchIndex.processResults(zincObjectResults, text);
+          const result = this.$_searchIndex.searchAndProcessResult(text);
           const zincObjects = result.zincObjects;
           if (zincObjects.length > 0) {
             this.objectSelected(zincObjects, true);
