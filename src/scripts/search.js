@@ -23,6 +23,8 @@ limitations under the License.
 
 import MiniSearch from 'minisearch';
 
+import { createUnqiuesFromObjects } from './utilities';
+
 //==============================================================================
 
 // The properties of a feature we index and show
@@ -104,7 +106,6 @@ export class SearchIndex
     }
 
     processResults(zincObjects, searchText) {
-      const expanded = [];
       const result = {
         regionPath: undefined,
         label: `Search Results for \"`,
@@ -124,23 +125,12 @@ export class SearchIndex
           result.label = zincObjects[0].groupName;
         }
       }
-      zincObjects.forEach(obj => {
-        if (obj.isZincObject) {
-          expanded.push(obj);
-        } else if (obj.isRegion) {
-          expanded.push(...obj.getAllObjects(true));
-        }
-      });
-      const uniq = Object.values(
-        expanded.reduce((acc, obj) => ({ ...acc, [obj.searchIndexId]: obj }), {})
-      );
-      result["zincObjects"] = uniq;
+      result["zincObjects"] = createUnqiuesFromObjects(zincObjects);
       return result;
     } 
 
     search(text) {
         const results = this._searchEngine.search(text, {prefix: true});
-        console.log(results)
         const zincResults = this.zincObjects.filter(zincObject => results.map(r => r.id).includes(zincObject.uuid));
         const regionResults = this.regions.filter(region => results.map(r => r.id).includes(region.uuid));
         zincResults.push(...regionResults);
@@ -168,27 +158,6 @@ export class SearchIndex
       return this.processResults(zincObjectResults, terms);
     }
 
-    // search(text)
-    // //==========
-    // {
-    //     const options = {};
-    //     let results = [];
-    //     text = text.trim()
-    //     if (text.length > 2 && ["'", '"'].indexOf(text.slice(0, 1)) >= 0) {
-    //         text = text.replaceAll(text.slice(0, 1), '');
-    //         results = this._searchEngine.search(text, {prefix: true, combineWith: 'AND'});
-    //     } else if (text.length > 1) {
-    //         results = this._searchEngine.search(text, {prefix: true});
-    //     }
-    //     const featureResults = results.map(r => {
-    //         return {
-    //             featureId: this._featureIds[r.id],
-    //             score: r.score,
-    //             terms: r.terms,
-    //             text: r.text
-    //         }});
-    //     return new SearchResults(featureResults);
-    // }
 }
 
 //==============================================================================

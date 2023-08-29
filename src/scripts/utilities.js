@@ -99,3 +99,21 @@ export const convertUUIDsToFullPaths = (rootRegion, IDs) => {
   }
   return results;
 }
+
+export const createUnqiuesFromObjects = (zincObjects) => {
+  if (zincObjects) {
+    const expanded = [];
+    zincObjects.forEach(obj => {
+      if (obj.isZincObject) {
+        expanded.push(obj);
+      } else if (obj.isRegion) {
+        expanded.push(...obj.getAllObjects(true));
+      }
+    });
+    const uniq = Object.values(
+      expanded.reduce((acc, obj) => ({ ...acc, [obj.uuid]: obj }), {})
+    );
+    return uniq;
+  }
+  return [];
+}
