@@ -316,7 +316,7 @@ export default {
       this.$refs.regionTree.updateKeyChildren(this.treeData[0].id, []);
       this.treeData[0].children.length = 0;
       this.treeData[0].id = undefined;
-      this.$emit("object-selected", undefined);
+      this.$emit("object-selected", []);
     },
     getColour: function (nodeData) {
       //Do not need to check for primitives as this is checked on the template
@@ -703,3 +703,4 @@ export default {
   display: none;
 }
 </style>
+
