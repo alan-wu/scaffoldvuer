@@ -111,7 +111,6 @@ export class SearchIndex
         label: `Search Results for \"`,
       };
       if (Array.isArray(searchText)) {
-        //zincObjectResults = this.$_searchIndex.search("Heart");
         result.label += ','.join(searchText);
       } else {
         result.label += searchText;
@@ -150,7 +149,6 @@ export class SearchIndex
     searchAndProcessResult(terms) {
       let zincObjectResults = [];
       if (Array.isArray(terms)) {
-        //zincObjectResults = this.$_searchIndex.search("Heart");
         zincObjectResults = this.searchTerms(terms);
       } else {
         zincObjectResults = this.search(terms);

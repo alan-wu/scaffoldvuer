@@ -664,7 +664,6 @@ export default {
     this._currentURL = undefined;
     this.availableBackground = ["white", "black", "lightskyblue"];
     this.$_searchIndex = new SearchIndex();
-    this.$_tempId = 1;
   },
   mounted: function () {
     this.$refs.treeControls.setModule(this.$module);
@@ -1393,7 +1392,6 @@ export default {
         this.loading = true;
         this.isReady = false;
         this.$_searchIndex.removeAll();
-        this.$_tempId = 1;
         this.hideRegionTooltip();
         this.$module.setFinishDownloadCallback(
           this.setURLFinishCallback({
