@@ -310,7 +310,13 @@
         popper-class="autocomplete-popper"
         @keyup.enter.native="search(searchText)"
         @select="search(searchText)"
-      />
+      >
+        <template slot-scope="{ item }">
+          <div class="value">
+            {{ item.value }}
+          </div>
+        </template>
+      </el-autocomplete>
     </el-popover>
   </div>
 </template>
@@ -594,9 +600,10 @@ export default {
       }
       cb(
         this.$refs.scaffold.fetchSuggestions(term).map((item) => {
+          const value = item.terms.length > 1 ? item.terms[1] : item.terms[0];
           return {
-            value: item.suggestion,
-            label: item.suggestion,
+            value: value,
+            label: value
           };
         })
       );
@@ -742,6 +749,17 @@ body {
     margin-bottom: 5px;
     &:last-child {
       margin-bottom: 0;
+    }
+  }
+}
+
+.autocomplete-popper {
+  li {
+    line-height: normal;
+    padding: 7px;
+
+    .value {
+      white-space: initial;
     }
   }
 }
