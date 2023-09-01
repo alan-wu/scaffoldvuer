@@ -9,9 +9,10 @@
       trigger="manual"
       popper-class="tooltip-popper non-selectable"
     >
-      <div class="tooltip-text">{{ label }}</div>
-      <div class="tooltip-text" v-if="region">Region: {{ region }}</div>
-      <i v-popover:tooltip />
+      <template v-popover:tooltip>
+        <div class="tooltip-text">{{ label }}</div>
+        <div class="tooltip-text" v-if="region">Region: {{ region }}</div>
+      </template>
     </el-popover>
   </div>
 </template>
@@ -64,8 +65,8 @@ export default {
       if (this.region) {
         yOffset = 55;
       }
-
-      return { left: this.x + "px", top: this.y - yOffset + "px" };
+      const x = this.x - 40;
+      return { left: x + "px", top: this.y - yOffset + "px" };
     },
   },
   watch: {

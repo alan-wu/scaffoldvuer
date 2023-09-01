@@ -23,6 +23,8 @@ limitations under the License.
 
 import MiniSearch from 'minisearch';
 
+import { createUnqiuesFromObjects } from './utilities';
+
 //==============================================================================
 
 // The properties of a feature we index and show
@@ -40,12 +42,13 @@ export class SearchIndex
     constructor()
     {
         this._searchEngine =  new MiniSearch({
-            fields: ['groupName'],
-            storeFields: ['groupName'],
+            fields: ['path', 'name'],
+            storeFields: ['path'],
             tokenize: (string, _fieldName) => string.split('"'), // indexing tokenizer
         });
         this._featureIds = [];
         this.zincObjects = [];
+        this.regions = [];
     }
 
     indexMetadata(featureId, metadata)
@@ -66,9 +69,19 @@ export class SearchIndex
     addZincObject(zincObject, id)
     //=======================
     {
-        const item = { groupName: zincObject.groupName, id };
-        this._searchEngine.add(item, {fields: ['groupName']});
+        const path = zincObject.getRegion().getFullPath();
+        const fullPath = path ? `${path}/${zincObject.groupName}` : zincObject.groupName;
+        const item = { path: fullPath, name: zincObject.groupName, id };
+        this._searchEngine.add(item, {fields: ['path', 'name']});
         this.zincObjects.push(zincObject);
+    }
+
+    addRegion(region, id)
+    //=======================
+    {
+        const item = { path: region.getFullPath(), name: region.getName(), id };
+        this._searchEngine.add(item, {fields: ['path', 'name']});
+        this.regions.push(region);
     }
 
     clearResults()
@@ -82,21 +95,48 @@ export class SearchIndex
     {
         this._searchEngine.removeAll();
         this.zincObjects.length = 0;
+        this.regions.length = 0;
     }
 
     auto_suggest(text)
     //================
     {
-        return this._searchEngine.autoSuggest(text, {prefix: true});
+        const results = this._searchEngine.autoSuggest(text, {prefix: true});
+        return results;
     }
 
-    search(text){
-        let results = this._searchEngine.search(text, {prefix: true});
-        let zincResults = this.zincObjects.filter(zincObject => results.map(r => r.id).includes(zincObject.searchIndexId));
+    processResults(zincObjects, searchText) {
+      const result = {
+        regionPath: undefined,
+        label: `Search Results for \"`,
+      };
+      if (Array.isArray(searchText)) {
+        result.label += ','.join(searchText);
+      } else {
+        result.label += searchText;
+      }
+      result.label += `\"`;
+      if (zincObjects.length === 1) {
+        if (zincObjects[0].isRegion) {
+          result.regionPath = zincObjects[0].getFullPath();
+        } else if (zincObjects[0].isZincObject) {
+          result.regionPath = zincObjects[0].getRegion().getFullPath();
+          result.label = zincObjects[0].groupName;
+        }
+      }
+      result["zincObjects"] = createUnqiuesFromObjects(zincObjects);
+      return result;
+    } 
+
+    search(text) {
+        const results = this._searchEngine.search(text, {prefix: true});
+        const zincResults = this.zincObjects.filter(zincObject => results.map(r => r.id).includes(zincObject.uuid));
+        const regionResults = this.regions.filter(region => results.map(r => r.id).includes(region.uuid));
+        zincResults.push(...regionResults);
         return zincResults;
     }
 
-    searchTerms(terms){
+    searchTerms(terms) {
       let results = [];
       terms.forEach(term => {
         const result = this.search(term);
@@ -106,27 +146,16 @@ export class SearchIndex
       return results;
     }
 
-    // search(text)
-    // //==========
-    // {
-    //     const options = {};
-    //     let results = [];
-    //     text = text.trim()
-    //     if (text.length > 2 && ["'", '"'].indexOf(text.slice(0, 1)) >= 0) {
-    //         text = text.replaceAll(text.slice(0, 1), '');
-    //         results = this._searchEngine.search(text, {prefix: true, combineWith: 'AND'});
-    //     } else if (text.length > 1) {
-    //         results = this._searchEngine.search(text, {prefix: true});
-    //     }
-    //     const featureResults = results.map(r => {
-    //         return {
-    //             featureId: this._featureIds[r.id],
-    //             score: r.score,
-    //             terms: r.terms,
-    //             text: r.text
-    //         }});
-    //     return new SearchResults(featureResults);
-    // }
+    searchAndProcessResult(terms) {
+      let zincObjectResults = [];
+      if (Array.isArray(terms)) {
+        zincObjectResults = this.searchTerms(terms);
+      } else {
+        zincObjectResults = this.search(terms);
+      }
+      return this.processResults(zincObjectResults, terms);
+    }
+
 }
 
 //==============================================================================
