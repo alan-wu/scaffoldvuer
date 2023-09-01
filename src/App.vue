@@ -616,6 +616,7 @@ body {
     padding: 7px;
 
     .value {
+      text-align: left;
       white-space: initial;
     }
   }
