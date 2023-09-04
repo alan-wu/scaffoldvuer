@@ -205,6 +205,12 @@
           <el-button size="mini" @click="featureTextureSlides(true)">
             Body slides
           </el-button>
+          <el-switch
+            v-model="onClickMarkers"
+            active-text="On Click Markers"
+            active-icon-class="el-icon-location"
+            active-color="#8300bf"
+          />
         </el-row>
         <el-row :gutter="20">
           <el-input
@@ -306,6 +312,7 @@ export default {
       selectedCoordinates: undefined,
       helpMode: false,
       displayMarkers: false,
+      onClickMarkers: false,
       syncMode: false,
       currentTime: 0,
       displayMinimap: false,
@@ -493,10 +500,11 @@ export default {
       }
     },
     onSelected: function (data) {
-      console.log(data);
       if (data && data.length > 0 && data[0].data.group) {
         delete this.$route.query["viewURL"];
-        this.$refs.scaffold.showRegionTooltip(data[0].data.group, true, true);
+        console.log(data)
+        this.$refs.scaffold.showRegionTooltipWithAnnotations(data, true, true);
+
         //this.$router.replace({
         //  query: { ...this.$route.query, region: data[0].data.group }
         //});

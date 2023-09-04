@@ -121,6 +121,7 @@ export const createUnqiuesFromObjects = (zincObjects) => {
 export const getObjectsFromAnnotations = (scene, annotations) => {
   const returned = {label: "Multiple selections", regionPath: "", objects: []};
   if (annotations && scene) {
+    const rpList = {};
     const rootRegion = scene.getRootRegion();
     if (annotations.length > 0) {
       returned.regionPath = annotations[0].data.region;
@@ -134,7 +135,10 @@ export const getObjectsFromAnnotations = (scene, annotations) => {
         returned.label = "Multiple selections";
       }
       const region = rootRegion.findChildFromPath(annotation.data.region);
-      const obj = findObjectWithUUID(region.getAllObjects(false), annotation.data.uuid);
+      if (!rpList[region.uuid]) {
+        rpList[region.uuid] = region.getAllObjects(false);
+      }
+      const obj = findObjectWithUUID(rpList[region.uuid], annotation.data.uuid);
       if (obj) returned.objects.push(obj);
     });
   }
