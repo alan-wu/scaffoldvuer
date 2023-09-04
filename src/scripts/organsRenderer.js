@@ -385,7 +385,8 @@ const PrimitiveData = function () {
 		const annotation = new (require('./annotation').annotation)();
     const region = zincObject.region.getFullPath();
 		annotation.data = {species:_this.sceneData.currentSpecies, system:systemName,
-      part:partName, group:zincObject.groupName, region: region, lastActionOnMarker: false};
+      part:partName, group:zincObject.groupName, region: region, uuid:zincObject.uuid,
+      lastActionOnMarker: false};
 		zincObject.userData["annotation"] = annotation;
 	}
 

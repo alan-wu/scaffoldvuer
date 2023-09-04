@@ -315,7 +315,7 @@ import OpacityControls from "./OpacityControls";
 import ScaffoldTooltip from "./ScaffoldTooltip";
 import TreeControls from "./TreeControls";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
-import { findObjectsWithNames } from "../scripts/utilities.js";
+import { findObjectsWithNames, getObjectsFromAnnotations } from "../scripts/utilities.js";
 import { SearchIndex } from "../scripts/search.js";
 import {
   Button,
@@ -1205,6 +1205,29 @@ export default {
           resetView,
           liveUpdates
         );
+      }
+      this.hideRegionTooltip();
+      return false;
+    },
+    /**
+     * Display the tooltip using the list of annotations.
+     * When resetView is set to true, it will
+     * reset view if the tooltip is not in view.
+     * Setting liveUpdates to true will update the tooltip location
+     * at every rendering loop.
+     */
+    showRegionTooltipWithAnnotations: function (annotations, resetView, liveUpdates) {
+      if (this.$module.scene) {
+        const result = getObjectsFromAnnotations(this.$module.scene, annotations);
+        if (result && result.objects.length > 0) {
+          return this.showRegionTooltipWithObjects(
+            result.label,
+            result.objects,
+            result.regionPath,
+            resetView,
+            liveUpdates
+          );
+        }
       }
       this.hideRegionTooltip();
       return false;
