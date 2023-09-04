@@ -37,26 +37,27 @@ const RendererModule = function()  {
 
 RendererModule.prototype = Object.create((require('./BaseModule').BaseModule).prototype);
 
-/**
- * This function will get the the first intersected object with name or
- * the first glyph object with name.
- */
 RendererModule.prototype.getIntersectedObject = function(intersects) {
 	if (intersects) {
-		for (let i = 0; i < intersects.length; i++) {
-			if (intersects[i] !== undefined) {
-				if (intersects[i].object &&
-            intersects[i].object.userData && 
-            intersects[i].object.userData.isZincObject && 
-            ((intersects[i].object.name && 
-              intersects[i].object.name !== "") ||
-            intersects[i].object.userData.isMarker))
-					return intersects[i];
-			}
-		}
+    const typeMap = intersects.map(intersect => {
+        if (intersect && intersect.object &&
+          intersect.object.userData) {
+          if (intersect.object.userData.isMarker) {
+            return 1;
+          } else if (intersect.object.name && 
+            intersect.object.userData.isZincObject) {
+            return 2;
+          }
+        }
+        return 0;
+    });
+    let i = typeMap.indexOf(1);
+    i = (i > -1) ? i : typeMap.indexOf(2);
+    return intersects[i];
 	}
 	return undefined;
 }
+
 
 RendererModule.prototype.getAnnotationsFromObjects = function(objects) {
   const annotations = [];

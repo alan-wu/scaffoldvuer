@@ -197,12 +197,17 @@ const PrimitiveData = function () {
     let id = undefined;
     let intersectedObject = undefined;
     if (intersected !== undefined) {
+      let marker = false;
       if (intersected.object.userData && 
         intersected.object.userData.isMarker) {
+        marker = true;
         intersectedObject = intersected.object.userData.parent.morph;
       } else {
         intersectedObject = intersected.object;
       }
+      try {
+        intersectedObject.userData.userData.annotation.data.lastActionOnMarker = marker;
+      } finally { }
       if (intersectedObject) {
         if (intersectedObject.name) {
           id = intersectedObject.name;
@@ -380,7 +385,7 @@ const PrimitiveData = function () {
 		const annotation = new (require('./annotation').annotation)();
     const region = zincObject.region.getFullPath();
 		annotation.data = {species:_this.sceneData.currentSpecies, system:systemName,
-      part:partName, group:zincObject.groupName, region: region};
+      part:partName, group:zincObject.groupName, region: region, lastActionOnMarker: false};
 		zincObject.userData["annotation"] = annotation;
 	}
 

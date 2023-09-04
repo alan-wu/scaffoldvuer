@@ -386,6 +386,8 @@ export default {
       });
     },
     objectAdded: function (zincObject) {
+      if (this._objects.length === 0)
+        zincObject.setMarkerMode("on");
       console.log(zincObject);
       this._objects.push(zincObject);
     },
