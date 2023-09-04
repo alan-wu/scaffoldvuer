@@ -1244,6 +1244,29 @@ export default {
       this.tData.region = undefined;
     },
     /**
+     * Set the marker modes for objects with the provided name, mode can
+     * be "on", "off" or "inherited".
+     */
+    setMarkerModeForObjectsWithName: function (name, mode) {
+      if (name && this.$module.scene) {
+        const rootRegion = this.$module.scene.getRootRegion();
+        const groups = [name];
+        const objects = findObjectsWithNames(rootRegion, groups, "", true);
+        objects.forEach(object => object.setMarkerMode(mode));
+      }
+    },
+    /**
+     * Set the marker modes for objects specified by the list of annotations
+     */
+    setMarkerModeWithAnnotations: function (annotations, mode) {
+      if (this.$module.scene) {
+        const result = getObjectsFromAnnotations(this.$module.scene, annotations);
+        if (result && result.objects.length > 0) {
+          result.objects.forEach(object => object.setMarkerMode(mode));
+        }
+      }
+    },
+    /**
      * This is called when mouse cursor enters supported elements
      * with help tootltips.
      */

@@ -207,8 +207,7 @@
           </el-button>
           <el-switch
             v-model="onClickMarkers"
-            active-text="On Click Markers"
-            active-icon-class="el-icon-location"
+            active-text="Markers On Selection"
             active-color="#8300bf"
           />
         </el-row>
@@ -502,9 +501,8 @@ export default {
     onSelected: function (data) {
       if (data && data.length > 0 && data[0].data.group) {
         delete this.$route.query["viewURL"];
-        console.log(data)
         this.$refs.scaffold.showRegionTooltipWithAnnotations(data, true, true);
-
+        if (this.onClickMarkers) this.$refs.scaffold.setMarkerModeForObjectsWithName(data[0].data.group, "on");
         //this.$router.replace({
         //  query: { ...this.$route.query, region: data[0].data.group }
         //});
