@@ -13,13 +13,6 @@ const OrgansSceneData = function() {
   this.timeVarying = false;
 }
 
-const PrimitiveData = function () {
-  this.geometries = [];
-  this.lines = [];
-  this.glyphsets = [];
-  this.pointsets = [];
-}
-
 /**
  * Viewer of 3D-organs models. Users can toggle on/off different views. Data is
  * displayed instead if models are not available.
@@ -39,7 +32,6 @@ const PrimitiveData = function () {
   const _this = this;
 	let pickerScene = undefined;
 	this.sceneData = new OrgansSceneData();
-  this.primitiveData = new PrimitiveData();
 	const timeChangedCallbacks = new Array();
 	const sceneChangedCallbacks = new Array();
   const organPartAddedCallbacks = new Array();
@@ -363,25 +355,12 @@ const PrimitiveData = function () {
 		}
 	}
 
-	const addOrganPartToPrimitiveData = function(zincObject) {
-    if (zincObject.isGeometry) {
-      _this.primitiveData.geometries.push(zincObject);
-    } else if (zincObject.isGlyphset) {
-      _this.primitiveData.glyphsets.push(zincObject);
-    } else if (zincObject.isLines) {
-      _this.primitiveData.lines.push(zincObject);
-    } else if (zincObject.isPointset) {
-      _this.primitiveData.pointsets.push(zincObject);
-    }
-	}
-
 	const addOrganPart = function(systemName, partName, useDefautColour, zincObject) {
     for (let i = 0; i < organPartAddedCallbacks.length;i++) {
       organPartAddedCallbacks[i](zincObject, _this.scene.isTimeVarying());
     }
     if (useDefautColour)
       modelsLoader.setGeometryColour(zincObject, systemName, partName);
-    addOrganPartToPrimitiveData(zincObject);
 		const annotation = new (require('./annotation').annotation)();
     const region = zincObject.region.getFullPath();
 		annotation.data = {species:_this.sceneData.currentSpecies, system:systemName,
@@ -472,10 +451,6 @@ const PrimitiveData = function () {
       _this.sceneData.currentSystem = systemName;
 			_this.sceneData.currentPart = partName;
 			_this.sceneData.currentTime = 0.0;
-			_this.primitiveData.geometries.splice(0);
-			_this.primitiveData.lines.splice(0);
-			_this.primitiveData.glyphsets.splice(0);
-			_this.primitiveData.pointsets.splice(0);
 			_this.sceneData.timeVarying = false;
       // This is used as title
       let name = "";

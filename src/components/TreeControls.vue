@@ -352,20 +352,13 @@ export default {
     //Set this right at the beginning.
     setModule: function (moduleIn) {
       this.$module = moduleIn;
-      this.$module.primitiveData.geometries.forEach((zincObject) => {
-        this.zincObjectAdded(zincObject);
-      });
-      this.$module.primitiveData.lines.forEach((zincObject) => {
-        this.zincObjectAdded(zincObject);
-      });
-      this.$module.primitiveData.glyphsets.forEach((zincObject) => {
-        this.zincObjectAdded(zincObject);
-      });
-      this.$module.primitiveData.pointsets.forEach((zincObject) => {
+      this.__nodeNumbers = 0;
+      const objects = this.$module.scene.getRootRegion().getAllObjects(true);
+      objects.forEach((zincObject) => {
         this.zincObjectAdded(zincObject);
       });
       this.$module.addOrganPartAddedCallback(this.zincObjectAdded);
-      this.__nodeNumbers = 0;
+
     },
     setColour: function (nodeData, value) {
       if (nodeData && nodeData.isPrimitives) {
