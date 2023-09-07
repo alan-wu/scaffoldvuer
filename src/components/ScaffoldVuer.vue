@@ -1392,6 +1392,7 @@ export default {
         this.$module.unsetFinishDownloadCallback();
         this.addRegionsToSearchIndex();
         this.$emit("on-ready");
+        this.setMarkers();
         this.isReady = true;
       };
     },
@@ -1555,6 +1556,15 @@ export default {
     toggleSyncControl: function (flag, rotateMode) {
       this.$module.toggleSyncControl(flag, rotateMode);
       this.$module.setSyncControlCallback(this.syncControlCallback);
+    },
+
+    /**
+     * Set the markers for the scene.
+     */
+    setMarkers: function () {
+      this.markerLabels.forEach((l)=>{
+        this.setMarkerModeForObjectsWithName(l, "on");
+      })
     },
   },
 };
