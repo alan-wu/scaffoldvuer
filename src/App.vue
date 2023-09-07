@@ -21,6 +21,7 @@
         :region="region"
         :view-u-r-l="viewURL"
         :format="format"
+        :marker-labels="markerLabels"
         @open-map="openMap"
         @on-ready="onReady"
         @scaffold-selected="onSelected"
@@ -109,6 +110,7 @@
             Help Mode
           </el-button>
           <el-button size="mini" @click="screenCapture()"> Capture </el-button>
+          <el-button size="mini" @click="changeMarkers"> Change Markers </el-button>
         </el-row>
         <el-row :gutter="10">
           <el-button size="mini" @click="saveSettings()">
@@ -325,6 +327,7 @@ export default {
         height: 128,
         align: "top-right",
       },
+      markerLabels: ["left atrium", "epicardium"],
       render: true,
       region: "",
       viewURL: "",
@@ -506,6 +509,13 @@ export default {
         //this.$router.replace({
         //  query: { ...this.$route.query, region: data[0].data.group }
         //});
+      }
+    },
+    changeMarkers: function() {
+      if (this.markerLabels[0] === "right ventricle"){
+        this.markerLabels = ["left atrium", "epicardium", "stomach"]
+      } else {
+        this.markerLabels = ["right ventricle"]
       }
     },
     onNavigated: function (data) {

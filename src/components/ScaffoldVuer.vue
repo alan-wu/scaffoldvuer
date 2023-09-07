@@ -433,6 +433,12 @@ export default {
       type: Boolean,
       default: false,
     },
+    markerLabels : {
+      type: Array,
+      default: function () {
+        return []
+      }
+    },
     /**
      * Show/hide minimap.
      */
@@ -590,6 +596,7 @@ export default {
         y: 200,
       },
       fileFormat: "metadata",
+      previousMarkerLabels: [],
     };
   },
   watch: {
@@ -655,6 +662,16 @@ export default {
     render: function (val) {
       this.toggleRendering(val);
     },
+    markerLabels: function(labels) {
+      console.log("marker labels changed", labels)
+      this.previousMarkerLabels.forEach((pml)=>{
+        this.setMarkerModeForObjectsWithName(pml, "off");
+      })
+      labels.forEach((l)=>{
+        this.setMarkerModeForObjectsWithName(l, "on");
+      })
+      this.previousMarkerLabels = labels
+    }
   },
   beforeCreate: function () {
     this.$module = new OrgansViewer();
