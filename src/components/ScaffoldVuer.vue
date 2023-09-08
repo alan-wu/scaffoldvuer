@@ -80,8 +80,8 @@
         @object-hovered="objectHovered"
         @drawer-toggled="drawerToggled"
       />
-      <div class="opacity-box">
-        <opacity-controls ref="opacityControl" />
+      <div class="primitive-controls-box">
+        <primitive-controls ref="primitiveControls" />
       </div>
       <el-popover
         v-if="sceneData.timeVarying"
@@ -311,7 +311,7 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
-import OpacityControls from "./OpacityControls";
+import PrimitiveControls from "./PrimitiveControls";
 import ScaffoldTooltip from "./ScaffoldTooltip";
 import TreeControls from "./TreeControls";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
@@ -350,7 +350,7 @@ const EventNotifier = require("../scripts/eventNotifier").EventNotifier;
 /**
  * A vue component of the scaffold viewer.
  *
- * @requires ./OpacityControls.vue
+ * @requires ./PrimitveControls.vue
  * @requires ./TreeControls.vue
  */
 export default {
@@ -358,7 +358,7 @@ export default {
   components: {
     MapSvgIcon,
     MapSvgSpriteColor,
-    OpacityControls,
+    PrimitiveControls,
     ScaffoldTooltip,
     TreeControls,
   },
@@ -1013,8 +1013,10 @@ export default {
      */
     objectSelected: function (objects, propagate) {
       this.selectedObjects = objects;
-      if (this.selectedObjects && this.selectedObjects.length > 0)
-        this.$refs.opacityControl.setObject(this.selectedObjects[0]);
+      if (this.selectedObjects && this.selectedObjects.length > 0) {
+        console.log(this.selectedObjects)
+        this.$refs.primitiveControls.setObject(this.selectedObjects[0]);
+      }
       this.$module.setSelectedByZincObjects(objects, undefined, propagate);
     },
     /**
@@ -1972,7 +1974,7 @@ export default {
   font-family: "Asap", sans-serif;
 }
 
-.opacity-box {
+.primitive-controls-box {
   right: 0px;
   bottom: 200px;
   position: absolute;

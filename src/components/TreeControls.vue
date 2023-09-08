@@ -44,6 +44,9 @@
               @change="setColour(data, $event)"
             />
             <span>{{ node.label }}</span>
+            <span v-if="data.isTextureSlides" class="node-options">
+              (Texture)
+            </span>
           </span>
         </el-tree>
       </div>
@@ -205,6 +208,7 @@ export default {
               id: region.uuid + "/" + zincObject.uuid,
               isPrimitives: true,
               regionPath: zincObject.region.getFullPath(),
+              isTextureSlides: zincObject.isTextureSlides ? true : false,
             };
             this.addTreeItem(regionData.children, child);
           }
@@ -680,6 +684,10 @@ export default {
       transform: rotate(180deg) scaleY(2);
     }
   }
+}
+
+.node-options {
+  text-align: right;
 }
 
 .drawer-button.open i {
