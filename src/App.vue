@@ -205,6 +205,11 @@
           <el-button size="mini" @click="featureTextureSlides(true)">
             Body slides
           </el-button>
+          <el-switch
+            v-model="onClickMarkers"
+            active-text="Markers On Selection"
+            active-color="#8300bf"
+          />
         </el-row>
         <el-row :gutter="20">
           <el-input
@@ -306,6 +311,7 @@ export default {
       selectedCoordinates: undefined,
       helpMode: false,
       displayMarkers: false,
+      onClickMarkers: false,
       syncMode: false,
       currentTime: 0,
       displayMinimap: false,
@@ -386,6 +392,8 @@ export default {
       });
     },
     objectAdded: function (zincObject) {
+      if (this._objects.length === 0)
+        zincObject.setMarkerMode("on");
       console.log(zincObject);
       this._objects.push(zincObject);
     },
@@ -491,10 +499,10 @@ export default {
       }
     },
     onSelected: function (data) {
-      console.log(data);
       if (data && data.length > 0 && data[0].data.group) {
         delete this.$route.query["viewURL"];
-        this.$refs.scaffold.showRegionTooltip(data[0].data.group, true, true);
+        this.$refs.scaffold.showRegionTooltipWithAnnotations(data, true, true);
+        if (this.onClickMarkers) this.$refs.scaffold.setMarkerModeForObjectsWithName(data[0].data.group, "on");
         //this.$router.replace({
         //  query: { ...this.$route.query, region: data[0].data.group }
         //});

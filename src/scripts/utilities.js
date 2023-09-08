@@ -117,3 +117,30 @@ export const createUnqiuesFromObjects = (zincObjects) => {
   }
   return [];
 }
+
+export const getObjectsFromAnnotations = (scene, annotations) => {
+  const returned = {label: "Multiple selections", regionPath: "", objects: []};
+  if (annotations && scene) {
+    const rpList = {};
+    const rootRegion = scene.getRootRegion();
+    if (annotations.length > 0) {
+      returned.regionPath = annotations[0].data.region;
+      returned.label = annotations[0].data.group;
+    }
+    annotations.forEach(annotation => {
+      if (!annotation.data.region.includes(returned.regionPath)) {
+        returned.regionPath = "";
+      }
+      if (returned.label !== annotation.data.group) {
+        returned.label = "Multiple selections";
+      }
+      const region = rootRegion.findChildFromPath(annotation.data.region);
+      if (!rpList[region.uuid]) {
+        rpList[region.uuid] = region.getAllObjects(false);
+      }
+      const obj = findObjectWithUUID(rpList[region.uuid], annotation.data.uuid);
+      if (obj) returned.objects.push(obj);
+    });
+  }
+  return returned;
+}
