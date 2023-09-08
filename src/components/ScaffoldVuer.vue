@@ -663,14 +663,13 @@ export default {
       this.toggleRendering(val);
     },
     markerLabels: function(labels) {
-      console.log("marker labels changed", labels)
       this.previousMarkerLabels.forEach((pml)=>{
         this.setMarkerModeForObjectsWithName(pml, "off");
       })
       labels.forEach((l)=>{
         this.setMarkerModeForObjectsWithName(l, "on");
       })
-      this.previousMarkerLabels = labels
+      this.previousMarkerLabels = labels;
     }
   },
   beforeCreate: function () {

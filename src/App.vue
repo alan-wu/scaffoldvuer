@@ -513,9 +513,9 @@ export default {
     },
     changeMarkers: function() {
       if (this.markerLabels[0] === "right ventricle"){
-        this.markerLabels = ["left atrium", "epicardium", "stomach"]
+        this.markerLabels = ["left atrium", "epicardium", "stomach"];
       } else {
-        this.markerLabels = ["right ventricle"]
+        this.markerLabels = ["right ventricle"];
       }
     },
     onNavigated: function (data) {
