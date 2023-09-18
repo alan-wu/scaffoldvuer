@@ -433,6 +433,12 @@ export default {
       type: Boolean,
       default: false,
     },
+    markerLabels : {
+      type: Array,
+      default: function () {
+        return []
+      }
+    },
     /**
      * Show/hide minimap.
      */
@@ -590,6 +596,7 @@ export default {
         y: 200,
       },
       fileFormat: "metadata",
+      previousMarkerLabels: [],
     };
   },
   watch: {
@@ -655,6 +662,15 @@ export default {
     render: function (val) {
       this.toggleRendering(val);
     },
+    markerLabels: function(labels) {
+      this.previousMarkerLabels.forEach((pml)=>{
+        this.setMarkerModeForObjectsWithName(pml, "off");
+      })
+      labels.forEach((l)=>{
+        this.setMarkerModeForObjectsWithName(l, "on");
+      })
+      this.previousMarkerLabels = labels;
+    }
   },
   beforeCreate: function () {
     this.$module = new OrgansViewer();
@@ -1377,6 +1393,7 @@ export default {
         this.$module.unsetFinishDownloadCallback();
         this.addRegionsToSearchIndex();
         this.$emit("on-ready");
+        this.setMarkers();
         this.isReady = true;
       };
     },
@@ -1540,6 +1557,15 @@ export default {
     toggleSyncControl: function (flag, rotateMode) {
       this.$module.toggleSyncControl(flag, rotateMode);
       this.$module.setSyncControlCallback(this.syncControlCallback);
+    },
+
+    /**
+     * Set the markers for the scene.
+     */
+    setMarkers: function () {
+      this.markerLabels.forEach((l)=>{
+        this.setMarkerModeForObjectsWithName(l, "on");
+      })
     },
   },
 };
