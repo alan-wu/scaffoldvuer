@@ -1,5 +1,5 @@
 <template>
-  <el-container v-show="material" class="opacity-container">
+  <el-container v-if="material" class="opacity-container">
     <el-header
       height="37px"
       class="header"
@@ -41,21 +41,23 @@ Vue.use(Slider);
  */
 export default {
   name: "OpacityControls",
+  props: {
+    material: undefined,
+  },
   data: function() {
     return {
       displayString: "100%",
-      material: undefined,
     };
   },
   watch: {
     "material.opacity": function() {
-      if (this.material) {
-        this._zincobject.setAlpha(this.material.opacity);
+      if (this.material && this._zincObject) {
+        this._zincObject.setAlpha(this.material.opacity);
       }
     }
   },
   mounted: function() {
-    this._zincobject = undefined;
+    this._zincObject = undefined;
   },
   methods: {
     formatTooltip(val) {
@@ -63,9 +65,9 @@ export default {
       return this.displayString;
     },
     setObject(object) {
-      this._zincobject = object;
+      this._zincObject = object;
     }
-  }
+  },
 };
 </script>
 
