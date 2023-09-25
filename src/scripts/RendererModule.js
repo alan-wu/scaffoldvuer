@@ -144,9 +144,9 @@ RendererModule.prototype.objectsToZincObjects = function(objects) {
         let glyphset = zincObject;
         if (zincObject.isGlyph)
           glyphset = zincObject.getGlyphset();
-        zincObjects. push(glyphset);
+        zincObjects.push(glyphset);
       } else {
-        zincObjects. push(zincObject);
+        zincObjects.push(zincObject);
       }
     }
   }
