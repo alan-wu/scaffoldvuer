@@ -1030,7 +1030,6 @@ export default {
     objectSelected: function (objects, propagate) {
       this.selectedObjects = objects;
       if (this.selectedObjects && this.selectedObjects.length > 0) {
-        console.log(this.selectedObjects)
         this.$refs.primitiveControls.setObject(this.selectedObjects[0]);
       }
       this.$module.setSelectedByZincObjects(objects, undefined, propagate);
