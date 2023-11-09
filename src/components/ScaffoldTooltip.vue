@@ -12,6 +12,13 @@
       <template v-popover:tooltip>
         <div class="tooltip-text">{{ label }}</div>
         <div class="tooltip-text" v-if="region">Region: {{ region }}</div>
+        <Tooltip
+          class="p-tooltip"
+          v-show="annotationDisplay"
+          ref="annotationTooltip"
+          :annotationDisplay="true"
+          :annotationEntry="annotationEntry"
+        />
       </template>
     </el-popover>
   </div>
@@ -21,6 +28,7 @@
 /* eslint-disable no-alert, no-console */
 import Vue from "vue";
 import { Popover } from "element-ui";
+import Tooltip from "@abi-software/flatmapvuer/src/components/Tooltip";
 import lang from "element-ui/lib/locale/lang/en";
 import locale from "element-ui/lib/locale";
 
@@ -32,10 +40,17 @@ Vue.use(Popover);
  */
 export default {
   name: "ScaffoldTooltip",
+ components: {
+    Tooltip,
+  },
   props: {
     label: {
       type: String,
       default: "",
+    },
+    annotationDisplay: {
+      type: Boolean,
+      default: false,
     },
     region: {
       type: String,
@@ -57,6 +72,7 @@ export default {
   data: function () {
     return {
       display: false,
+      annotationEntry: { }
     };
   },
   computed: {
@@ -69,23 +85,42 @@ export default {
       return { left: x + "px", top: this.y - yOffset + "px" };
     },
   },
+  methods: {
+    checkForDisplay: function () {
+      if (this.visible && this.label && this.label !== "") {
+        this.display = true;
+        if (this.annotationDisplay) {
+          this.annotationEntry = {
+            "id": this.label,
+            "layer": this.region ? this.region : "Root"
+          };
+        }
+      }
+      else {
+        this.display = false;
+        annotationEntry = { };
+      }
+    }
+  },
   watch: {
     label: {
       handler: function () {
-        if (this.visible && this.label && this.label !== "")
-          this.display = true;
-        else this.display = false;
+        this.checkForDisplay();
       },
       immediate: true,
     },
     visible: {
       handler: function () {
-        if (this.visible && this.label && this.label !== "")
-          this.display = true;
-        else this.display = false;
+        this.checkForDisplay();
       },
       immediate: true,
     },
+    annotationDisplay: {
+      handler: function () {
+        this.checkForDisplay();
+      },
+      immediate: true,
+    }
   },
 };
 </script>
@@ -137,6 +172,18 @@ export default {
   ::v-deep .non-selectable {
     user-select: none;
     pointer-events: none;
+  }
+
+  .p-tooltip {
+    display: flex;
+    width: 300px;
+    white-space:normal;
+    .attribute-content {
+      color: rgb(44, 62, 80);
+    }
+    &::before, &::after {
+      display:none;
+    }
   }
 }
 </style>

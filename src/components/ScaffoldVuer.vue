@@ -14,6 +14,7 @@
       :visible="tData.visible"
       :x="tData.x"
       :y="tData.y"
+      :annotationDisplay="viewingMode === 'Annotation' && tData.active === true"
     />
     <div
       id="organsDisplayArea"
@@ -246,6 +247,23 @@
         trigger="click"
         popper-class="background-popper non-selectable"
       >
+        <el-row class="backgroundText">Viewing Mode</el-row>
+        <el-row class="backgroundControl">
+          <el-select
+            :popper-append-to-body="false"
+            v-model="viewingMode"
+            placeholder="Select"
+            class="select-box viewing-mode"
+            popper-class="scaffold_viewer_dropdownr"
+          >
+            <el-option v-for="item in viewingModes" :key="item" :label="item" :value="item">
+              <el-row>
+                <el-col :span="12">{{ item }}</el-col>
+              </el-row>
+            </el-option>
+          </el-select>
+        </el-row>
+        <el-row class="backgroundSpacer"></el-row>
         <el-row class="backgroundText"> Change background </el-row>
         <el-row class="backgroundChooser">
           <div
@@ -594,9 +612,15 @@ export default {
         visible: false,
         x: 200,
         y: 200,
+        active: false,
       },
       fileFormat: "metadata",
       previousMarkerLabels: [],
+      viewingMode: "Exploration",
+      viewingModes: [
+        "Annotation",
+        "Exploration",
+      ]
     };
   },
   watch: {
@@ -969,6 +993,7 @@ export default {
               ? event.identifiers[0].data.id
               : event.identifiers[0].data.group;
             if (event.identifiers[0].coords) {
+              this.tData.active = false;
               this.tData.visible = true;
               this.tData.label = id;
               if (event.identifiers[0].data.region)
@@ -1156,6 +1181,11 @@ export default {
                 );
             }
           } else {
+            if (!name.includes("Search Results for")) {
+              this.tData.active = true;
+            } else {
+              this.tData.active = false;
+            }
             this.tData.visible = true;
             this.tData.label = name;
             this.tData.x = coords.position.x;
@@ -1257,6 +1287,7 @@ export default {
         //Unset the tracking
         this.$module.setupLiveCoordinates(undefined);
       }
+      this.tData.active = false;
       this.tData.visible = false;
       this.tData.region = undefined;
     },
@@ -1596,6 +1627,11 @@ export default {
   }
 }
 
+.backgroundSpacer {
+  border-bottom: 1px solid #e4e7ed;
+  margin-bottom: 10px;
+}
+
 .warning-icon {
   color: $warning;
   top: 15px;
@@ -1730,7 +1766,7 @@ export default {
   background-color: #ffffff;
   border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
-  height: 72px;
+  height: 124px;
   width: 128px;
   min-width: 128px;
 
@@ -1741,6 +1777,10 @@ export default {
         border-top-color: #fff !important;
       }
     }
+  }
+
+  .el-row ~ .el-row {
+    margin-top: 8px;
   }
 }
 
@@ -1964,6 +2004,13 @@ export default {
   color: rgb(48, 49, 51);
   margin-left: 8px;
 
+  &.viewing-mode {
+    width: unset;
+    ::v-deep .el-input__inner {
+      line-height:30px
+    }
+  }
+
   ::v-deep .el-input__inner {
     color: $app-primary-color;
     height: 22px;
@@ -1972,6 +2019,9 @@ export default {
     border: none;
     font-family: "Asap", sans-serif;
     line-height: 22px;
+    &is-focus, &:focus {
+      border: 1px solid $app-primary-color;
+    }
   }
 
   ::v-deep .el-input,
