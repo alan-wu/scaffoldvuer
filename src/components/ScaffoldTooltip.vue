@@ -69,6 +69,7 @@ export default {
       default: 200,
     },
   },
+  inject: ['scaffoldUrl'],
   data: function () {
     return {
       display: false,
@@ -90,15 +91,16 @@ export default {
       if (this.visible && this.label && this.label !== "") {
         this.display = true;
         if (this.annotationDisplay) {
+          const region = this.region ? this.region +"/" : "";
           this.annotationEntry = {
-            "id": this.label,
-            "layer": this.region ? this.region : "Root"
+            "featureId": region + this.label,
+            "resourceId": encodeURIComponent(this.scaffoldUrl),
           };
         }
       }
       else {
         this.display = false;
-        annotationEntry = { };
+        this.annotationEntry = { };
       }
     }
   },

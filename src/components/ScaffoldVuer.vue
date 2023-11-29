@@ -544,6 +544,21 @@ export default {
       type: Boolean,
       default: true,
     },
+    /**
+     * Specify the endpoint of the flatmap server.
+     * This is used by annotation service included in
+     * third party flatmapvuer library.
+     */
+    flatmapAPI: {
+      type: String,
+      default: "https://mapcore-demo.org/current/flatmap/v3/"
+    },
+  },
+  provide() {
+    return {
+      flatmapAPI: this.flatmapAPI,
+      scaffoldUrl: this.url,
+    };
   },
   data: function () {
     return {
