@@ -93,7 +93,7 @@ export default {
         if (this.annotationDisplay) {
           const region = this.region ? this.region +"/" : "";
           this.annotationEntry = {
-            "featureId": region + this.label,
+            "featureId": encodeURIComponent(region + this.label),
             "resourceId": encodeURIComponent(this.scaffoldUrl),
           };
         }
