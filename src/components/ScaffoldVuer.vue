@@ -990,6 +990,10 @@ export default {
           }
         }
         // Triggers when an object has been selected
+        if (this.viewingMode === 'Annotation') {
+          //Make sure the tooltip is displayed with annotation mode
+          this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
+        }
         this.$emit("scaffold-selected", event.identifiers);
       } else if (event.eventType == 2) {
         if (this.selectedObjects.length === 0) {
