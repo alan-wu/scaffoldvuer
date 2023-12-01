@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/scaffoldvuer",
-  "version": "0.3.1",
+  "version": "0.3.2-beta.0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -29,7 +29,7 @@
     "*.js"
   ],
   "dependencies": {
-    "@abi-software/flatmapvuer": "^0.5.9-beta.2",
+    "@abi-software/flatmapvuer": "^0.5.9-beta.3",
     "@abi-software/svg-sprite": "^0.3.0",
     "axios": "^0.21.2",
     "core-js": "^3.22.5",
