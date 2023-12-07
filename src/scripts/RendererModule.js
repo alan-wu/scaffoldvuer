@@ -111,8 +111,8 @@ RendererModule.prototype.setHighlightedByZincObjects = function(
     let morphs = [];
     if (zincObjects) {
       zincObjects.forEach(zincObject => {
-        if (zincObject && zincObject.morph)
-          morphs.push(zincObject.morph);
+        if (zincObject && zincObject.getMorph())
+          morphs.push(zincObject.getMorph());
       });
     }
 
@@ -176,8 +176,12 @@ RendererModule.prototype.setSelectedByZincObjects = function(
   let morphs = [];
   if (zincObjects) {
     zincObjects.forEach(zincObject => {
-      if (zincObject && zincObject.morph)
-        morphs.push(zincObject.morph);
+      if (zincObject) {
+        const morph = zincObject.getMorph();
+        if (morph) {
+          morphs.push(morph);
+        }
+      }
     });
   }
 
@@ -191,17 +195,7 @@ const addGlyphToArray = function(objects) {
 }
 
 RendererModule.prototype.findObjectsByGroupName = function(groupName) {
-  const geometries = this.scene.findGeometriesWithGroupName(groupName);
-  const objects = [];
-  for (let i = 0; i < geometries.length; i ++ ) {
-    objects.push(geometries[i].morph);
-  }
-  const glyphsets = this.scene.findGlyphsetsWithGroupName(groupName);
-  for (let i = 0; i < glyphsets.length; i ++ ) {
-    glyphsets[i].forEachGlyph(addGlyphToArray(objects));
-  }
-  
-  return objects;
+  return this.scene.findObjectsWithGroupName(groupName);
 }
 
 RendererModule.prototype.setHighlightedByGroupName = function(groupName, propagateChanges) {

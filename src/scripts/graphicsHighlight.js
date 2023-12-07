@@ -1,5 +1,24 @@
 var THREE = require('zincjs').THREE;
 
+const setEmissiveColour = (fullList, colour, setDepthFunc) => {
+  for (let i = 0; i < fullList.length; i++) {
+    if (fullList[i] && fullList[i].material && fullList[i].material.emissive) {
+      fullList[i].material.emissive.setRGB(...colour);
+      if (setDepthFunc && fullList[i].material.depthFunc) {
+        fullList[i].material.depthFunc = THREE.LessEqualDepth;
+      }
+      fullList[i].children.forEach(child => {
+        const object = child.userData;
+        if (object && object.isZincObject && child.material && child.material.emissive) {
+          child.material.emissive.setRGB(...colour);
+        }
+      });
+    }
+  }
+}
+
+
+
 /**
  * This module manages highlighted and selected objects in 3D modules. 
  * 
@@ -65,10 +84,7 @@ exports.GraphicsHighlight = function() {
     // Selected object cannot be highlighted
     const array = getUnmatchingObjects(objects, currentSelectedObjects);
     const fullList = getFullListOfObjects(array);
-    for (let i = 0; i < fullList.length; i++) {
-      if (fullList[i] && fullList[i].material && fullList[i].material.emissive)
-        fullList[i].material.emissive.setRGB(..._this.highlightColour);
-    }
+    setEmissiveColour(fullList, _this.highlightColour, false);
     currentHighlightedObjects = array;
     return isDifferent(currentHighlightedObjects, previousHighlightedObjects);
   }
@@ -80,10 +96,7 @@ exports.GraphicsHighlight = function() {
     _this.resetHighlighted();
     _this.resetSelected();
     const fullList = getFullListOfObjects(objects);
-    for (let i = 0; i < fullList.length; i++) {
-    	if (fullList[i] && fullList[i].material && fullList[i].material.emissive)
-        fullList[i].material.emissive.setRGB(..._this.selectColour);
-    }
+    setEmissiveColour(fullList, _this.selectColour, false);
     currentSelectedObjects = objects;
     return isDifferent(currentSelectedObjects, previousHSelectedObjects);
   }
@@ -99,27 +112,13 @@ exports.GraphicsHighlight = function() {
   
   this.resetHighlighted = function() {
     const fullList = getFullListOfObjects(currentHighlightedObjects);
-    for (let i = 0; i < fullList.length; i++) {
-      if (fullList[i] && fullList[i].material) {
-        if (fullList[i].material.emissive)
-          fullList[i].material.emissive.setRGB(..._this.originalColour);
-        if (fullList[i].material.depthFunc)
-          fullList[i].material.depthFunc = THREE.LessEqualDepth;
-      }
-    }
+    setEmissiveColour(fullList, _this.originalColour, true);
     currentHighlightedObjects = [];
   }
   
   this.resetSelected = function() {
     const fullList = getFullListOfObjects(currentSelectedObjects);
-    for (let i = 0; i < fullList.length; i++) {
-    	if (fullList[i] && fullList[i].material) {
-    		if (fullList[i].material.emissive)
-          fullList[i].material.emissive.setRGB(..._this.originalColour);
-    		if (fullList[i].material.depthFunc)
-          fullList[i].material.depthFunc = THREE.LessEqualDepth;
-    	}
-    }
+    setEmissiveColour(fullList, _this.originalColour, true);
     currentSelectedObjects = [];
   }
   

@@ -44,7 +44,7 @@ export const testVolume = async (scaffoldVuer, texture_prefix) => {
   const material = texture.getMaterial(options);
   zincObject.createMesh(cube, material, meshOptions);
   scaffoldVuer.addZincObject(zincObject);
-  zincObject.morph.matrix.set(
+  zincObject.getMorph().matrix.set(
     -100,
     0,
     0,
@@ -104,9 +104,9 @@ export const testSlides = async (scaffoldVuer, texture_prefix) => {
   //textureSlides.morph.matrix.set(-100, 0, 0, 0, 0, -100, 0, 0, 0, 0, -100, 0, -60, -100, 30, 1);
   //textureSlides.morph.matrix.set( -100, 0, 0, -60, 0, -100, 0, -100, 0, 0, -100, 30, 0, 0, 0, 1 );
 
-  const n = textureSlides.morph.matrix.clone();
+  const n = textureSlides.getMorph().matrix.clone();
   n.set(-100, 0, 0, -10, 0, -200, 0, 0, 0, 0, -100, 0, 0, 0, 10, 1);
-  textureSlides.morph.applyMatrix4(n);
+  textureSlides.getMorph().applyMatrix4(n);
   scaffoldVuer.addZincObject(textureSlides);
   //scaffoldVuer.fitWindow();
   window.texture = textureSlides;

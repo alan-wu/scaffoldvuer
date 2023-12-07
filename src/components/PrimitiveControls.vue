@@ -91,7 +91,9 @@ export default {
       } else {
         this.isTextureSlides = false;
       }
-      if (object && object.morph) this.material = object.morph.material;
+      if (object && object.getMorph()) {
+        this.material = object.getMorph().material;
+      }
       else this.material = undefined;
       this.$refs.opacityControls.setObject(object);
     }
