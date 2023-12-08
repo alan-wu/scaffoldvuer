@@ -8,6 +8,7 @@
       <ScaffoldVuer
         ref="scaffold"
         class="vuer"
+        :flatmapAPI="flatmapAPI"
         :display-u-i="displayUI"
         :url="url"
         :help-mode="helpMode"
@@ -341,6 +342,7 @@ export default {
       searchText: "",
       loadTextureVolumeOnReady: false,
       readyCallback: undefined,
+      flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v4/",
     };
   },
   watch: {
