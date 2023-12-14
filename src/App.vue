@@ -213,6 +213,12 @@
             active-text="Markers On Selection"
             active-color="#8300bf"
           />
+          <el-switch
+            v-model="wireframe"
+            active-text="wireframe"
+            active-color="#8300bf"
+            @change="wireframeChanged"
+          />
         </el-row>
         <el-row :gutter="20">
           <el-input
@@ -315,6 +321,7 @@ export default {
       helpMode: false,
       displayMarkers: false,
       onClickMarkers: false,
+      wireframe: false,
       syncMode: false,
       currentTime: 0,
       displayMinimap: false,
@@ -397,9 +404,12 @@ export default {
       });
     },
     objectAdded: function (zincObject) {
-      if (this._objects.length === 0)
+      if (this._objects.length === 0) {
         zincObject.setMarkerMode("on");
-      console.log(zincObject);
+      }
+      if (zincObject.isGeometry) {
+        zincObject._lod._material.wireframe = this.wireframe;
+      }
       this._objects.push(zincObject);
     },
     openMap: function (map) {
@@ -494,8 +504,14 @@ export default {
         cameracontrol.stopAutoTumble();
       }
     },
+    wireframeChanged: function (value) {
+      this._objects.forEach((zincObject) => {
+        if (zincObject.isGeometry) {
+          zincObject._lod._material.wireframe = value;
+        }
+      });
+    },
     onReady: function () {
-      console.log("ready");
       //window.scaffoldvuer = this.$refs.scaffold;
       this.$refs.dropzone.revokeURLs();
       if (this.readyCallback) {
