@@ -1,4 +1,4 @@
-var THREE = require('zincjs').THREE;
+import { THREE } from 'zincjs';
 
 const setEmissiveColour = (fullList, colour, setDepthFunc) => {
   for (let i = 0; i < fullList.length; i++) {
@@ -17,15 +17,13 @@ const setEmissiveColour = (fullList, colour, setDepthFunc) => {
   }
 }
 
-
-
 /**
  * This module manages highlighted and selected objects in 3D modules. 
  * 
  * @class
  * @returns {exports.GraphicsHighlight}
  */
-exports.GraphicsHighlight = function() {
+const GraphicsHighlight = function() {
   let currentHighlightedObjects = [];
   let currentSelectedObjects = [];
   this.highlightColour = [1, 0, 0];
@@ -131,3 +129,5 @@ exports.GraphicsHighlight = function() {
     _this.resetHighlighted();
   }
 }
+
+export { GraphicsHighlight as default };

@@ -4,7 +4,6 @@
     v-loading="loading"
     class="scaffold-container"
     element-loading-text="Loading..."
-    element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.3)"
   >
     <map-svg-sprite-color />
@@ -27,182 +26,192 @@
       <el-popover
         v-if="displayWarning"
         ref="warningPopover"
-        v-model="hoverVisibilities[6].value"
+        :visible="hoverVisibilities[6].value"
         :content="warningMessage"
         placement="right"
-        :append-to-body="false"
-        trigger="manual"
+        :teleported="false"
         popper-class="scaffold-popper message-popper right-popper non-selectable"
-      />
-      <i
-        v-if="displayWarning"
-        v-popover:warningPopover
-        class="el-icon-warning message-icon warning-icon"
-        @mouseover="showHelpText(6)"
-        @mouseout="hideHelpText(6)"
       >
-        <span class="message-text">Beta</span>
-      </i>
+        <template #reference>
+          <div
+            v-if="displayWarning"
+            class="message-icon warning-icon"
+            @mouseover="showHelpText(6)"
+            @mouseout="hideHelpText(6)"
+          >
+            <el-icon><el-icon-warning-filled /></el-icon>
+            <span class="message-text">Beta</span>
+          </div>
+        </template>
+      </el-popover>
       <el-popover
         v-if="displayLatestChanges"
-        ref="latestChangesPopover"
-        v-model="hoverVisibilities[7].value"
+        :visible="hoverVisibilities[7].value"
         :content="latestChangesMessage"
         placement="right"
-        :append-to-body="false"
+        :teleported="false"
         trigger="manual"
         popper-class="scaffold-popper message-popper right-popper non-selectable"
-      />
-      <i
-        v-if="displayLatestChanges && latestChangesMessage"
-        v-popover:latestChangesPopover
-        class="el-icon-warning message-icon latest-changesicon"
-        @mouseover="showHelpText(7)"
-        @mouseout="hideHelpText(7)"
       >
-        <span class="message-text">What's new?</span>
-      </i>
+        <template #reference>
+          <div
+            v-if="displayLatestChanges && latestChangesMessage"
+            class="el-icon-warning message-icon latest-changesicon"
+            @mouseover="showHelpText(7)"
+            @mouseout="hideHelpText(7)"
+          >
+            <el-icon><el-icon-warning-filled /></el-icon>
+            <span class="warning-text">What's new?</span>
+          </div>
+        </template>
+      </el-popover>
       <el-popover
-        ref="checkBoxPopover"
-        v-model="hoverVisibilities[5].value"
+        :visible="hoverVisibilities[5].value"
         content="Change region visibility"
         placement="right"
-        :append-to-body="false"
+        :teleported="false"
         trigger="manual"
         popper-class="scaffold-popper right-popper non-selectable"
-      />
-      <tree-controls
-        ref="treeControls"
-        v-popover:checkBoxPopover
-        :help-mode="helpMode"
-        :isReady="isReady"
-        :show-colour-picker="showColourPicker"
-        @object-selected="objectSelected"
-        @object-hovered="objectHovered"
-        @drawer-toggled="drawerToggled"
-      />
+      >
+        <template #reference>
+          <tree-controls
+            ref="treeControls"
+            :help-mode="helpMode"
+            :isReady="isReady"
+            :show-colour-picker="showColourPicker"
+            @object-selected="objectSelected"
+            @object-hovered="objectHovered"
+            @drawer-toggled="drawerToggled"
+          />
+        </template>
+      </el-popover>
       <div class="primitive-controls-box">
         <primitive-controls ref="primitiveControls" />
       </div>
       <el-popover
         v-if="sceneData.timeVarying"
         ref="sliderPopover"
-        v-model="hoverVisibilities[4].value"
+        :visible="hoverVisibilities[4].value"
         content="Move the slider to animate the region"
         placement="top"
-        :append-to-body="false"
+        :teleported="false"
         trigger="manual"
         popper-class="scaffold-popper top-popper non-selectable"
-      />
-      <div
-        v-if="sceneData.timeVarying"
-        v-popover:sliderPopover
-        class="time-slider-container"
-        :class="[minimisedSlider ? 'minimised' : '', sliderPosition]"
       >
-        <el-tabs type="card">
-          <el-tab-pane label="Animate scaffold">
-            <el-row class="tab-content">
-              <map-svg-icon
-                v-if="isPlaying"
-                icon="pause"
-                class="icon-button video-button"
-                @click.native="play(false)"
-              />
-              <map-svg-icon
-                v-else
-                icon="play"
-                class="video-button icon-button"
-                @click.native="play(true)"
-              />
-              <el-slider
-                :min="0"
-                :max="timeMax"
-                :value="(sceneData.currentTime / 100) * timeMax"
-                :step="0.1"
-                tooltip-class="time-slider-tooltip"
-                class="slider"
-                :format-tooltip="formatTooltip"
-                :marks="timeStamps"
-                @input="timeChange($event)"
-              />
-            </el-row>
-          </el-tab-pane>
-          <el-tab-pane label="Animation data">
-            <el-row class="tab-content">
-              <div class="animation-data">
-                Original duration:
-                <div class="purple">
-                  {{ orginalDuration }}
-                </div>
-              </div>
-              <div class="animation-data">
-                Animation duration:
-                <div class="purple">
-                  {{ animateDuration }}
-                </div>
-              </div>
-              <div class="animation-data">
-                Playback speed
-                <el-select
-                  :popper-append-to-body="true"
-                  :value="currentSpeed"
-                  placeholder="Select"
-                  class="select-box"
-                  popper-class="scaffold_viewer_dropdown"
-                  @change="speedChanged($event)"
-                >
-                  <el-option
-                    v-for="item in playSpeed"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
+        <template #reference>
+          <div
+            v-if="sceneData.timeVarying"
+            v-popover:sliderPopover
+            class="time-slider-container"
+            :class="[minimisedSlider ? 'minimised' : '', sliderPosition]"
+          >
+            <el-tabs type="card">
+              <el-tab-pane label="Animate scaffold">
+                <el-row class="tab-content">
+                  <map-svg-icon
+                    v-if="isPlaying"
+                    icon="pause"
+                    class="icon-button video-button"
+                    @click.native="play(false)"
                   />
-                </el-select>
-              </div>
-            </el-row>
-          </el-tab-pane>
-        </el-tabs>
-      </div>
+                  <map-svg-icon
+                    v-else
+                    icon="play"
+                    class="video-button icon-button"
+                    @click.native="play(true)"
+                  />
+                  <el-slider
+                    :min="0"
+                    :max="timeMax"
+                    :value="(sceneData.currentTime / 100) * timeMax"
+                    :step="0.1"
+                    tooltip-class="time-slider-tooltip"
+                    class="slider"
+                    :format-tooltip="formatTooltip"
+                    :marks="timeStamps"
+                    @input="timeChange($event)"
+                  />
+                </el-row>
+              </el-tab-pane>
+              <el-tab-pane label="Animation data">
+                <el-row class="tab-content">
+                  <div class="animation-data">
+                    Original duration:
+                    <div class="purple">
+                      {{ orginalDuration }}
+                    </div>
+                  </div>
+                  <div class="animation-data">
+                    Animation duration:
+                    <div class="purple">
+                      {{ animateDuration }}
+                    </div>
+                  </div>
+                  <div class="animation-data">
+                    Playback speed
+                    <el-select
+                      :teleported="true"
+                      :value="currentSpeed"
+                      placeholder="Select"
+                      class="select-box"
+                      popper-class="scaffold_viewer_dropdown"
+                      @change="speedChanged($event)"
+                    >
+                      <el-option
+                        v-for="item in playSpeed"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                      />
+                    </el-select>
+                  </div>
+                </el-row>
+              </el-tab-pane>
+            </el-tabs>
+          </div>
+        </template>
+      </el-popover>
       <div class="bottom-right-control">
         <el-popover
-          v-model="hoverVisibilities[0].value"
+          :visible="hoverVisibilities[0].value"
           content="Zoom in"
           placement="left"
-          :append-to-body="false"
+          :teleported="false"
           trigger="manual"
           popper-class="scaffold-popper left-popper non-selectable"
         >
-          <map-svg-icon
-            slot="reference"
-            icon="zoomIn"
-            class="icon-button zoomIn"
-            @click.native="zoomIn()"
-            @mouseover.native="showHelpText(0)"
-            @mouseout.native="hideHelpText(0)"
-          />
+          <template #reference>
+            <map-svg-icon
+              icon="zoomIn"
+              class="icon-button zoomIn"
+              @click.native="zoomIn()"
+              @mouseover.native="showHelpText(0)"
+              @mouseout.native="hideHelpText(0)"
+            />
+          </template>
         </el-popover>
         <el-popover
-          v-model="hoverVisibilities[1].value"
+          :visible="hoverVisibilities[1].value"
           content="Zoom out"
           placement="top-end"
-          :append-to-body="false"
+          :teleported="false"
           trigger="manual"
           popper-class="scaffold-popper popper-zoomout non-selectable"
         >
-          <map-svg-icon
-            slot="reference"
-            icon="zoomOut"
-            class="icon-button zoomOut"
-            @click.native="zoomOut()"
-            @mouseover.native="showHelpText(1)"
-            @mouseout.native="hideHelpText(1)"
-          />
+          <template #reference>
+            <map-svg-icon
+              icon="zoomOut"
+              class="icon-button zoomOut"
+              @click.native="zoomOut()"
+              @mouseover.native="showHelpText(1)"
+              @mouseout.native="hideHelpText(1)"
+            />
+          </template>
         </el-popover>
         <el-popover
-          v-model="hoverVisibilities[2].value"
+          :visible="hoverVisibilities[2].value"
           placement="top"
-          :append-to-body="false"
+          :teleported="false"
           trigger="manual"
           popper-class="scaffold-popper non-selectable"
         >
@@ -222,12 +231,15 @@
         </el-popover>
       </div>
       <el-popover
+        v-if="openMapRef"
         ref="open-map-popover"
+        :virtual-ref="openMapRef"
         placement="top-start"
         width="128"
-        :append-to-body="false"
+        :teleported="false"
         trigger="click"
         popper-class="open-map-popper"
+        virtual-triggering
       >
         <el-row v-for="item in openMapOptions" :key="item.key">
           <el-button
@@ -241,17 +253,19 @@
       </el-popover>
       <el-popover
         ref="backgroundPopover"
+        :virtual-ref="backgroundIconRef"
         placement="top-start"
         width="128"
-        :append-to-body="false"
+        :teleported="false"
         trigger="click"
         popper-class="background-popper non-selectable"
+        virtual-triggering
       >
         <el-row class="backgroundText">Viewing Mode</el-row>
         <el-row class="backgroundControl">
           <el-select
-            :popper-append-to-body="false"
-            v-model="viewingMode"
+            :popper-teleported="false"
+            :visible="viewingMode"
             placeholder="Select"
             class="select-box viewing-mode"
             popper-class="scaffold_viewer_dropdownr"
@@ -284,41 +298,43 @@
       >
         <el-row>
           <el-popover
-            v-model="hoverVisibilities[8].value"
+            :visible="hoverVisibilities[8].value"
             content="Open new map"
             placement="right"
-            :append-to-body="false"
+            :teleported="false"
             trigger="manual"
             popper-class="scaffold-popper right-popper non-selectable"
           >
-            <map-svg-icon
-              v-if="enableOpenMapUI && openMapOptions.length > 0"
-              slot="reference"
-              v-popover:open-map-popover
-              icon="openMap"
-              class="icon-button"
-              @mouseover.native="showHelpText(8)"
-              @mouseout.native="hideHelpText(8)"
-            />
+            <template #reference>
+              <map-svg-icon
+                v-if="enableOpenMapUI && openMapOptions.length > 0"
+                ref="openMapRef"
+                icon="openMap"
+                class="icon-button"
+                @mouseover.native="showHelpText(8)"
+                @mouseout.native="hideHelpText(8)"
+              />
+            </template>
           </el-popover>
         </el-row>
         <el-row>
           <el-popover
-            v-model="hoverVisibilities[3].value"
+            :visible="hoverVisibilities[3].value"
             content="Change background color"
             placement="right"
-            :append-to-body="false"
+            :teleported="false"
             trigger="manual"
             popper-class="scaffold-popper right-popper non-selectable"
           >
-            <map-svg-icon
-              slot="reference"
-              v-popover:backgroundPopover
-              icon="changeBckgd"
-              class="icon-button"
-              @mouseover.native="showHelpText(3)"
-              @mouseout.native="hideHelpText(3)"
-            />
+            <template #reference>
+              <map-svg-icon
+                ref="backgroundIconRef"
+                icon="changeBckgd"
+                class="icon-button"
+                @mouseover.native="showHelpText(3)"
+                @mouseout.native="hideHelpText(3)"
+              />
+            </template>
           </el-popover>
         </el-row>
       </div>
@@ -328,42 +344,33 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import Vue from "vue";
-import PrimitiveControls from "./PrimitiveControls";
-import ScaffoldTooltip from "./ScaffoldTooltip";
-import TreeControls from "./TreeControls";
-import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
-import { findObjectsWithNames, getObjectsFromAnnotations } from "../scripts/utilities.js";
-import { SearchIndex } from "../scripts/search.js";
+import { shallowRef } from 'vue'
 import {
-  Button,
-  Col,
-  Loading,
-  Option,
-  Popover,
-  Row,
-  Select,
-  Slider,
-  TabPane,
-  Tabs,
-} from "element-ui";
-import lang from "element-ui/lib/locale/lang/en";
-import locale from "element-ui/lib/locale";
+  WarningFilled as ElIconWarningFilled,
+  ArrowDown as ElIconArrowDown,
+  ArrowLeft as ElIconArrowLeft,
+} from '@element-plus/icons-vue'
+import PrimitiveControls from "./PrimitiveControls.vue";
+import ScaffoldTooltip from "./ScaffoldTooltip.vue";
+import TreeControls from "./TreeControls.vue";
+import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
+import { findObjectsWithNames, getObjectsFromAnnotations } from "../scripts/Utilities.js";
 
-locale.use(lang);
-Vue.use(Button);
-Vue.use(Col);
-Vue.use(Loading.directive);
-Vue.use(Option);
-Vue.use(Popover);
-Vue.use(Row);
-Vue.use(Select);
-Vue.use(Slider);
-Vue.use(TabPane);
-Vue.use(Tabs);
-
-const OrgansViewer = require("../scripts/organsRenderer").OrgansViewer;
-const EventNotifier = require("../scripts/eventNotifier").EventNotifier;
+import { SearchIndex } from "../scripts/Search.js";
+import {
+  ElButton as Button,
+  ElCol as Col,
+  ElLoading as Loading,
+  ElOption as Option,
+  ElPopover as Popover,
+  ElRow as Row,
+  ElSelect as Select,
+  ElSlider as Slider,
+  ElTabPane as TabPane,
+  ElTabs as Tabs,
+} from "element-plus";
+import { OrgansViewer } from "../scripts/OrgansRenderer.js";
+import { EventNotifier } from "../scripts/EventNotifier.js";
 
 /**
  * A vue component of the scaffold viewer.
@@ -374,11 +381,24 @@ const EventNotifier = require("../scripts/eventNotifier").EventNotifier;
 export default {
   name: "ScaffoldVuer",
   components: {
+    Button,
+    Col,
+    Loading,
+    Option,
+    Popover,
+    Row,
+    Select,
+    Slider,
+    TabPane,
+    Tabs,
     MapSvgIcon,
     MapSvgSpriteColor,
     PrimitiveControls,
     ScaffoldTooltip,
     TreeControls,
+    ElIconWarningFilled,
+    ElIconArrowDown,
+    ElIconArrowLeft,
   },
   props: {
     /**
@@ -635,7 +655,9 @@ export default {
       viewingModes: [
         "Annotation",
         "Exploration",
-      ]
+      ],
+      openMapRef: undefined,
+      backgroundIconRef: undefined,
     };
   },
   watch: {
@@ -721,6 +743,8 @@ export default {
     this.$_searchIndex = new SearchIndex();
   },
   mounted: function () {
+    this.openMapRef = shallowRef(this.$refs.openMapRef)
+    this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef)
     this.$refs.treeControls.setModule(this.$module);
     let eventNotifier = new EventNotifier();
     eventNotifier.subscribe(this, this.eventNotifierCallback);
@@ -1544,10 +1568,12 @@ export default {
             true
           );
         }
-        this.$module.scene.displayMarkers = this.displayMarkers;
-        this.$module.scene.forcePickableObjectsUpdate = true;
-        this.$module.scene.displayMinimap = this.displayMinimap;
-        this.updateMinimapScissor();
+        if (this.$module && this.$module.scene) {
+          this.$module.scene.displayMarkers = this.displayMarkers;
+          this.$module.scene.forcePickableObjectsUpdate = true;
+          this.$module.scene.displayMinimap = this.displayMinimap;
+          this.updateMinimapScissor();
+        }
       }
     },
     /**
@@ -1622,16 +1648,16 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-@import "~element-ui/packages/theme-chalk/src/button";
-@import "~element-ui/packages/theme-chalk/src/col";
-@import "~element-ui/packages/theme-chalk/src/loading";
-@import "~element-ui/packages/theme-chalk/src/option";
-@import "~element-ui/packages/theme-chalk/src/popover";
-@import "~element-ui/packages/theme-chalk/src/row";
-@import "~element-ui/packages/theme-chalk/src/select";
-@import "~element-ui/packages/theme-chalk/src/slider";
-@import "~element-ui/packages/theme-chalk/src/tabs";
-@import "~element-ui/packages/theme-chalk/src/tab-pane";
+@use "element-plus/theme-chalk/src/button";
+@use "element-plus/theme-chalk/src/col";
+@use "element-plus/theme-chalk/src/loading";
+@use "element-plus/theme-chalk/src/option";
+@use "element-plus/theme-chalk/src/popover";
+@use "element-plus/theme-chalk/src/row";
+@use "element-plus/theme-chalk/src/select";
+@use "element-plus/theme-chalk/src/slider";
+@use "element-plus/theme-chalk/src/tabs";
+@use "element-plus/theme-chalk/src/tab-pane";
 
 .message-icon {
   position: absolute;
@@ -1666,7 +1692,7 @@ export default {
   vertical-align: 5px;
 }
 
-::v-deep .message-popper {
+:deep(.message-popper) {
   padding: 9px 10px;
   min-width: 150px;
   font-size: 12px;
@@ -1727,17 +1753,21 @@ export default {
   font-size: 14px;
 }
 
-.tab-content ::v-deep .el-slider__marks-text {
-  margin-top: 12px;
-  margin-left: 8px;
-  font-size: 10px;
+.tab-content {
+  :deep(.el-slider__marks-text) {
+    margin-top: 12px;
+    margin-left: 8px;
+    font-size: 10px;
+  }
 }
 
-.tab-content ::v-deep .el-slider__stop {
-  width: 10px;
-  height: 10px;
-  top: -1px;
-  border: solid 1px $app-primary-color;
+.tab-content {
+  :deep(.el-slider__stop) {
+    width: 10px;
+    height: 10px;
+    top: -1px;
+    border: solid 1px $app-primary-color;
+  }
 }
 
 .animation-data {
@@ -1758,12 +1788,12 @@ export default {
   width: calc(100% - 88px);
   margin-top: -7px;
 
-  ::v-deep .el-slider__runway {
+  :deep(.el-slider__runway) {
     height: 10px;
     margin: 14px 0;
   }
 
-  ::v-deep .el-slider__button-wrapper {
+  :deep(.el-slider__button-wrapper) {
     top: -13px;
   }
 }
@@ -1776,11 +1806,11 @@ export default {
   padding-left: 8px;
 }
 
-::v-deep .non-selectable {
+:deep(.non-selectable) {
   user-select: none;
 }
 
-::v-deep .background-popper {
+:deep(.background-popper) {
   padding: 5px 12px;
   background-color: #ffffff;
   border: 1px solid $app-primary-color;
@@ -1803,7 +1833,7 @@ export default {
   }
 }
 
-::v-deep .open-map-popper {
+:deep(.open-map-popper) {
   padding-top: 5px;
   padding-bottom: 5px;
   background-color: #ffffff;
@@ -1905,7 +1935,7 @@ export default {
 }
 
 .time-slider-container {
-  ::v-deep .el-tabs__header {
+  :deep(.el-tabs__header) {
     margin: 0px;
     border-bottom: 1px solid rgb(144, 147, 153);
   }
@@ -1914,7 +1944,7 @@ export default {
     margin-bottom: 5px;
   }
 
-  ::v-deep .el-tabs__content {
+  :deep(.el-tabs__content) {
     border-left: 1px solid rgb(144, 147, 153);
     border-bottom: 1px solid rgb(144, 147, 153);
     border-right: 1px solid rgb(144, 147, 153);
@@ -1922,7 +1952,7 @@ export default {
     background-color: white;
   }
 
-  ::v-deep .el-tabs--card {
+  :deep(.el-tabs--card) {
     > .el-tabs__header {
       .el-tabs__nav {
         border: 1px solid rgb(144, 147, 153);
@@ -1952,7 +1982,7 @@ export default {
   }
 }
 
-::v-deep .scaffold-popper {
+:deep(.scaffold-popper) {
   padding: 6px 4px;
   font-size: 12px;
   color: rgb(48, 49, 51);
@@ -1990,23 +2020,26 @@ export default {
   }
 }
 
-::v-deep .el-slider__button {
+:deep(.el-slider__button) {
   border: 2px solid $app-primary-color;
 }
 
-::v-deep .el-slider__bar {
+:deep(.el-slider__bar) {
   background-color: $app-primary-color;
   height: 10px;
 }
 
-::v-deep .el-loading-spinner {
-  i,
+:deep(.el-loading-spinner) {
+  .path {
+    stroke: $app-primary-color;
+  }
   .el-loading-text {
     color: $app-primary-color;
   }
 }
 
-::v-deep .popper-zoomout {
+
+:deep(.popper-zoomout) {
   padding-right: 11px;
   left: -21px !important;
   .popper__arrow {
@@ -2025,12 +2058,13 @@ export default {
 
   &.viewing-mode {
     width: unset;
-    ::v-deep .el-input__inner {
+    :deep(.el-input__inner) {
       line-height:30px
     }
   }
 
-  ::v-deep .el-input__inner {
+  :deep()
+    .el-input__inner {
     color: $app-primary-color;
     height: 22px;
     padding-left: 8px;
@@ -2043,8 +2077,8 @@ export default {
     }
   }
 
-  ::v-deep .el-input,
-  ::v-deep .el-input__icon {
+  :deep(.el-input),
+  :deep(.el-input__icon) {
     line-height: 22px;
   }
 }

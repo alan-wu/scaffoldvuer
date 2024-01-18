@@ -35,7 +35,7 @@ const Subscription = function(subscriberIn, callbackIn, eventType) {
   }
 }
 
-exports.EventNotifier = function() {
+const EventNotifier = function() {
   const subscriptions = [];
   
   this.publish = function(source, eventType, id, zincObjects) {
@@ -63,4 +63,7 @@ exports.EventNotifier = function() {
   }
 }  
 
-exports.EVENT_TYPE = EVENT_TYPE;
+export {
+  EventNotifier,
+  EVENT_TYPE,
+};

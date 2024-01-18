@@ -17,7 +17,6 @@
           node-key="id"
           v-loading="!isReady"
           show-checkbox
-          element-loading-spinner="el-icon-loading"
           element-loading-background="rgba(0, 0, 0, 0.3)"
           :check-strictly="false"
           :data="treeData[0].children"
@@ -25,29 +24,30 @@
           :render-after-expand="false"
           @check="checkChanged"
         >
-          <span
-            slot-scope="{ node, data }"
-            class="region-tree-node"
-            :class="{
-              activeItem: active.includes(data.id),
-              hoverItem: hover.includes(data.id),
-            }"
-            @click="changeActiveByNode(data, true)"
-            @mouseover="changeHoverByNode(data, true)"
-          >
-            <el-color-picker
-              v-if="data.isPrimitives"
-              :class="{ 'show-picker': showColourPicker }"
-              :value="getColour(data)"
-              size="small"
-              :popper-class="myPopperClass"
-              @change="setColour(data, $event)"
-            />
-            <span>{{ node.label }}</span>
-            <span v-if="data.isTextureSlides" class="node-options">
-              (Texture)
-            </span>
+          <template #default="{ node, data }">
+            <span
+              class="region-tree-node"
+              :class="{
+                activeItem: active.includes(data.id),
+                hoverItem: hover.includes(data.id),
+              }"
+              @click="changeActiveByNode(data, true)"
+              @mouseover="changeHoverByNode(data, true)"
+            >
+              <el-color-picker
+                v-if="data.isPrimitives"
+                :class="{ 'show-picker': showColourPicker }"
+                :value="getColour(data)"
+                size="small"
+                :popper-class="myPopperClass"
+                @change="setColour(data, $event)"
+              />
+              <span>{{ node.label }}</span>
+              <span v-if="data.isTextureSlides" class="node-options">
+                (Texture)
+              </span>
           </span>
+          </template>
         </el-tree>
       </div>
     </div>
@@ -56,40 +56,30 @@
       :class="{ open: drawerOpen, close: !drawerOpen }"
       @click="toggleDrawer"
     >
-      <i class="el-icon-arrow-left" />
+      <el-icon><el-icon-arrow-left /></el-icon>
     </div>
   </div>
 </template>
 
 <script>
 /* eslint-disable no-alert, no-console */
-import Vue from "vue";
 import {
-  Checkbox,
-  CheckboxGroup,
-  ColorPicker,
-  Loading,
-  Row,
-  Tree,
-} from "element-ui";
-import lang from "element-ui/lib/locale/lang/en";
-import locale from "element-ui/lib/locale";
+  ArrowLeft as ElIconArrowLeft,
+} from '@element-plus/icons-vue'
+import {
+  ElCheckbox as Checkbox,
+  ElCheckboxGroup as CheckboxGroup,
+  ElColorPicker as ColorPicker,
+  ElLoading as Loading,
+  ElRow as Row,
+  ElTree as Tree,
+} from "element-plus";
 import {
   convertUUIDsToFullPaths,
   createListFromPrimitives,
   extractAllFullPaths,
   findObjectsWithNames,
-} from "../scripts/utilities.js";
-
-const orderBy = require("lodash/orderBy");
-const uniq = require("lodash/uniq");
-locale.use(lang);
-Vue.use(Checkbox);
-Vue.use(CheckboxGroup);
-Vue.use(ColorPicker);
-Vue.use(Loading);
-Vue.use(Row);
-Vue.use(Tree);
+} from "../scripts/Utilities.js";
 
 const nameSorting = (a, b) => {
   const labelA = a.label.toUpperCase();
@@ -108,6 +98,15 @@ const nameSorting = (a, b) => {
  */
 export default {
   name: "TreeControls",
+  components: {
+    ElIconArrowLeft,
+    Checkbox,
+    CheckboxGroup,
+    ColorPicker,
+    Loading,
+    Row,
+    Tree,
+  },
   props: {
     /**
      * Enable/disable colour picker
@@ -469,11 +468,21 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-@import "~element-ui/packages/theme-chalk/src/checkbox";
-@import "~element-ui/packages/theme-chalk/src/color-picker";
-@import "~element-ui/packages/theme-chalk/src/loading";
-@import "~element-ui/packages/theme-chalk/src/row";
-@import "~element-ui/packages/theme-chalk/src/tree";
+@use "element-plus/theme-chalk/src/checkbox";
+@use "element-plus/theme-chalk/src/color-picker";
+@use "element-plus/theme-chalk/src/loading";
+@use "element-plus/theme-chalk/src/row";
+@use "element-plus/theme-chalk/src/tree";
+
+
+:deep(.el-loading-spinner) {
+  .path {
+    stroke: $app-primary-color;
+  }
+  .el-loading-text {
+    color: $app-primary-color;
+  }
+}
 
 .checkbox-container {
   display: flex;
@@ -539,7 +548,7 @@ export default {
   margin-top: 6px;
   scrollbar-width: thin;
 
-  ::v-deep .el-tree {
+  :deep(.el-tree) {
     max-height: 240px;
     min-height: 130px;
     overflow: auto;
@@ -553,12 +562,12 @@ export default {
     }
   }
 
-  ::v-deep .el-tree-node__content {
+  :deep(.el-tree-node__content) {
     height: 22px;
   }
 }
 
-::v-deep .el-checkbox__input {
+:deep(.el-checkbox__input) {
   &.is-indeterminate,
   &.is-checked {
     .el-checkbox__inner {
@@ -568,11 +577,11 @@ export default {
   }
 }
 
-::v-deep .el-color-picker__color {
+:deep(.el-color-picker__color) {
   border: 1px solid $app-primary-color;
 }
 
-::v-deep .el-checkbox__label {
+:deep(.el-checkbox__label) {
   padding-left: 5px;
   color: $app-primary-color !important;
   font-size: 12px;
@@ -595,11 +604,11 @@ export default {
   background-color: #fff;
   width: 100%;
 
-  ::v-deep .el-color-picker {
+  :deep(.el-color-picker) {
     height: 14px !important;
   }
 
-  ::v-deep .el-color-picker__trigger {
+  :deep(.el-color-picker__trigger) {
     margin-left: 8px;
     margin-right: 8px;
     padding: 0px;
@@ -613,44 +622,18 @@ export default {
   background-color: #eee !important;
 }
 
-::v-deep .el-color-picker__icon {
+:deep(.el-color-picker__icon) {
   &.el-icon-arrow-down {
     display: none;
   }
 }
 
-::v-deep .show-picker {
+:deep(.show-picker) {
   .el-color-picker__icon {
     &.el-icon-arrow-down {
       display: block;
     }
   }
-}
-
-::v-deep .my-drawer {
-  background: rgba(0, 0, 0, 0);
-  box-shadow: none;
-}
-
-.drawer {
-  ::v-deep .el-drawer:focus {
-    outline: none;
-  }
-}
-
-.open-drawer {
-  width: 20px;
-  height: 40px;
-  z-index: 8;
-  position: absolute;
-  left: 0px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
-  border: solid 1px #e4e7ed;
-  background-color: #f7faff;
-  text-align: center;
-  vertical-align: middle;
-  cursor: pointer;
-  pointer-events: auto;
 }
 
 .drawer-button {
