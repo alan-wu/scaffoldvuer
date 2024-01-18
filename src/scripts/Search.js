@@ -23,7 +23,7 @@ limitations under the License.
 
 import MiniSearch from 'minisearch';
 
-import { createUnqiuesFromObjects } from './utilities';
+import { createUnqiuesFromObjects } from './Utilities';
 
 //==============================================================================
 

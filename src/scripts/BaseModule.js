@@ -76,5 +76,7 @@ BaseModule.prototype.addNotifier = function(eventNotifier) {
   this.eventNotifiers.push(eventNotifier);
 }
 
-exports.BaseModule = BaseModule;
-exports.MODULE_CHANGE = MODULE_CHANGE;
+export {
+  BaseModule,
+  MODULE_CHANGE
+}

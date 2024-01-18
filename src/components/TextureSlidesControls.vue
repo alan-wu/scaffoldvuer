@@ -7,7 +7,7 @@
       <el-row v-for="(slide, index) in settings" :key="slide.id">
         <el-col :offset="0" :span="2">
           <el-select
-            :popper-append-to-body="false"
+            :teleported="false"
             :value="slide.direction"
             placeholder="Select"
             class="input-box"
@@ -64,37 +64,34 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import Vue from "vue";
 import {
-  Col,
-  Container,
-  Footer,
-  Header,
-  Icon,
-  InputNumber,
-  Main,
-  Row,
-  Slider,
-} from "element-ui";
-import lang from "element-ui/lib/locale/lang/en";
-import locale from "element-ui/lib/locale";
-
-locale.use(lang);
-Vue.use(Col);
-Vue.use(Container);
-Vue.use(Footer);
-Vue.use(Header);
-Vue.use(Icon);
-Vue.use(InputNumber);
-Vue.use(Main);
-Vue.use(Slider);
-Vue.use(Row);
+  ElCol as Col,
+  ElContainer as Container,
+  ElFooter as Footer,
+  ElHeader as Header,
+  ElIcon as Icon,
+  ElInputNumber as InputNumber,
+  ElMain as Main,
+  ElRow as Row,
+  ElSlider as Slider,
+} from "element-plus";
 
 /**
  * A component to control the opacity of the target object.
  */
 export default {
   name: "TextureSlidesControls",
+  components: {
+    Col,
+    Container,
+    Footer,
+    Header,
+    Icon,
+    InputNumber,
+    Main,
+    Row,
+    Slider,
+  },
   data: function () {
     return {
       settings: [],
@@ -160,11 +157,11 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-@import "~element-ui/packages/theme-chalk/src/col";
-@import "~element-ui/packages/theme-chalk/src/container";
-@import "~element-ui/packages/theme-chalk/src/input-number";
-@import "~element-ui/packages/theme-chalk/src/slider";
-@import "~element-ui/packages/theme-chalk/src/row";
+@use "element-plus/theme-chalk/src/col";
+@use "element-plus/theme-chalk/src/container";
+@use "element-plus/theme-chalk/src/input-number";
+@use "element-plus/theme-chalk/src/slider";
+@use "element-plus/theme-chalk/src/row";
 
 .header {
   color: #606266;
@@ -219,7 +216,7 @@ export default {
   overflow-y: none;
 }
 
-::v-deep .el-slider__bar {
+:deep(.el-slider__bar) {
   background-color: $app-primary-color;
 }
 
@@ -234,13 +231,13 @@ export default {
 
   &.number-input {
     width: 42px;
-    ::v-deep .el-input__inner {
+    :deep(.el-input__inner) {
       padding-left: 0px;
       padding-right: 0px;
     }
   }
 
-  ::v-deep .el-input__inner {
+  :deep(.el-input__inner) {
     color: $app-primary-color;
     height: 22px;
     padding-left: 8px;
@@ -250,8 +247,8 @@ export default {
     line-height: 22px;
   }
 
-  ::v-deep .el-input,
-  ::v-deep .el-input__icon {
+  :deep(.el-input),
+  :deep(.el-input__icon) {
     line-height: 22px;
   }
 

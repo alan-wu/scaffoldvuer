@@ -25,22 +25,24 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import Vue from "vue";
-import { Container, Header, Main, Slider } from "element-ui";
-import lang from "element-ui/lib/locale/lang/en";
-import locale from "element-ui/lib/locale";
-
-locale.use(lang);
-Vue.use(Container);
-Vue.use(Header);
-Vue.use(Main);
-Vue.use(Slider);
+import {
+  ElContainer as Container,
+  ElHeader as Header,
+  ElMain as Main,
+  ElSlider as Slider
+} from "element-plus";
 
 /**
  * A component to control the opacity of the target object.
  */
 export default {
   name: "OpacityControls",
+  components: {
+    Container,
+    Header,
+    Main,
+    Slider,
+  },
   props: {
     material: undefined,
   },
@@ -73,8 +75,8 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-@import "~element-ui/packages/theme-chalk/src/container";
-@import "~element-ui/packages/theme-chalk/src/slider";
+@use "element-plus/theme-chalk/src/container";
+@use "element-plus/theme-chalk/src/slider";
 
 .header {
   color: #606266;
@@ -116,7 +118,7 @@ export default {
   background-color: #fff;
 }
 
-::v-deep .el-slider__bar {
+:deep(.el-slider__bar) {
   background-color: $app-primary-color;
 }
 

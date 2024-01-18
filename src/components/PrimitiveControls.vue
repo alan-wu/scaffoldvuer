@@ -4,14 +4,14 @@
     class="primitive-controls"
   >
     <el-drawer
-      custom-class="my-drawer"
       :class="{
+        'my-drawer': true,
         'drawer-content': true,
         'opacity': material !== undefined,
         'texture-slides': isTextureSlides,
       }"
       :visible.sync="drawerOpen"
-      :append-to-body="false"
+      :teleported="false"
       :modal-append-to-body="false"
       size="300"
       :with-header="false"
@@ -23,7 +23,7 @@
         class="tab-button close"
         @click="toggleDrawer"
       >
-        <i class="el-icon-arrow-right" />
+      <el-icon><el-icon-arrow-right/></el-icon>
       </div>
       <opacity-controls
         :material="material"
@@ -38,23 +38,20 @@
       class="tab-button open"
       @click="toggleDrawer"
     >
-      <i class="el-icon-arrow-left" />
+    <el-icon-arrow-left class="el-icon-arrow-left"/>
     </div>
   </div>
 </template>
 
 <script>
 /* eslint-disable no-alert, no-console */
-import Vue from "vue";
-import OpacityControls from "./OpacityControls";
-import TextureSlidesControls from "./TextureSlidesControls";
-import { Drawer, Icon } from "element-ui";
-import lang from "element-ui/lib/locale/lang/en";
-import locale from "element-ui/lib/locale";
-
-locale.use(lang);
-Vue.use(Drawer);
-Vue.use(Icon);
+import {
+  ArrowRight as ElIconArrowRight,
+  ArrowLeft as ElIconArrowLeft,
+} from '@element-plus/icons-vue'
+import OpacityControls from "./OpacityControls.vue";
+import TextureSlidesControls from "./TextureSlidesControls.vue";
+import { ElDrawer as Drawer } from "element-plus";
 
 /**
  * A component to control the opacity of the target object.
@@ -62,6 +59,7 @@ Vue.use(Icon);
 export default {
   name: "PrimitiveControls",
   components: {
+    Drawer,
     OpacityControls,
     TextureSlidesControls,
   },
@@ -101,9 +99,9 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-@import "~element-ui/packages/theme-chalk/src/container";
-@import "~element-ui/packages/theme-chalk/src/drawer";
-@import "~element-ui/packages/theme-chalk/src/slider";
+@use "element-plus/theme-chalk/src/container";
+@use "element-plus/theme-chalk/src/drawer";
+@use "element-plus/theme-chalk/src/slider";
 
 .primitive-controls {
   text-align: left;
@@ -131,7 +129,7 @@ export default {
   }
 }
 
-::v-deep .my-drawer {
+:deep(.my-drawer) {
   background: rgba(0, 0, 0, 0);
   box-shadow: none;
 }

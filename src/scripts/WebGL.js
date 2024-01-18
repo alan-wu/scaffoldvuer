@@ -3,7 +3,7 @@
  * @author mr.doob / http://mrdoob.com/
  */
 
-exports.WEBGL = {
+const WEBGL = {
 
 	isWebGLAvailable: function () {
 
@@ -92,3 +92,5 @@ exports.WEBGL = {
 	}
 
 };
+
+export { WEBGL as default };
