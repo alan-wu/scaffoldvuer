@@ -1991,6 +1991,7 @@ export default {
   border: 1px solid $app-primary-color;
   white-space: nowrap;
   min-width: unset;
+  width: unset!important;;
   pointer-events: none;
 
   .el-popper__arrow {
