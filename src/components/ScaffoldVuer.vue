@@ -61,7 +61,7 @@
             @mouseout="hideHelpText(7)"
           >
             <el-icon><el-icon-warning-filled /></el-icon>
-            <span class="warning-text">What's new?</span>
+            <span class="message-text">What's new?</span>
           </div>
         </template>
       </el-popover>
@@ -89,7 +89,7 @@
         <primitive-controls ref="primitiveControls" />
       </div>
       <el-popover
-        v-if="sceneData.timeVarying"
+        v-if="timeVarying"
         ref="sliderPopover"
         :visible="hoverVisibilities[4].value"
         content="Move the slider to animate the region"
@@ -100,8 +100,7 @@
       >
         <template #reference>
           <div
-            v-if="sceneData.timeVarying"
-            v-popover:sliderPopover
+            v-if="timeVarying"
             class="time-slider-container"
             :class="[minimisedSlider ? 'minimised' : '', sliderPosition]"
           >
@@ -123,7 +122,7 @@
                   <el-slider
                     :min="0"
                     :max="timeMax"
-                    :value="(sceneData.currentTime / 100) * timeMax"
+                    :model-value="currentTime / 100 * timeMax"
                     :step="0.1"
                     tooltip-class="time-slider-tooltip"
                     class="slider"
@@ -151,7 +150,7 @@
                     Playback speed
                     <el-select
                       :teleported="true"
-                      :value="currentSpeed"
+                      :model-value="currentSpeed"
                       placeholder="Select"
                       class="select-box"
                       popper-class="scaffold_viewer_dropdown"
@@ -220,14 +219,15 @@
             <br />
             window
           </div>
-          <map-svg-icon
-            slot="reference"
-            icon="fitWindow"
-            class="icon-button fitWindow"
-            @click.native="fitWindow()"
-            @mouseover.native="showHelpText(2)"
-            @mouseout.native="hideHelpText(2)"
-          />
+          <template #reference>
+            <map-svg-icon
+              icon="fitWindow"
+              class="icon-button fitWindow"
+              @click.native="fitWindow()"
+              @mouseover.native="showHelpText(2)"
+              @mouseout.native="hideHelpText(2)"
+            />
+          </template>
         </el-popover>
       </div>
       <el-popover
@@ -261,36 +261,38 @@
         popper-class="background-popper non-selectable"
         virtual-triggering
       >
-        <el-row class="backgroundText">Viewing Mode</el-row>
-        <el-row class="backgroundControl">
-          <el-select
-            :popper-teleported="false"
-            :visible="viewingMode"
-            placeholder="Select"
-            class="select-box viewing-mode"
-            popper-class="scaffold_viewer_dropdownr"
-          >
-            <el-option v-for="item in viewingModes" :key="item" :label="item" :value="item">
-              <el-row>
-                <el-col :span="12">{{ item }}</el-col>
-              </el-row>
-            </el-option>
-          </el-select>
-        </el-row>
-        <el-row class="backgroundSpacer"></el-row>
-        <el-row class="backgroundText"> Change background </el-row>
-        <el-row class="backgroundChooser">
-          <div
-            v-for="item in availableBackground"
-            :key="item"
-            :class="[
-              'backgroundChoice',
-              item,
-              item == currentBackground ? 'active' : '',
-            ]"
-            @click="backgroundChangeCallback(item)"
-          />
-        </el-row>
+        <div>
+          <el-row class="backgroundText">Viewing Mode</el-row>
+          <el-row class="backgroundControl">
+            <el-select
+              :teleported="false"
+              v-model="viewingMode"
+              placeholder="Select"
+              class="select-box viewing-mode"
+              popper-class="scaffold_viewer_dropdown"
+            >
+                  <el-option v-for="item in viewingModes" :key="item" :label="item" :value="item">
+                <el-row>
+                  <el-col :span="12">{{ item }}</el-col>
+                </el-row>
+              </el-option>
+            </el-select>
+          </el-row>
+          <el-row class="backgroundSpacer"></el-row>
+          <el-row class="backgroundText"> Change background </el-row>
+          <el-row class="backgroundChooser">
+            <div
+              v-for="item in availableBackground"
+              :key="item"
+              :class="[
+                'backgroundChoice',
+                item,
+                item == currentBackground ? 'active' : '',
+              ]"
+              @click="backgroundChangeCallback(item)"
+            />
+          </el-row>
+        </div>  
       </el-popover>
       <div
         class="settings-group"
@@ -310,7 +312,7 @@
                 v-if="enableOpenMapUI && openMapOptions.length > 0"
                 ref="openMapRef"
                 icon="openMap"
-                class="icon-button"
+                class="icon-button open-map-button"
                 @mouseover.native="showHelpText(8)"
                 @mouseout.native="hideHelpText(8)"
               />
@@ -344,7 +346,7 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { shallowRef } from 'vue'
+import { reactive, toRef, shallowRef } from 'vue'
 import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
@@ -582,7 +584,8 @@ export default {
   },
   data: function () {
     return {
-      sceneData: this.$module.sceneData,
+      currentTime: 0.0,
+      timeVarying: undefined,
       isPlaying: false,
       isReady: false,
       /**
@@ -704,14 +707,10 @@ export default {
     displayMinimap: function (val) {
       this.$module.scene.displayMinimap = val;
     },
-    "sceneData.currentTime": function () {
-      /**
-       * Triggers when scene time changes.
-       *
-       * @property {number} time Current build-in time of scene.
-       * of selected object.
-       */
-      this.$emit("timeChanged", this.sceneData.currentTime);
+    currentTime: {
+      handler: function () {
+        this.$emit("timeChanged", this.currentTime);
+      },
     },
     duration: function () {
       this.$module.scene.setDuration(this.duration);
@@ -742,9 +741,12 @@ export default {
     this.availableBackground = ["white", "black", "lightskyblue"];
     this.$_searchIndex = new SearchIndex();
   },
+  created: function() {
+    this.timeVarying = toRef(this.$module.sceneData, 'timeVarying');
+  },
   mounted: function () {
-    this.openMapRef = shallowRef(this.$refs.openMapRef)
-    this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef)
+    this.openMapRef = shallowRef(this.$refs.openMapRef);
+    this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef);
     this.$refs.treeControls.setModule(this.$module);
     let eventNotifier = new EventNotifier();
     eventNotifier.subscribe(this, this.eventNotifierCallback);
@@ -756,6 +758,9 @@ export default {
       this.$refs.scaffoldContainer
     );
     this.defaultRate = this.$module.getPlayRate();
+    this.$module.zincRenderer.addPreRenderCallbackFunction(() => {
+      this.currentTime = this.$module.getCurrentTime();
+    })
   },
   beforeDestroy: function () {
     if (this.ro) this.ro.disconnect();
@@ -1087,8 +1092,10 @@ export default {
      */
     timeChange: function (event) {
       let normalizedTime = (event / this.timeMax) * 100;
-      if (normalizedTime != this.sceneData.currentTime)
+      if (normalizedTime != this.currentTime) {
         this.$module.updateTime(normalizedTime);
+        console.log(this.currentTime)
+      }
     },
     /**
      * A callback used by children components. Set the selected zinc object
@@ -1810,53 +1817,43 @@ export default {
   user-select: none;
 }
 
-:deep(.background-popper) {
+:deep(.background-popper.el-popover.el-popper) {
   padding: 5px 12px;
   background-color: #ffffff;
   border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
-  height: 124px;
-  width: 128px;
-  min-width: 128px;
-
-  &.el-popper[x-placement^="top"] {
-    .popper__arrow {
-      border-top-color: $app-primary-color !important;
-      &:after {
-        border-top-color: #fff !important;
-      }
+  height: 140px;
+  min-width: 200px;
+  .el-popper__arrow {
+    &:before {
+      border-color: $app-primary-color;
     }
-  }
-
-  .el-row ~ .el-row {
-    margin-top: 8px;
   }
 }
 
-:deep(.open-map-popper) {
+:deep(.open-map-popper.el-popover.el-popper) {
   padding-top: 5px;
   padding-bottom: 5px;
   background-color: #ffffff;
   border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
-  width: 178px;
-  min-width: 178px;
+  min-width: 188px;
 
   .el-row ~ .el-row {
     margin-top: 8px;
   }
 
   .el-button {
-    padding-top:5px;
-    padding-bottom:5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background: #f3e6f9;
+    border-color: $app-primary-color;
+    color: $app-primary-color;
   }
 
-  &.el-popper[x-placement^="top"] {
-    .popper__arrow {
-      border-top-color: $app-primary-color !important;
-      &:after {
-        border-top-color: #fff !important;
-      }
+  .el-popper__arrow {
+    &:before {
+      border-color: $app-primary-color;
     }
   }
 }
@@ -1918,6 +1915,9 @@ export default {
 .icon-button {
   height: 24px !important;
   width: 24px !important;
+  &.open-map-button {
+    margin-bottom:4px;
+  }
 
   &:hover {
     cursor: pointer;
@@ -1938,6 +1938,7 @@ export default {
   :deep(.el-tabs__header) {
     margin: 0px;
     border-bottom: 1px solid rgb(144, 147, 153);
+    height: 24px;
   }
 
   .el-row {
@@ -1952,7 +1953,7 @@ export default {
     background-color: white;
   }
 
-  :deep(.el-tabs--card) {
+  :deep(.el-tabs.el-tabs--top.el-tabs--card) {
     > .el-tabs__header {
       .el-tabs__nav {
         border: 1px solid rgb(144, 147, 153);
@@ -1982,7 +1983,7 @@ export default {
   }
 }
 
-:deep(.scaffold-popper) {
+:deep(.scaffold-popper.el-popper.el-popper) {
   padding: 6px 4px;
   font-size: 12px;
   color: rgb(48, 49, 51);
@@ -1992,30 +1993,10 @@ export default {
   min-width: unset;
   pointer-events: none;
 
-  &.left-popper {
-    .popper__arrow {
-      border-left-color: $app-primary-color !important;
-      &:after {
-        border-left-color: #f3ecf6 !important;
-      }
-    }
-  }
-
-  &.right-popper {
-    .popper__arrow {
-      border-right-color: $app-primary-color !important;
-      &:after {
-        border-right-color: #f3ecf6 !important;
-      }
-    }
-  }
-
-  &.el-popper[x-placement^="top"] {
-    .popper__arrow {
-      border-top-color: $app-primary-color !important;
-      &:after {
-        border-top-color: #f3ecf6 !important;
-      }
+  .el-popper__arrow {
+    &:before {
+      border-color: $app-primary-color;
+      background-color: #f3ecf6;
     }
   }
 }
@@ -2048,27 +2029,27 @@ export default {
 }
 
 .select-box {
-  width: 57px;
   border-radius: 4px;
   border: 1px solid rgb(144, 147, 153);
   background-color: var(--white);
   font-weight: 500;
   color: rgb(48, 49, 51);
-  margin-left: 8px;
-
+  width:60px;
+  :deep(.el-select__wrapper) {
+    padding: 0px;
+    min-height: 26px;
+    color: rgb(48, 49, 51);
+  }
   &.viewing-mode {
-    width: unset;
-    :deep(.el-input__inner) {
+    :deep(.el-select__wrapper) {
       line-height:30px
     }
   }
 
   :deep()
-    .el-input__inner {
+    .el-select__selected-item {
     color: $app-primary-color;
     height: 22px;
-    padding-left: 8px;
-    padding-right: 8px;
     border: none;
     font-family: "Asap", sans-serif;
     line-height: 22px;
@@ -2082,6 +2063,20 @@ export default {
     line-height: 22px;
   }
 }
+
+:deep(.scaffold_viewer_dropdown) {
+  min-width: 160px !important;
+  .el-select-dropdown__item {
+    white-space: nowrap;
+    text-align: left;
+    &.is-selected {
+      color: $app-primary-color;
+      font-weight: normal;
+    }
+  }
+}
+
+
 </style>
 
 <style lang="scss">
@@ -2094,17 +2089,22 @@ export default {
   border: 1px solid $app-primary-color !important;
   white-space: nowrap !important;
   min-width: unset !important;
+  .el-popper__arrow {
+    &:before {
+      border-color: $app-primary-color!important;
+      background-color: #f3ecf6!important;
+    }
+  }
 }
 
 .scaffold_viewer_dropdown .el-select-dropdown__item {
   white-space: nowrap;
   text-align: left;
   font-family: "Asap", sans-serif;
+  &.is-selected {
+    color: $app-primary-color;
+    font-weight: normal;
+  }
 }
 
-.primitive-controls-box {
-  right: 0px;
-  bottom: 200px;
-  position: absolute;
-}
 </style>

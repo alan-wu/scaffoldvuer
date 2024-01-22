@@ -37,10 +37,11 @@
               <el-color-picker
                 v-if="data.isPrimitives"
                 :class="{ 'show-picker': showColourPicker }"
-                :value="getColour(data)"
+                :model-value="getColour(data)"
                 size="small"
                 :popper-class="myPopperClass"
                 @change="setColour(data, $event)"
+                :teleported="false"
               />
               <span>{{ node.label }}</span>
               <span v-if="data.isTextureSlides" class="node-options">

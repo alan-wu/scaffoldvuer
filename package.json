@@ -39,7 +39,7 @@
     "*.js"
   ],
   "dependencies": {
-    "@abi-software/flatmapvuer": "^0.6.0-vue3.1",
+    "@abi-software/flatmapvuer": "^0.6.0-vue3.2",
     "@abi-software/svg-sprite": "^0.4.0-vue3-beta.0",
     "@element-plus/icons-vue": "^2.3.1",
     "@vue/compat": "^3.3.13",
@@ -47,8 +47,7 @@
     "core-js": "^3.22.5",
     "current-script-polyfill": "^1.0.0",
     "element-plus": "^2.4.4",
-    "google-auth-library": "^9.4.2",
-    "google-spreadsheet": "^4.1.1",
+    "google-spreadsheet": "^3.3.0",
     "minisearch": "^6.0.1",
     "query-string": "^6.11.1",
     "simple-dropzone": "^0.8.3",
