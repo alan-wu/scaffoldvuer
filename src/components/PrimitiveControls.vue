@@ -6,13 +6,9 @@
     <el-drawer
       :class="{
         'my-drawer': true,
-        'drawer-content': true,
-        'opacity': material !== undefined,
-        'texture-slides': isTextureSlides,
       }"
-      :visible.sync="drawerOpen"
-      :teleported="false"
-      :modal-append-to-body="false"
+      v-model="drawerOpen"
+      :append-to-body="false"
       size="300"
       :with-header="false"
       :wrapper-closable="false"
@@ -27,6 +23,7 @@
       </div>
       <opacity-controls
         :material="material"
+        :zincObject="zincObject"
         ref="opacityControls" />
       <texture-slides-controls
         v-show="isTextureSlides"
@@ -38,13 +35,14 @@
       class="tab-button open"
       @click="toggleDrawer"
     >
-    <el-icon-arrow-left class="el-icon-arrow-left"/>
+    <el-icon><el-icon-arrow-left class="el-icon-arrow-left"/></el-icon>
     </div>
   </div>
 </template>
 
 <script>
 /* eslint-disable no-alert, no-console */
+import { ref, shallowRef } from 'vue';
 import {
   ArrowRight as ElIconArrowRight,
   ArrowLeft as ElIconArrowLeft,
@@ -68,10 +66,8 @@ export default {
       material: undefined,
       isTextureSlides: false,
       drawerOpen: true,
+      zincObject: undefined,
     };
-  },
-  mounted: function() {
-    this._zincobject = undefined;
   },
   methods: {
     formatTooltip: function(val) {
@@ -82,7 +78,7 @@ export default {
       this.drawerOpen = !this.drawerOpen;
     },
     setObject: function(object) {
-      this._zincobject = object;
+      this.zincObject = shallowRef(object);
       if (object.isTextureSlides) {
         this.isTextureSlides = true;
         this.$refs.tSlidesControls.setObject(object);
@@ -90,10 +86,10 @@ export default {
         this.isTextureSlides = false;
       }
       if (object && object.getMorph()) {
-        this.material = object.getMorph().material;
+        this.material = ref(object.getMorph().material);
+      } else {
+        this.material = undefined;
       }
-      else this.material = undefined;
-      this.$refs.opacityControls.setObject(object);
     }
   }
 };
@@ -120,20 +116,16 @@ export default {
   position: absolute;
   top: 10px;
 }
-
-.drawer-content {
-  position: relative;
-  &.opacity {
-    height: 93px;
-  }
-  &.texture-slides{
-    height: 250px;
-  }
-}
-
 :deep(.my-drawer) {
   background: rgba(0, 0, 0, 0);
   box-shadow: none;
+  right: 0px;
+  top: 60%;
+  position: absolute;
+  width:unset!important;
+  .el-drawer__body {
+    padding: 0px;
+  }
 }
 
 .tab-button {
@@ -155,12 +147,11 @@ export default {
     float: left;
     flex: 1;
     border-right: 0;
-    bottom: 26px;
   }
 
   &.open {
     position: absolute;
-    bottom:26px;
+    top:60%;
   }
 
   i {

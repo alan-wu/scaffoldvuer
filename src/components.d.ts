@@ -7,7 +7,6 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    AnnotationTool: typeof import('./components/AnnotationTool.vue')['default']
     ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCol: typeof import('element-plus/es')['ElCol']
@@ -17,12 +16,8 @@ declare module 'vue' {
     ElFooter: typeof import('element-plus/es')['ElFooter']
     ElHeader: typeof import('element-plus/es')['ElHeader']
     ElIcon: typeof import('element-plus/es')['ElIcon']
-    ElIconArrowDown: typeof import('@element-plus/icons-vue')['ArrowDown']
     ElIconArrowLeft: typeof import('@element-plus/icons-vue')['ArrowLeft']
     ElIconArrowRight: typeof import('@element-plus/icons-vue')['ArrowRight']
-    ElIconArrowUp: typeof import('@element-plus/icons-vue')['ArrowUp']
-    ElIconClose: typeof import('@element-plus/icons-vue')['Close']
-    ElIconEdit: typeof import('@element-plus/icons-vue')['Edit']
     ElIconWarningFilled: typeof import('@element-plus/icons-vue')['WarningFilled']
     ElInput: typeof import('element-plus/es')['ElInput']
     ElInputNumber: typeof import('element-plus/es')['ElInputNumber']

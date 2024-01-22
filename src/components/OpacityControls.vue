@@ -45,6 +45,7 @@ export default {
   },
   props: {
     material: undefined,
+    zincObject: undefined,
   },
   data: function() {
     return {
@@ -53,22 +54,16 @@ export default {
   },
   watch: {
     "material.opacity": function() {
-      if (this.material && this._zincObject) {
-        this._zincObject.setAlpha(this.material.opacity);
+      if (this.material && this.zincObject) {
+        this.zincObject.setAlpha(this.material.opacity);
       }
     }
-  },
-  mounted: function() {
-    this._zincObject = undefined;
   },
   methods: {
     formatTooltip(val) {
       this.displayString = Math.floor(100 * val + 0.5) + "%";
       return this.displayString;
     },
-    setObject(object) {
-      this._zincObject = object;
-    }
   },
 };
 </script>

@@ -52,8 +52,14 @@ export default defineConfig(({ command, mode }) => {
 
   if (command === 'serve') {
     config.server =  {
-        port: 8081,
+      port: 8081,
     };
-  } 
+    config.define = {
+      'process.env.HTTP_PROXY': 8081,
+      global: 'globalThis',
+      // If you want to exposes all env variables, which is not recommended
+      // 'process.env': env
+    };
+  };
   return config;
 })
