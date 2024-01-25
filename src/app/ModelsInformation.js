@@ -1,5 +1,5 @@
-//import { GoogleSpreadsheet } from 'google-spreadsheet';
-//import { JWT } from 'google-auth-library';
+//import { google } from 'googleapis';
+//const sheets = google.sheets('v4');
 
 /* eslint-disable no-alert, no-console */
 export default {

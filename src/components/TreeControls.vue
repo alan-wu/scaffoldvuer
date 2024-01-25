@@ -41,7 +41,6 @@
                 size="small"
                 :popper-class="myPopperClass"
                 @change="setColour(data, $event)"
-                :teleported="false"
               />
               <span>{{ node.label }}</span>
               <span v-if="data.isTextureSlides" class="node-options">
@@ -469,12 +468,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-@use "element-plus/theme-chalk/src/checkbox";
-@use "element-plus/theme-chalk/src/color-picker";
-@use "element-plus/theme-chalk/src/loading";
-@use "element-plus/theme-chalk/src/row";
-@use "element-plus/theme-chalk/src/tree";
-
 
 :deep(.el-loading-spinner) {
   .path {

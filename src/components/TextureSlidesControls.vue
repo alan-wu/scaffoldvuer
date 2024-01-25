@@ -157,12 +157,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-@use "element-plus/theme-chalk/src/col";
-@use "element-plus/theme-chalk/src/container";
-@use "element-plus/theme-chalk/src/input-number";
-@use "element-plus/theme-chalk/src/slider";
-@use "element-plus/theme-chalk/src/row";
-
 .header {
   color: #606266;
   line-height: 1;

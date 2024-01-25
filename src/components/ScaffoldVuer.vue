@@ -346,7 +346,7 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { reactive, toRef, shallowRef } from 'vue'
+import { toRef, shallowRef } from 'vue'
 import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
@@ -1655,16 +1655,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-@use "element-plus/theme-chalk/src/button";
-@use "element-plus/theme-chalk/src/col";
-@use "element-plus/theme-chalk/src/loading";
-@use "element-plus/theme-chalk/src/option";
-@use "element-plus/theme-chalk/src/popover";
-@use "element-plus/theme-chalk/src/row";
-@use "element-plus/theme-chalk/src/select";
-@use "element-plus/theme-chalk/src/slider";
-@use "element-plus/theme-chalk/src/tabs";
-@use "element-plus/theme-chalk/src/tab-pane";
 
 .message-icon {
   position: absolute;
@@ -1711,12 +1701,6 @@ export default {
     outline: none !important;
     border: 0px;
   }
-}
-
-.scaffold-container {
-  height: 100%;
-  width: 100%;
-  position: relative;
 }
 
 .time-slider-container {
@@ -2081,6 +2065,11 @@ export default {
 </style>
 
 <style lang="scss">
+
+.scaffold-container {
+  --el-color-primary: #8300BF;
+}
+
 .time-slider-tooltip {
   padding: 6px 4px !important;
   font-family: "Asap", sans-serif;

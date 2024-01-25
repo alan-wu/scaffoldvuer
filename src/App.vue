@@ -464,14 +464,6 @@ export default {
 </script>
 
 <style lang="scss">
-@use "element-plus/theme-chalk/src/button";
-@use "element-plus/theme-chalk/src/col";
-@use "element-plus/theme-chalk/src/icon";
-@use "element-plus/theme-chalk/src/input";
-@use "element-plus/theme-chalk/src/input-number";
-@use "element-plus/theme-chalk/src/switch";
-@use "element-plus/theme-chalk/src/popover";
-@use "element-plus/theme-chalk/src/row";
 
 #app {
   font-family: "Asap", sans-serif;
