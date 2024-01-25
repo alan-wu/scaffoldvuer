@@ -97,10 +97,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-@use "element-plus/theme-chalk/src/container";
-@use "element-plus/theme-chalk/src/drawer";
-@use "element-plus/theme-chalk/src/slider";
-
 .primitive-controls {
   text-align: left;
   width:350px;

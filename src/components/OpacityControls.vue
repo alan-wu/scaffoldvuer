@@ -70,9 +70,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-@use "element-plus/theme-chalk/src/container";
-@use "element-plus/theme-chalk/src/slider";
-
 .header {
   color: #606266;
   line-height: 1;
