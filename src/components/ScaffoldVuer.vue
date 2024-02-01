@@ -2068,6 +2068,12 @@ export default {
 
 .scaffold-container {
   --el-color-primary: #8300BF;
+  --el-color-primary-light-7: #dab3ec;
+  --el-color-primary-light-8: #e6ccf2
+  --el-color-primary-light-9: #f3e6f9;
+  height: 100%;
+  width: 100%;
+  position: relative;
 }
 
 .time-slider-tooltip {

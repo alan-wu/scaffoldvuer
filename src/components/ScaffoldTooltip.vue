@@ -154,6 +154,7 @@ export default {
 
   .tooltip-text {
     text-align: center;
+    color: $app-primary-color;
   }
 
   :deep(.non-selectable) {
