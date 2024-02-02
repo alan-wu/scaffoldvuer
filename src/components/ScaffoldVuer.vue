@@ -111,13 +111,13 @@
                     v-if="isPlaying"
                     icon="pause"
                     class="icon-button video-button"
-                    @click.native="play(false)"
+                    @click="play(false)"
                   />
                   <map-svg-icon
                     v-else
                     icon="play"
                     class="video-button icon-button"
-                    @click.native="play(true)"
+                    @click="play(true)"
                   />
                   <el-slider
                     :min="0"
@@ -183,9 +183,9 @@
             <map-svg-icon
               icon="zoomIn"
               class="icon-button zoomIn"
-              @click.native="zoomIn()"
-              @mouseover.native="showHelpText(0)"
-              @mouseout.native="hideHelpText(0)"
+              @click="zoomIn()"
+              @mouseover="showHelpText(0)"
+              @mouseout="hideHelpText(0)"
             />
           </template>
         </el-popover>
@@ -201,9 +201,9 @@
             <map-svg-icon
               icon="zoomOut"
               class="icon-button zoomOut"
-              @click.native="zoomOut()"
-              @mouseover.native="showHelpText(1)"
-              @mouseout.native="hideHelpText(1)"
+              @click="zoomOut()"
+              @mouseover="showHelpText(1)"
+              @mouseout="hideHelpText(1)"
             />
           </template>
         </el-popover>
@@ -223,9 +223,9 @@
             <map-svg-icon
               icon="fitWindow"
               class="icon-button fitWindow"
-              @click.native="fitWindow()"
-              @mouseover.native="showHelpText(2)"
-              @mouseout.native="hideHelpText(2)"
+              @click="fitWindow()"
+              @mouseover="showHelpText(2)"
+              @mouseout="hideHelpText(2)"
             />
           </template>
         </el-popover>
@@ -313,8 +313,8 @@
                 ref="openMapRef"
                 icon="openMap"
                 class="icon-button open-map-button"
-                @mouseover.native="showHelpText(8)"
-                @mouseout.native="hideHelpText(8)"
+                @mouseover="showHelpText(8)"
+                @mouseout="hideHelpText(8)"
               />
             </template>
           </el-popover>
@@ -333,8 +333,8 @@
                 ref="backgroundIconRef"
                 icon="changeBckgd"
                 class="icon-button"
-                @mouseover.native="showHelpText(3)"
-                @mouseout.native="hideHelpText(3)"
+                @mouseover="showHelpText(3)"
+                @mouseout="hideHelpText(3)"
               />
             </template>
           </el-popover>
@@ -1822,7 +1822,6 @@ export default {
   border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
   min-width: 188px;
-
   .el-row ~ .el-row {
     margin-top: 8px;
   }

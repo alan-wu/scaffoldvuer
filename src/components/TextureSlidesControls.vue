@@ -51,7 +51,7 @@
         </el-col>
       </el-row>
     </el-main>
-    <el-footer height="30px" class="add-slides-text" @click.native="addNewSlide">
+    <el-footer height="30px" class="add-slides-text" @click="addNewSlide">
       <el-row>
         <el-col :span="2">
           <i class="el-icon-plus" />
