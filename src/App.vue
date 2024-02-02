@@ -141,7 +141,7 @@
       </template>
     </el-popover>
     <el-autocomplete v-model="searchText" class="search-box" placeholder="Search" :fetch-suggestions="fetchSuggestions"
-      :teleported="false" popper-class="autocomplete-popper" @keyup.enter.native="search(searchText)"
+      :teleported="false" popper-class="autocomplete-popper" @keyup.enter="search(searchText)"
       @select="search(searchText)">
       <template #default="{ item }">
         <div class="value">
