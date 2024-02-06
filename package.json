@@ -9,9 +9,7 @@
   "scripts": {
     "serve": "vite --host --force",
     "build-bundle": "vite build",
-    "lint": "vue-cli-service lint --ext .js,.vue src",
-    "build:bundle": "vue-cli-service build --target lib --name scaffoldvuer ./src/components/index.js",
-    "build:wc": "vue-cli-service build --target lib --name scaffoldvuer-wc ./src/ScaffoldVuer-wc.js --mode wc --env bundle --no-clean",
+    "build-static": "vite build -c vite.static-build.js",
     "styleguide": "vue-cli-service styleguidist",
     "styleguide:build": "vue-cli-service styleguidist:build",
     "changelog": "auto-changelog -p --output CHANGELOG.md --template keepachangelog",
