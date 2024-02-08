@@ -2018,34 +2018,7 @@ export default {
   background-color: var(--white);
   font-weight: 500;
   color: rgb(48, 49, 51);
-  width:60px;
-  :deep(.el-select__wrapper) {
-    padding: 0px;
-    min-height: 26px;
-    color: rgb(48, 49, 51);
-  }
-  &.viewing-mode {
-    :deep(.el-select__wrapper) {
-      line-height:30px
-    }
-  }
-
-  :deep()
-    .el-select__selected-item {
-    color: $app-primary-color;
-    height: 22px;
-    border: none;
-    font-family: "Asap", sans-serif;
-    line-height: 22px;
-    &is-focus, &:focus {
-      border: 1px solid $app-primary-color;
-    }
-  }
-
-  :deep(.el-input),
-  :deep(.el-input__icon) {
-    line-height: 22px;
-  }
+  width: 150px!important;
 }
 
 :deep(.scaffold_viewer_dropdown) {
