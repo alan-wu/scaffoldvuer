@@ -2,6 +2,8 @@
 
 This project aims to provide high-level 3D physiological models viewing capability.
 
+Scaffoldvuer is now built with Vue3 frameworks. Vue 2 version of Scaffoldvuer is no longer in development.
+
 
 ## Scaffoldvuer on NPM
 
@@ -25,7 +27,7 @@ Install the package in your vue app project with the following command "npm i @a
 Import the package in your script as followed:
 ```javascript
 import { ScaffoldVuer } from '@abi-software/scaffoldvuer';
-import '@abi-software/scaffoldvuer/dist/scaffoldvuer.css';
+import '@abi-software/scaffoldvuer/dist/style.css';
 ```
 Local registration in vue component:
 ```javascript
@@ -37,6 +39,7 @@ export default {
   ...
 }
 ```
+
 
 
 The codes above register the ScaffoldVuer component in the global scope.
