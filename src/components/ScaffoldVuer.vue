@@ -508,7 +508,6 @@ export default {
         };
       },
     },
-
     /**
      * Flag to determine rather the open map UI icon and popup
      * should be shown or not.
@@ -517,6 +516,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    /**
+     * This array populate the the openMapOptions popup.
+     * Each entry contains a pair of display and key.
+     */
     openMapOptions: {
       type: Array,
       default: function () {
@@ -710,6 +713,8 @@ export default {
     },
     currentTime: {
       handler: function () {
+        //Emit when time in the current scene has changed
+        //@arg Current time in scene
         this.$emit("timeChanged", this.currentTime);
       },
     },
@@ -769,6 +774,11 @@ export default {
     this.$module = undefined;
   },
   methods: {
+    /**
+     * @vuese
+     * Call this to manually add a zinc object into the current scene
+     * @arg Zinc object to be added
+     */
     addZincObject: function (zincObject) {
       if (this.$module.scene) {
         this.$module.scene.addZincObject(zincObject);
@@ -777,15 +787,19 @@ export default {
       }
     },
     /**
+     * Internal only.
      * This is called when a new zinc object is read into the scene.
      */
     zincObjectAdded: function (zincObject) {
       this.loading = false;
       this.$_searchIndex.addZincObject(zincObject, zincObject.uuid);
+      //Emit when a new object is added to the scene
+      //@arg The object added to the sceene
       this.$emit("zinc-object-added", zincObject);
     },
     /**
-     * 
+     * Internal only.
+     * Add regions to search index.
      */
     addRegionsToSearchIndex: function () {
       const rootRegion = this.$module.scene.getRootRegion();
@@ -795,6 +809,7 @@ export default {
       });
     },
     /**
+     * Internal only.
      * This is called when Change backgspeedround colour button
      * is pressed an causes the backgrouColornd colour to be changed
      * to one of the three preset colour: white, black and
@@ -807,6 +822,7 @@ export default {
         .setClearColor(this.currentBackground, 1);
     },
     /**
+     * Internal only.
      * This is called by captueeScreenshot and after the last render
      * loop, it download a screenshot of the current scene with no UI.
      */
@@ -827,11 +843,10 @@ export default {
       hrefElement.remove();
     },
     /**
+     * @vuese
      * Function for capturing a screenshot of the current rendering.
      *
-     * @param {String} filename filename given to the screenshot.
-     *
-     * @public
+     * @arg filename given to the screenshot.
      */
     captureScreenshot: function (filename) {
       this.captureFilename = filename;
@@ -840,9 +855,8 @@ export default {
       );
     },
     /**
+     * @vuese
      * Function to clear current scene, the tree controls and the search index.
-     *
-     * @public
      */
     clearScene: function () {
       if (this.$refs.treeControls) this.$refs.treeControls.clear();
@@ -860,10 +874,9 @@ export default {
       return val ? val.toFixed(2) + " ms" : "0 ms";
     },
     /**
+     * @vuese
      * Function to reset the view to default.
      * Also called when the associated button is pressed.
-     *
-     * @public
      */
     fitWindow: function () {
       if (this.$module.scene) {
@@ -871,10 +884,9 @@ export default {
       }
     },
     /**
+     * @vuese
      * Function to zoom in.
      * Also called when the associated button is pressed.
-     *
-     * @public
      */
     zoomIn: function () {
       if (this.$module.scene) {
@@ -885,7 +897,7 @@ export default {
      * Function to zoom out.
      * Also called when the associated button is pressed.
      *
-     * @public
+     * @vuese
      */
     zoomOut: function () {
       if (this.$module.scene) {
@@ -895,7 +907,7 @@ export default {
     /**
      * Function to change the current play speed.
      *
-     * @public
+     * @vuese
      */
     speedChanged: function (speed) {
       this.currentSpeed = speed;
@@ -904,13 +916,19 @@ export default {
     /**
      * Function used to stop the free spin
      *
-     * @public
+     * @vuese
      */
     stopFreeSpin: function () {
       let cameracontrol = this.$module.scene.getZincCameraControls();
       cameracontrol.stopAutoTumble();
       this.isTransitioning = false;
     },
+    /**
+     * Return a list of obejcts with the provided name.
+     * @arg Group name to search.
+     *
+     * @vuese
+     */
     findObjectsWithGroupName: function (name) {
       let objects = [];
       if (name && name != "" && this.$module.scene) {
@@ -919,7 +937,10 @@ export default {
       return objects;
     },
     /**
-     * Focus on named region
+     * Find and and zoom into objects with the provided list of names.
+     * @arg List of names
+     * 
+     * @vuese
      */
     viewRegion: function (names) {
       const rootRegion = this.$module.scene.getRootRegion();
@@ -963,6 +984,11 @@ export default {
         }
       }
     },
+    /**
+     * Return renderer information
+     * 
+     * @vuese
+     */
     getRendererInfo: function () {
       if (this.$module.zincRenderer) {
         return this.$module.zincRenderer.getThreeJSRenderer().info;
@@ -973,7 +999,7 @@ export default {
      * Function used to rotate the scene.
      * Also called when the associated button is pressed.
      *
-     * @public
+     * @vuese
      */
     freeSpin: function () {
       if (this.$module.scene) {
@@ -1024,6 +1050,8 @@ export default {
           //Make sure the tooltip is displayed with annotation mode
           this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
         }
+        //Emit when an object is selected
+        //@arg Identifier of selected objects
         this.$emit("scaffold-selected", event.identifiers);
       } else if (event.eventType == 2) {
         if (this.selectedObjects.length === 0) {
@@ -1052,7 +1080,8 @@ export default {
               this.tData.y = event.identifiers[0].coords.y;
             }
           }
-          // Triggers when an object has been highlighted
+          //Emit when an object is highlighted
+          //@arg Identifier of selected objects
           this.$emit("scaffold-highlighted", event.identifiers);
         }
       } else if (event.eventType == 3) {
@@ -1070,7 +1099,7 @@ export default {
     /**
      * Get the coordinates of the current selected region.
      *
-     * @public
+     * @vuese
      */
     getCoordinatesOfSelected: function () {
       if (this.selectedObjects && this.selectedObjects.length > 0) {
@@ -1083,7 +1112,7 @@ export default {
      * current selected region which will be updated after each render
      * loop.
      *
-     * @public
+     * @vuese
      */
     getDynamicSelectedCoordinates: function () {
       return this.$module.selectedScreenCoordinates;
@@ -1095,13 +1124,14 @@ export default {
       let normalizedTime = (event / this.timeMax) * 100;
       if (normalizedTime != this.currentTime) {
         this.$module.updateTime(normalizedTime);
-        console.log(this.currentTime)
       }
     },
     /**
      * A callback used by children components. Set the selected zinc object
      *
-     * @param {object} object Zinc object
+     * @arg Selected zinc objects
+     * @arg Flag to determine if callback should be triggered when new selection
+     * is made 
      */
     objectSelected: function (objects, propagate) {
       this.selectedObjects = objects;
@@ -1113,7 +1143,9 @@ export default {
     /**
      * A callback used by children components. Set the highlighted zinc object
      *
-     * @param {object} object Zinc object
+     * @arg Hovered zinc objects
+     * @arg Flag to determine if callback should be triggered when new selection
+     * is made 
      */
     objectHovered: function (objects, propagate) {
       this.hoveredObjects = objects;
@@ -1150,9 +1182,10 @@ export default {
       }
     },
     /**
+     * @vuese
      * Start the animation.
      *
-     * @param {object} object Zinc object
+     * @arg flag to turn the animation on/off
      */
     play: function (flag) {
       this.$module.playAnimation(flag);
@@ -1161,6 +1194,7 @@ export default {
       //this.hideRegionTooltip();
     },
     /**
+     * @vuese
      * Function to toggle on/off overlay help.
      */
     setHelpMode: function (helpMode) {
@@ -1330,6 +1364,10 @@ export default {
       this.hideRegionTooltip();
       return false;
     },
+    /**
+     * @vuese
+     * Hide the tooltip
+     */
     hideRegionTooltip: function () {
       if (this.$_liveCoordinatesUpdated) {
         this.$module.zincRenderer.removePostRenderCallbackFunction(
@@ -1355,6 +1393,7 @@ export default {
       }
     },
     /**
+     * @vuese
      * Set the marker modes for objects specified by the list of annotations
      */
     setMarkerModeWithAnnotations: function (annotations, mode) {
@@ -1385,6 +1424,13 @@ export default {
         clearTimeout(this.helpTextWait);
       }
     },
+    /**
+     * @vuese
+     * 
+     * Search a object and display the tooltip
+     * @arg text to search across
+     * @arg toggle the tooltip if this is set
+     */
     search: function (text, displayLabel) {
       if (this.$_searchIndex) {
         if (text === undefined || text === "" ||
@@ -1419,7 +1465,10 @@ export default {
       return false;
     },
     /**
-     * Get the list of suggested terms
+     * @vuese
+     * 
+     * Get the list of suggested terms based on the provided term.
+     * This can be used for autocomplete.
      */
     fetchSuggestions: function (term) {
       if (this.$_searchIndex === undefined) return [];
@@ -1473,6 +1522,7 @@ export default {
         this.$module.updateTime(0);
         this.$module.unsetFinishDownloadCallback();
         this.addRegionsToSearchIndex();
+        //Emit when all objects have been loaded
         this.$emit("on-ready");
         this.setMarkers();
         this.isReady = true;
@@ -1482,7 +1532,7 @@ export default {
      * Function used for getting the current states of the scene. This exported states
      * can be imported using the importStates method.
      *
-     * @public
+     * @vuese
      */
     getState: function () {
       let state = {
@@ -1503,7 +1553,7 @@ export default {
      * Function used for importing the states of the scene. This exported states
      * can be imported using the read states method.
      *
-     * @public
+     * @vuese
      */
     setState: function (state) {
       if (state) {
@@ -1534,6 +1584,12 @@ export default {
         }
       }
     },
+    /**
+     * export current scene in GLTF.
+     * @arg Return in binary form when set to true
+     * 
+     * @vuese
+     */
     exportGLTF: function (binary) {
       return this.$module.scene.exportGLTF(binary);
     },
@@ -1542,7 +1598,7 @@ export default {
      * viewport. This function will ignore the state prop and
      * read in the new url.
      *
-     * @public
+     * @vuese
      */
     setURLAndState: function (newValue, state) {
       if (newValue != this._currentURL) {
@@ -1588,7 +1644,7 @@ export default {
      * Function used for reading in new scaffold metadata. This function will ignore
      * the state prop and read in the new url.
      *
-     * @public
+     * @vuese
      */
     setURL: function (newValue) {
       this.setURLAndState(newValue, undefined);
@@ -1621,6 +1677,11 @@ export default {
         }
       }
     },
+    /**
+     * @vuese
+     * 
+     * Force the renderer to resize
+     */
     forceResize: function () {
       if (this.$module.zincRenderer) {
         this.$module.zincRenderer.onWindowResize();
@@ -1631,6 +1692,9 @@ export default {
       if (this.tData.visible) {
         this.showRegionTooltip(this.tData.label, true, true);
       }
+      //Emit when the scene has been transformed due to navigation,
+      //only triggered during syncControl mode
+      //@arg Information on the navigation
       this.$emit("scaffold-navigated", payload);
     },
     /**
