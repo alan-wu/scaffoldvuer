@@ -27,14 +27,8 @@ declare module 'vue' {
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
     ElTabs: typeof import('element-plus/es')['ElTabs']
     ElTree: typeof import('element-plus/es')['ElTree']
-    OpacityControls: typeof import('./components/OpacityControls.vue')['default']
-    PrimitiveControls: typeof import('./components/PrimitiveControls.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    ScaffoldTooltip: typeof import('./components/ScaffoldTooltip.vue')['default']
-    ScaffoldVuer: typeof import('./components/ScaffoldVuer.vue')['default']
-    TextureSlidesControls: typeof import('./components/TextureSlidesControls.vue')['default']
-    TreeControls: typeof import('./components/TreeControls.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']
