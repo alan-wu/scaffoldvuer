@@ -13,8 +13,8 @@ const OrgansSceneData = function() {
   this.currentSpecies  = "";
   this.metaURL = "";
   this.viewURL = "";
-  this.currentTime = 0.0;
   this.timeVarying = false;
+	this.currentTime = 0.0;
 }
 
 /**
@@ -43,8 +43,7 @@ const OrgansSceneData = function() {
 	const modelsLoader = ModelsLoaderIn;
   this.NDCCameraControl = undefined;
 	_this.typeName = "Organ Viewer";
-	this.currentTime = 0.0
-	
+
 	this.getSceneData = function() {
 	  return _this.sceneData;
 	}
@@ -64,7 +63,6 @@ const OrgansSceneData = function() {
 				_this.scene.setMorphsTime(actualTime);
 		}
 		_this.sceneData.currentTime = value;
-		_this.currentTime = value;
 	}
 	
 	/**
@@ -84,7 +82,6 @@ const OrgansSceneData = function() {
       _this.sceneData.nerveMap.additionalReader.setTime(currentTime / 
         duration);
 		_this.sceneData.currentTime = currentTime / duration * 100.0;
-		_this.currentTime = currentTime / duration * 100.0;
   }
 
 	this.getCurrentTime = function() {
@@ -463,7 +460,6 @@ const OrgansSceneData = function() {
 			_this.sceneData.currentPart = partName;
 			_this.sceneData.currentTime = 0.0;
 			_this.sceneData.timeVarying = false;
-			_this.currentTime = 0.0;
       // This is used as title
       let name = "";
       if (speciesName)

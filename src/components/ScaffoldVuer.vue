@@ -508,9 +508,10 @@ export default {
         };
       },
     },
+
     /**
-     * Flag to determine rather open map UI should be
-     * presented or not.
+     * Flag to determine rather the open map UI icon and popup
+     * should be shown or not.
      */
     enableOpenMapUI: {
       type: Boolean,
@@ -2037,7 +2038,6 @@ export default {
 </style>
 
 <style lang="scss">
-
 .scaffold-container {
   --el-color-primary: #8300BF;
   --el-color-primary-light-7: #dab3ec;
