@@ -15,7 +15,7 @@ export default defineConfig({
 
     sidebar: [
       {
-        text: 'Examples',
+        text: 'Index',
         items: [
           { text: 'Live Demo', link: '/demo' },
           { text: 'API References', link: '/components/ScaffoldVuer' },
