@@ -132,7 +132,7 @@ export default {
       },
     },
   },
-  destroyed: function () {
+  unmounted: function () {
     this.sortedPrimitiveGroups = undefined;
   },
   methods: {
