@@ -768,7 +768,7 @@ export default {
       this.currentTime = this.$module.getCurrentTime();
     })
   },
-  beforeDestroy: function () {
+  beforeUnmount: function () {
     if (this.ro) this.ro.disconnect();
     this.$module.destroy();
     this.$module = undefined;
