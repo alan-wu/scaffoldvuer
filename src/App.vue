@@ -132,7 +132,9 @@
     </el-popover>
     <el-popover placement="bottom" trigger="click" width="800" popper-class="table-popover" :teleported="false">
       <template #default>
-        <ModelsTable @viewModelClicked="viewModelClicked" />
+        <Suspense>
+          <ModelsTable @viewModelClicked="viewModelClicked" />
+        </Suspense>
       </template>
       <template #reference>
         <el-button class="models-button" :icon="ElIconFolderOpened">
