@@ -68,7 +68,8 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import models from './ModelsInformation.js'
+import getTableData from "./ModelsInformation.js";
+
 import { 
   ElButton as Button,
   ElInput as Input,
@@ -84,14 +85,19 @@ export default {
     Table,
     TableColumn
   ],
-  mixins: [models],
+  async setup() {
+    const keywords = ["Organ", "Species", "Note", "Location",
+      "Last modified","Blackfynn dataset", "Published", "Discover"];
+    const spreadsheet_id = import.meta.env.VITE_GOOGLE_SPREADSHEET_ID;
+    const service_email = import.meta.env.VITE_GOOGLE_SERVICE_SCAFFOLDVUER_EMAIL;
+    const service_key = import.meta.env.VITE_GOOGLE_PRIVATE_SCAFFOLDVUER_KEY;
+    const tableData = await getTableData(keywords, spreadsheet_id, service_email, service_key);
+    return { tableData };
+  },
   data() {
     return {
       search: '',
     }
-  },
-  created: function() {
-    this.getModelsInformation();
   },
   methods: {
     handleView: function(row) {
@@ -106,9 +112,3 @@ export default {
   }
 };
 </script>
-
-<style scoped lang="scss">
-@use "element-plus/theme-chalk/src/input";
-@use "element-plus/theme-chalk/src/table";
-@use "element-plus/theme-chalk/src/table-column";
-</style>
