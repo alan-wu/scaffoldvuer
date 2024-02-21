@@ -3,12 +3,12 @@
     <el-header height="30px" class="header">
       <div>Texture Slides Settings</div>
     </el-header>
-    <el-main class="block">
-      <el-row v-for="(slide, index) in settings" :key="slide.id">
-        <el-col :offset="0" :span="2">
+    <el-main class="slides-block">
+      <el-row v-for="(slide, index) in settings" :key="slide.id" class="slide-row">
+        <el-col :offset="0" :span="6">
           <el-select
             :teleported="false"
-            :value="slide.direction"
+            :model-value="slide.direction"
             placeholder="Select"
             class="input-box"
             popper-class="viewer_dropdown"
@@ -22,7 +22,7 @@
             />
           </el-select>
         </el-col>
-        <el-col :offset="0" :span="14">
+        <el-col :offset="0" :span="10">
           <el-slider
             v-model="slide.value"
             class="my-slider"
@@ -33,7 +33,7 @@
             @input="modifySlide(slide)"
           />
         </el-col>
-        <el-col :offset="0" :span="3">
+        <el-col :offset="0" :span="6">
           <el-input-number
             v-model="slide.value"
             :step="0.01"
@@ -43,20 +43,22 @@
             class="input-box number-input"
           />
         </el-col>
-        <el-col :offset="2" :span="2">
-          <i
+        <el-col :offset="0" :span="2">
+          <el-icon
             class="el-icon-close close-icon"
             @click="removeSlide(index, slide)"
-          />
+          >
+            <el-icon-close />
+          </el-icon>
         </el-col>
       </el-row>
     </el-main>
     <el-footer height="30px" class="add-slides-text" @click="addNewSlide">
       <el-row>
         <el-col :span="2">
-          <i class="el-icon-plus" />
+          <el-icon><el-icon-plus /></el-icon>
         </el-col>
-        <el-col :span="10"> Add a new slide </el-col>
+        <el-col :span="20"> Add a new slide </el-col>
       </el-row>
     </el-footer>
   </el-container>
@@ -64,6 +66,10 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
+import {
+  Close as ElIconClose,
+  Plus as ElIconPlus,
+} from '@element-plus/icons-vue'
 import {
   ElCol as Col,
   ElContainer as Container,
@@ -91,6 +97,8 @@ export default {
     Main,
     Row,
     Slider,
+    ElIconClose,
+    ElIconPlus,
   },
   data: function () {
     return {
@@ -110,13 +118,6 @@ export default {
         },
       ],
     };
-  },
-  watch: {
-    settings: function () {
-      if (this.material && this._zincObject) {
-        this._zincObject.setAlpha(this.material.opacity);
-      }
-    },
   },
   mounted: function () {
     this._zincObject = undefined;
@@ -143,6 +144,7 @@ export default {
       }
     },
     modifySlide: function (slide) {
+      console.log(slide.value)
       if (slide) {
         this._zincObject.modifySlideSettings(slide);
       }
@@ -173,13 +175,11 @@ export default {
   font-size: 12px;
   cursor: pointer;
   pointer-events: auto;
+  direction:ltr;
 }
 
-.display {
-  width: 44px;
-}
-
-.block {
+.slides-block {
+  direction:rtl;
   pointer-events: auto;
   &.el-main {
     padding: 5px;
@@ -194,15 +194,18 @@ export default {
   }
 }
 
+#scroll div{
+    direction:ltr;
+}
+
+
 .my-slider {
-  width: 109px;
   top: -6px;
-  left: 50px;
   position: relative;
 }
 
 .t-slides-container {
-  width: 300px;
+  width: 250px;
   height: 250px;
   border-radius: 4px;
   border: solid 1px #d8dce6;
@@ -210,47 +213,44 @@ export default {
   overflow-y: none;
 }
 
-:deep(.el-slider__bar) {
-  background-color: $app-primary-color;
-}
-
 .input-box {
-  width: 42px;
+  width: 38px;
   border-radius: 4px;
   border: 1px solid rgb(144, 147, 153);
   background-color: var(--white);
   font-weight: 500;
   color: rgb(48, 49, 51);
   margin-left: 8px;
+  height: 24px;
 
   &.number-input {
     width: 42px;
-    :deep(.el-input__inner) {
+    :deep(.el-input__wrapper) {
       padding-left: 0px;
       padding-right: 0px;
     }
   }
 
-  :deep(.el-input__inner) {
+
+  :deep(.el-select__wrapper) {
+    height: 24px;
+    padding: 0;
+    min-height: unset;
+  }
+
+  :deep(.el-select__selection) {
     color: $app-primary-color;
     height: 22px;
-    padding-left: 8px;
+    padding-left: 4px;
     padding-right: 8px;
     border: none;
     font-family: "Asap", sans-serif;
     line-height: 22px;
   }
 
-  :deep(.el-input),
-  :deep(.el-input__icon) {
+  :deep(.el-select__suffix),
+  :deep(.el-icon) {
     line-height: 22px;
-  }
-
-  .viewer_dropdown .el-select-dropdown__item {
-    white-space: nowrap;
-    color: $app-primary-color;
-    text-align: left;
-    font-family: "Asap", sans-serif;
   }
 }
 
@@ -259,5 +259,9 @@ export default {
   top: 2px;
   position: relative;
   cursor: pointer;
+}
+
+.slide-row {
+  direction:ltr;
 }
 </style>
