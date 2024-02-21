@@ -96,14 +96,14 @@ export default {
 
 .my-slider {
   position: absolute;
-  width: 109px;
+  width: 135px;
   top: -12px;
   left: 50px;
   pointer-events: auto;
 }
 
 .opacity-container {
-  width: 224px;
+  width: 250px;
   height: 93px;
   border-radius: 4px;
   border: solid 1px #d8dce6;

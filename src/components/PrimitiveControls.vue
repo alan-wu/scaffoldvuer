@@ -91,7 +91,7 @@ export default {
     }
   }
   &.close {
-    right: -220px;
+    right: -250px;
     .my-drawer {
       pointer-events: none;
       opacity: 0;
@@ -105,7 +105,7 @@ export default {
   text-align: left;
   border: 1px solid rgb(220, 223, 230);
   background: #ffffff;
-  width:220px;
+  width:250px;
 }
 
 .drawer-button {
