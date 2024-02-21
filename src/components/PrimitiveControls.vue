@@ -11,7 +11,7 @@
         ref="opacityControls" />
       <texture-slides-controls
         v-show="isTextureSlides"
-        class="controls"
+        class="texture-controls"
         ref="tSlidesControls" />
     </div>
     <div

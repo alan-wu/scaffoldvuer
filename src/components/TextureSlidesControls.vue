@@ -198,7 +198,6 @@ export default {
     direction:ltr;
 }
 
-
 .my-slider {
   top: -6px;
   position: relative;
@@ -230,7 +229,6 @@ export default {
       padding-right: 0px;
     }
   }
-
 
   :deep(.el-select__wrapper) {
     height: 24px;
