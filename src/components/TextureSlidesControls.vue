@@ -45,10 +45,10 @@
         </el-col>
         <el-col :offset="0" :span="2">
           <el-icon
-            class="el-icon-close close-icon"
+            class="delete-icon"
             @click="removeSlide(index, slide)"
           >
-            <el-icon-close />
+            <el-icon-delete />
           </el-icon>
         </el-col>
       </el-row>
@@ -67,7 +67,7 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import {
-  Close as ElIconClose,
+  Delete as ElIconDelete,
   Plus as ElIconPlus,
 } from '@element-plus/icons-vue'
 import {
@@ -97,7 +97,7 @@ export default {
     Main,
     Row,
     Slider,
-    ElIconClose,
+    ElIconDelete,
     ElIconPlus,
   },
   data: function () {
@@ -252,7 +252,7 @@ export default {
   }
 }
 
-.close-icon {
+.delete-icon {
   color: $app-primary-color;
   top: 2px;
   position: relative;
