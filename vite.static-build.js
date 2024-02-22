@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import rootConfig from './vite.config.js'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 // defineWorkspace provides a nice type hinting DX
 export default defineConfig((configEnv) => {
