@@ -66,6 +66,17 @@ export const testVolume = async (scaffoldVuer, texture_prefix) => {
   window.texture = zincObject;
 };
 
+const addCylinder = (scaffoldVuer) => {
+  const THREE = scaffoldVuer.$module.Zinc.THREE;
+  const cylinderGeometry = new THREE.CylinderGeometry(50, 50, 200,80);
+  const material = new THREE.MeshPhongMaterial( {color: 0xffff00, side : THREE.DoubleSide} ); 
+  const cylinderMesh = new THREE.Mesh( cylinderGeometry, material );
+  const zincGeometry = new scaffoldVuer.$module.Zinc.Geometry();
+  zincGeometry.setMesh(cylinderMesh, false, false);
+  zincGeometry.setName("Cylinder");
+  scaffoldVuer.addZincObject(zincGeometry);
+}
+
 export const testSlides = async (scaffoldVuer, texture_prefix) => {
   const scaffoldModule = scaffoldVuer.$module;
   const texture = await getTexture(scaffoldModule, texture_prefix);
@@ -108,7 +119,97 @@ export const testSlides = async (scaffoldVuer, texture_prefix) => {
   n.set(-100, 0, 0, -10, 0, -200, 0, 0, 0, 0, -100, 0, 0, 0, 10, 1);
   textureSlides.morph.applyMatrix4(n);
   scaffoldVuer.addZincObject(textureSlides);
-  //scaffoldVuer.fitWindow();
-  window.texture = textureSlides;
+  scaffoldVuer.fitWindow();
+  //window.texture = textureSlides;
+  //addCylinder(scaffoldVuer);
 };
+
+const getArmTexture = async (scaffoldModule) => {
+  const imgArray = [];
+  const texture = new scaffoldModule.Zinc.TextureArray();
+  imgArray.push('https://mapcore-bucket1.s3.us-west-2.amazonaws.com/texture/arm1/1564.png');
+  await texture.loadFromImages(imgArray);
+  return texture;
+};
+
+
+/*
+{
+    "id": "mesh-location-orientation",
+    "locations": [
+        {
+            "identifier": 1,
+            "label": "dave",
+            "orientation": "[10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 10.0]",
+            "position": "[62.97939922758831, 48.5944672602095, 1.2382504590408302e-14]",
+            "scale": "[1, 2, 3]"
+            "reference_point": "corner"
+        }
+    ],
+    "version": "0.1.0"
+}
+*/
+
+//https://threejs.org/docs/#manual/en/introduction/Matrix-transformations
+const applyTransformation = (scaffoldVuer, mesh, rotation, position, scale, reference) => {
+  //if (reference === "centre") {
+  //  mesh.geometry.translate(-0.5, -0.5, -0.5);
+  //}
+  const THREE = scaffoldVuer.$module.Zinc.THREE;
+  const matrix = new THREE.Matrix4();
+  matrix.set(
+    rotation[0],
+    rotation[1],
+    rotation[2],
+    0,
+    rotation[3],
+    rotation[4],
+    rotation[5],
+    0,
+    rotation[6],
+    rotation[7],
+    rotation[8],
+    0,
+    0,
+    0,
+    0,
+    0
+  );
+  console.log(matrix)
+  const quaternion = new THREE.Quaternion().setFromRotationMatrix(matrix);
+  console.log(quaternion);
+  mesh.position.set(...position);
+  mesh.quaternion.copy( quaternion );
+  mesh.scale.set(...scale);
+  mesh.updateMatrix();
+  console.log(rotation)
+}
+
+
+
+export const testArmSlides = async (scaffoldVuer) => {
+  const scaffoldModule = scaffoldVuer.$module;
+  const texture = await getArmTexture(scaffoldModule);
+  const textureSlides = new scaffoldModule.Zinc.TextureSlides(texture);
+  textureSlides.setName("Arm texture");
+  textureSlides.createSlides([
+    {
+      direction: "z",
+      value: 0.5,
+    },
+  ]);
+
+  const rotation = [
+     Math.cos(Math.PI / 2.0), 0, Math.sin(Math.PI / 2.0),
+    0, 1, 0,
+    -Math.sin(Math.PI / 2.0), 0, Math.cos(Math.PI / 2.0)
+  ];
+  const position = [0, -1.0, 0.95];
+  const scale = [1.6, 1.6, 1.2];
+  const reference = "centre";
+  applyTransformation(scaffoldVuer, textureSlides.morph, rotation, position, scale, reference);
+  scaffoldVuer.addZincObject(textureSlides);
+  scaffoldVuer.fitWindow();
+};
+
 
