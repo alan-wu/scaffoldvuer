@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
@@ -62,6 +63,12 @@ export default defineConfig(({ command, mode }) => {
       // If you want to exposes all env variables, which is not recommended
       // 'process.env': env
     };
+    config.plugins.push(
+      nodePolyfills({
+        // To add only specific polyfills, add them here. If no option is passed, adds all polyfills
+        include: ['path']
+      })
+    );
   };
   return config;
 })

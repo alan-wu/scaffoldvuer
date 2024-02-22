@@ -7,6 +7,11 @@ export default defineConfig((configEnv) => {
   config.build = {
     outDir: "test-html"
   };
-
+  config.plugins.push(
+    nodePolyfills({
+      // To add only specific polyfills, add them here. If no option is passed, adds all polyfills
+      include: ['path']
+    })
+  );
   return config;
 })
