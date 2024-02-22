@@ -111,6 +111,9 @@
           <el-button size="small" @click="featureTextureSlides(true)">
             Body slides
           </el-button>
+          <el-button size="small" @click="featureArmSlides(true)">
+            Arm slides
+          </el-button>
           <el-switch v-model="onClickMarkers" active-text="Markers On Selection" active-color="#8300bf" />
           <el-switch
               v-model="wireframe"
@@ -160,7 +163,7 @@ import { shallowRef } from 'vue';
 import { ScaffoldVuer } from "./components/index.js";
 import DropZone from "./app/DropZone.vue";
 import ModelsTable from "./app/ModelsTable.vue";
-import { testSlides, testVolume } from "./app/TextureDemos.js";
+import { testArmSlides, testSlides, testVolume } from "./app/TextureDemos.js";
 import {
   FolderOpened as ElIconFolderOpened,
   Setting as ElIconSetting,
@@ -338,6 +341,23 @@ export default {
       this.$refs.scaffold.clearScene();
       testSlides(this.$refs.scaffold, texture_prefix);
     },
+    featureArmSlides: async function (overlap) {
+      //Test texture
+      if (overlap) {
+        const url =
+          "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/texture/arm1/arm_texture_metadata.json";
+        if (this.route.query.url !== encodeURI(url)) {
+          this.router.replace({ path: "/", query: { url } });
+          this.readyCallback = testArmSlides;
+          return;
+        } else {
+          testArmSlides(this.$refs.scaffold);
+          return;
+        }
+      }
+      this.$refs.scaffold.clearScene();
+      testSlides(this.$refs.scaffold, texture_prefix);
+    },
     saveSettings: function () {
       this.sceneSettings.push(this.$refs.scaffold.getState());
     },
@@ -409,6 +429,12 @@ export default {
       if (this.readyCallback) {
         this.readyCallback(this.$refs.scaffold, texture_prefix);
         this.readyCallback = undefined;
+      } else {
+        const url =
+          "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/texture/arm1/arm_texture_metadata.json";
+        if (this.route.query.url === encodeURI(url)) {
+          testArmSlides(this.$refs.scaffold);
+        }
       }
     },
     onSelected: function (data) {
