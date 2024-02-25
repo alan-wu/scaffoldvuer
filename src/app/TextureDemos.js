@@ -124,10 +124,22 @@ export const testSlides = async (scaffoldVuer, texture_prefix) => {
   //addCylinder(scaffoldVuer);
 };
 
+const padNumber = (number) => {
+  let string = number.toString();
+  while(string.length < 4) {
+    string = "0" + string;
+  }
+  return string;
+}
+
 const getArmTexture = async (scaffoldModule) => {
   const imgArray = [];
+  const prefix = "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/texture/arm1/jpg";
   const texture = new scaffoldModule.Zinc.TextureArray();
-  imgArray.push('https://mapcore-bucket1.s3.us-west-2.amazonaws.com/texture/arm1/1564.png');
+  for (let i = 984; i <= 2184;) {
+    imgArray.push(`${prefix}/${padNumber(i)}.jpg`);
+    i = i + 10 ;
+  }
   await texture.loadFromImages(imgArray);
   return texture;
 };
@@ -193,6 +205,14 @@ export const testArmSlides = async (scaffoldVuer) => {
   const textureSlides = new scaffoldModule.Zinc.TextureSlides(texture);
   textureSlides.setName("Arm texture");
   textureSlides.createSlides([
+    {
+      direction: "x",
+      value: 0.5,
+    },
+    {
+      direction: "y",
+      value: 0.5,
+    },
     {
       direction: "z",
       value: 0.5,
