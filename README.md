@@ -2,7 +2,8 @@
 
 This project aims to provide high-level 3D physiological models viewing capability.
 
-Scaffoldvuer is now built with Vue3 frameworks. Vue 2 version of Scaffoldvuer is no longer in development.
+Scaffoldvuer is now built with Vue3 frameworks. Vue 2 version of Scaffoldvuer is no longer maintained and the source
+can be found in this [branch](https://github.com/ABI-Software/scaffoldvuer/tree/Vue-2).
 
 
 ## Scaffoldvuer on NPM
