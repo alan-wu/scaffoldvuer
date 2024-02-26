@@ -1,12 +1,11 @@
-var THREE = require('zincjs').THREE;
-
+import { THREE } from 'zincjs';
 /**
  * This module manages highlighted and selected objects in 3D modules. 
  * 
  * @class
  * @returns {exports.GraphicsHighlight}
  */
-exports.GraphicsHighlight = function() {
+const GraphicsHighlight = function() {
   let currentHighlightedObjects = [];
   let currentSelectedObjects = [];
   this.highlightColour = [1, 0, 0];
@@ -132,3 +131,5 @@ exports.GraphicsHighlight = function() {
     _this.resetHighlighted();
   }
 }
+
+export { GraphicsHighlight as default };

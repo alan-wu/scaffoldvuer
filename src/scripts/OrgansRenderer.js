@@ -1,4 +1,8 @@
-const THREE = require('zincjs').THREE;
+import { THREE } from 'zincjs';
+import { RendererModule } from './RendererModule.js';
+import Annotation from './Annotation.js';
+
+
 // Current model's associate data, data fields, external link, nerve map
 // informations,
 // these are proived in the organsFileMap array.
@@ -9,8 +13,8 @@ const OrgansSceneData = function() {
   this.currentSpecies  = "";
   this.metaURL = "";
   this.viewURL = "";
-  this.currentTime = 0.0;
   this.timeVarying = false;
+	this.currentTime = 0.0;
 }
 
 /**
@@ -28,7 +32,7 @@ const OrgansSceneData = function() {
  * @returns {PJP.OrgansViewer}
  */
  const OrgansViewer = function(ModelsLoaderIn)  {
-  (require('./RendererModule').RendererModule).call(this);
+  RendererModule.call(this);
   const _this = this;
 	let pickerScene = undefined;
 	this.sceneData = new OrgansSceneData();
@@ -39,7 +43,7 @@ const OrgansSceneData = function() {
 	const modelsLoader = ModelsLoaderIn;
   this.NDCCameraControl = undefined;
 	_this.typeName = "Organ Viewer";
-	
+
 	this.getSceneData = function() {
 	  return _this.sceneData;
 	}
@@ -79,6 +83,10 @@ const OrgansSceneData = function() {
         duration);
 		_this.sceneData.currentTime = currentTime / duration * 100.0;
   }
+
+	this.getCurrentTime = function() {
+		return _this.sceneData.currentTime;
+	}
 
   this.toggleSyncControl = (flag, rotateMode) => {
     let cameraControl = this.scene.getZincCameraControls();
@@ -361,7 +369,7 @@ const OrgansSceneData = function() {
     }
     if (useDefautColour)
       modelsLoader.setGeometryColour(zincObject, systemName, partName);
-		const annotation = new (require('./annotation').annotation)();
+		const annotation = new Annotation();
     const region = zincObject.region.getFullPath();
 		annotation.data = {species:_this.sceneData.currentSpecies, system:systemName,
       part:partName, group:zincObject.groupName, region: region, uuid:zincObject.uuid,
@@ -583,5 +591,7 @@ const OrgansSceneData = function() {
 
 }
 
-OrgansViewer.prototype = Object.create((require('./RendererModule').RendererModule).prototype);
-exports.OrgansViewer = OrgansViewer;
+OrgansViewer.prototype = Object.create(RendererModule.prototype);
+export {
+	OrgansViewer
+}

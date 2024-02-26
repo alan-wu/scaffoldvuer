@@ -1,4 +1,9 @@
-const THREE = require('zincjs').THREE;
+import WEBGL from './WebGL';
+import Zinc from 'zincjs';
+const THREE = Zinc.THREE;
+import { BaseModule } from './BaseModule';
+import { EVENT_TYPE } from "./EventNotifier";
+import GraphicsHighlight from "./GraphicsHighlight";
 
 /**
  * Create a {@link Zinc.Renderer} on the dom element with corresponding elementID.
@@ -6,11 +11,9 @@ const THREE = require('zincjs').THREE;
  * @returns {Zinc.Renderer}
  */
 const createRenderer = function () {
-  const WEBGL = require('./WebGL').WEBGL;
   const localContainer = document.createElement( 'div' );
   let localRenderer = undefined;;
   localContainer.style.height = "100%";
-  const Zinc = require('zincjs');
   if (WEBGL.isWebGLAvailable()) {
     localRenderer = new Zinc.Renderer(localContainer, window);
     Zinc.defaultMaterialColor = 0xFFFF9C;
@@ -24,18 +27,18 @@ const createRenderer = function () {
 }
 
 const RendererModule = function()  {
-  (require('./BaseModule').BaseModule).call(this);
+  BaseModule.call(this);
   this.scene = undefined;
   this.rendererContainer = undefined;
   this.displayArea = undefined;
-  this.graphicsHighlight = new (require("./graphicsHighlight").GraphicsHighlight)();
+  this.graphicsHighlight = new GraphicsHighlight();
   this.zincRenderer = null;
   this.selectedScreenCoordinates = new THREE.Vector3();
   this.selectedCenter = undefined;
   this.liveUpdatesObjects = undefined;
 }
 
-RendererModule.prototype = Object.create((require('./BaseModule').BaseModule).prototype);
+RendererModule.prototype = Object.create(BaseModule.prototype);
 
 RendererModule.prototype.getIntersectedObject = function(intersects) {
 	if (intersects) {
@@ -66,7 +69,7 @@ RendererModule.prototype.getAnnotationsFromObjects = function(objects) {
     let annotation = undefined;
     if (zincObject) {
       if (zincObject.isGlyph || zincObject.isGlyphset) {
-        const glyphset = zincObject;
+        let glyphset = zincObject;
         if (zincObject.isGlyph)
           glyphset = zincObject.getGlyphset();
         annotation = glyphset.userData ? glyphset.userData.annotation : undefined;
@@ -94,9 +97,9 @@ RendererModule.prototype.setHighlightedByObjects = function(
   const changed = this.graphicsHighlight.setHighlighted(objects);
   const zincObjects = this.objectsToZincObjects(objects);
   if (propagateChanges) {
-    eventType = require("./eventNotifier").EVENT_TYPE.MOVE;
+    let eventType = EVENT_TYPE.MOVE;
     if (changed)
-      eventType = require("./eventNotifier").EVENT_TYPE.HIGHLIGHTED;
+      eventType = EVENT_TYPE.HIGHLIGHTED;
     const annotations = this.getAnnotationsFromObjects(objects);
     if (annotations.length > 0)
       annotations[0].coords = coords;
@@ -161,7 +164,7 @@ RendererModule.prototype.setSelectedByObjects = function(
     const zincObjects = this.objectsToZincObjects(objects);
     this.setupLiveCoordinates(zincObjects);
     if (propagateChanges) {
-      const eventType = require("./eventNotifier").EVENT_TYPE.SELECTED;
+      const eventType = EVENT_TYPE.SELECTED;
       const annotations = this.getAnnotationsFromObjects(objects);
       if (annotations.length > 0)
         annotations[0].coords = coords;
@@ -284,7 +287,9 @@ RendererModule.prototype.destroy = function() {
     this.zincRenderer.getThreeJSRenderer().dispose();
     this.zincRenderer = undefined;
   }
-  (require('./BaseModule').BaseModule).prototype.destroy.call( this );
+  BaseModule.prototype.destroy.call( this );
 }
 
-exports.RendererModule = RendererModule;
+export {
+  RendererModule
+}

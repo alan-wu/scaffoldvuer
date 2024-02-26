@@ -58,7 +58,7 @@ const findObjectWithUUID = (objects, uuid, remove) => {
   if (index > -1) {
     object = objects[index];
     if (remove) {
-      objects.splice(i, 1);
+      objects.splice(index, 1);
     }
   }
   return object;

@@ -4,7 +4,6 @@
     v-loading="loading"
     class="scaffold-container"
     element-loading-text="Loading..."
-    element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.3)"
   >
     <map-svg-sprite-color />
@@ -27,182 +26,191 @@
       <el-popover
         v-if="displayWarning"
         ref="warningPopover"
-        v-model="hoverVisibilities[6].value"
+        :visible="hoverVisibilities[6].value"
         :content="warningMessage"
         placement="right"
-        :append-to-body="false"
-        trigger="manual"
+        :teleported="false"
         popper-class="scaffold-popper message-popper right-popper non-selectable"
-      />
-      <i
-        v-if="displayWarning"
-        v-popover:warningPopover
-        class="el-icon-warning message-icon warning-icon"
-        @mouseover="showHelpText(6)"
-        @mouseout="hideHelpText(6)"
       >
-        <span class="message-text">Beta</span>
-      </i>
+        <template #reference>
+          <div
+            v-if="displayWarning"
+            class="message-icon warning-icon"
+            @mouseover="showHelpText(6)"
+            @mouseout="hideHelpText(6)"
+          >
+            <el-icon><el-icon-warning-filled /></el-icon>
+            <span class="message-text">Beta</span>
+          </div>
+        </template>
+      </el-popover>
       <el-popover
         v-if="displayLatestChanges"
-        ref="latestChangesPopover"
-        v-model="hoverVisibilities[7].value"
+        :visible="hoverVisibilities[7].value"
         :content="latestChangesMessage"
         placement="right"
-        :append-to-body="false"
+        :teleported="false"
         trigger="manual"
         popper-class="scaffold-popper message-popper right-popper non-selectable"
-      />
-      <i
-        v-if="displayLatestChanges && latestChangesMessage"
-        v-popover:latestChangesPopover
-        class="el-icon-warning message-icon latest-changesicon"
-        @mouseover="showHelpText(7)"
-        @mouseout="hideHelpText(7)"
       >
-        <span class="message-text">What's new?</span>
-      </i>
+        <template #reference>
+          <div
+            v-if="displayLatestChanges && latestChangesMessage"
+            class="el-icon-warning message-icon latest-changesicon"
+            @mouseover="showHelpText(7)"
+            @mouseout="hideHelpText(7)"
+          >
+            <el-icon><el-icon-warning-filled /></el-icon>
+            <span class="message-text">What's new?</span>
+          </div>
+        </template>
+      </el-popover>
       <el-popover
-        ref="checkBoxPopover"
-        v-model="hoverVisibilities[5].value"
+        :visible="hoverVisibilities[5].value"
         content="Change region visibility"
         placement="right"
-        :append-to-body="false"
+        :teleported="false"
         trigger="manual"
         popper-class="scaffold-popper right-popper non-selectable"
-      />
-      <tree-controls
-        ref="treeControls"
-        v-popover:checkBoxPopover
-        :help-mode="helpMode"
-        :isReady="isReady"
-        :show-colour-picker="showColourPicker"
-        @object-selected="objectSelected"
-        @object-hovered="objectHovered"
-        @drawer-toggled="drawerToggled"
-      />
+      >
+        <template #reference>
+          <tree-controls
+            ref="treeControls"
+            :help-mode="helpMode"
+            :isReady="isReady"
+            :show-colour-picker="showColourPicker"
+            @object-selected="objectSelected"
+            @object-hovered="objectHovered"
+            @drawer-toggled="drawerToggled"
+          />
+        </template>
+      </el-popover>
       <div class="primitive-controls-box">
         <primitive-controls ref="primitiveControls" />
       </div>
       <el-popover
-        v-if="sceneData.timeVarying"
+        v-if="timeVarying"
         ref="sliderPopover"
-        v-model="hoverVisibilities[4].value"
+        :visible="hoverVisibilities[4].value"
         content="Move the slider to animate the region"
         placement="top"
-        :append-to-body="false"
+        :teleported="false"
         trigger="manual"
         popper-class="scaffold-popper top-popper non-selectable"
-      />
-      <div
-        v-if="sceneData.timeVarying"
-        v-popover:sliderPopover
-        class="time-slider-container"
-        :class="[minimisedSlider ? 'minimised' : '', sliderPosition]"
       >
-        <el-tabs type="card">
-          <el-tab-pane label="Animate scaffold">
-            <el-row class="tab-content">
-              <map-svg-icon
-                v-if="isPlaying"
-                icon="pause"
-                class="icon-button video-button"
-                @click.native="play(false)"
-              />
-              <map-svg-icon
-                v-else
-                icon="play"
-                class="video-button icon-button"
-                @click.native="play(true)"
-              />
-              <el-slider
-                :min="0"
-                :max="timeMax"
-                :value="(sceneData.currentTime / 100) * timeMax"
-                :step="0.1"
-                tooltip-class="time-slider-tooltip"
-                class="slider"
-                :format-tooltip="formatTooltip"
-                :marks="timeStamps"
-                @input="timeChange($event)"
-              />
-            </el-row>
-          </el-tab-pane>
-          <el-tab-pane label="Animation data">
-            <el-row class="tab-content">
-              <div class="animation-data">
-                Original duration:
-                <div class="purple">
-                  {{ orginalDuration }}
-                </div>
-              </div>
-              <div class="animation-data">
-                Animation duration:
-                <div class="purple">
-                  {{ animateDuration }}
-                </div>
-              </div>
-              <div class="animation-data">
-                Playback speed
-                <el-select
-                  :popper-append-to-body="true"
-                  :value="currentSpeed"
-                  placeholder="Select"
-                  class="select-box"
-                  popper-class="scaffold_viewer_dropdown"
-                  @change="speedChanged($event)"
-                >
-                  <el-option
-                    v-for="item in playSpeed"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
+        <template #reference>
+          <div
+            v-if="timeVarying"
+            class="time-slider-container"
+            :class="[minimisedSlider ? 'minimised' : '', sliderPosition]"
+          >
+            <el-tabs type="card">
+              <el-tab-pane label="Animate scaffold">
+                <el-row class="tab-content">
+                  <map-svg-icon
+                    v-if="isPlaying"
+                    icon="pause"
+                    class="icon-button video-button"
+                    @click="play(false)"
                   />
-                </el-select>
-              </div>
-            </el-row>
-          </el-tab-pane>
-        </el-tabs>
-      </div>
+                  <map-svg-icon
+                    v-else
+                    icon="play"
+                    class="video-button icon-button"
+                    @click="play(true)"
+                  />
+                  <el-slider
+                    :min="0"
+                    :max="timeMax"
+                    :model-value="currentTime / 100 * timeMax"
+                    :step="0.1"
+                    tooltip-class="time-slider-tooltip"
+                    class="slider"
+                    :format-tooltip="formatTooltip"
+                    :marks="timeStamps"
+                    @input="timeChange($event)"
+                  />
+                </el-row>
+              </el-tab-pane>
+              <el-tab-pane label="Animation data">
+                <el-row class="tab-content">
+                  <div class="animation-data">
+                    Original duration:
+                    <div class="purple">
+                      {{ orginalDuration }}
+                    </div>
+                  </div>
+                  <div class="animation-data">
+                    Animation duration:
+                    <div class="purple">
+                      {{ animateDuration }}
+                    </div>
+                  </div>
+                  <div class="animation-data">
+                    Playback speed
+                    <el-select
+                      :teleported="true"
+                      :model-value="currentSpeed"
+                      placeholder="Select"
+                      class="select-box"
+                      popper-class="scaffold_viewer_dropdown"
+                      @change="speedChanged($event)"
+                    >
+                      <el-option
+                        v-for="item in playSpeed"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                      />
+                    </el-select>
+                  </div>
+                </el-row>
+              </el-tab-pane>
+            </el-tabs>
+          </div>
+        </template>
+      </el-popover>
       <div class="bottom-right-control">
         <el-popover
-          v-model="hoverVisibilities[0].value"
+          :visible="hoverVisibilities[0].value"
           content="Zoom in"
           placement="left"
-          :append-to-body="false"
+          :teleported="false"
           trigger="manual"
           popper-class="scaffold-popper left-popper non-selectable"
         >
-          <map-svg-icon
-            slot="reference"
-            icon="zoomIn"
-            class="icon-button zoomIn"
-            @click.native="zoomIn()"
-            @mouseover.native="showHelpText(0)"
-            @mouseout.native="hideHelpText(0)"
-          />
+          <template #reference>
+            <map-svg-icon
+              icon="zoomIn"
+              class="icon-button zoomIn"
+              @click="zoomIn()"
+              @mouseover="showHelpText(0)"
+              @mouseout="hideHelpText(0)"
+            />
+          </template>
         </el-popover>
         <el-popover
-          v-model="hoverVisibilities[1].value"
+          :visible="hoverVisibilities[1].value"
           content="Zoom out"
           placement="top-end"
-          :append-to-body="false"
+          :teleported="false"
           trigger="manual"
           popper-class="scaffold-popper popper-zoomout non-selectable"
         >
-          <map-svg-icon
-            slot="reference"
-            icon="zoomOut"
-            class="icon-button zoomOut"
-            @click.native="zoomOut()"
-            @mouseover.native="showHelpText(1)"
-            @mouseout.native="hideHelpText(1)"
-          />
+          <template #reference>
+            <map-svg-icon
+              icon="zoomOut"
+              class="icon-button zoomOut"
+              @click="zoomOut()"
+              @mouseover="showHelpText(1)"
+              @mouseout="hideHelpText(1)"
+            />
+          </template>
         </el-popover>
         <el-popover
-          v-model="hoverVisibilities[2].value"
+          :visible="hoverVisibilities[2].value"
           placement="top"
-          :append-to-body="false"
+          :teleported="false"
           trigger="manual"
           popper-class="scaffold-popper non-selectable"
         >
@@ -211,23 +219,27 @@
             <br />
             window
           </div>
-          <map-svg-icon
-            slot="reference"
-            icon="fitWindow"
-            class="icon-button fitWindow"
-            @click.native="fitWindow()"
-            @mouseover.native="showHelpText(2)"
-            @mouseout.native="hideHelpText(2)"
-          />
+          <template #reference>
+            <map-svg-icon
+              icon="fitWindow"
+              class="icon-button fitWindow"
+              @click="fitWindow()"
+              @mouseover="showHelpText(2)"
+              @mouseout="hideHelpText(2)"
+            />
+          </template>
         </el-popover>
       </div>
       <el-popover
+        v-if="openMapRef"
         ref="open-map-popover"
+        :virtual-ref="openMapRef"
         placement="top-start"
         width="128"
-        :append-to-body="false"
+        :teleported="false"
         trigger="click"
         popper-class="open-map-popper"
+        virtual-triggering
       >
         <el-row v-for="item in openMapOptions" :key="item.key">
           <el-button
@@ -241,42 +253,46 @@
       </el-popover>
       <el-popover
         ref="backgroundPopover"
+        :virtual-ref="backgroundIconRef"
         placement="top-start"
         width="128"
-        :append-to-body="false"
+        :teleported="false"
         trigger="click"
         popper-class="background-popper non-selectable"
+        virtual-triggering
       >
-        <el-row class="backgroundText">Viewing Mode</el-row>
-        <el-row class="backgroundControl">
-          <el-select
-            :popper-append-to-body="false"
-            v-model="viewingMode"
-            placeholder="Select"
-            class="select-box viewing-mode"
-            popper-class="scaffold_viewer_dropdownr"
-          >
-            <el-option v-for="item in viewingModes" :key="item" :label="item" :value="item">
-              <el-row>
-                <el-col :span="12">{{ item }}</el-col>
-              </el-row>
-            </el-option>
-          </el-select>
-        </el-row>
-        <el-row class="backgroundSpacer"></el-row>
-        <el-row class="backgroundText"> Change background </el-row>
-        <el-row class="backgroundChooser">
-          <div
-            v-for="item in availableBackground"
-            :key="item"
-            :class="[
-              'backgroundChoice',
-              item,
-              item == currentBackground ? 'active' : '',
-            ]"
-            @click="backgroundChangeCallback(item)"
-          />
-        </el-row>
+        <div>
+          <el-row class="backgroundText">Viewing Mode</el-row>
+          <el-row class="backgroundControl">
+            <el-select
+              :teleported="false"
+              v-model="viewingMode"
+              placeholder="Select"
+              class="select-box viewing-mode"
+              popper-class="scaffold_viewer_dropdown"
+            >
+                  <el-option v-for="item in viewingModes" :key="item" :label="item" :value="item">
+                <el-row>
+                  <el-col :span="12">{{ item }}</el-col>
+                </el-row>
+              </el-option>
+            </el-select>
+          </el-row>
+          <el-row class="backgroundSpacer"></el-row>
+          <el-row class="backgroundText"> Change background </el-row>
+          <el-row class="backgroundChooser">
+            <div
+              v-for="item in availableBackground"
+              :key="item"
+              :class="[
+                'backgroundChoice',
+                item,
+                item == currentBackground ? 'active' : '',
+              ]"
+              @click="backgroundChangeCallback(item)"
+            />
+          </el-row>
+        </div>  
       </el-popover>
       <div
         class="settings-group"
@@ -284,41 +300,43 @@
       >
         <el-row>
           <el-popover
-            v-model="hoverVisibilities[8].value"
+            :visible="hoverVisibilities[8].value"
             content="Open new map"
             placement="right"
-            :append-to-body="false"
+            :teleported="false"
             trigger="manual"
             popper-class="scaffold-popper right-popper non-selectable"
           >
-            <map-svg-icon
-              v-if="enableOpenMapUI && openMapOptions.length > 0"
-              slot="reference"
-              v-popover:open-map-popover
-              icon="openMap"
-              class="icon-button"
-              @mouseover.native="showHelpText(8)"
-              @mouseout.native="hideHelpText(8)"
-            />
+            <template #reference>
+              <map-svg-icon
+                v-if="enableOpenMapUI && openMapOptions.length > 0"
+                ref="openMapRef"
+                icon="openMap"
+                class="icon-button open-map-button"
+                @mouseover="showHelpText(8)"
+                @mouseout="hideHelpText(8)"
+              />
+            </template>
           </el-popover>
         </el-row>
         <el-row>
           <el-popover
-            v-model="hoverVisibilities[3].value"
+            :visible="hoverVisibilities[3].value"
             content="Change background color"
             placement="right"
-            :append-to-body="false"
+            :teleported="false"
             trigger="manual"
             popper-class="scaffold-popper right-popper non-selectable"
           >
-            <map-svg-icon
-              slot="reference"
-              v-popover:backgroundPopover
-              icon="changeBckgd"
-              class="icon-button"
-              @mouseover.native="showHelpText(3)"
-              @mouseout.native="hideHelpText(3)"
-            />
+            <template #reference>
+              <map-svg-icon
+                ref="backgroundIconRef"
+                icon="changeBckgd"
+                class="icon-button"
+                @mouseover="showHelpText(3)"
+                @mouseout="hideHelpText(3)"
+              />
+            </template>
           </el-popover>
         </el-row>
       </div>
@@ -328,42 +346,33 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import Vue from "vue";
-import PrimitiveControls from "./PrimitiveControls";
-import ScaffoldTooltip from "./ScaffoldTooltip";
-import TreeControls from "./TreeControls";
-import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
-import { findObjectsWithNames, getObjectsFromAnnotations } from "../scripts/utilities.js";
-import { SearchIndex } from "../scripts/search.js";
+import { toRef, shallowRef } from 'vue'
 import {
-  Button,
-  Col,
-  Loading,
-  Option,
-  Popover,
-  Row,
-  Select,
-  Slider,
-  TabPane,
-  Tabs,
-} from "element-ui";
-import lang from "element-ui/lib/locale/lang/en";
-import locale from "element-ui/lib/locale";
+  WarningFilled as ElIconWarningFilled,
+  ArrowDown as ElIconArrowDown,
+  ArrowLeft as ElIconArrowLeft,
+} from '@element-plus/icons-vue'
+import PrimitiveControls from "./PrimitiveControls.vue";
+import ScaffoldTooltip from "./ScaffoldTooltip.vue";
+import TreeControls from "./TreeControls.vue";
+import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
+import { findObjectsWithNames, getObjectsFromAnnotations } from "../scripts/Utilities.js";
 
-locale.use(lang);
-Vue.use(Button);
-Vue.use(Col);
-Vue.use(Loading.directive);
-Vue.use(Option);
-Vue.use(Popover);
-Vue.use(Row);
-Vue.use(Select);
-Vue.use(Slider);
-Vue.use(TabPane);
-Vue.use(Tabs);
-
-const OrgansViewer = require("../scripts/organsRenderer").OrgansViewer;
-const EventNotifier = require("../scripts/eventNotifier").EventNotifier;
+import { SearchIndex } from "../scripts/Search.js";
+import {
+  ElButton as Button,
+  ElCol as Col,
+  ElLoading as Loading,
+  ElOption as Option,
+  ElPopover as Popover,
+  ElRow as Row,
+  ElSelect as Select,
+  ElSlider as Slider,
+  ElTabPane as TabPane,
+  ElTabs as Tabs,
+} from "element-plus";
+import { OrgansViewer } from "../scripts/OrgansRenderer.js";
+import { EventNotifier } from "../scripts/EventNotifier.js";
 
 /**
  * A vue component of the scaffold viewer.
@@ -374,11 +383,24 @@ const EventNotifier = require("../scripts/eventNotifier").EventNotifier;
 export default {
   name: "ScaffoldVuer",
   components: {
+    Button,
+    Col,
+    Loading,
+    Option,
+    Popover,
+    Row,
+    Select,
+    Slider,
+    TabPane,
+    Tabs,
     MapSvgIcon,
     MapSvgSpriteColor,
     PrimitiveControls,
     ScaffoldTooltip,
     TreeControls,
+    ElIconWarningFilled,
+    ElIconArrowDown,
+    ElIconArrowLeft,
   },
   props: {
     /**
@@ -487,13 +509,17 @@ export default {
       },
     },
     /**
-     * Flag to determine rather open map UI should be
-     * presented or not.
+     * Flag to determine rather the open map UI icon and popup
+     * should be shown or not.
      */
     enableOpenMapUI: {
       type: Boolean,
       default: false,
     },
+    /**
+     * This array populate the the openMapOptions popup.
+     * Each entry contains a pair of display and key.
+     */
     openMapOptions: {
       type: Array,
       default: function () {
@@ -562,7 +588,8 @@ export default {
   },
   data: function () {
     return {
-      sceneData: this.$module.sceneData,
+      currentTime: 0.0,
+      timeVarying: undefined,
       isPlaying: false,
       isReady: false,
       /**
@@ -635,7 +662,9 @@ export default {
       viewingModes: [
         "Annotation",
         "Exploration",
-      ]
+      ],
+      openMapRef: undefined,
+      backgroundIconRef: undefined,
     };
   },
   watch: {
@@ -682,14 +711,12 @@ export default {
     displayMinimap: function (val) {
       this.$module.scene.displayMinimap = val;
     },
-    "sceneData.currentTime": function () {
-      /**
-       * Triggers when scene time changes.
-       *
-       * @property {number} time Current build-in time of scene.
-       * of selected object.
-       */
-      this.$emit("timeChanged", this.sceneData.currentTime);
+    currentTime: {
+      handler: function () {
+        //Emit when time in the current scene has changed
+        //@arg Current time in scene
+        this.$emit("timeChanged", this.currentTime);
+      },
     },
     duration: function () {
       this.$module.scene.setDuration(this.duration);
@@ -720,7 +747,12 @@ export default {
     this.availableBackground = ["white", "black", "lightskyblue"];
     this.$_searchIndex = new SearchIndex();
   },
+  created: function() {
+    this.timeVarying = toRef(this.$module.sceneData, 'timeVarying');
+  },
   mounted: function () {
+    this.openMapRef = shallowRef(this.$refs.openMapRef);
+    this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef);
     this.$refs.treeControls.setModule(this.$module);
     let eventNotifier = new EventNotifier();
     eventNotifier.subscribe(this, this.eventNotifierCallback);
@@ -732,13 +764,21 @@ export default {
       this.$refs.scaffoldContainer
     );
     this.defaultRate = this.$module.getPlayRate();
+    this.$module.zincRenderer.addPreRenderCallbackFunction(() => {
+      this.currentTime = this.$module.getCurrentTime();
+    })
   },
-  beforeDestroy: function () {
+  beforeUnmount: function () {
     if (this.ro) this.ro.disconnect();
     this.$module.destroy();
     this.$module = undefined;
   },
   methods: {
+    /**
+     * @vuese
+     * Call this to manually add a zinc object into the current scene
+     * @arg Zinc object to be added
+     */
     addZincObject: function (zincObject) {
       if (this.$module.scene) {
         this.$module.scene.addZincObject(zincObject);
@@ -747,15 +787,19 @@ export default {
       }
     },
     /**
+     * Internal only.
      * This is called when a new zinc object is read into the scene.
      */
     zincObjectAdded: function (zincObject) {
       this.loading = false;
       this.$_searchIndex.addZincObject(zincObject, zincObject.uuid);
+      //Emit when a new object is added to the scene
+      //@arg The object added to the sceene
       this.$emit("zinc-object-added", zincObject);
     },
     /**
-     * 
+     * Internal only.
+     * Add regions to search index.
      */
     addRegionsToSearchIndex: function () {
       const rootRegion = this.$module.scene.getRootRegion();
@@ -765,6 +809,7 @@ export default {
       });
     },
     /**
+     * Internal only.
      * This is called when Change backgspeedround colour button
      * is pressed an causes the backgrouColornd colour to be changed
      * to one of the three preset colour: white, black and
@@ -777,6 +822,7 @@ export default {
         .setClearColor(this.currentBackground, 1);
     },
     /**
+     * Internal only.
      * This is called by captueeScreenshot and after the last render
      * loop, it download a screenshot of the current scene with no UI.
      */
@@ -797,11 +843,10 @@ export default {
       hrefElement.remove();
     },
     /**
+     * @vuese
      * Function for capturing a screenshot of the current rendering.
      *
-     * @param {String} filename filename given to the screenshot.
-     *
-     * @public
+     * @arg filename given to the screenshot.
      */
     captureScreenshot: function (filename) {
       this.captureFilename = filename;
@@ -810,9 +855,8 @@ export default {
       );
     },
     /**
+     * @vuese
      * Function to clear current scene, the tree controls and the search index.
-     *
-     * @public
      */
     clearScene: function () {
       if (this.$refs.treeControls) this.$refs.treeControls.clear();
@@ -830,10 +874,9 @@ export default {
       return val ? val.toFixed(2) + " ms" : "0 ms";
     },
     /**
+     * @vuese
      * Function to reset the view to default.
      * Also called when the associated button is pressed.
-     *
-     * @public
      */
     fitWindow: function () {
       if (this.$module.scene) {
@@ -841,10 +884,9 @@ export default {
       }
     },
     /**
+     * @vuese
      * Function to zoom in.
      * Also called when the associated button is pressed.
-     *
-     * @public
      */
     zoomIn: function () {
       if (this.$module.scene) {
@@ -855,7 +897,7 @@ export default {
      * Function to zoom out.
      * Also called when the associated button is pressed.
      *
-     * @public
+     * @vuese
      */
     zoomOut: function () {
       if (this.$module.scene) {
@@ -865,7 +907,7 @@ export default {
     /**
      * Function to change the current play speed.
      *
-     * @public
+     * @vuese
      */
     speedChanged: function (speed) {
       this.currentSpeed = speed;
@@ -874,13 +916,19 @@ export default {
     /**
      * Function used to stop the free spin
      *
-     * @public
+     * @vuese
      */
     stopFreeSpin: function () {
       let cameracontrol = this.$module.scene.getZincCameraControls();
       cameracontrol.stopAutoTumble();
       this.isTransitioning = false;
     },
+    /**
+     * Return a list of obejcts with the provided name.
+     * @arg Group name to search.
+     *
+     * @vuese
+     */
     findObjectsWithGroupName: function (name) {
       let objects = [];
       if (name && name != "" && this.$module.scene) {
@@ -889,7 +937,10 @@ export default {
       return objects;
     },
     /**
-     * Focus on named region
+     * Find and and zoom into objects with the provided list of names.
+     * @arg List of names
+     * 
+     * @vuese
      */
     viewRegion: function (names) {
       const rootRegion = this.$module.scene.getRootRegion();
@@ -933,6 +984,11 @@ export default {
         }
       }
     },
+    /**
+     * Return renderer information
+     * 
+     * @vuese
+     */
     getRendererInfo: function () {
       if (this.$module.zincRenderer) {
         return this.$module.zincRenderer.getThreeJSRenderer().info;
@@ -943,7 +999,7 @@ export default {
      * Function used to rotate the scene.
      * Also called when the associated button is pressed.
      *
-     * @public
+     * @vuese
      */
     freeSpin: function () {
       if (this.$module.scene) {
@@ -994,6 +1050,8 @@ export default {
           //Make sure the tooltip is displayed with annotation mode
           this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
         }
+        //Emit when an object is selected
+        //@arg Identifier of selected objects
         this.$emit("scaffold-selected", event.identifiers);
       } else if (event.eventType == 2) {
         if (this.selectedObjects.length === 0) {
@@ -1022,7 +1080,8 @@ export default {
               this.tData.y = event.identifiers[0].coords.y;
             }
           }
-          // Triggers when an object has been highlighted
+          //Emit when an object is highlighted
+          //@arg Identifier of selected objects
           this.$emit("scaffold-highlighted", event.identifiers);
         }
       } else if (event.eventType == 3) {
@@ -1040,7 +1099,7 @@ export default {
     /**
      * Get the coordinates of the current selected region.
      *
-     * @public
+     * @vuese
      */
     getCoordinatesOfSelected: function () {
       if (this.selectedObjects && this.selectedObjects.length > 0) {
@@ -1053,7 +1112,7 @@ export default {
      * current selected region which will be updated after each render
      * loop.
      *
-     * @public
+     * @vuese
      */
     getDynamicSelectedCoordinates: function () {
       return this.$module.selectedScreenCoordinates;
@@ -1063,13 +1122,16 @@ export default {
      */
     timeChange: function (event) {
       let normalizedTime = (event / this.timeMax) * 100;
-      if (normalizedTime != this.sceneData.currentTime)
+      if (normalizedTime != this.currentTime) {
         this.$module.updateTime(normalizedTime);
+      }
     },
     /**
      * A callback used by children components. Set the selected zinc object
      *
-     * @param {object} object Zinc object
+     * @arg Selected zinc objects
+     * @arg Flag to determine if callback should be triggered when new selection
+     * is made 
      */
     objectSelected: function (objects, propagate) {
       this.selectedObjects = objects;
@@ -1081,7 +1143,9 @@ export default {
     /**
      * A callback used by children components. Set the highlighted zinc object
      *
-     * @param {object} object Zinc object
+     * @arg Hovered zinc objects
+     * @arg Flag to determine if callback should be triggered when new selection
+     * is made 
      */
     objectHovered: function (objects, propagate) {
       this.hoveredObjects = objects;
@@ -1118,9 +1182,10 @@ export default {
       }
     },
     /**
+     * @vuese
      * Start the animation.
      *
-     * @param {object} object Zinc object
+     * @arg flag to turn the animation on/off
      */
     play: function (flag) {
       this.$module.playAnimation(flag);
@@ -1129,6 +1194,7 @@ export default {
       //this.hideRegionTooltip();
     },
     /**
+     * @vuese
      * Function to toggle on/off overlay help.
      */
     setHelpMode: function (helpMode) {
@@ -1298,6 +1364,10 @@ export default {
       this.hideRegionTooltip();
       return false;
     },
+    /**
+     * @vuese
+     * Hide the tooltip
+     */
     hideRegionTooltip: function () {
       if (this.$_liveCoordinatesUpdated) {
         this.$module.zincRenderer.removePostRenderCallbackFunction(
@@ -1323,6 +1393,7 @@ export default {
       }
     },
     /**
+     * @vuese
      * Set the marker modes for objects specified by the list of annotations
      */
     setMarkerModeWithAnnotations: function (annotations, mode) {
@@ -1353,6 +1424,13 @@ export default {
         clearTimeout(this.helpTextWait);
       }
     },
+    /**
+     * @vuese
+     * 
+     * Search a object and display the tooltip
+     * @arg text to search across
+     * @arg toggle the tooltip if this is set
+     */
     search: function (text, displayLabel) {
       if (this.$_searchIndex) {
         if (text === undefined || text === "" ||
@@ -1387,7 +1465,10 @@ export default {
       return false;
     },
     /**
-     * Get the list of suggested terms
+     * @vuese
+     * 
+     * Get the list of suggested terms based on the provided term.
+     * This can be used for autocomplete.
      */
     fetchSuggestions: function (term) {
       if (this.$_searchIndex === undefined) return [];
@@ -1441,6 +1522,7 @@ export default {
         this.$module.updateTime(0);
         this.$module.unsetFinishDownloadCallback();
         this.addRegionsToSearchIndex();
+        //Emit when all objects have been loaded
         this.$emit("on-ready");
         this.setMarkers();
         this.isReady = true;
@@ -1450,7 +1532,7 @@ export default {
      * Function used for getting the current states of the scene. This exported states
      * can be imported using the importStates method.
      *
-     * @public
+     * @vuese
      */
     getState: function () {
       let state = {
@@ -1471,7 +1553,7 @@ export default {
      * Function used for importing the states of the scene. This exported states
      * can be imported using the read states method.
      *
-     * @public
+     * @vuese
      */
     setState: function (state) {
       if (state) {
@@ -1502,6 +1584,12 @@ export default {
         }
       }
     },
+    /**
+     * export current scene in GLTF.
+     * @arg Return in binary form when set to true
+     * 
+     * @vuese
+     */
     exportGLTF: function (binary) {
       return this.$module.scene.exportGLTF(binary);
     },
@@ -1510,7 +1598,7 @@ export default {
      * viewport. This function will ignore the state prop and
      * read in the new url.
      *
-     * @public
+     * @vuese
      */
     setURLAndState: function (newValue, state) {
       if (newValue != this._currentURL) {
@@ -1544,17 +1632,19 @@ export default {
             true
           );
         }
-        this.$module.scene.displayMarkers = this.displayMarkers;
-        this.$module.scene.forcePickableObjectsUpdate = true;
-        this.$module.scene.displayMinimap = this.displayMinimap;
-        this.updateMinimapScissor();
+        if (this.$module && this.$module.scene) {
+          this.$module.scene.displayMarkers = this.displayMarkers;
+          this.$module.scene.forcePickableObjectsUpdate = true;
+          this.$module.scene.displayMinimap = this.displayMinimap;
+          this.updateMinimapScissor();
+        }
       }
     },
     /**
      * Function used for reading in new scaffold metadata. This function will ignore
      * the state prop and read in the new url.
      *
-     * @public
+     * @vuese
      */
     setURL: function (newValue) {
       this.setURLAndState(newValue, undefined);
@@ -1587,6 +1677,11 @@ export default {
         }
       }
     },
+    /**
+     * @vuese
+     * 
+     * Force the renderer to resize
+     */
     forceResize: function () {
       if (this.$module.zincRenderer) {
         this.$module.zincRenderer.onWindowResize();
@@ -1597,6 +1692,9 @@ export default {
       if (this.tData.visible) {
         this.showRegionTooltip(this.tData.label, true, true);
       }
+      //Emit when the scene has been transformed due to navigation,
+      //only triggered during syncControl mode
+      //@arg Information on the navigation
       this.$emit("scaffold-navigated", payload);
     },
     /**
@@ -1622,16 +1720,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-@import "~element-ui/packages/theme-chalk/src/button";
-@import "~element-ui/packages/theme-chalk/src/col";
-@import "~element-ui/packages/theme-chalk/src/loading";
-@import "~element-ui/packages/theme-chalk/src/option";
-@import "~element-ui/packages/theme-chalk/src/popover";
-@import "~element-ui/packages/theme-chalk/src/row";
-@import "~element-ui/packages/theme-chalk/src/select";
-@import "~element-ui/packages/theme-chalk/src/slider";
-@import "~element-ui/packages/theme-chalk/src/tabs";
-@import "~element-ui/packages/theme-chalk/src/tab-pane";
 
 .message-icon {
   position: absolute;
@@ -1666,7 +1754,7 @@ export default {
   vertical-align: 5px;
 }
 
-::v-deep .message-popper {
+:deep(.message-popper) {
   padding: 9px 10px;
   min-width: 150px;
   font-size: 12px;
@@ -1678,12 +1766,6 @@ export default {
     outline: none !important;
     border: 0px;
   }
-}
-
-.scaffold-container {
-  height: 100%;
-  width: 100%;
-  position: relative;
 }
 
 .time-slider-container {
@@ -1727,17 +1809,21 @@ export default {
   font-size: 14px;
 }
 
-.tab-content ::v-deep .el-slider__marks-text {
-  margin-top: 12px;
-  margin-left: 8px;
-  font-size: 10px;
+.tab-content {
+  :deep(.el-slider__marks-text) {
+    margin-top: 12px;
+    margin-left: 8px;
+    font-size: 10px;
+  }
 }
 
-.tab-content ::v-deep .el-slider__stop {
-  width: 10px;
-  height: 10px;
-  top: -1px;
-  border: solid 1px $app-primary-color;
+.tab-content {
+  :deep(.el-slider__stop) {
+    width: 10px;
+    height: 10px;
+    top: -1px;
+    border: solid 1px $app-primary-color;
+  }
 }
 
 .animation-data {
@@ -1758,12 +1844,12 @@ export default {
   width: calc(100% - 88px);
   margin-top: -7px;
 
-  ::v-deep .el-slider__runway {
+  :deep(.el-slider__runway) {
     height: 10px;
     margin: 14px 0;
   }
 
-  ::v-deep .el-slider__button-wrapper {
+  :deep(.el-slider__button-wrapper) {
     top: -13px;
   }
 }
@@ -1776,57 +1862,46 @@ export default {
   padding-left: 8px;
 }
 
-::v-deep .non-selectable {
+:deep(.non-selectable) {
   user-select: none;
 }
 
-::v-deep .background-popper {
+:deep(.background-popper.el-popover.el-popper) {
   padding: 5px 12px;
   background-color: #ffffff;
   border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
-  height: 124px;
-  width: 128px;
-  min-width: 128px;
-
-  &.el-popper[x-placement^="top"] {
-    .popper__arrow {
-      border-top-color: $app-primary-color !important;
-      &:after {
-        border-top-color: #fff !important;
-      }
+  height: 140px;
+  min-width: 200px;
+  .el-popper__arrow {
+    &:before {
+      border-color: $app-primary-color;
     }
-  }
-
-  .el-row ~ .el-row {
-    margin-top: 8px;
   }
 }
 
-::v-deep .open-map-popper {
+:deep(.open-map-popper.el-popover.el-popper) {
   padding-top: 5px;
   padding-bottom: 5px;
   background-color: #ffffff;
   border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
-  width: 178px;
-  min-width: 178px;
-
+  min-width: 188px;
   .el-row ~ .el-row {
     margin-top: 8px;
   }
 
   .el-button {
-    padding-top:5px;
-    padding-bottom:5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background: #f3e6f9;
+    border-color: $app-primary-color;
+    color: $app-primary-color;
   }
 
-  &.el-popper[x-placement^="top"] {
-    .popper__arrow {
-      border-top-color: $app-primary-color !important;
-      &:after {
-        border-top-color: #fff !important;
-      }
+  .el-popper__arrow {
+    &:before {
+      border-color: $app-primary-color;
     }
   }
 }
@@ -1888,6 +1963,9 @@ export default {
 .icon-button {
   height: 24px !important;
   width: 24px !important;
+  &.open-map-button {
+    margin-bottom:4px;
+  }
 
   &:hover {
     cursor: pointer;
@@ -1905,16 +1983,17 @@ export default {
 }
 
 .time-slider-container {
-  ::v-deep .el-tabs__header {
+  :deep(.el-tabs__header) {
     margin: 0px;
     border-bottom: 1px solid rgb(144, 147, 153);
+    height: 24px;
   }
 
   .el-row {
     margin-bottom: 5px;
   }
 
-  ::v-deep .el-tabs__content {
+  :deep(.el-tabs__content) {
     border-left: 1px solid rgb(144, 147, 153);
     border-bottom: 1px solid rgb(144, 147, 153);
     border-right: 1px solid rgb(144, 147, 153);
@@ -1922,7 +2001,7 @@ export default {
     background-color: white;
   }
 
-  ::v-deep .el-tabs--card {
+  :deep(.el-tabs.el-tabs--top.el-tabs--card) {
     > .el-tabs__header {
       .el-tabs__nav {
         border: 1px solid rgb(144, 147, 153);
@@ -1952,7 +2031,7 @@ export default {
   }
 }
 
-::v-deep .scaffold-popper {
+:deep(.scaffold-popper.el-popper.el-popper) {
   padding: 6px 4px;
   font-size: 12px;
   color: rgb(48, 49, 51);
@@ -1960,53 +2039,37 @@ export default {
   border: 1px solid $app-primary-color;
   white-space: nowrap;
   min-width: unset;
+  width: unset!important;;
   pointer-events: none;
 
-  &.left-popper {
-    .popper__arrow {
-      border-left-color: $app-primary-color !important;
-      &:after {
-        border-left-color: #f3ecf6 !important;
-      }
-    }
-  }
-
-  &.right-popper {
-    .popper__arrow {
-      border-right-color: $app-primary-color !important;
-      &:after {
-        border-right-color: #f3ecf6 !important;
-      }
-    }
-  }
-
-  &.el-popper[x-placement^="top"] {
-    .popper__arrow {
-      border-top-color: $app-primary-color !important;
-      &:after {
-        border-top-color: #f3ecf6 !important;
-      }
+  .el-popper__arrow {
+    &:before {
+      border-color: $app-primary-color;
+      background-color: #f3ecf6;
     }
   }
 }
 
-::v-deep .el-slider__button {
+:deep(.el-slider__button) {
   border: 2px solid $app-primary-color;
 }
 
-::v-deep .el-slider__bar {
+:deep(.el-slider__bar) {
   background-color: $app-primary-color;
   height: 10px;
 }
 
-::v-deep .el-loading-spinner {
-  i,
+:deep(.el-loading-spinner) {
+  .path {
+    stroke: $app-primary-color;
+  }
   .el-loading-text {
     color: $app-primary-color;
   }
 }
 
-::v-deep .popper-zoomout {
+
+:deep(.popper-zoomout) {
   padding-right: 11px;
   left: -21px !important;
   .popper__arrow {
@@ -2015,42 +2078,40 @@ export default {
 }
 
 .select-box {
-  width: 57px;
   border-radius: 4px;
   border: 1px solid rgb(144, 147, 153);
   background-color: var(--white);
   font-weight: 500;
   color: rgb(48, 49, 51);
-  margin-left: 8px;
+  width: 150px!important;
+}
 
-  &.viewing-mode {
-    width: unset;
-    ::v-deep .el-input__inner {
-      line-height:30px
+:deep(.scaffold_viewer_dropdown) {
+  min-width: 160px !important;
+  .el-select-dropdown__item {
+    white-space: nowrap;
+    text-align: left;
+    &.is-selected {
+      color: $app-primary-color;
+      font-weight: normal;
     }
-  }
-
-  ::v-deep .el-input__inner {
-    color: $app-primary-color;
-    height: 22px;
-    padding-left: 8px;
-    padding-right: 8px;
-    border: none;
-    font-family: "Asap", sans-serif;
-    line-height: 22px;
-    &is-focus, &:focus {
-      border: 1px solid $app-primary-color;
-    }
-  }
-
-  ::v-deep .el-input,
-  ::v-deep .el-input__icon {
-    line-height: 22px;
   }
 }
+
+
 </style>
 
 <style lang="scss">
+.scaffold-container {
+  --el-color-primary: #8300BF;
+  --el-color-primary-light-7: #dab3ec;
+  --el-color-primary-light-8: #e6ccf2
+  --el-color-primary-light-9: #f3e6f9;
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
 .time-slider-tooltip {
   padding: 6px 4px !important;
   font-family: "Asap", sans-serif;
@@ -2060,17 +2121,22 @@ export default {
   border: 1px solid $app-primary-color !important;
   white-space: nowrap !important;
   min-width: unset !important;
+  .el-popper__arrow {
+    &:before {
+      border-color: $app-primary-color!important;
+      background-color: #f3ecf6!important;
+    }
+  }
 }
 
 .scaffold_viewer_dropdown .el-select-dropdown__item {
   white-space: nowrap;
   text-align: left;
   font-family: "Asap", sans-serif;
+  &.is-selected {
+    color: $app-primary-color;
+    font-weight: normal;
+  }
 }
 
-.primitive-controls-box {
-  right: 0px;
-  bottom: 200px;
-  position: absolute;
-}
 </style>

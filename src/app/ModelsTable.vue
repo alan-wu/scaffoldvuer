@@ -2,7 +2,7 @@
   <div>
     <el-input
       v-model="search"
-      size="mini"
+      size="small"
       placeholder="Type to search"
     />
     <el-table
@@ -39,23 +39,23 @@
         label="Action"
         width="300"
       >
-        <template slot-scope="scope">
+        <template #default="scope">
           <el-button
-            size="mini"
+            size="small"
             @click="handleView(scope.row)"
           >
             View
           </el-button>
           <el-button
             v-if="scope.row.Discover !== 'Not even'"
-            size="mini"
+            size="small"
             @click="handleDiscover(scope.row)"
           >
             Discover
           </el-button>
           <el-button
             v-if="scope.row['Blackfynn dataset'] !== '/'"
-            size="mini"
+            size="small"
             @click="handleBlackfynn(scope.row)"
           >
             Blackfynn
@@ -68,29 +68,36 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import Vue from "vue";
-import models from './ModelsInformation'
-import { Button, Input, Table, TableColumn } from "element-ui";
-import lang from "element-ui/lib/locale/lang/en";
-import locale from "element-ui/lib/locale";
+import getTableData from "./ModelsInformation.js";
 
-locale.use(lang);
-Vue.use(Button);
-Vue.use(Input);
-Vue.use(Table);
-Vue.use(TableColumn);
-
+import { 
+  ElButton as Button,
+  ElInput as Input,
+  ElTable as Table,
+  ElTableColumn as TableColumn
+} from "element-plus";
 
 export default {
   name: "ModelsTable",
-  mixins: [models],
+  components: [
+    Button,
+    Input,
+    Table,
+    TableColumn
+  ],
+  async setup() {
+    const keywords = ["Organ", "Species", "Note", "Location",
+      "Last modified","Blackfynn dataset", "Published", "Discover"];
+    const spreadsheet_id = import.meta.env.VITE_GOOGLE_SPREADSHEET_ID;
+    const service_email = import.meta.env.VITE_GOOGLE_SERVICE_SCAFFOLDVUER_EMAIL;
+    const service_key = import.meta.env.VITE_GOOGLE_PRIVATE_SCAFFOLDVUER_KEY;
+    const tableData = await getTableData(keywords, spreadsheet_id, service_email, service_key);
+    return { tableData };
+  },
   data() {
     return {
       search: '',
     }
-  },
-  created: function() {
-    this.getModelsInformation();
   },
   methods: {
     handleView: function(row) {
@@ -105,9 +112,3 @@ export default {
   }
 };
 </script>
-
-<style scoped lang="scss">
-@import "~element-ui/packages/theme-chalk/src/input";
-@import "~element-ui/packages/theme-chalk/src/table";
-@import "~element-ui/packages/theme-chalk/src/table-column";
-</style>

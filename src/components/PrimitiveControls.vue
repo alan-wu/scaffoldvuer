@@ -2,59 +2,36 @@
   <div
     v-show="material || isTextureSlides"
     class="primitive-controls"
+    :class="{ open: drawerOpen, close: !drawerOpen }"
   >
-    <el-drawer
-      custom-class="my-drawer"
-      :class="{
-        'drawer-content': true,
-        'opacity': material !== undefined,
-        'texture-slides': isTextureSlides,
-      }"
-      :visible.sync="drawerOpen"
-      :append-to-body="false"
-      :modal-append-to-body="false"
-      size="300"
-      :with-header="false"
-      :wrapper-closable="false"
-      :modal="false"
-    >
-      <div
-        v-if="drawerOpen"
-        class="tab-button close"
-        @click="toggleDrawer"
-      >
-        <i class="el-icon-arrow-right" />
-      </div>
+    <div class="my-drawer" :class="{ open: drawerOpen, close: !drawerOpen }">
       <opacity-controls
         :material="material"
+        :zincObject="zincObject"
         ref="opacityControls" />
       <texture-slides-controls
         v-show="isTextureSlides"
-        class="controls"
+        class="texture-controls"
         ref="tSlidesControls" />
-    </el-drawer>
+    </div>
     <div
-      v-if="!drawerOpen"
-      class="tab-button open"
+      class="drawer-button"
+      :class="{ open: drawerOpen, close: !drawerOpen }"
       @click="toggleDrawer"
     >
-      <i class="el-icon-arrow-left" />
+      <el-icon><el-icon-arrow-right /></el-icon>
     </div>
   </div>
 </template>
 
 <script>
 /* eslint-disable no-alert, no-console */
-import Vue from "vue";
-import OpacityControls from "./OpacityControls";
-import TextureSlidesControls from "./TextureSlidesControls";
-import { Drawer, Icon } from "element-ui";
-import lang from "element-ui/lib/locale/lang/en";
-import locale from "element-ui/lib/locale";
-
-locale.use(lang);
-Vue.use(Drawer);
-Vue.use(Icon);
+import { ref, shallowRef } from 'vue';
+import {
+  ArrowRight as ElIconArrowRight,
+} from '@element-plus/icons-vue'
+import OpacityControls from "./OpacityControls.vue";
+import TextureSlidesControls from "./TextureSlidesControls.vue";
 
 /**
  * A component to control the opacity of the target object.
@@ -70,10 +47,8 @@ export default {
       material: undefined,
       isTextureSlides: false,
       drawerOpen: true,
+      zincObject: undefined,
     };
-  },
-  mounted: function() {
-    this._zincobject = undefined;
   },
   methods: {
     formatTooltip: function(val) {
@@ -84,16 +59,15 @@ export default {
       this.drawerOpen = !this.drawerOpen;
     },
     setObject: function(object) {
-      this._zincobject = object;
+      this.zincObject = shallowRef(object);
       if (object.isTextureSlides) {
         this.isTextureSlides = true;
         this.$refs.tSlidesControls.setObject(object);
       } else {
         this.isTextureSlides = false;
       }
-      if (object && object.morph) this.material = object.morph.material;
+      if (object && object.morph) this.material = ref(object.morph.material);
       else this.material = undefined;
-      this.$refs.opacityControls.setObject(object);
     }
   }
 };
@@ -101,72 +75,64 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-@import "~element-ui/packages/theme-chalk/src/container";
-@import "~element-ui/packages/theme-chalk/src/drawer";
-@import "~element-ui/packages/theme-chalk/src/slider";
-
 .primitive-controls {
-  text-align: left;
-  width:350px;
-  pointer-events:none;
-}
-
-.display {
-  width: 44px;
-}
-
-.icon {
-  right: 17px;
   position: absolute;
-  top: 10px;
-}
+  bottom: 30%;
+  pointer-events:none;
+  transition: all 1s ease;
 
-.drawer-content {
-  position: relative;
-  &.opacity {
-    height: 93px;
+  &.open {
+    right: 0px;
+    .my-drawer {
+      opacity: 1;
+    }
   }
-  &.texture-slides{
-    height: 250px;
+  &.close {
+    right: -250px;
+    .my-drawer {
+      pointer-events: none;
+      opacity: 0;
+    }
   }
 }
-
-::v-deep .my-drawer {
-  background: rgba(0, 0, 0, 0);
-  box-shadow: none;
+.my-drawer {
+  transition: all 1s ease;
+  float: right;
+  max-height: 150px;
+  text-align: left;
+  border: 1px solid rgb(220, 223, 230);
+  background: #ffffff;
+  width:250px;
 }
 
-.tab-button {
+.drawer-button {
+  float: right;
   width: 20px;
   height: 40px;
   z-index: 8;
-  right: 0px;
-  
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
-  border: solid 1px #e4e7ed;
-  background-color: #FFFFFF;
+  border: solid 1px $app-primary-color;
+  background-color: #f9f2fc;
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
   pointer-events: auto;
-  //transition: bottom 0.3s;
-
-  &.close {
-    float: left;
-    flex: 1;
-    border-right: 0;
-    bottom: 26px;
-  }
-
-  &.open {
-    position: absolute;
-    bottom:26px;
-  }
+  margin-top: 25px;
 
   i {
+    font-weight: 600;
     margin-top: 12px;
     color: $app-primary-color;
-    transform: scaleY(2.5);
+    transition-delay: 0.9s;
+  }
+  &.open {
+    i {
+      transform: rotate(0deg) scaleY(2.5);
+    }
+  }
+  &.close {
+    i {
+      transform: rotate(180deg) scaleY(2.5);
+    }
   }
 }
 
