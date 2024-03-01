@@ -267,6 +267,9 @@ export default {
   created: function () {
     texture_prefix = import.meta.env.VITE_TEXTURE_FOOT_PREFIX;
   },
+  unmounted: function () {
+    this.$refs.dropzone.revokeURLs();
+  },
   methods: {
     exportGLTF: function () {
       this.$refs.scaffold.exportGLTF(false).then((data) => {
@@ -424,8 +427,6 @@ export default {
       });
     },
     onReady: function () {
-      //window.scaffoldvuer = this.$refs.scaffold;
-      this.$refs.dropzone.revokeURLs();
       if (this.readyCallback) {
         this.readyCallback(this.$refs.scaffold, texture_prefix);
         this.readyCallback = undefined;
@@ -475,6 +476,7 @@ export default {
       this.currentTime = val;
     },
     parseQuery: function (query) {
+      //window.scaffoldvuer = this.$refs.scaffold;
       this.router.isReady().then(() => {
         if (query.url != this.url) {
           this._objects = [];

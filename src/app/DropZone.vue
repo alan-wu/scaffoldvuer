@@ -60,6 +60,7 @@ export default {
       this.objectURLs = [];    
     },
     localDrop: function (fileMap) {
+      this.revokeURLs();
       const dataMaps = {};
       let list = {};
       let metadata = undefined;
