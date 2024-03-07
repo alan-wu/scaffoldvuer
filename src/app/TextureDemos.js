@@ -62,7 +62,6 @@ export const testVolume = async (scaffoldVuer, texture_prefix) => {
     0,
     1
   );
-  //console.log(zincObject.morph.matrix)
   window.texture = zincObject;
 };
 
@@ -187,14 +186,11 @@ const applyTransformation = (scaffoldVuer, mesh, rotation, position, scale, refe
     0,
     0
   );
-  console.log(matrix)
   const quaternion = new THREE.Quaternion().setFromRotationMatrix(matrix);
-  console.log(quaternion);
   mesh.position.set(...position);
   mesh.quaternion.copy( quaternion );
   mesh.scale.set(...scale);
   mesh.updateMatrix();
-  console.log(rotation)
 }
 
 
@@ -220,13 +216,13 @@ export const testArmSlides = async (scaffoldVuer) => {
   ]);
 
   const rotation = [
-     Math.cos(Math.PI / 2.0), 0, Math.sin(Math.PI / 2.0),
+    0, 0, 1,
     0, 1, 0,
-    -Math.sin(Math.PI / 2.0), 0, Math.cos(Math.PI / 2.0)
+    -1, 0, 0
   ];
   const position = [0, -1.0, 0.95];
   const scale = [1.6, 1.6, 1.2];
-  const reference = "centre";
+  const reference = "corner";
   applyTransformation(scaffoldVuer, textureSlides.morph, rotation, position, scale, reference);
   scaffoldVuer.addZincObject(textureSlides);
   scaffoldVuer.fitWindow();

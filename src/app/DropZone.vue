@@ -16,6 +16,12 @@
 import { SimpleDropzone } from "simple-dropzone";
 import path from "path";
 
+const getJSON = async (URL) => {
+  return fetch(URL)
+    .then((response) => response.json())
+    .then((responseJson) => {return responseJson});
+}
+
 export default {
   name: "DropZone",
   data: function () {
@@ -33,7 +39,25 @@ export default {
     });
   },
   methods: {
-    createMetadataObjectURLs: function (text, list) {
+    processTextureFile: function(textureData, flatarray) {
+      if (textureData && textureData.images && textureData.images.source) {
+        const images = textureData.images.source;
+        for (let i = 0; i < images.length; i++) {
+          const index = flatarray.findIndex(element => {
+            return element[0].includes(images[i]);
+          });
+          if (index > -1) {
+            const objectURL = URL.createObjectURL(flatarray[index][1]);
+            this.objectURLs.push(objectURL);
+            textureData.images.source[i] = objectURL;
+          }
+        }
+        const content = JSON.stringify(textureData);
+        let blob = new Blob([content], { type: "application/json" });
+        return URL.createObjectURL(blob);
+      }
+    },
+    createMetadataObjectURLs: async function (text, list, flatarray) {
       let content = text;
       for (const [key, file] of Object.entries(list)) {
         if (content.includes(key)) {
@@ -43,7 +67,19 @@ export default {
           this.objectURLs.push(objectURL);
         }
       }
-      let blob = new Blob([content], { type: "application/json" });
+      const data = JSON.parse(content);
+      for (let i = 0; i < data.length; i++) {
+        if (data[i] && data[i].Type) {
+          if (data[i].Type === "Texture") {
+            const textureData = await getJSON(data[i].URL);
+            URL.revokeObjectURL(data[i].URL);
+            const newURL = this.processTextureFile(textureData, flatarray)
+            data[i].URL = newURL;
+          }
+        }
+      }
+      let newContent = JSON.stringify(data);
+      let blob = new Blob([newContent], { type: "application/json" });
       const metaURL = URL.createObjectURL(blob);
       this.objectURLs.push(metaURL);
       this.$emit("files-drop", { url: metaURL, format : "metadata" } );
@@ -95,7 +131,7 @@ export default {
         const metaFileURL = URL.createObjectURL(metadata.file);
         fetch(metaFileURL)
           .then((response) => response.text())
-          .then((text) => this.createMetadataObjectURLs(text, list));
+          .then((text) => this.createMetadataObjectURLs(text, list, flatarray));
         URL.revokeObjectURL(metaFileURL);
       }
       if (gltf) {
