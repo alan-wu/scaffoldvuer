@@ -152,7 +152,7 @@
                       :teleported="true"
                       :model-value="currentSpeed"
                       placeholder="Select"
-                      class="select-box"
+                      class="scaffold-select-box speed"
                       popper-class="scaffold_viewer_dropdown"
                       @change="speedChanged($event)"
                     >
@@ -268,7 +268,7 @@
               :teleported="false"
               v-model="viewingMode"
               placeholder="Select"
-              class="select-box viewing-mode"
+              class="scaffold-select-box viewing-mode"
               popper-class="scaffold_viewer_dropdown"
             >
                   <el-option v-for="item in viewingModes" :key="item" :label="item" :value="item">
@@ -2077,13 +2077,25 @@ export default {
   }
 }
 
-.select-box {
+.scaffold-select-box {
   border-radius: 4px;
   border: 1px solid rgb(144, 147, 153);
   background-color: var(--white);
   font-weight: 500;
   color: rgb(48, 49, 51);
   width: 150px!important;
+  &.viewing-mode {
+    width: 150px!important;
+  }
+  &.speed {
+    margin-left: 8px;
+    width:50px!important;
+    height: 24px;
+    :deep(.el-select__wrapper) {
+      padding: 0;
+      min-height: 24px
+    }
+  }
 }
 
 :deep(.scaffold_viewer_dropdown) {
