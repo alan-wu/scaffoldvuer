@@ -201,7 +201,7 @@ const OrgansSceneData = function() {
       if (intersected.object.userData && 
         intersected.object.userData.isMarker) {
         marker = true;
-        intersectedObject = intersected.object.userData.parent.morph;
+        intersectedObject = intersected.object.userData.parent.getMorph();
       } else {
         intersectedObject = intersected.object;
       }

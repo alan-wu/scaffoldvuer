@@ -2076,6 +2076,7 @@ export default {
     left: 53px !important;
   }
 }
+
 .scaffold-select-box {
   border-radius: 4px;
   border: 1px solid rgb(144, 147, 153);

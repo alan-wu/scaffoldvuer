@@ -44,7 +44,7 @@ export const testVolume = async (scaffoldVuer, texture_prefix) => {
   const material = texture.getMaterial(options);
   zincObject.createMesh(cube, material, meshOptions);
   scaffoldVuer.addZincObject(zincObject);
-  zincObject.morph.matrix.set(
+  zincObject.getMorph().matrix.set(
     -100,
     0,
     0,
@@ -62,7 +62,6 @@ export const testVolume = async (scaffoldVuer, texture_prefix) => {
     0,
     1
   );
-  //console.log(zincObject.morph.matrix)
   window.texture = zincObject;
 };
 
@@ -115,9 +114,9 @@ export const testSlides = async (scaffoldVuer, texture_prefix) => {
   //textureSlides.morph.matrix.set(-100, 0, 0, 0, 0, -100, 0, 0, 0, 0, -100, 0, -60, -100, 30, 1);
   //textureSlides.morph.matrix.set( -100, 0, 0, -60, 0, -100, 0, -100, 0, 0, -100, 30, 0, 0, 0, 1 );
 
-  const n = textureSlides.morph.matrix.clone();
+  const n = textureSlides.getMorph().matrix.clone();
   n.set(-100, 0, 0, -10, 0, -200, 0, 0, 0, 0, -100, 0, 0, 0, 10, 1);
-  textureSlides.morph.applyMatrix4(n);
+  textureSlides.getMorph().applyMatrix4(n);
   scaffoldVuer.addZincObject(textureSlides);
   scaffoldVuer.fitWindow();
   //window.texture = textureSlides;
@@ -187,14 +186,11 @@ const applyTransformation = (scaffoldVuer, mesh, rotation, position, scale, refe
     0,
     0
   );
-  console.log(matrix)
   const quaternion = new THREE.Quaternion().setFromRotationMatrix(matrix);
-  console.log(quaternion);
   mesh.position.set(...position);
   mesh.quaternion.copy( quaternion );
   mesh.scale.set(...scale);
   mesh.updateMatrix();
-  console.log(rotation)
 }
 
 
@@ -220,13 +216,13 @@ export const testArmSlides = async (scaffoldVuer) => {
   ]);
 
   const rotation = [
-     Math.cos(Math.PI / 2.0), 0, Math.sin(Math.PI / 2.0),
+    0, 0, 1,
     0, 1, 0,
-    -Math.sin(Math.PI / 2.0), 0, Math.cos(Math.PI / 2.0)
+    -1, 0, 0
   ];
   const position = [0, -1.0, 0.95];
   const scale = [1.6, 1.6, 1.2];
-  const reference = "centre";
+  const reference = "corner";
   applyTransformation(scaffoldVuer, textureSlides.morph, rotation, position, scale, reference);
   scaffoldVuer.addZincObject(textureSlides);
   scaffoldVuer.fitWindow();

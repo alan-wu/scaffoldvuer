@@ -66,8 +66,11 @@ export default {
       } else {
         this.isTextureSlides = false;
       }
-      if (object && object.morph) this.material = ref(object.morph.material);
-      else this.material = undefined;
+      if (object && object.getMorph()) {
+        this.material = ref(object.getMorph().material);
+      } else {
+        this.material = undefined;
+      }
     }
   }
 };
