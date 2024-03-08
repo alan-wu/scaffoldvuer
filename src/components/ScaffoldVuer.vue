@@ -2083,10 +2083,10 @@ export default {
   background-color: var(--white);
   font-weight: 500;
   color: rgb(48, 49, 51);
-  width: 150px!important;
   &.viewing-mode {
     width: 150px!important;
   }
+
   &.speed {
     margin-left: 8px;
     width:50px!important;

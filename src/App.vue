@@ -476,7 +476,6 @@ export default {
       this.currentTime = val;
     },
     parseQuery: function (query) {
-      //window.scaffoldvuer = this.$refs.scaffold;
       this.router.isReady().then(() => {
         if (query.url != this.url) {
           this._objects = [];
