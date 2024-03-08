@@ -3,7 +3,12 @@ import { THREE } from 'zincjs';
 const setEmissiveColour = (fullList, colour, setDepthFunc) => {
   for (let i = 0; i < fullList.length; i++) {
     if (fullList[i] && fullList[i].material && fullList[i].material.emissive) {
-      fullList[i].material.emissive.setRGB(...colour);
+      let object = fullList[i].userData;
+      if (object && object.isZincObject) {
+        object.setEmissiveRGB(colour);
+      } else if (fullList[i].material && fullList[i].material.emissive) {
+        fullList[i].material.emissive.setRGB(...colour);
+      }
       if (setDepthFunc && fullList[i].material.depthFunc) {
         fullList[i].material.depthFunc = THREE.LessEqualDepth;
       }
@@ -75,7 +80,43 @@ const GraphicsHighlight = function() {
     }
     return _temp1;
   }
-  
+
+
+   /*
+    * Not sure why the following block does not work
+    *
+  this.setHighlighted = function(objects) {
+    const previousHighlightedObjects = [...currentHighlightedObjects];
+    // Selected object cannot be highlighted
+    const array = getUnmatchingObjects(objects, currentSelectedObjects);
+    const fullList = getFullListOfObjects(array);
+    const different = isDifferent(array, previousHighlightedObjects);
+    console.log("highlight:", different)
+    if (different) {
+      _this.resetHighlighted();
+      setEmissiveColour(fullList, _this.highlightColour, false);
+    }
+    currentHighlightedObjects = array;
+    return different;
+  }
+
+  this.setSelected = function(objects) {
+    // first find highlighted object that are not selected
+    const previousHSelectedObjects = [...currentSelectedObjects];
+    const fullList = getFullListOfObjects(objects);
+    const different = isDifferent(objects, previousHSelectedObjects);
+    console.log("selected:", different)
+    if (different) {
+      _this.resetHighlighted();
+      _this.resetSelected();
+      setEmissiveColour(fullList, _this.selectColour, false);
+    }
+    currentSelectedObjects = objects;
+    return different;
+  }
+  */
+
+
   this.setHighlighted = function(objects) {
     const previousHighlightedObjects = [...currentHighlightedObjects];
     _this.resetHighlighted();
