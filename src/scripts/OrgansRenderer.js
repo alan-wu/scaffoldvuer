@@ -234,20 +234,27 @@ const OrgansSceneData = function() {
 		return function(intersects, window_x, window_y) {
       const intersected = _this.getIntersectedObject(intersects);
       const idObject = getIdObjectFromIntersect(intersected);
+			const worldCoords = [
+				intersected ? intersected.point.x : 0,
+				intersected ? intersected.point.y : 0,
+				intersected ? intersected.point.z : 0,
+			];
       const coords = { x: window_x, y: window_y };
       if (idObject.id) {
         if (idObject.object.userData.isGlyph) { 
-          if (idObject.object.name)
-            _this.setSelectedByObjects([idObject.object], coords, true);
-          else
+          if (idObject.object.name) {
+            _this.setSelectedByObjects([idObject.object], coords,
+							worldCoords, true);
+					} else {
             _this.setSelectedByZincObjects(idObject.object.userData.getGlyphset(),
-              coords, true);
+							coords, worldCoords, true);
+					}
         } else {
-          _this.setSelectedByObjects([idObject.object], coords, true);
+          _this.setSelectedByObjects([idObject.object], coords, worldCoords, true);
         }
         return;
       } else {
-				_this.setSelectedByObjects([], coords, true);
+				_this.setSelectedByObjects([], coords, worldCoords, true);
 			}
 		}
 	};
@@ -493,8 +500,8 @@ const OrgansSceneData = function() {
 			    	  _this.sceneData.viewURL = undefined;
             }
 			      _this.sceneData.metaURL = url;
-			      organScene.loadMetadataURL(url, _addOrganPartCallback(systemName, partName, false),
-			    	  downloadCompletedCallback());	      
+						organScene.addZincObjectAddedCallbacks(_addOrganPartCallback(systemName, partName, false));
+			      organScene.loadMetadataURL(url, undefined, downloadCompletedCallback());	      
 			      _this.scene = organScene;
 			      _this.zincRenderer.setCurrentScene(organScene);
 			      _this.graphicsHighlight.reset();
@@ -523,8 +530,8 @@ const OrgansSceneData = function() {
 			      }
   	    	  _this.sceneData.viewURL = undefined;
 			      _this.sceneData.metaURL = url;
-			      organScene.loadGLTF(url, _addOrganPartCallback(undefined, partName, false),
-              downloadCompletedCallback());
+						organScene.addZincObjectAddedCallbacks(_addOrganPartCallback(undefined, partName, false));
+			      organScene.loadGLTF(url, undefined, downloadCompletedCallback());
 			      _this.scene = organScene;
 			      _this.zincRenderer.setCurrentScene(organScene);
 			      _this.graphicsHighlight.reset();

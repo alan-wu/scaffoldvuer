@@ -777,13 +777,14 @@ export default {
     /**
      * @vuese
      * Call this to manually add a zinc object into the current scene
-     * @arg Zinc object to be added
+     * @arg ZincObject object to be added
+     * @arg addToScene also add object to scene
      */
     addZincObject: function (zincObject) {
       if (this.$module.scene) {
         this.$module.scene.addZincObject(zincObject);
-        this.zincObjectAdded(zincObject);
-        if (this.$refs.treeControls) this.$refs.treeControls.zincObjectAdded(zincObject);
+        //this.zincObjectAdded(zincObject);
+        //if (this.$refs.treeControls) this.$refs.treeControls.zincObjectAdded(zincObject);
       }
     },
     /**

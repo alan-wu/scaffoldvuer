@@ -158,7 +158,7 @@ RendererModule.prototype.objectsToZincObjects = function(objects) {
 
 
 RendererModule.prototype.setSelectedByObjects = function(
-  objects, coords, propagateChanges) {
+  objects, coords, worldCoords, propagateChanges) {
   const changed = this.graphicsHighlight.setSelected(objects);
   if (changed) {
     const zincObjects = this.objectsToZincObjects(objects);
@@ -166,8 +166,10 @@ RendererModule.prototype.setSelectedByObjects = function(
     if (propagateChanges) {
       const eventType = EVENT_TYPE.SELECTED;
       const annotations = this.getAnnotationsFromObjects(objects);
-      if (annotations.length > 0)
+      if (annotations.length > 0) {
         annotations[0].coords = coords;
+        annotations[0].worldCoords = worldCoords;
+      }
       this.publishChanges(annotations, eventType, zincObjects);
     }
   }
@@ -175,7 +177,7 @@ RendererModule.prototype.setSelectedByObjects = function(
 }
 
 RendererModule.prototype.setSelectedByZincObjects = function(
-  zincObjects, coords, propagateChanges) {
+  zincObjects, coords, worldCoords, propagateChanges) {
   let morphs = [];
   if (zincObjects) {
     zincObjects.forEach(zincObject => {
@@ -188,7 +190,7 @@ RendererModule.prototype.setSelectedByZincObjects = function(
     });
   }
 
-  return this.setSelectedByObjects(morphs, coords, propagateChanges);
+  return this.setSelectedByObjects(morphs, coords, worldCoords, propagateChanges);
 }
 
 const addGlyphToArray = function(objects) {
