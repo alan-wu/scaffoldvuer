@@ -13,6 +13,10 @@
         v-show="isTextureSlides"
         class="texture-controls"
         ref="tSlidesControls" />
+        <points-controls
+          v-show="isPointset"
+          class="pointset-controls"
+          ref="pointsetControls" />
     </div>
     <div
       class="drawer-button"
@@ -31,6 +35,7 @@ import {
   ArrowRight as ElIconArrowRight,
 } from '@element-plus/icons-vue'
 import OpacityControls from "./OpacityControls.vue";
+import PointsControls from "./PointsControls.vue";
 import TextureSlidesControls from "./TextureSlidesControls.vue";
 
 /**
@@ -40,12 +45,14 @@ export default {
   name: "PrimitiveControls",
   components: {
     OpacityControls,
+    PointsControls,
     TextureSlidesControls,
   },
   data: function() {
     return {
       material: undefined,
       isTextureSlides: false,
+      isPointset: false,
       drawerOpen: true,
       zincObject: undefined,
     };
@@ -60,11 +67,14 @@ export default {
     },
     setObject: function(object) {
       this.zincObject = shallowRef(object);
+      this.isPointset = false;
+      this.isTextureSlides = false;
       if (object.isTextureSlides) {
         this.isTextureSlides = true;
         this.$refs.tSlidesControls.setObject(object);
-      } else {
-        this.isTextureSlides = false;
+      } else if (object.isPointset) {
+        this.isPointset = true;
+        this.$refs.pointsetControls.setObject(object);
       }
       if (object && object.getMorph()) {
         this.material = ref(object.getMorph().material);

@@ -1,5 +1,5 @@
 <template>
-  <el-container v-show="settings.length > 0" class="t-slides-container">
+  <el-container class="t-slides-container">
     <el-header height="30px" class="header">
       <div>Texture Slides Settings</div>
     </el-header>
@@ -79,7 +79,9 @@ import {
   ElInputNumber as InputNumber,
   ElMain as Main,
   ElRow as Row,
+  ElSelect as Select,
   ElSlider as Slider,
+  ElOption as Option,
 } from "element-plus";
 
 /**
@@ -96,7 +98,9 @@ export default {
     InputNumber,
     Main,
     Row,
+    Select,
     Slider,
+    Option,
     ElIconDelete,
     ElIconPlus,
   },
