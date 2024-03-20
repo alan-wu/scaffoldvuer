@@ -242,7 +242,8 @@ export default {
       route: useRoute(),
       router: useRouter(),
       ElIconSetting: shallowRef(ElIconSetting),
-      ElIconFolderOpened: shallowRef(ElIconFolderOpened)
+      ElIconFolderOpened: shallowRef(ElIconFolderOpened),
+      coordinatesClicked: [],
     };
   },
   watch: {
@@ -438,10 +439,40 @@ export default {
         }
       }
     },
+    addLines: function (coord) {
+      if (this.coordinatesClicked.length === 1) {
+        const returned = this.$refs.scaffold.$module.scene.createLines(
+            "test",
+            "lines",
+            [this.coordinatesClicked[0], coord],
+            0x00ee22,
+          );
+          this.coordinatesClicked.length = 0;
+          console.log(returned);
+      } else {
+        this.coordinatesClicked.push(coord);
+      }
+    },
     onSelected: function (data) {
+
       if (data && data.length > 0 && data[0].data.group) {
+              /*
+        if (data[0].worldCoords) {
+          console.log(data[0].data);
+          const returned = this.$refs.scaffold.$module.scene.createPoints(
+            "test",
+            "points",
+            [data[0].worldCoords],
+            undefined,
+            0x0022ee,
+          );
+
+          console.log(returned)
+          this.addLines(data[0].worldCoords);
+        }
+        */
         delete this.route.query["viewURL"];
-        this.$refs.scaffold.showRegionTooltipWithAnnotations(data, true, true);
+        this.$refs.scaffold.showRegionTooltipWithAnnotations(data, false, true);
         if (this.onClickMarkers) this.$refs.scaffold.setMarkerModeForObjectsWithName(data[0].data.group, "on");
       }
     },

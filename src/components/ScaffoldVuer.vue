@@ -23,6 +23,50 @@
       @keydown.66="backgroundChangeCallback"
     />
     <div v-show="displayUI && !isTransitioning">
+      <div
+        class="bottom-draw-control"
+      >
+        <el-popover
+          content="Draw Point"
+          placement="top"
+          :teleported="false"
+          trigger="manual"
+          width="80"
+          popper-class="flatmap-popper"
+          :visible="hoverVisibilities[9].value"
+        >
+          <template #reference>
+            <map-svg-icon
+              icon="drawPoint"
+              class="icon-button shape"
+              :class="[drawingShape === 'Point' ? 'active' : '']"
+              @click="toggleDrawing('Point')"
+              @mouseover="showHelpText(9)"
+              @mouseout="hideHelpText(9)"
+            />
+          </template>
+        </el-popover>
+        <el-popover
+          content="Draw Line"
+          placement="top"
+          :teleported="false"
+          trigger="manual"
+          width="80"
+          popper-class="flatmap-popper"
+          :visible="hoverVisibilities[10].value"
+        >
+          <template #reference>
+            <map-svg-icon
+              icon="drawLine"
+              class="icon-button shape"
+              :class="[drawingShape === 'Line' ? 'active' : '']"
+              @click="toggleDrawing('Line')"
+              @mouseover="showHelpText(10)"
+              @mouseout="hideHelpText(10)"
+            />
+          </template>
+        </el-popover>
+      </div>
       <el-popover
         v-if="displayWarning"
         ref="warningPopover"
@@ -590,6 +634,7 @@ export default {
     return {
       currentTime: 0.0,
       timeVarying: undefined,
+      drawingShape: "",
       isPlaying: false,
       isReady: false,
       /**
@@ -598,6 +643,8 @@ export default {
       isTransitioning: false,
       tooltipAppendToBody: false,
       hoverVisibilities: [
+        { value: false },
+        { value: false },
         { value: false },
         { value: false },
         { value: false },
@@ -665,6 +712,7 @@ export default {
       ],
       openMapRef: undefined,
       backgroundIconRef: undefined,
+      lastDrawingPoints: [],
     };
   },
   watch: {
@@ -776,9 +824,9 @@ export default {
   methods: {
     /**
      * @vuese
-     * Call this to manually add a zinc object into the current scene
+     * Call this to manually add a zinc object into the current scene.
+     * This will subsequently trigger a zincObjectAdded
      * @arg ZincObject object to be added
-     * @arg addToScene also add object to scene
      */
     addZincObject: function (zincObject) {
       if (this.$module.scene) {
@@ -938,6 +986,19 @@ export default {
       return objects;
     },
     /**
+     * Switch active drawing type 
+     * @arg shapeName shape to toggle
+     *
+     * @vuese
+     */
+    toggleDrawing: function (shapeName) {
+      if (shapeName === this.drawingShape) {
+        this.drawingShape = "";
+      } else {
+        this.drawingShape = shapeName;
+      }
+    },
+    /**
      * Find and and zoom into objects with the provided list of names.
      * @arg List of names
      * 
@@ -985,6 +1046,39 @@ export default {
         }
       }
     },
+    draw: function(data) {
+      if (data && data.length > 0 && data[0].data.group) {
+        if (data[0].worldCoords) {
+          if (this.drawingShape === "Point") {
+            this.drawPoint(data[0].worldCoords, data[0].data);
+          } else if (this.drawingShape === "Line") {
+            this.drawLine(data[0].worldCoords, data[0].data);
+          }
+        }
+      }
+    },
+    drawPoint: function(coords, data) {
+      const returned = this.$module.scene.createPoints(
+        "test",
+        "points",
+        [coords],
+        undefined,
+        0x0022ee,
+      );
+    },
+    drawLine: function(coords, data) {
+      if (this.lastDrawingPoints.length === 1) {
+        const returned = this.$module.scene.createLines(
+          "test",
+          "lines",
+          [this.lastDrawingPoints[0], coords],
+          0x00ee22,
+        );
+        this.lastDrawingPoints.length = 0;
+      } else {
+        this.lastDrawingPoints.push(coords);
+      }
+    },    
     /**
      * Return renderer information
      * 
@@ -1037,23 +1131,26 @@ export default {
        * Event Type 1: Move
        */
       if (event.eventType == 1) {
-        if (this.$refs.treeControls) {
-          if (names.length > 0) {
-            //this.$refs.treeControls.changeActiveByNames(names, region, false);
-            this.$refs.treeControls.updateActiveUI(zincObjects);
-          } else {
-            this.hideRegionTooltip();
-            this.$refs.treeControls.removeActive(true);
-          }
-        }
-        // Triggers when an object has been selected
         if (this.viewingMode === 'Annotation') {
+          if (this.drawingShape !== "") {
+            this.draw(event.identifiers);
+          }
           //Make sure the tooltip is displayed with annotation mode
           this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
+        } else {
+          if (this.$refs.treeControls) {
+            if (names.length > 0) {
+              //this.$refs.treeControls.changeActiveByNames(names, region, false);
+              this.$refs.treeControls.updateActiveUI(zincObjects);
+            } else {
+              this.hideRegionTooltip();
+              this.$refs.treeControls.removeActive(true);
+            }
+          }
+          //Emit when an object is selected
+          //@arg Identifier of selected objects
+          this.$emit("scaffold-selected", event.identifiers);
         }
-        //Emit when an object is selected
-        //@arg Identifier of selected objects
-        this.$emit("scaffold-selected", event.identifiers);
       } else if (event.eventType == 2) {
         if (this.selectedObjects.length === 0) {
           this.hideRegionTooltip();
@@ -1863,6 +1960,17 @@ export default {
   padding-left: 8px;
 }
 
+.bottom-draw-control {
+  background-color: var(--el-color-primary-light-9);
+  padding: 4px 4px 2px 4px;
+  border-style: solid;
+  border-color: var(--el-color-primary-light-5);
+  border-radius: 1rem;
+  position: absolute;
+  right: calc(50vw - 100px);;
+  bottom: 16px;
+}
+
 :deep(.non-selectable) {
   user-select: none;
 }
@@ -1970,6 +2078,15 @@ export default {
 
   &:hover {
     cursor: pointer;
+  }
+
+  &.shape {
+    margin-left: 4px;
+    margin-right: 4px;
+    color: var(--el-color-primary-light-5);
+    &.active {
+      color: var(--el-color-primary);
+    }
   }
 }
 
@@ -2117,6 +2234,7 @@ export default {
 <style lang="scss">
 .scaffold-container {
   --el-color-primary: #8300BF;
+  --el-color-primary-light-5: #cd99e5;
   --el-color-primary-light-7: #dab3ec;
   --el-color-primary-light-8: #e6ccf2
   --el-color-primary-light-9: #f3e6f9;
