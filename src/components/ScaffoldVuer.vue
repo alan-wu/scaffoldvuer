@@ -633,7 +633,7 @@ export default {
   data: function () {
     return {
       currentTime: 0.0,
-      timeVarying: undefined,
+      timeVarying: false,
       drawingShape: "",
       isPlaying: false,
       isReady: false,
@@ -795,9 +795,6 @@ export default {
     this.availableBackground = ["white", "black", "lightskyblue"];
     this.$_searchIndex = new SearchIndex();
   },
-  created: function() {
-    this.timeVarying = toRef(this.$module.sceneData, 'timeVarying');
-  },
   mounted: function () {
     this.openMapRef = shallowRef(this.$refs.openMapRef);
     this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef);
@@ -842,6 +839,9 @@ export default {
     zincObjectAdded: function (zincObject) {
       this.loading = false;
       this.$_searchIndex.addZincObject(zincObject, zincObject.uuid);
+      if (this.timeVarying === false && zincObject.isTimeVarying()) {
+        this.timeVarying = true;
+      }
       //Emit when a new object is added to the scene
       //@arg The object added to the sceene
       this.$emit("zinc-object-added", zincObject);
@@ -1707,6 +1707,7 @@ export default {
         this._currentURL = newValue;
         if (this.$refs.treeControls) this.$refs.treeControls.clear();
         this.loading = true;
+        this.timeVarying = false;
         this.isReady = false;
         this.$_searchIndex.removeAll();
         this.hideRegionTooltip();
