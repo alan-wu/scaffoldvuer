@@ -298,6 +298,8 @@ export default {
       });
     },
     objectAdded: function (zincObject) {
+      console.log(zincObject.getBoundingBox())
+
       if (this._objects.length === 0) {
         zincObject.setMarkerMode("on");
       }
@@ -456,6 +458,7 @@ export default {
     onSelected: function (data) {
 
       if (data && data.length > 0 && data[0].data.group) {
+        console.log(data[0].worldCoords)
               /*
         if (data[0].worldCoords) {
           console.log(data[0].data);
@@ -467,7 +470,7 @@ export default {
             0x0022ee,
           );
 
-          console.log(returned)
+          console.log(data[0].worldCoords)
           this.addLines(data[0].worldCoords);
         }
         */
