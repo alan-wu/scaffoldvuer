@@ -53,7 +53,7 @@
     "vue": "^3.4.15",
     "vue-router": "^4.2.5",
     "vue3-component-svg-sprite": "^0.0.1",
-    "zincjs": "^1.5.1-beta.0"
+    "zincjs": "^1.5.1-beta.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.6.2",
