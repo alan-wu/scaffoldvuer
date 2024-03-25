@@ -490,6 +490,7 @@ const OrgansSceneData = function() {
 			      } else {
 			    	  organScene = _this.zincRenderer.createScene(name);
 			      }
+						_this.selectObjectOnPick = true;
 			      for (let i = 0; i < sceneChangedCallbacks.length;i++) {
 			    	  sceneChangedCallbacks[i](_this.sceneData);
 			      }

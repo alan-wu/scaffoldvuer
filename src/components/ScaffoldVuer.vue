@@ -8,6 +8,7 @@
   >
     <map-svg-sprite-color />
     <scaffold-tooltip
+      :createData="createData"
       :label="tData.label"
       :region="tData.region"
       :visible="tData.visible"
@@ -25,9 +26,10 @@
     <div v-show="displayUI && !isTransitioning">
       <div
         class="bottom-draw-control"
+        v-if="viewingMode === 'Annotation'"
       >
         <el-popover
-          content="Draw Point"
+          content="Comment"
           placement="top"
           :teleported="false"
           trigger="manual"
@@ -37,12 +39,32 @@
         >
           <template #reference>
             <map-svg-icon
-              icon="drawPoint"
+              icon="comment"
               class="icon-button shape"
-              :class="[drawingShape === 'Point' ? 'active' : '']"
-              @click="toggleDrawing('Point')"
+              :class="[createData.shape === '' ? 'active' : '']"
+              @click="toggleDrawing('')"
               @mouseover="showHelpText(9)"
               @mouseout="hideHelpText(9)"
+            />
+          </template>
+        </el-popover>
+        <el-popover
+          content="Draw Point"
+          placement="top"
+          :teleported="false"
+          trigger="manual"
+          width="80"
+          popper-class="flatmap-popper"
+          :visible="hoverVisibilities[10].value"
+        >
+          <template #reference>
+            <map-svg-icon
+              icon="drawPoint"
+              class="icon-button shape"
+              :class="[createData.shape === 'Point' ? 'active' : '']"
+              @click="toggleDrawing('Point')"
+              @mouseover="showHelpText(10)"
+              @mouseout="hideHelpText(10)"
             />
           </template>
         </el-popover>
@@ -53,16 +75,16 @@
           trigger="manual"
           width="80"
           popper-class="flatmap-popper"
-          :visible="hoverVisibilities[10].value"
+          :visible="hoverVisibilities[11].value"
         >
           <template #reference>
             <map-svg-icon
               icon="drawLine"
               class="icon-button shape"
-              :class="[drawingShape === 'Line' ? 'active' : '']"
+              :class="[createData.shape === 'Line' ? 'active' : '']"
               @click="toggleDrawing('Line')"
-              @mouseover="showHelpText(10)"
-              @mouseout="hideHelpText(10)"
+              @mouseover="showHelpText(11)"
+              @mouseout="hideHelpText(11)"
             />
           </template>
         </el-popover>
@@ -314,8 +336,9 @@
               placeholder="Select"
               class="scaffold-select-box viewing-mode"
               popper-class="scaffold_viewer_dropdown"
+              @mode="viewingModeChange"
             >
-                  <el-option v-for="item in viewingModes" :key="item" :label="item" :value="item">
+              <el-option v-for="item in viewingModes" :key="item" :label="item" :value="item">
                 <el-row>
                   <el-col :span="12">{{ item }}</el-col>
                 </el-row>
@@ -417,6 +440,7 @@ import {
 } from "element-plus";
 import { OrgansViewer } from "../scripts/OrgansRenderer.js";
 import { EventNotifier } from "../scripts/EventNotifier.js";
+import { AnnotationService } from '@abi-software/sparc-annotation';
 
 /**
  * A vue component of the scaffold viewer.
@@ -632,9 +656,15 @@ export default {
   },
   data: function () {
     return {
+      createData: {
+        tooltip: false,
+        points: [],
+        shape: "",
+        x: 0,
+        y: 0,
+      },
       currentTime: 0.0,
       timeVarying: false,
-      drawingShape: "",
       isPlaying: false,
       isReady: false,
       /**
@@ -643,6 +673,7 @@ export default {
       isTransitioning: false,
       tooltipAppendToBody: false,
       hoverVisibilities: [
+        { value: false },
         { value: false },
         { value: false },
         { value: false },
@@ -712,7 +743,6 @@ export default {
       ],
       openMapRef: undefined,
       backgroundIconRef: undefined,
-      lastDrawingPoints: [],
     };
   },
   watch: {
@@ -827,9 +857,8 @@ export default {
      */
     addZincObject: function (zincObject) {
       if (this.$module.scene) {
+        // zincObjectAdded will be alled in sequential callback
         this.$module.scene.addZincObject(zincObject);
-        //this.zincObjectAdded(zincObject);
-        //if (this.$refs.treeControls) this.$refs.treeControls.zincObjectAdded(zincObject);
       }
     },
     /**
@@ -992,10 +1021,12 @@ export default {
      * @vuese
      */
     toggleDrawing: function (shapeName) {
-      if (shapeName === this.drawingShape) {
-        this.drawingShape = "";
+      if (shapeName === this.createData.shape) {
+        this.createData.shape = "";
+        this.$module.selectObjectOnPick = true;
       } else {
-        this.drawingShape = shapeName;
+        this.createData.shape = shapeName;
+        this.$module.selectObjectOnPick = false;
       }
     },
     /**
@@ -1048,16 +1079,19 @@ export default {
     },
     draw: function(data) {
       if (data && data.length > 0 && data[0].data.group) {
+        this.createData.tooltip = true;
         if (data[0].worldCoords) {
-          if (this.drawingShape === "Point") {
+          if (this.createData.shape === "Point") {
             this.drawPoint(data[0].worldCoords, data[0].data);
-          } else if (this.drawingShape === "Line") {
+          } else if (this.createData.shape === "Line") {
             this.drawLine(data[0].worldCoords, data[0].data);
           }
         }
       }
     },
     drawPoint: function(coords, data) {
+      this.createData.points.length = 0;
+      this.createData.points.push(coords);
       const returned = this.$module.scene.createPoints(
         "test",
         "points",
@@ -1067,16 +1101,16 @@ export default {
       );
     },
     drawLine: function(coords, data) {
-      if (this.lastDrawingPoints.length === 1) {
+      if (this.createData.points.length === 1) {
         const returned = this.$module.scene.createLines(
           "test",
           "lines",
-          [this.lastDrawingPoints[0], coords],
+          [this.createData.points[0], coords],
           0x00ee22,
         );
-        this.lastDrawingPoints.length = 0;
+        this.createData.points.length = 0;
       } else {
-        this.lastDrawingPoints.push(coords);
+        this.createData.points.push(coords);
       }
     },    
     /**
@@ -1132,11 +1166,17 @@ export default {
        */
       if (event.eventType == 1) {
         if (this.viewingMode === 'Annotation') {
-          if (this.drawingShape !== "") {
-            this.draw(event.identifiers);
+          if (this.createData.shape !== "") {
+            // Create new shape bsaed on current settings
+            if (names.length > 0) {
+              this.createData.x = event.identifiers[0].coords.x;
+              this.createData.y = event.identifiers[0].coords.y;
+              this.draw(event.identifiers);
+            }
+          } else {
+            //Make sure the tooltip is displayed with annotation mode
+            this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
           }
-          //Make sure the tooltip is displayed with annotation mode
-          this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
         } else {
           if (this.$refs.treeControls) {
             if (names.length > 0) {
@@ -1461,6 +1501,21 @@ export default {
       }
       this.hideRegionTooltip();
       return false;
+    },
+    /**
+     * Callback on viewing mode change
+     */
+    viewingModeChange: function () {
+      if (this.$module) {
+        if ((this.viewingMode === "Exploration") ||
+          (this.viewingMode === "Annotation") &&
+          (this.createData.shape === "")) {
+            this.$module.selectObjectOnPick = true;
+        } else {
+          this.$module.selectObjectOnPick = false;
+        }
+      }
+      this.createData.shape = "";
     },
     /**
      * @vuese

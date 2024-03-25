@@ -32,6 +32,7 @@ const RendererModule = function()  {
   this.rendererContainer = undefined;
   this.displayArea = undefined;
   this.graphicsHighlight = new GraphicsHighlight();
+  this.selectObjectOnPick = true;
   this.zincRenderer = null;
   this.selectedScreenCoordinates = new THREE.Vector3();
   this.selectedCenter = undefined;
@@ -159,10 +160,17 @@ RendererModule.prototype.objectsToZincObjects = function(objects) {
 
 RendererModule.prototype.setSelectedByObjects = function(
   objects, coords, worldCoords, propagateChanges) {
-  const changed = this.graphicsHighlight.setSelected(objects);
+  let changed = false;
+  if (this.selectObjectOnPick) {
+    changed = this.graphicsHighlight.setSelected(objects);
+  } else {
+    changed = true;
+  }
   if (changed) {
     const zincObjects = this.objectsToZincObjects(objects);
-    this.setupLiveCoordinates(zincObjects);
+    if (this.selectObjectOnPick) {
+      this.setupLiveCoordinates(zincObjects);
+    }
     if (propagateChanges) {
       const eventType = EVENT_TYPE.SELECTED;
       const annotations = this.getAnnotationsFromObjects(objects);
@@ -210,7 +218,7 @@ RendererModule.prototype.setHighlightedByGroupName = function(groupName, propaga
 
 RendererModule.prototype.setSelectedByGroupName = function(groupName, propagateChanges) {
   const objects = this.findObjectsByGroupName(groupName);
-  return this.setSelectedByObjects(objects, undefined, propagateChanges);
+  return this.setSelectedByObjects(objects, undefined, undefined, propagateChanges);
 }
 
 RendererModule.prototype.changeBackgroundColour = function(backgroundColourString) {
