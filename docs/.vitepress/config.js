@@ -7,7 +7,7 @@ const versionNumber = process.env.npm_package_version
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "ScaffoldVuer Docs",
+  title: "ScaffoldVuer",
   description: "API documentation for ScaffoldVuer",
   base: '/scaffoldvuer/',
   themeConfig: {
