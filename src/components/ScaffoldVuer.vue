@@ -15,6 +15,8 @@
       :x="tData.x"
       :y="tData.y"
       :annotationDisplay="viewingMode === 'Annotation' && tData.active === true"
+      @confirm-create="confirmCreate($event)"
+      @cancel-create="cancelCreate()"
     />
     <div
       id="organsDisplayArea"
@@ -657,7 +659,7 @@ export default {
   data: function () {
     return {
       createData: {
-        tooltip: false,
+        toBeConfirmed: false,
         points: [],
         shape: "",
         x: 0,
@@ -941,6 +943,42 @@ export default {
       if (this.$_searchIndex) this.$_searchIndex.removeAll();
       if (this.$module.scene) this.$module.scene.clearAll();
     },
+    /**
+     * @vuese
+     * Confirm creation of new primitive. This is only called from callback.
+     */
+    confirmCreate: function(payload) {
+      if (payload) {
+        let object = undefined;
+        if (payload.shape === "Point") {
+          object = this.$module.scene.createPoints(
+            payload.region,
+            payload.group,
+            this.createData.points,
+            undefined,
+            0x0022ee,
+          );
+          
+        } else if (payload.shape === "Line") {
+          object = this.$module.scene.createLines(
+            payload.region,
+            payload.group,
+            [this.createData.points[0], this.createData.points[1]],
+            0x00ee22,
+          );
+        }
+        if (object) {
+          this.tData.region = payload.region;
+          this.tData.label = payload.group;
+        }
+      }
+      this.createData.toBeConfirmed = false;
+    },
+    cancelCreate: function() {
+      this.createData.points.length = 0;
+      this.createData.toBeConfirmed = false;
+      this.tData.visible = false;
+    },
     formatTooltip(val) {
       if (this.timeMax >= 1000) {
         if (val) {
@@ -1079,12 +1117,11 @@ export default {
     },
     draw: function(data) {
       if (data && data.length > 0 && data[0].data.group) {
-        this.createData.tooltip = true;
         if (data[0].worldCoords) {
           if (this.createData.shape === "Point") {
-            this.drawPoint(data[0].worldCoords, data[0].data);
+            this.drawPoint(data[0].worldCoords, data);
           } else if (this.createData.shape === "Line") {
-            this.drawLine(data[0].worldCoords, data[0].data);
+            this.drawLine(data[0].worldCoords, data);
           }
         }
       }
@@ -1092,23 +1129,14 @@ export default {
     drawPoint: function(coords, data) {
       this.createData.points.length = 0;
       this.createData.points.push(coords);
-      const returned = this.$module.scene.createPoints(
-        "test",
-        "points",
-        [coords],
-        undefined,
-        0x0022ee,
-      );
+      this.showRegionTooltipWithAnnotations(data, true, true);
+      this.createData.toBeConfirmed = true;
     },
     drawLine: function(coords, data) {
       if (this.createData.points.length === 1) {
-        const returned = this.$module.scene.createLines(
-          "test",
-          "lines",
-          [this.createData.points[0], coords],
-          0x00ee22,
-        );
-        this.createData.points.length = 0;
+        this.createData.points.push(coords);
+        this.showRegionTooltipWithAnnotations(data, true, true);
+        this.createData.toBeConfirmed = true;
       } else {
         this.createData.points.push(coords);
       }
@@ -1515,6 +1543,7 @@ export default {
           this.$module.selectObjectOnPick = false;
         }
       }
+      this.$module.toBeConfirmed = false;
       this.createData.shape = "";
     },
     /**

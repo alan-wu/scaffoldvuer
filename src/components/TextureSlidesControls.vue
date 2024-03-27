@@ -148,7 +148,6 @@ export default {
       }
     },
     modifySlide: function (slide) {
-      console.log(slide.value)
       if (slide) {
         this._zincObject.modifySlideSettings(slide);
       }

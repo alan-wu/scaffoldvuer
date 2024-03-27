@@ -8,6 +8,8 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     copy: typeof import('./components/PointsControls copy.vue')['default']
+    CreateTooltip: typeof import('./components/CreateTooltip.vue')['default']
+    CreateTooltipContent: typeof import('./components/CreateTooltipContent.vue')['default']
     ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCol: typeof import('element-plus/es')['ElCol']

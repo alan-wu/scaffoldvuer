@@ -9,13 +9,20 @@
       trigger="manual"
       popper-class="tooltip-popper non-selectable"
       virtual-triggering
+      @hide="hideTriggered"
     >
       <template #default>
         <div class="tooltip-text">{{ label }}</div>
         <div class="tooltip-text" v-if="region">Region: {{ region }}</div>
+        <CreateTooltiipContent
+          v-show="createData.toBeConfirmed"
+          :createData="createData"
+          @confirm-create="$emit('confirm-create', $event)"
+          @cancel-create="$emit('cancel-create')"
+        /> 
         <Tooltip
           class="p-tooltip"
-          v-show="annotationDisplay"
+          v-show="annotationDisplay && !createData.toBeConfirmed"
           ref="annotationTooltip"
           :annotationDisplay="true"
           :annotationEntry="annotationEntry"
@@ -28,6 +35,7 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import { ElPopover as Popover } from "element-plus";
+import CreateTooltiipContent from "./CreateTooltipContent.vue";
 import { Tooltip } from "@abi-software/flatmapvuer";
 import "@abi-software/flatmapvuer/dist/style.css";
 
@@ -37,10 +45,21 @@ import "@abi-software/flatmapvuer/dist/style.css";
 export default {
   name: "ScaffoldTooltip",
   components: {
+    CreateTooltiipContent,
     Popover,
     Tooltip,
   },
   props: {
+    createData: {
+      type: Object,
+      default: {
+        toBeConfirmed: false,
+        points: [],
+        shape: "",
+        x: 0,
+        y: 0,
+      }
+    },
     label: {
       type: String,
       default: "",
@@ -99,7 +118,10 @@ export default {
         this.display = false;
         this.annotationEntry = { };
       }
-    }
+    },
+    hideTriggered: function() {
+      this.$emit('cancel-create');
+    },
   },
   watch: {
     label: {
