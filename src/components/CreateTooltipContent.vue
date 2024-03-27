@@ -9,13 +9,13 @@
         <br>
         __annotation region
       </span>
-      <el-row class="row" v-if="show">
+      <el-row class="row" v-show="showPoint">
         <el-col :offset="0" :span="8">
           Position:
         </el-col>
         <el-col :offset="0" :span="16">
-          <el-row v-for="{ value, i } in createData.points" :key="i">
-            {{ value[0] }}, {{ value[1] }}, {{ value[2] }}
+          <el-row v-for="{ value, i } in createData.points" :key="i" class="value">
+            {{ i }}
           </el-row>
         </el-col>
       </el-row>
@@ -102,6 +102,7 @@ export default {
     return {
       group: "default",
       region: "",
+      showPoint: false,
     }
   },
   methods: {
@@ -154,6 +155,10 @@ export default {
   overflow-y: none;
   user-select: auto;
   pointer-events: auto;
+}
+
+.value {
+  font-size: 12px;
 }
 
 .input-box {

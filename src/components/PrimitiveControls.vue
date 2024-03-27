@@ -9,14 +9,17 @@
         :material="material"
         :zincObject="zincObject"
         ref="opacityControls" />
+      <transformation-controls
+        class="transformation-controls"
+        ref="transformationControls" />
       <texture-slides-controls
         v-show="isTextureSlides"
         class="texture-controls"
         ref="tSlidesControls" />
-        <points-controls
-          v-show="isPointset"
-          class="pointset-controls"
-          ref="pointsetControls" />
+      <points-controls
+        v-show="isPointset"
+        class="pointset-controls"
+        ref="pointsetControls" />
     </div>
     <div
       class="drawer-button"
@@ -37,6 +40,7 @@ import {
 import OpacityControls from "./OpacityControls.vue";
 import PointsControls from "./PointsControls.vue";
 import TextureSlidesControls from "./TextureSlidesControls.vue";
+import TransformationControls from "./TransformationControls.vue";
 
 /**
  * A component to control the opacity of the target object.
@@ -47,6 +51,7 @@ export default {
     OpacityControls,
     PointsControls,
     TextureSlidesControls,
+    TransformationControls,
   },
   data: function() {
     return {
@@ -69,12 +74,15 @@ export default {
       this.zincObject = shallowRef(object);
       this.isPointset = false;
       this.isTextureSlides = false;
-      if (object.isTextureSlides) {
-        this.isTextureSlides = true;
-        this.$refs.tSlidesControls.setObject(object);
-      } else if (object.isPointset) {
-        this.isPointset = true;
-        this.$refs.pointsetControls.setObject(object);
+      if (object) {
+        if (object.isTextureSlides) {
+          this.isTextureSlides = true;
+          this.$refs.tSlidesControls.setObject(object);
+        } else if (object.isPointset) {
+          this.isPointset = true;
+          this.$refs.pointsetControls.setObject(object);
+        }
+        this.$refs.transformationControls.setObject(object);
       }
       if (object && object.getMorph()) {
         this.material = ref(object.getMorph().material);

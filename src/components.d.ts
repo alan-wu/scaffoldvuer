@@ -7,8 +7,6 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    copy: typeof import('./components/PointsControls copy.vue')['default']
-    CreateTooltip: typeof import('./components/CreateTooltip.vue')['default']
     CreateTooltipContent: typeof import('./components/CreateTooltipContent.vue')['default']
     ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElButton: typeof import('element-plus/es')['ElButton']
@@ -37,7 +35,6 @@ declare module 'vue' {
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
     ElTabs: typeof import('element-plus/es')['ElTabs']
     ElTree: typeof import('element-plus/es')['ElTree']
-    LineControls: typeof import('./components/lineControls.vue')['default']
     LinesControls: typeof import('./components/LinesControls.vue')['default']
     OpacityControls: typeof import('./components/OpacityControls.vue')['default']
     PointsControls: typeof import('./components/PointsControls.vue')['default']
@@ -47,6 +44,7 @@ declare module 'vue' {
     ScaffoldTooltip: typeof import('./components/ScaffoldTooltip.vue')['default']
     ScaffoldVuer: typeof import('./components/ScaffoldVuer.vue')['default']
     TextureSlidesControls: typeof import('./components/TextureSlidesControls.vue')['default']
+    TransformationControls: typeof import('./components/TransformationControls.vue')['default']
     TreeControls: typeof import('./components/TreeControls.vue')['default']
   }
   export interface ComponentCustomProperties {

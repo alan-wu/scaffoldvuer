@@ -415,7 +415,7 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { toRef, shallowRef } from 'vue'
+import { shallowRef } from 'vue'
 import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
@@ -970,6 +970,7 @@ export default {
         if (object) {
           this.tData.region = payload.region;
           this.tData.label = payload.group;
+          this.changeActiveByName([payload.group], payload.region, false);
         }
       }
       this.createData.toBeConfirmed = false;
@@ -1210,6 +1211,7 @@ export default {
             if (names.length > 0) {
               //this.$refs.treeControls.changeActiveByNames(names, region, false);
               this.$refs.treeControls.updateActiveUI(zincObjects);
+              this.updatePrimitiveControls(zincObjects);
             } else {
               this.hideRegionTooltip();
               this.$refs.treeControls.removeActive(true);
@@ -1293,6 +1295,19 @@ export default {
       }
     },
     /**
+     * Update primitive controls UI with the specified objects
+     *
+     * @arg objects objects to be set for the selected
+     */
+    updatePrimitiveControls: function (objects) {
+      this.selectedObjects = objects;
+      if (this.selectedObjects && this.selectedObjects.length > 0) {
+        this.$refs.primitiveControls.setObject(this.selectedObjects[0]);
+      } else {
+        this.$refs.primitiveControls.setObject(undefined);
+      }
+    },
+    /**
      * A callback used by children components. Set the selected zinc object
      *
      * @arg Selected zinc objects
@@ -1300,10 +1315,7 @@ export default {
      * is made 
      */
     objectSelected: function (objects, propagate) {
-      this.selectedObjects = objects;
-      if (this.selectedObjects && this.selectedObjects.length > 0) {
-        this.$refs.primitiveControls.setObject(this.selectedObjects[0]);
-      }
+      this.updatePrimitiveControls(objects);
       this.$module.setSelectedByZincObjects(objects, undefined, propagate);
     },
     /**
