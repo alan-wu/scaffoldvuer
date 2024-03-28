@@ -94,7 +94,7 @@ RendererModule.prototype.getAnnotationsFromObjects = function(objects) {
 }
 
 RendererModule.prototype.setHighlightedByObjects = function(
-  objects, coords, propagateChanges) {
+  objects, coords, worldCoords, propagateChanges) {
   const changed = this.graphicsHighlight.setHighlighted(objects);
   const zincObjects = this.objectsToZincObjects(objects);
   if (propagateChanges) {
@@ -102,8 +102,10 @@ RendererModule.prototype.setHighlightedByObjects = function(
     if (changed)
       eventType = EVENT_TYPE.HIGHLIGHTED;
     const annotations = this.getAnnotationsFromObjects(objects);
-    if (annotations.length > 0)
+    if (annotations.length > 0) {
       annotations[0].coords = coords;
+      annotations[0].worldCoords = worldCoords;
+    }
     this.publishChanges(annotations, eventType, zincObjects);
   }
   return changed;
@@ -111,7 +113,7 @@ RendererModule.prototype.setHighlightedByObjects = function(
 
 
 RendererModule.prototype.setHighlightedByZincObjects = function(
-  zincObjects, coords, propagateChanges) {
+  zincObjects, coords, worldCoords, propagateChanges) {
     let morphs = [];
     if (zincObjects) {
       zincObjects.forEach(zincObject => {
@@ -120,7 +122,7 @@ RendererModule.prototype.setHighlightedByZincObjects = function(
       });
     }
 
-    return this.setHighlightedByObjects(morphs, coords,propagateChanges);
+    return this.setHighlightedByObjects(morphs, coords, worldCoords, propagateChanges);
 }
 
 RendererModule.prototype.setupLiveCoordinates = function(zincObjects) {
@@ -213,7 +215,7 @@ RendererModule.prototype.findObjectsByGroupName = function(groupName) {
 
 RendererModule.prototype.setHighlightedByGroupName = function(groupName, propagateChanges) {
   const objects = this.findObjectsByGroupName(groupName);
-  return this.setHighlightedByObjects(objects, undefined, propagateChanges);
+  return this.setHighlightedByObjects(objects, undefined, undefined, propagateChanges);
 }
 
 RendererModule.prototype.setSelectedByGroupName = function(groupName, propagateChanges) {

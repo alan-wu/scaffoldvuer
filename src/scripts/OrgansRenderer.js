@@ -268,15 +268,20 @@ const OrgansSceneData = function() {
 		return function(intersects, window_x, window_y) {
       const intersected = _this.getIntersectedObject(intersects);
       const idObject = getIdObjectFromIntersect(intersected);
+			const worldCoords = [
+				intersected ? intersected.point.x : 0,
+				intersected ? intersected.point.y : 0,
+				intersected ? intersected.point.z : 0,
+			];
       const coords = { x: window_x, y: window_y };
       if (idObject.id) {
         _this.displayArea.style.cursor = "pointer";
-        _this.setHighlightedByObjects([idObject.object], coords, true);
+        _this.setHighlightedByObjects([idObject.object], coords, worldCoords, true);
         return;
       }
       else {
 				_this.displayArea.style.cursor = "auto";
-				_this.setHighlightedByObjects([], coords, true);
+				_this.setHighlightedByObjects([], coords, worldCoords, true);
       }
 		}
 	};

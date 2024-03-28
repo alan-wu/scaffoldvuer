@@ -120,7 +120,9 @@ export default {
       }
     },
     hideTriggered: function() {
-      this.$emit('cancel-create');
+      if (this.createData.toBeConfirmed) {
+        this.$emit('cancel-create');
+      }
     },
   },
   watch: {

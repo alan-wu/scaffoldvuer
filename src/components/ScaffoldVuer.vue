@@ -973,12 +973,15 @@ export default {
           this.changeActiveByName([payload.group], payload.region, false);
         }
       }
-      this.createData.toBeConfirmed = false;
+      //this.createData.toBeConfirmed = false;
+      this.cancelCreate();
     },
     cancelCreate: function() {
       this.createData.points.length = 0;
       this.createData.toBeConfirmed = false;
       this.tData.visible = false;
+      this.$module.scene.clearTemporaryPrimitives();
+      this._tempLine = undefined;
     },
     formatTooltip(val) {
       if (this.timeMax >= 1000) {
@@ -1116,6 +1119,21 @@ export default {
         }
       }
     },
+    createEditTemporaryLines: function(worldCoords) {
+      if (this.createData.shape === "Line") {
+        if (this.createData.points.length === 1)  {
+          if (this._tempLine) {
+            const positionAttribute = this._tempLine.geometry.getAttribute( 'position' );
+            positionAttribute.setXYZ(1, worldCoords[0], worldCoords[1], worldCoords[2]);
+            positionAttribute.needsUpdate = true;
+          } else {
+            this._tempLine = this.$module.scene.addTemporaryLines(
+              [this.createData.points[0], worldCoords], 0x00ffff);
+              console.log(this._tempLine);
+          }
+        }
+      }
+    },
     draw: function(data) {
       if (data && data.length > 0 && data[0].data.group) {
         if (data[0].worldCoords) {
@@ -1139,6 +1157,7 @@ export default {
         this.showRegionTooltipWithAnnotations(data, true, true);
         this.createData.toBeConfirmed = true;
       } else {
+        this.$module.scene.addTemporaryPoints([coords], 0xffff00);
         this.createData.points.push(coords);
       }
     },    
@@ -1191,7 +1210,7 @@ export default {
       /*
        * Event Type 1: Selected
        * Event Type 2: Highlighted
-       * Event Type 1: Move
+       * Event Type 3: Move
        */
       if (event.eventType == 1) {
         if (this.viewingMode === 'Annotation') {
@@ -1241,11 +1260,15 @@ export default {
               this.tData.active = false;
               this.tData.visible = true;
               this.tData.label = id;
-              if (event.identifiers[0].data.region)
+              if (event.identifiers[0].data.region) {
                 this.tData.region = event.identifiers[0].data.region;
-              else this.tData.region = undefined;
+              }
+              else {
+                this.tData.region = undefined;
+              }
               this.tData.x = event.identifiers[0].coords.x;
               this.tData.y = event.identifiers[0].coords.y;
+              this.createEditTemporaryLines(event.identifiers[0].worldCoords);
             }
           }
           //Emit when an object is highlighted
@@ -1260,7 +1283,9 @@ export default {
               this.$refs.scaffoldContainer.getBoundingClientRect();
             this.tData.x = event.identifiers[0].coords.x - offsets.left;
             this.tData.y = event.identifiers[0].coords.y - offsets.top;
+            this.createEditTemporaryLines(event.identifiers[0].worldCoords);
           }
+          this.createEditTemporaryLines(event.identifiers[0].worldCoords);
         }
       }
     },
@@ -1316,7 +1341,7 @@ export default {
      */
     objectSelected: function (objects, propagate) {
       this.updatePrimitiveControls(objects);
-      this.$module.setSelectedByZincObjects(objects, undefined, propagate);
+      this.$module.setSelectedByZincObjects(objects, undefined, undefined, propagate);
     },
     /**
      * A callback used by children components. Set the highlighted zinc object
@@ -1327,7 +1352,7 @@ export default {
      */
     objectHovered: function (objects, propagate) {
       this.hoveredObjects = objects;
-      this.$module.setHighlightedByZincObjects(objects, undefined, propagate);
+      this.$module.setHighlightedByZincObjects(objects, undefined, undefined, propagate);
     },
     /**
      * Set the selected by name.
