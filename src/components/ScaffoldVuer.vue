@@ -2202,6 +2202,11 @@ export default {
     cursor: pointer;
   }
 
+  &:focus {
+    border: none;
+    outline: none;
+  }
+
   &.shape {
     margin-left: 4px;
     margin-right: 4px;
