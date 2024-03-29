@@ -23,7 +23,7 @@
           <el-input-number
             v-model="width"
             :step="1"
-            :min="0"
+            :min="1"
             :max="100"
             :controls="false"
             class="input-box number-input"
@@ -76,7 +76,7 @@ export default {
     setObject: function (object) {
       if (object.isLines) {
         this._zincObject = object;
-        this.width = this._zincObject.morph.material.linewidth;
+        this.width = this._zincObject.getMorph().material.linewidth;
       } else {
         this._zincObject = undefined;
         this.linewidth = 10;

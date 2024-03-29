@@ -1129,7 +1129,6 @@ export default {
           } else {
             this._tempLine = this.$module.scene.addTemporaryLines(
               [this.createData.points[0], worldCoords], 0x00ffff);
-              console.log(this._tempLine);
           }
         }
       }

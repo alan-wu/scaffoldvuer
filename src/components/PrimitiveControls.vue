@@ -20,6 +20,10 @@
         v-show="isPointset"
         class="pointset-controls"
         ref="pointsetControls" />
+      <lines-controls
+        v-show="isLines"
+        class="lines-controls"
+        ref="linesControls" />
     </div>
     <div
       class="drawer-button"
@@ -39,6 +43,7 @@ import {
 } from '@element-plus/icons-vue'
 import OpacityControls from "./OpacityControls.vue";
 import PointsControls from "./PointsControls.vue";
+import LinesControls from "./LinesControls.vue";
 import TextureSlidesControls from "./TextureSlidesControls.vue";
 import TransformationControls from "./TransformationControls.vue";
 
@@ -48,6 +53,7 @@ import TransformationControls from "./TransformationControls.vue";
 export default {
   name: "PrimitiveControls",
   components: {
+    LinesControls,
     OpacityControls,
     PointsControls,
     TextureSlidesControls,
@@ -74,6 +80,7 @@ export default {
       this.zincObject = shallowRef(object);
       this.isPointset = false;
       this.isTextureSlides = false;
+      this.isLines = false;
       if (object) {
         if (object.isTextureSlides) {
           this.isTextureSlides = true;
@@ -81,6 +88,9 @@ export default {
         } else if (object.isPointset) {
           this.isPointset = true;
           this.$refs.pointsetControls.setObject(object);
+        } else if (object.isLines2) {
+          this.isLines = true;
+          this.$refs.linesControls.setObject(object);
         }
         this.$refs.transformationControls.setObject(object);
       }
