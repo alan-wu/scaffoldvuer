@@ -98,6 +98,14 @@ export default {
       type: Object,
     },
   },
+  watch: {
+    "createData.shape": {
+      handler: function (value) {
+        this.group = value;
+      },
+      immediate: true,
+    },
+  },
   data: function () {
     return {
       group: "default",
