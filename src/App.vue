@@ -298,8 +298,8 @@ export default {
       });
     },
     objectAdded: function (zincObject) {
-      console.log(zincObject.getBoundingBox())
-
+      console.log(zincObject)
+      console.log(this.$refs.scaffold.$module.scene.getBoundingBox())
       if (this._objects.length === 0) {
         zincObject.setMarkerMode("on");
       }
@@ -430,6 +430,7 @@ export default {
       });
     },
     onReady: function () {
+      console.log(this.$refs.scaffold)
       if (this.readyCallback) {
         this.readyCallback(this.$refs.scaffold, texture_prefix);
         this.readyCallback = undefined;
@@ -458,7 +459,7 @@ export default {
     onSelected: function (data) {
 
       if (data && data.length > 0 && data[0].data.group) {
-        console.log(data[0].worldCoords)
+        console.log(data[0].data.group)
               /*
         if (data[0].worldCoords) {
           console.log(data[0].data);

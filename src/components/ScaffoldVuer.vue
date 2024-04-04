@@ -659,6 +659,7 @@ export default {
   data: function () {
     return {
       createData: {
+        drawingBox: false,
         toBeConfirmed: false,
         points: [],
         shape: "",
@@ -980,8 +981,16 @@ export default {
       this.createData.points.length = 0;
       this.createData.toBeConfirmed = false;
       this.tData.visible = false;
-      this.$module.scene.clearTemporaryPrimitives();
-      this._tempLine = undefined;
+      if (this._tempLine) {
+        this.$module.scene.removeTemporaryPrimitive(this._tempLine);
+        this._tempLine = undefined;
+      }
+      if (this._tempPoint) {
+        this.$module.scene.removeTemporaryPrimitive(this._tempPoint);
+        this._tempPoint = undefined;
+      }
+
+
     },
     formatTooltip(val) {
       if (this.timeMax >= 1000) {
@@ -1072,6 +1081,14 @@ export default {
       }
     },
     /**
+     * Toggle the drawing box which aid the drawing
+     *
+     * @vuese
+     */
+     toggleDrawingBox: function () {
+      this.createData.drawingBox = !this.createData.drawingBox;
+    },
+    /**
      * Find and and zoom into objects with the provided list of names.
      * @arg List of names
      * 
@@ -1156,7 +1173,7 @@ export default {
         this.showRegionTooltipWithAnnotations(data, true, true);
         this.createData.toBeConfirmed = true;
       } else {
-        this.$module.scene.addTemporaryPoints([coords], 0xffff00);
+        this._tempPoint = this.$module.scene.addTemporaryPoints([coords], 0xffff00);
         this.createData.points.push(coords);
       }
     },    
@@ -1743,6 +1760,8 @@ export default {
         //Emit when all objects have been loaded
         this.$emit("on-ready");
         this.setMarkers();
+        this.$module.scene.addBoundingBoxPrimitive(
+          "_helper", "boundingBox", 0x40E0D0, 0.15);
         this.isReady = true;
       };
     },

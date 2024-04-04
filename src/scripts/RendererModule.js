@@ -130,11 +130,15 @@ RendererModule.prototype.setupLiveCoordinates = function(zincObjects) {
   if (zincObjects && (zincObjects.length > 0)) {
     const boundingBox = this.scene.getBoundingBoxOfZincObjects(zincObjects);
     let newSelectedCenter = new THREE.Vector3();
-    boundingBox.getCenter(newSelectedCenter);
-    if (this.selectedCenter == undefined) {
-      this.selectedCenter = newSelectedCenter;
+    if (boundingBox) {
+      boundingBox.getCenter(newSelectedCenter);
+      if (this.selectedCenter == undefined) {
+        this.selectedCenter = newSelectedCenter;
+      } else {
+        this.selectedCenter.copy(newSelectedCenter);
+      }
     } else {
-      this.selectedCenter.copy(newSelectedCenter);
+      this.selectedCenter = undefined;
     }
   } else {
     this.selectedCenter = undefined;

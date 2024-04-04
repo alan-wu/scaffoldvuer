@@ -4,7 +4,7 @@
       <div>Lines settings</div>
     </el-header>
     <el-main class="slides-block">
-      <el-row class="row">
+      <el-row>
         <el-col :offset="0" :span="6">
           Width:
         </el-col>

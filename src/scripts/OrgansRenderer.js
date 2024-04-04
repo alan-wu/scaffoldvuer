@@ -537,7 +537,7 @@ const OrgansSceneData = function() {
   	    	  _this.sceneData.viewURL = undefined;
 			      _this.sceneData.metaURL = url;
 						organScene.addZincObjectAddedCallbacks(_addOrganPartCallback(undefined, partName, false));
-			      organScene.loadGLTF(url, undefined, downloadCompletedCallback());
+			      organScene.loadGLTF(url, undefined, undefined, downloadCompletedCallback());
 			      _this.scene = organScene;
 			      _this.zincRenderer.setCurrentScene(organScene);
 			      _this.graphicsHighlight.reset();

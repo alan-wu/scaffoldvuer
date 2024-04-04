@@ -64,6 +64,7 @@ export default {
       material: undefined,
       isTextureSlides: false,
       isPointset: false,
+      isLines: false,
       drawerOpen: true,
       zincObject: undefined,
     };

@@ -4,7 +4,7 @@
       <div>Points settings</div>
     </el-header>
     <el-main class="slides-block">
-      <el-row class="row">
+      <el-row>
         <el-col :offset="0" :span="6">
           Size:
         </el-col>
@@ -30,7 +30,7 @@
           />
         </el-col>
       </el-row>
-      <el-row class="slide-row">
+      <el-row>
         <el-col :offset="0" :span="16">
           Size attenuation:
         </el-col>

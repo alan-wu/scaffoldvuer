@@ -4,12 +4,12 @@
       <div>Transformation settings</div>
     </el-header>
     <el-main class="slides-block">
-      <el-row class="row">
+      <el-row>
         <el-col :offset="0" :span="8">
           Position:
         </el-col>
       </el-row>
-      <el-row class="slide-row">
+      <el-row class="">
         <el-col :offset="3" :span="1">
           x:
         </el-col>
@@ -47,6 +47,32 @@
           />
         </el-col>
       </el-row>
+      <el-row class="tool-row">
+        <el-col :offset="0" :span="6">
+          Scale:
+        </el-col>
+        <el-col :offset="0" :span="10">
+          <el-slider
+            v-model="scale"
+            :step="0.01"
+            :min="0"
+            :max="5"
+            :show-tooltip="false"
+            @input="modifyScale()"
+          />
+        </el-col>
+        <el-col :offset="0" :span="6">
+          <el-input-number
+            v-model="scale"
+            :step="0.01"
+            :min="0"
+            :max="5"
+            :controls="false"
+            class="input-box number-input"
+            @change="modifyScale()"
+          />
+        </el-col>
+      </el-row>
     </el-main>
   </el-container>
 </template>
@@ -79,6 +105,7 @@ export default {
       x: 0,
       y: 0,
       z: 0,
+      scale: 1,
     };
   },
   mounted: function () {
@@ -88,25 +115,26 @@ export default {
     setObject: function (object) {
       if (object.isZincObject) {
         this._zincObject = object;
-        const morph = this._zincObject.getMorph();
+        const morph = this._zincObject.getGroup();
         if (morph && morph.position) {
           this.x = morph.position.x;
           this.y = morph.position.y;
           this.z = morph.position.z;
+          this.scale = morph.scale.x;
         }
       } else {
         this._zincObject = undefined;
         this.x = 0;
-        this.y = y;
-        this.z = z;
+        this.y = 0;
+        this.z = 0;
+        this.scale = 1;
       }
     },
     modifyPosition: function() {
-      const morph = this._zincObject.getMorph();
-      if (morph) {
-        morph.position.set(this.x, this.y, this.z);
-        morph.updateMatrix();
-      }
+      this._zincObject.setPosition(this.x, this.y, this.z);
+    },
+    modifyScale: function() {
+      this._zincObject.setScaleAll(this.scale);
     },
   },
 };
@@ -163,6 +191,19 @@ export default {
       padding-right: 0px;
     }
   }
+}
+
+.my-slider {
+  position: absolute;
+  width: 135px;
+  left: 50px;
+  pointer-events: auto;
+}
+
+.tool-row {
+  align-items:center;
+  text-align: center;
+  padding-top:8px;
 }
 
 </style>
