@@ -1,8 +1,5 @@
 <template>
   <el-container class="pointset-container">
-    <el-header height="30px" class="header">
-      <div>Points settings</div>
-    </el-header>
     <el-main class="slides-block">
       <el-row>
         <el-col :offset="0" :span="6">
@@ -62,7 +59,6 @@
 import {
   ElCol as Col,
   ElContainer as Container,
-  ElHeader as Header,
   ElInputNumber as InputNumber,
   ElMain as Main,
   ElSelect as Select,
@@ -78,7 +74,6 @@ export default {
   components: {
     Col,
     Container,
-    Header,
     InputNumber,
     Main,
     Select,
@@ -129,13 +124,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-.header {
-  color: #606266;
-  line-height: 1;
-  padding: 8px 17px 1px 15px;
-  border-bottom: 1px solid #ebeef5;
-  font-size: 14px;
-}
 
 .slides-block {
   pointer-events: auto;
@@ -160,9 +148,6 @@ export default {
 .pointset-container {
   width: 250px;
   height: auto;
-  border-radius: 4px;
-  border: solid 1px #d8dce6;
-  background-color: #fff;
   overflow-y: none;
 }
 

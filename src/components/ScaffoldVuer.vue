@@ -1233,9 +1233,11 @@ export default {
           if (this.createData.shape !== "") {
             // Create new shape bsaed on current settings
             if (names.length > 0) {
-              this.createData.x = event.identifiers[0].coords.x;
-              this.createData.y = event.identifiers[0].coords.y;
-              this.draw(event.identifiers);
+              if (event.identifiers[0].coords) {
+                this.createData.x = event.identifiers[0].coords.x;
+                this.createData.y = event.identifiers[0].coords.y;
+                this.draw(event.identifiers);
+              }
             }
           } else {
             //Make sure the tooltip is displayed with annotation mode

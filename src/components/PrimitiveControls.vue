@@ -5,25 +5,34 @@
     :class="{ open: drawerOpen, close: !drawerOpen }"
   >
     <div class="my-drawer" :class="{ open: drawerOpen, close: !drawerOpen }">
-      <opacity-controls
-        :material="material"
-        :zincObject="zincObject"
-        ref="opacityControls" />
-      <transformation-controls
-        class="transformation-controls"
-        ref="transformationControls" />
-      <texture-slides-controls
-        v-show="isTextureSlides"
-        class="texture-controls"
-        ref="tSlidesControls" />
-      <points-controls
-        v-show="isPointset"
-        class="pointset-controls"
-        ref="pointsetControls" />
-      <lines-controls
-        v-show="isLines"
-        class="lines-controls"
-        ref="linesControls" />
+      <el-collapse class="collapse" v-model="activeName" accordion>
+        <el-collapse-item title="Opacity" name="1" v-show="!isTextureSlides" >
+          <opacity-controls
+            :material="material"
+            :zincObject="zincObject"
+            ref="opacityControls" />
+        </el-collapse-item>
+        <el-collapse-item title="Transformation" name="2">
+          <transformation-controls
+            class="transformation-controls"
+            ref="transformationControls" />
+        </el-collapse-item>
+        <el-collapse-item v-show="isTextureSlides" title="Texture Slides" name="3">
+          <texture-slides-controls
+            class="texture-controls"
+            ref="tSlidesControls" />
+        </el-collapse-item>
+        <el-collapse-item v-show="isPointset" title="Points" name="4">
+          <points-controls
+            class="pointset-controls"
+            ref="pointsetControls" />
+        </el-collapse-item>
+        <el-collapse-item v-show="isLines" title="Lines" name="5">
+          <lines-controls
+            class="lines-controls"
+            ref="linesControls" />
+        </el-collapse-item>
+      </el-collapse>
     </div>
     <div
       class="drawer-button"
@@ -40,7 +49,12 @@
 import { ref, shallowRef } from 'vue';
 import {
   ArrowRight as ElIconArrowRight,
-} from '@element-plus/icons-vue'
+} from '@element-plus/icons-vue';
+import {
+  ElCollapse as Collapse,
+  ElCollapseItem as CollapseItem,
+} from "element-plus";
+
 import OpacityControls from "./OpacityControls.vue";
 import PointsControls from "./PointsControls.vue";
 import LinesControls from "./LinesControls.vue";
@@ -53,6 +67,8 @@ import TransformationControls from "./TransformationControls.vue";
 export default {
   name: "PrimitiveControls",
   components: {
+    Collapse,
+    CollapseItem,
     LinesControls,
     OpacityControls,
     PointsControls,
@@ -61,6 +77,7 @@ export default {
   },
   data: function() {
     return {
+      activeName: 1,
       material: undefined,
       isTextureSlides: false,
       isPointset: false,
@@ -110,7 +127,6 @@ export default {
 .primitive-controls {
   position: absolute;
   bottom: 30%;
-  pointer-events:none;
   transition: all 1s ease;
 
   &.open {
@@ -132,9 +148,17 @@ export default {
   float: right;
   max-height: 150px;
   text-align: left;
-  border: 1px solid rgb(220, 223, 230);
   background: #ffffff;
   width:250px;
+  .collapse {
+    border: 1px solid rgb(220, 223, 230);
+    :deep(.el-collapse-item__header) {
+      padding-left: 8px;
+    }
+    :deep(.el-collapse-item__content) {
+      padding-bottom: 8px;
+    }
+  }
 }
 
 .drawer-button {
