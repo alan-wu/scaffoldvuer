@@ -6,28 +6,28 @@
   >
     <div class="my-drawer" :class="{ open: drawerOpen, close: !drawerOpen }">
       <el-collapse class="collapse" v-model="activeName" accordion>
-        <el-collapse-item title="Opacity" name="1" v-show="!isTextureSlides" >
+        <el-collapse-item title="Opacity" name="oControls" v-show="!isTextureSlides" >
           <opacity-controls
             :material="material"
             :zincObject="zincObject"
             ref="opacityControls" />
         </el-collapse-item>
-        <el-collapse-item title="Transformation" name="2">
+        <el-collapse-item title="Transformation" name="trControls">
           <transformation-controls
             class="transformation-controls"
             ref="transformationControls" />
         </el-collapse-item>
-        <el-collapse-item v-show="isTextureSlides" title="Texture Slides" name="3">
+        <el-collapse-item v-show="isTextureSlides" title="Texture Slides" name="tsControls">
           <texture-slides-controls
             class="texture-controls"
             ref="tSlidesControls" />
         </el-collapse-item>
-        <el-collapse-item v-show="isPointset" title="Points" name="4">
+        <el-collapse-item v-show="isPointset" title="Points" name="pControls">
           <points-controls
             class="pointset-controls"
             ref="pointsetControls" />
         </el-collapse-item>
-        <el-collapse-item v-show="isLines" title="Lines" name="5">
+        <el-collapse-item v-show="isLines" title="Lines" name="lControls">
           <lines-controls
             class="lines-controls"
             ref="linesControls" />
@@ -77,7 +77,7 @@ export default {
   },
   data: function() {
     return {
-      activeName: 1,
+      activeName: "oControls",
       material: undefined,
       isTextureSlides: false,
       isPointset: false,
@@ -95,10 +95,15 @@ export default {
       this.drawerOpen = !this.drawerOpen;
     },
     setObject: function(object) {
-      this.zincObject = shallowRef(object);
+      if (object) {
+        this.zincObject = shallowRef(object);
+      } else {
+        this.zincObject = undefined;
+      }
       this.isPointset = false;
       this.isTextureSlides = false;
       this.isLines = false;
+      this.activeName  = "oControls";
       if (object) {
         if (object.isTextureSlides) {
           this.isTextureSlides = true;
@@ -110,7 +115,9 @@ export default {
           this.isLines = true;
           this.$refs.linesControls.setObject(object);
         }
-        this.$refs.transformationControls.setObject(object);
+        if (!object.isTextureSlides) {
+          this.$refs.transformationControls.setObject(object);
+        }
       }
       if (object && object.getMorph()) {
         this.material = ref(object.getMorph().material);

@@ -123,7 +123,7 @@ export default {
           shape: this.createData.shape,
         }
       );
-      this.group = "default";
+      this.group = this.createData.shape;
     },
     cancel: function () {
       this.$emit("cancel-create");

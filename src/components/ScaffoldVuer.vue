@@ -1251,7 +1251,7 @@ export default {
               this.updatePrimitiveControls(zincObjects);
             } else {
               this.hideRegionTooltip();
-              this.$refs.treeControls.removeActive(true);
+              this.$refs.treeControls.removeActive(false);
             }
           }
           //Emit when an object is selected
