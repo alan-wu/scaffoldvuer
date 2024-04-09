@@ -50,7 +50,7 @@
             plain
             @click="confirm"
           >
-            Confirm
+            {{ confirmText }}
           </el-button>
         </el-col>
         <el-col :offset="0" :span="12">
@@ -102,8 +102,17 @@ export default {
     "createData.shape": {
       handler: function (value) {
         this.group = value;
+        this.$emit("cancel-create");
       },
       immediate: true,
+    },
+  },
+  computed: {
+    confirmText: function () {
+      if (this.createData.editingIndex > -1) {
+        return "Edit";
+      }
+      return "Confirm";
     },
   },
   data: function () {
@@ -121,6 +130,7 @@ export default {
           region: "__annotation/" + this.region, 
           group: this.group,
           shape: this.createData.shape,
+          editingIndex: this.createData.editingIndex,
         }
       );
       this.group = this.createData.shape;

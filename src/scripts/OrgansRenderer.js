@@ -234,27 +234,30 @@ const OrgansSceneData = function() {
 		return function(intersects, window_x, window_y) {
       const intersected = _this.getIntersectedObject(intersects);
       const idObject = getIdObjectFromIntersect(intersected);
-			const worldCoords = [
-				intersected ? intersected.point.x : 0,
-				intersected ? intersected.point.y : 0,
-				intersected ? intersected.point.z : 0,
-			];
+			const extraData = {
+				worldCoords: [
+					intersected ? intersected.point.x : 0,
+					intersected ? intersected.point.y : 0,
+					intersected ? intersected.point.z : 0,
+				],
+				intersected,
+			};
       const coords = { x: window_x, y: window_y };
       if (idObject.id) {
         if (idObject.object.userData.isGlyph) { 
           if (idObject.object.name) {
             _this.setSelectedByObjects([idObject.object], coords,
-							worldCoords, true);
+							extraData, true);
 					} else {
             _this.setSelectedByZincObjects(idObject.object.userData.getGlyphset(),
-							coords, worldCoords, true);
+							coords, extraData, true);
 					}
         } else {
-          _this.setSelectedByObjects([idObject.object], coords, worldCoords, true);
+          _this.setSelectedByObjects([idObject.object], coords, extraData, true);
         }
         return;
       } else {
-				_this.setSelectedByObjects([], coords, worldCoords, true);
+				_this.setSelectedByObjects([], coords, extraData, true);
 			}
 		}
 	};
@@ -268,20 +271,22 @@ const OrgansSceneData = function() {
 		return function(intersects, window_x, window_y) {
       const intersected = _this.getIntersectedObject(intersects);
       const idObject = getIdObjectFromIntersect(intersected);
-			const worldCoords = [
-				intersected ? intersected.point.x : 0,
-				intersected ? intersected.point.y : 0,
-				intersected ? intersected.point.z : 0,
-			];
+			const extraData = {
+				worldCoords: [
+					intersected ? intersected.point.x : 0,
+					intersected ? intersected.point.y : 0,
+					intersected ? intersected.point.z : 0,
+				],
+			}
       const coords = { x: window_x, y: window_y };
       if (idObject.id) {
         _this.displayArea.style.cursor = "pointer";
-        _this.setHighlightedByObjects([idObject.object], coords, worldCoords, true);
+        _this.setHighlightedByObjects([idObject.object], coords, extraData, true);
         return;
       }
       else {
 				_this.displayArea.style.cursor = "auto";
-				_this.setHighlightedByObjects([], coords, worldCoords, true);
+				_this.setHighlightedByObjects([], coords, extraData, true);
       }
 		}
 	};

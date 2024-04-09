@@ -425,7 +425,11 @@ import PrimitiveControls from "./PrimitiveControls.vue";
 import ScaffoldTooltip from "./ScaffoldTooltip.vue";
 import TreeControls from "./TreeControls.vue";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
-import { findObjectsWithNames, getObjectsFromAnnotations } from "../scripts/Utilities.js";
+import {
+  getEditableLines,
+  getObjectsFromAnnotations,
+  findObjectsWithNames,
+} from "../scripts/Utilities.js";
 
 import { SearchIndex } from "../scripts/Search.js";
 import {
@@ -665,6 +669,7 @@ export default {
         shape: "",
         x: 0,
         y: 0,
+        editingIndex: -1,
       },
       currentTime: 0.0,
       timeVarying: false,
@@ -817,7 +822,7 @@ export default {
         this.setMarkerModeForObjectsWithName(l, "on");
       })
       this.previousMarkerLabels = labels;
-    }
+    },
   },
   beforeCreate: function () {
     this.$module = new OrgansViewer();
@@ -959,7 +964,6 @@ export default {
             undefined,
             0x0022ee,
           );
-          
         } else if (payload.shape === "Line") {
           object = this.$module.scene.createLines(
             payload.region,
@@ -967,19 +971,26 @@ export default {
             [this.createData.points[0], this.createData.points[1]],
             0x00ee22,
           );
+        } else if (payload.editingIndex > -1) {
+          if (this._editingZincObject) {
+            this._editingZincObject.editVertice([this.createData.points[1]],
+              payload.editingIndex);
+          }
         }
         if (object) {
+          object.zincObject.isEditable = true;
           this.tData.region = payload.region;
           this.tData.label = payload.group;
           this.changeActiveByName([payload.group], payload.region, false);
         }
       }
-      //this.createData.toBeConfirmed = false;
       this.cancelCreate();
     },
     cancelCreate: function() {
       this.createData.points.length = 0;
       this.createData.toBeConfirmed = false;
+      this._editingZincObject = undefined;
+      this.createData.editingIndex = -1;
       this.tData.visible = false;
       if (this._tempLine) {
         this.$module.scene.removeTemporaryPrimitive(this._tempLine);
@@ -989,8 +1000,6 @@ export default {
         this.$module.scene.removeTemporaryPrimitive(this._tempPoint);
         this._tempPoint = undefined;
       }
-
-
     },
     formatTooltip(val) {
       if (this.timeMax >= 1000) {
@@ -1137,7 +1146,7 @@ export default {
       }
     },
     createEditTemporaryLines: function(worldCoords) {
-      if (this.createData.shape === "Line") {
+      if (this.createData.shape === "Line" || this.createData.editingIndex > -1) {
         if (this.createData.points.length === 1)  {
           if (this._tempLine) {
             const positionAttribute = this._tempLine.geometry.getAttribute( 'position' );
@@ -1152,11 +1161,12 @@ export default {
     },
     draw: function(data) {
       if (data && data.length > 0 && data[0].data.group) {
-        if (data[0].worldCoords) {
+        if (data[0].extraData.worldCoords) {
           if (this.createData.shape === "Point") {
-            this.drawPoint(data[0].worldCoords, data);
-          } else if (this.createData.shape === "Line") {
-            this.drawLine(data[0].worldCoords, data);
+            this.drawPoint(data[0].extraData.worldCoords, data);
+          } else if (this.createData.shape === "Line" ||
+            this.createData.editingIndex > -1) {
+            this.drawLine(data[0].extraData.worldCoords, data);
           }
         }
       }
@@ -1203,6 +1213,31 @@ export default {
         setTimeout(this.stopFreeSpin, 4000);
       }
     },
+    activateAnnotationMode: function(names, event) {
+      if ((this.createData.shape !== "") || (this.createData.editingIndex > -1)) {
+        // Create new shape bsaed on current settings
+        if (names.length > 0) {
+          if (event.identifiers[0].coords) {
+            this.createData.x = event.identifiers[0].coords.x;
+            this.createData.y = event.identifiers[0].coords.y;
+            this.draw(event.identifiers);
+          }
+        }
+      } else {
+        //Make sure the tooltip is displayed with annotation mode
+        const editing = getEditableLines(event);
+        if (editing) {
+          this.activateEditingMode(editing.zincObject, editing.vertexIndex,
+            editing.point);
+        }
+        this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
+      }
+    },
+    activateEditingMode: function(zincObject, vertexIndex, point) {
+      this._editingZincObject = zincObject;
+      this.createData.editingIndex = vertexIndex;
+      this.drawLine(point, undefined);
+    },
     /**
      * Callback when a region is selected/highlighted.
      * It will also update other controls.
@@ -1211,7 +1246,6 @@ export default {
     eventNotifierCallback: function (event) {
       const names = [];
       let zincObjects = [];
-      const region = undefined;
       if (event.eventType == 1 || event.eventType == 2) {
         event.identifiers.forEach((identifier) => {
           if (identifier) {
@@ -1230,19 +1264,8 @@ export default {
        */
       if (event.eventType == 1) {
         if (this.viewingMode === 'Annotation') {
-          if (this.createData.shape !== "") {
-            // Create new shape bsaed on current settings
-            if (names.length > 0) {
-              if (event.identifiers[0].coords) {
-                this.createData.x = event.identifiers[0].coords.x;
-                this.createData.y = event.identifiers[0].coords.y;
-                this.draw(event.identifiers);
-              }
-            }
-          } else {
-            //Make sure the tooltip is displayed with annotation mode
-            this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
-          }
+          this.activateAnnotationMode(names, event);
+
         } else {
           if (this.$refs.treeControls) {
             if (names.length > 0) {
@@ -1286,7 +1309,7 @@ export default {
               }
               this.tData.x = event.identifiers[0].coords.x;
               this.tData.y = event.identifiers[0].coords.y;
-              this.createEditTemporaryLines(event.identifiers[0].worldCoords);
+              this.createEditTemporaryLines(event.identifiers[0].extraData.worldCoords);
             }
           }
           //Emit when an object is highlighted
@@ -1301,9 +1324,9 @@ export default {
               this.$refs.scaffoldContainer.getBoundingClientRect();
             this.tData.x = event.identifiers[0].coords.x - offsets.left;
             this.tData.y = event.identifiers[0].coords.y - offsets.top;
-            this.createEditTemporaryLines(event.identifiers[0].worldCoords);
+            this.createEditTemporaryLines(event.identifiers[0].extraData.worldCoords);
           }
-          this.createEditTemporaryLines(event.identifiers[0].worldCoords);
+          this.createEditTemporaryLines(event.identifiers[0].extraData.worldCoords);
         }
       }
     },
@@ -1359,7 +1382,7 @@ export default {
      */
     objectSelected: function (objects, propagate) {
       this.updatePrimitiveControls(objects);
-      this.$module.setSelectedByZincObjects(objects, undefined, undefined, propagate);
+      this.$module.setSelectedByZincObjects(objects, undefined, {}, propagate);
     },
     /**
      * A callback used by children components. Set the highlighted zinc object
@@ -1370,7 +1393,7 @@ export default {
      */
     objectHovered: function (objects, propagate) {
       this.hoveredObjects = objects;
-      this.$module.setHighlightedByZincObjects(objects, undefined, undefined, propagate);
+      this.$module.setHighlightedByZincObjects(objects, undefined, {}, propagate);
     },
     /**
      * Set the selected by name.

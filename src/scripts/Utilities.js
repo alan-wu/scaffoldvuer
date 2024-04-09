@@ -14,6 +14,37 @@ export const createListFromPrimitives = (primitives, list) => {
   return list;
 }
 
+const getDistance = (point1, point2) => {
+  const dist0 = point1[0] - point2[0];
+  const dist1 = point1[1] - point2[1];
+  const dist2 = point1[2] - point2[2];
+  return Math.sqrt(dist0 * dist0 + dist1 * dist1 + dist2 * dist2);
+}
+
+export const getEditableLines = (event) => {
+  const zincObjects = event.zincObjects;
+  if (zincObjects.length > 0 && zincObjects[0]) {
+    const zincObject = zincObjects[0];
+    if (zincObject.isEditable && zincObject.isLines2) {
+      const info = event.identifiers[0].extraData.intersected;
+      if (info && info.faceIndex > -1) {
+        const v = zincObject.getVerticesByFaceIndex(info.faceIndex);
+        const pointOnLine = event.identifiers[0].extraData.intersected.pointOnLine
+        if (v.length > 1) {
+          const dist0 = getDistance(v[0], pointOnLine);
+          const dist1 = getDistance(v[1], pointOnLine);
+          if (dist0 > dist1) {
+            return { zincObject, vertexIndex: info.faceIndex * 2, point: v[1]};
+          } else {
+            return { zincObject, vertexIndex: info.faceIndex * 2 + 1, point: v[0]};
+          }
+        }
+      }
+    }
+  }
+  return undefined;
+}
+
 export const extractAllFullPaths = (item, list) => {
   let nodeName = "";
   if (item.isRegion) {
