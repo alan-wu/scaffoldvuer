@@ -27,6 +27,24 @@
           />
         </el-col>
       </el-row>
+      <el-row v-if="createData.faceIndex > -1">
+        <el-col :offset="0" :span="4">
+          <el-button :icon="ElIconArrowLeft" @click="onMoveClick(-unit)"/>
+        </el-col>
+        <el-col :offset="3" :span="3">
+          Move
+        </el-col>
+        <el-col :offset="0" :span="7">
+          <el-input-number
+            v-model="unit"
+            :controls="false"
+            class="input-box number-input"
+          />
+        </el-col>
+        <el-col :offset="2" :span="2">
+          <el-button :icon="ElIconArrowRight" @click="onMoveClick(unit)"/>
+        </el-col>
+      </el-row>
     </el-main>
   </el-container>
 </template>
@@ -35,7 +53,12 @@
 /* eslint-disable no-alert, no-console */
 // This is not in use at this moment, due to
 // limited support to line width
+import { shallowRef } from 'vue';
 import {
+  moveLine,
+} from "../scripts/Utilities.js";
+import {
+  ElButton as Button,
   ElCol as Col,
   ElContainer as Container,
   ElInputNumber as InputNumber,
@@ -44,6 +67,10 @@ import {
   ElSlider as Slider,
   ElOption as Option,
 } from "element-plus";
+import {
+  ArrowLeft as ElIconArrowLeft,
+  ArrowRight as ElIconArrowRight,
+} from '@element-plus/icons-vue';
 
 /**
  * A component to control the opacity of the target object.
@@ -51,6 +78,7 @@ import {
 export default {
   name: "LinesControls",
   components: {
+    Button,
     Col,
     Container,
     InputNumber,
@@ -58,16 +86,29 @@ export default {
     Select,
     Slider,
     Option,
+    ElIconArrowLeft,
+    ElIconArrowRight,
+  },
+  props: {
+    createData: {
+      type: Object,
+    },
   },
   data: function () {
     return {
       width: 1,
+      unit: 0.1,
+      ElIconArrowLeft: shallowRef(ElIconArrowLeft),
+      ElIconArrowRight: shallowRef(ElIconArrowRight),
     };
   },
   mounted: function () {
     this._zincObject = undefined;
   },
   methods: {
+    onMoveClick: function(unit) {
+      moveLine(this._zincObject, this.createData.faceIndex, unit);
+    },
     setObject: function (object) {
       if (object.isLines) {
         this._zincObject = object;

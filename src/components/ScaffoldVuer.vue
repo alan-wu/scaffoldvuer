@@ -154,7 +154,7 @@
         </template>
       </el-popover>
       <div class="primitive-controls-box">
-        <primitive-controls ref="primitiveControls" />
+        <primitive-controls ref="primitiveControls" :createData="createData"/>
       </div>
       <el-popover
         v-if="timeVarying"
@@ -430,7 +430,6 @@ import {
   getObjectsFromAnnotations,
   findObjectsWithNames,
 } from "../scripts/Utilities.js";
-
 import { SearchIndex } from "../scripts/Search.js";
 import {
   ElButton as Button,
@@ -670,6 +669,7 @@ export default {
         x: 0,
         y: 0,
         editingIndex: -1,
+        faceIndex: -1,
       },
       currentTime: 0.0,
       timeVarying: false,
@@ -991,6 +991,7 @@ export default {
       this.createData.toBeConfirmed = false;
       this._editingZincObject = undefined;
       this.createData.editingIndex = -1;
+      this.createData.faceIndex = -1;
       this.tData.visible = false;
       if (this._tempLine) {
         this.$module.scene.removeTemporaryPrimitive(this._tempLine);
@@ -1146,7 +1147,7 @@ export default {
       }
     },
     createEditTemporaryLines: function(worldCoords) {
-      if (this.createData.shape === "Line" || this.createData.editingIndex > -1) {
+      if (worldCoords && this.createData.shape === "Line" || this.createData.editingIndex > -1) {
         if (this.createData.points.length === 1)  {
           if (this._tempLine) {
             const positionAttribute = this._tempLine.geometry.getAttribute( 'position' );
@@ -1227,14 +1228,15 @@ export default {
         //Make sure the tooltip is displayed with annotation mode
         const editing = getEditableLines(event);
         if (editing) {
-          this.activateEditingMode(editing.zincObject, editing.vertexIndex,
-            editing.point);
+          this.activateEditingMode(editing.zincObject, editing.faceIndex,
+            editing.vertexIndex, editing.point);
         }
         this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
       }
     },
-    activateEditingMode: function(zincObject, vertexIndex, point) {
+    activateEditingMode: function(zincObject, faceIndex, vertexIndex, point) {
       this._editingZincObject = zincObject;
+      this.createData.faceIndex = faceIndex;
       this.createData.editingIndex = vertexIndex;
       this.drawLine(point, undefined);
     },

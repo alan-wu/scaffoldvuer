@@ -29,16 +29,35 @@ export const getEditableLines = (event) => {
       const info = event.identifiers[0].extraData.intersected;
       if (info && info.faceIndex > -1) {
         const v = zincObject.getVerticesByFaceIndex(info.faceIndex);
-        const pointOnLine = event.identifiers[0].extraData.intersected.pointOnLine
+        const p = event.identifiers[0].extraData.intersected.pointOnLine;
         if (v.length > 1) {
-          const dist0 = getDistance(v[0], pointOnLine);
-          const dist1 = getDistance(v[1], pointOnLine);
+          const dist0 = getDistance(v[0], [p.x, p.y, p.z]);
+          const dist1 = getDistance(v[1], [p.x, p.y, p.z]);
           if (dist0 > dist1) {
-            return { zincObject, vertexIndex: info.faceIndex * 2, point: v[1]};
+            return { zincObject, faceIndex: info.faceIndex, vertexIndex: info.faceIndex * 2 + 1, point: v[0]};
           } else {
-            return { zincObject, vertexIndex: info.faceIndex * 2 + 1, point: v[0]};
+            return { zincObject, faceIndex: info.faceIndex, vertexIndex: info.faceIndex * 2, point: v[1]};
           }
         }
+      }
+    }
+  }
+  return undefined;
+}
+
+export const moveLine = (zincObject, faceIndex, unit) => {
+  if (zincObject && unit !== 0.0) {
+    if (zincObject.isEditable && zincObject.isLines2) {
+      if (faceIndex > -1) {
+        const v = zincObject.getVerticesByFaceIndex(faceIndex);
+        let d = [v[0][0] - v[1][0], v[0][1] - v[1][1], v[0][2] - v[1][2]];
+        const mag = Math.sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
+        for (let i = 0; i < 3; i++) {
+          d[i] = d[i] / mag * unit;
+          v[0][i] = v[0][i] + d[i];
+          v[1][i] = v[1][i] + d[i];
+        }
+        zincObject.editVertice(v, faceIndex * 2);
       }
     }
   }

@@ -30,7 +30,8 @@
         <el-collapse-item v-show="isLines" title="Lines" name="lControls">
           <lines-controls
             class="lines-controls"
-            ref="linesControls" />
+            ref="linesControls"
+            :createData="createData" />
         </el-collapse-item>
       </el-collapse>
     </div>
@@ -74,6 +75,12 @@ export default {
     PointsControls,
     TextureSlidesControls,
     TransformationControls,
+    ElIconArrowRight,
+  },
+  props: {
+    createData: {
+      type: Object,
+    },
   },
   data: function() {
     return {
