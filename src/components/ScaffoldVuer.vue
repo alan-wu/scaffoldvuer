@@ -1147,15 +1147,17 @@ export default {
       }
     },
     createEditTemporaryLines: function(worldCoords) {
-      if (worldCoords && this.createData.shape === "Line" || this.createData.editingIndex > -1) {
-        if (this.createData.points.length === 1)  {
-          if (this._tempLine) {
-            const positionAttribute = this._tempLine.geometry.getAttribute( 'position' );
-            positionAttribute.setXYZ(1, worldCoords[0], worldCoords[1], worldCoords[2]);
-            positionAttribute.needsUpdate = true;
-          } else {
-            this._tempLine = this.$module.scene.addTemporaryLines(
-              [this.createData.points[0], worldCoords], 0x00ffff);
+      if (worldCoords) {
+        if (this.createData.shape === "Line" || this.createData.editingIndex > -1) {
+          if (this.createData.points.length === 1)  {
+            if (this._tempLine) {
+              const positionAttribute = this._tempLine.geometry.getAttribute( 'position' );
+              positionAttribute.setXYZ(1, worldCoords[0], worldCoords[1], worldCoords[2]);
+              positionAttribute.needsUpdate = true;
+            } else {
+              this._tempLine = this.$module.scene.addTemporaryLines(
+                [this.createData.points[0], worldCoords], 0x00ffff);
+            }
           }
         }
       }
