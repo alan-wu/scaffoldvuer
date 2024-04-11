@@ -338,7 +338,7 @@
               placeholder="Select"
               class="scaffold-select-box viewing-mode"
               popper-class="scaffold_viewer_dropdown"
-              @mode="viewingModeChange"
+              @change="viewingModeChange"
             >
               <el-option v-for="item in viewingModes" :key="item" :label="item" :value="item">
                 <el-row>
@@ -1624,9 +1624,9 @@ export default {
         } else {
           this.$module.selectObjectOnPick = false;
         }
+        this.cancelCreate();
       }
-      this.$module.toBeConfirmed = false;
-      this.createData.shape = "";
+
     },
     /**
      * @vuese
