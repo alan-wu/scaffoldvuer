@@ -429,6 +429,7 @@ import {
   getEditableLines,
   getObjectsFromAnnotations,
   findObjectsWithNames,
+  updateBoundingBox,
 } from "../scripts/Utilities.js";
 import { SearchIndex } from "../scripts/Search.js";
 import {
@@ -1020,6 +1021,12 @@ export default {
     fitWindow: function () {
       if (this.$module.scene) {
         this.$module.scene.viewAll();
+        if (this._boundingBoxGeo) {
+          const vis = this._boundingBoxGeo.getVisibility();
+          this._boundingBoxGeo.setVisibility(false);
+          updateBoundingBox(this._boundingBoxGeo, this.$module.scene);
+          this._boundingBoxGeo.setVisibility(vis);
+        }
       }
     },
     /**
@@ -1626,7 +1633,6 @@ export default {
         }
         this.cancelCreate();
       }
-
     },
     /**
      * @vuese
@@ -1789,7 +1795,7 @@ export default {
         //Emit when all objects have been loaded
         this.$emit("on-ready");
         this.setMarkers();
-        this.$module.scene.addBoundingBoxPrimitive(
+        this._boundingBoxGeo = this.$module.scene.addBoundingBoxPrimitive(
           "_helper", "boundingBox", 0x40E0D0, 0.15);
         this.isReady = true;
       };

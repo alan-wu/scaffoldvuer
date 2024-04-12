@@ -1,3 +1,5 @@
+import { THREE } from 'zincjs';
+
 export const createListFromPrimitives = (primitives, list) => {
   if (primitives) {
     let id = "";
@@ -62,6 +64,25 @@ export const moveLine = (zincObject, faceIndex, unit) => {
     }
   }
   return undefined;
+}
+
+export const updateBoundingBox = (geometry, scene) => {
+  const box = scene.getBoundingBox();
+  const dim = new THREE.Vector3().subVectors(box.max, box.min);
+  const boxGeo = new THREE.BoxGeometry(dim.x, dim.y, dim.z);
+  dim.addVectors(box.min, box.max).multiplyScalar( 0.5 );
+  const positions = boxGeo.getAttribute("position");
+  const count = positions.count;
+  const vertices = [];
+  for (let i = 0; i < count; i++) {
+    vertices[i] = [
+      positions.array[i * 3],
+      positions.array[i * 3 + 1],
+      positions.array[i * 3 + 2]
+    ];
+  }
+  geometry.editVertices(vertices , 0);
+  boxGeo.dispose();
 }
 
 export const extractAllFullPaths = (item, list) => {
