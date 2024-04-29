@@ -115,12 +115,15 @@ export default {
         if (object.isTextureSlides) {
           this.isTextureSlides = true;
           this.$refs.tSlidesControls.setObject(object);
+          this.activeName = "tsControls";
         } else if (object.isPointset) {
           this.isPointset = true;
           this.$refs.pointsetControls.setObject(object);
+          this.activeName = "pControls";
         } else if (object.isLines2) {
           this.isLines = true;
           this.$refs.linesControls.setObject(object);
+          this.activeName = "lControls";
         }
         if (!object.isTextureSlides) {
           this.$refs.transformationControls.setObject(object);

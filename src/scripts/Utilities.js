@@ -60,6 +60,7 @@ export const moveLine = (zincObject, faceIndex, unit) => {
           v[1][i] = v[1][i] + d[i];
         }
         zincObject.editVertice(v, faceIndex * 2);
+        zincObject.boundingBoxUpdateRequired = true;
       }
     }
   }
@@ -82,6 +83,7 @@ export const updateBoundingBox = (geometry, scene) => {
     ];
   }
   geometry.editVertices(vertices , 0);
+  geometry.setPosition(dim.x, dim.y, dim.z);
   boxGeo.dispose();
 }
 

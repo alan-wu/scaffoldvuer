@@ -116,7 +116,6 @@ const GraphicsHighlight = function() {
   }
   */
 
-
   this.setHighlighted = function(objects) {
     const previousHighlightedObjects = [...currentHighlightedObjects];
     _this.resetHighlighted();
