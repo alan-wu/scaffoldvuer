@@ -8,10 +8,10 @@ hero:
   tagline: Providing high-level 3D physiological models viewing capability.
   actions:
     - theme: brand
+      text: API Reference
+      link: /components/ScaffoldVuer
+    - theme: alt
       text: Live demo
       link: /demo
-    - theme: alt
-      text: API References
-      link: /components/ScaffoldVuer
 
 ---

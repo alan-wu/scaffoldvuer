@@ -34,6 +34,11 @@ export default defineConfig(({ command, mode }) => {
         // https://github.com/antfu/unocss
         // see unocss.config.ts for config
     ],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+      }
+    },
     build: {
       lib: {
         entry: path.resolve(__dirname, "./src/components/index.js"),

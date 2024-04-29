@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/scaffoldvuer",
-  "version": "0.4.0-vue3.7",
+  "version": "1.0.0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -41,13 +41,14 @@
     "*.js"
   ],
   "dependencies": {
-    "@abi-software/flatmapvuer": "^0.6.1-demo-0",
-    "@abi-software/svg-sprite": "0.4.0-vue3.3",
+    "@abi-software/flatmapvuer": "^1.0.0",
+    "@abi-software/svg-sprite": "^1.0.0",
     "@element-plus/icons-vue": "^2.3.1",
     "@vue/compat": "^3.4.15",
     "core-js": "^3.22.5",
     "element-plus": "^2.4.4",
     "minisearch": "^6.0.1",
+    "pinia": "^2.1.7",
     "simple-dropzone": "^0.8.3",
     "unplugin-vue-components": "^0.26.0",
     "vue": "^3.4.15",

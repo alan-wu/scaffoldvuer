@@ -38,6 +38,8 @@ import { ElPopover as Popover } from "element-plus";
 import CreateTooltiipContent from "./CreateTooltipContent.vue";
 import { Tooltip } from "@abi-software/flatmapvuer";
 import "@abi-software/flatmapvuer/dist/style.css";
+import { mapState } from 'pinia';
+import { useMainStore } from "@/store/index";
 
 /**
  * A component to control the opacity of the target object.
@@ -86,6 +88,11 @@ export default {
     },
   },
   inject: ['scaffoldUrl'],
+  provide() {
+    return {
+      userApiKey: this.userToken,
+    };
+  },
   data: function () {
     return {
       display: false,
@@ -93,6 +100,7 @@ export default {
     };
   },
   computed: {
+    ...mapState(useMainStore,  ['userToken']),
     position: function () {
       let yOffset = 40;
       if (this.region) {
@@ -111,6 +119,7 @@ export default {
           this.annotationEntry = {
             "featureId": encodeURIComponent(region + this.label),
             "resourceId": encodeURIComponent(this.scaffoldUrl),
+            "resource": encodeURIComponent(this.scaffoldUrl),
           };
         }
       }
