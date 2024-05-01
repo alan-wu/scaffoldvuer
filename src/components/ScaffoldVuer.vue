@@ -1020,11 +1020,17 @@ export default {
      */
     fitWindow: function () {
       if (this.$module.scene) {
+        //We do not want the bounding box to affect the
+        //bounding box calculation.
+        let vis = false;
+        if (this._boundingBoxGeo) {
+          vis = this._boundingBoxGeo.getVisibility();
+          this._boundingBoxGeo.setVisibility(false);
+        }
         this.$module.scene.viewAll();
         if (this._boundingBoxGeo) {
-          const vis = this._boundingBoxGeo.getVisibility();
-          this._boundingBoxGeo.setVisibility(false);
           updateBoundingBox(this._boundingBoxGeo, this.$module.scene);
+          //Resume the bounding box visibility
           this._boundingBoxGeo.setVisibility(vis);
         }
       }
