@@ -28,7 +28,7 @@
     <div v-show="displayUI && !isTransitioning">
       <div
         class="bottom-draw-control"
-        v-if="viewingMode === 'Annotation'"
+        v-if="viewingMode === 'Annotation' && userInformation"
       >
         <el-popover
           content="Comment"
@@ -415,7 +415,7 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { shallowRef } from 'vue'
+import { markRaw, shallowRef } from 'vue';
 import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
@@ -431,7 +431,7 @@ import {
   findObjectsWithNames,
   updateBoundingBox,
 } from "../scripts/Utilities.js";
-import { SearchIndex } from "../scripts/Search.js";
+
 import {
   ElButton as Button,
   ElCol as Col,
@@ -444,9 +444,12 @@ import {
   ElTabPane as TabPane,
   ElTabs as Tabs,
 } from "element-plus";
-import { OrgansViewer } from "../scripts/OrgansRenderer.js";
-import { EventNotifier } from "../scripts/EventNotifier.js";
 import { AnnotationService } from '@abi-software/sparc-annotation';
+import { EventNotifier } from "../scripts/EventNotifier.js";
+import { OrgansViewer } from "../scripts/OrgansRenderer.js";
+import { SearchIndex } from "../scripts/Search.js";
+import { mapState } from 'pinia';
+import { useMainStore } from "@/store/index";
 
 /**
  * A vue component of the scaffold viewer.
@@ -475,6 +478,10 @@ export default {
     ElIconWarningFilled,
     ElIconArrowDown,
     ElIconArrowLeft,
+  },
+  setup(props) {
+    const annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
+    return { annotator };
   },
   props: {
     /**
@@ -662,6 +669,7 @@ export default {
   },
   data: function () {
     return {
+      annotator: undefined,
       createData: {
         drawingBox: false,
         toBeConfirmed: false,
@@ -752,6 +760,7 @@ export default {
       ],
       openMapRef: undefined,
       backgroundIconRef: undefined,
+      userInformation: undefined,
     };
   },
   watch: {
@@ -856,6 +865,9 @@ export default {
     if (this.ro) this.ro.disconnect();
     this.$module.destroy();
     this.$module = undefined;
+  },
+  computed: {
+    ...mapState(useMainStore,  ['userToken']),
   },
   methods: {
     /**
@@ -1230,22 +1242,26 @@ export default {
       }
     },
     activateAnnotationMode: function(names, event) {
-      if ((this.createData.shape !== "") || (this.createData.editingIndex > -1)) {
-        // Create new shape bsaed on current settings
-        if (names.length > 0) {
-          if (event.identifiers[0].coords) {
-            this.createData.x = event.identifiers[0].coords.x;
-            this.createData.y = event.identifiers[0].coords.y;
-            this.draw(event.identifiers);
+      if (this.userInformation) {
+        if ((this.createData.shape !== "") || (this.createData.editingIndex > -1)) {
+          // Create new shape bsaed on current settings
+          if (names.length > 0) {
+            if (event.identifiers[0].coords) {
+              this.createData.x = event.identifiers[0].coords.x;
+              this.createData.y = event.identifiers[0].coords.y;
+              this.draw(event.identifiers);
+            }
           }
+        } else {
+          //Make sure the tooltip is displayed with annotation mode
+          const editing = getEdiqtableLines(event);
+          if (editing) {
+            this.activateEditingMode(editing.zincObject, editing.faceIndex,
+              editing.vertexIndex, editing.point);
+          }
+          this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
         }
       } else {
-        //Make sure the tooltip is displayed with annotation mode
-        const editing = getEditableLines(event);
-        if (editing) {
-          this.activateEditingMode(editing.zincObject, editing.faceIndex,
-            editing.vertexIndex, editing.point);
-        }
         this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
       }
     },
@@ -1630,6 +1646,14 @@ export default {
      */
     viewingModeChange: function () {
       if (this.$module) {
+        if (this.viewingMode === "Annotation") {
+          this.userInformation = undefined;
+          this.annotator.authenticate(this.userToken).then((userData) => {
+            if (userData.name && userData.email) {
+              this.userInformation = userData;
+            }
+          });
+        }
         if ((this.viewingMode === "Exploration") ||
           (this.viewingMode === "Annotation") &&
           (this.createData.shape === "")) {
