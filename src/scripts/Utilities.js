@@ -217,3 +217,122 @@ export const getObjectsFromAnnotations = (scene, annotations) => {
   }
   return returned;
 }
+
+const getCoordinatesForAnnotationFeature = (zincObject) => {
+  const mesh = zincObject.getMorph();
+  let attr = 'position';
+  if (zincObject.isLines2) {
+    attr = 'instanceStart';
+  }
+  const coords = [];
+  let vIndex = 0;
+  const position = mesh.geometry.getAttribute( attr );
+  for (let i = 0; i < zincObject.drawRange; i++) {
+    coords.push([
+      position.array[vIndex++],
+      position.array[vIndex++],
+      position.array[vIndex++],
+    ]);
+  }
+  return coords;
+}
+
+const createNewAnnotationsWithFeatures = (zincObject, region, group, scaffoldUrl, comment) => {
+  let type = undefined;
+  if (zincObject.isPointset) {
+    type = "MultiPoint";
+  } else if (zincObject.isLines2) {
+    type = "MultiLineString";
+  }
+  if (type) {
+    const coords = getCoordinatesForAnnotationFeature(zincObject);
+    const featureID = encodeURIComponent(region + group);
+    const userAnnotation = {
+      resource: encodeURIComponent(scaffoldUrl),
+      item: {
+        "id": featureID,
+      },
+      body: {
+        evidence: [],
+        comment: comment,
+      },
+      feature: {
+        "id": featureID,
+        "properties": {
+            "drawn": true,
+            "label": "Drawn annotation"
+        },
+        "geometry": {
+            "coordinates": coords,
+            "type": type
+        }
+      },
+    }
+    return userAnnotation;
+  }
+}
+
+/*
+ * Add/Update drawn annotations to the server.
+ */
+export const addUserAnnotationWithFeature = (service, userToken, zincObject, region, group, scaffoldUrl, action) => {
+  if (service && service.currentUser) {
+    const annotation = createNewAnnotationsWithFeatures(zincObject, region, group, scaffoldUrl, action);
+    console.log(annotation)
+    if (annotation) {
+      annotation.creator = {...service.currentUser};
+      if (!annotation.creator.orcid) annotation.creator.orcid = '0000-0000-0000-0000';
+      service.addAnnotation(userToken, annotation)
+      .then((response) => {
+        if (!response.annotationId) {
+          console.log('There is a problem with the submission, please try again later');
+        }
+      })
+      .catch(() => {
+        console.log('There is a problem with the submission, please try again later');
+      })
+    }
+  }
+}
+
+/*
+ * Get the drawn annotation stored on the annotation server
+ */
+export const getDrawnAnnotations = async (service, userToken, scaffoldUrl) => {
+  const resource = encodeURIComponent(scaffoldUrl);
+  return await service.drawnFeatures(userToken, resource);
+}
+
+/*
+ * Convert features store in annotation server into primitives
+ */
+export const annotationFeaturesToPrimitives = (scene, features)  => {
+  if (scene) {
+    features.forEach((feature) => {
+      console.log(feature)
+      const geometry = feature.geometry;
+      const regionGroup = decodeURIComponent(feature.id);
+      const last = regionGroup.lastIndexOf('/');
+      const region = regionGroup.substring(0, last);
+      const group = regionGroup.substring(last + 1);
+      let object = undefined;
+      if (geometry.type === "MultiPoint") {
+        object = scene.createPoints(
+          region,
+          group,
+          geometry.coordinates,
+          undefined,
+          0x0022ee,
+        );
+      } else if (geometry.type === "MultiLineString") {
+        object = scene.createLines(
+          region,
+          group,
+          geometry.coordinates,
+          0x00ee22,
+        );
+      }
+      if (object) object.zincObject.isEditable = true;
+    });
+  }
+}

@@ -426,6 +426,9 @@ import ScaffoldTooltip from "./ScaffoldTooltip.vue";
 import TreeControls from "./TreeControls.vue";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
 import {
+  addUserAnnotationWithFeature,
+  annotationFeaturesToPrimitives,
+  getDrawnAnnotations,
   getEditableLines,
   getObjectsFromAnnotations,
   findObjectsWithNames,
@@ -988,9 +991,15 @@ export default {
           if (this._editingZincObject) {
             this._editingZincObject.editVertice([this.createData.points[1]],
               payload.editingIndex);
+            const region = this._editingZincObject.region.getFullPath() + "/";
+            const group = this._editingZincObject.groupName;
+            addUserAnnotationWithFeature(this.annotator, this.userToken, this._editingZincObject,
+              region, group, this.url, "Position Updated");
           }
         }
         if (object) {
+          addUserAnnotationWithFeature(this.annotator, this.userToken, object.zincObject,
+            payload.region, payload.group, this.url, "Create");
           object.zincObject.isEditable = true;
           this.tData.region = payload.region;
           this.tData.label = payload.group;
@@ -1254,7 +1263,7 @@ export default {
           }
         } else {
           //Make sure the tooltip is displayed with annotation mode
-          const editing = getEdiqtableLines(event);
+          const editing = getEditableLines(event);
           if (editing) {
             this.activateEditingMode(editing.zincObject, editing.faceIndex,
               editing.vertexIndex, editing.point);
@@ -1647,10 +1656,22 @@ export default {
     viewingModeChange: function () {
       if (this.$module) {
         if (this.viewingMode === "Annotation") {
+          let authenticated = false;
+          if (this.userInformation) {
+            authenticated = true;
+          }
           this.userInformation = undefined;
           this.annotator.authenticate(this.userToken).then((userData) => {
             if (userData.name && userData.email) {
               this.userInformation = userData;
+              //Only draw annotations stored in the server on initial authentication
+              if (!authenticated) {
+                getDrawnAnnotations(this.annotator, this.userToken, this.url).then((payload) => {
+                  if (payload && payload.features) {
+                    annotationFeaturesToPrimitives(this.$module.scene, payload.features);
+                  }
+                });
+              }
             }
           });
         }
