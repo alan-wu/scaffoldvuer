@@ -668,6 +668,7 @@ export default {
     return {
       flatmapAPI: this.flatmapAPI,
       scaffoldUrl: this.url,
+      $annotator: this.annotator,
     };
   },
   data: function () {
