@@ -2,13 +2,33 @@
   <div id="app">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Asap:400,400i,500,600,700&display=swap" />
     <drop-zone ref="dropzone" @files-drop="onFilesDrop">
-      <ScaffoldVuer v-if="url" ref="scaffold" class="vuer" :flatmapAPI="flatmapAPI" :display-u-i="displayUI" :url="url"
-        :help-mode="helpMode" :display-latest-changes="true" :display-minimap="displayMinimap"
-        :display-markers="displayMarkers" :enableOpenMapUI="true" :minimap-settings="minimapSettings"
-        :show-colour-picker="showColourPicker" :render="render" :region="region" :view-u-r-l="viewURL" :format="format"
-        :marker-labels="markerLabels" @open-map="openMap" @on-ready="onReady" @scaffold-selected="onSelected"
-        @scaffold-navigated="onNavigated" @timeChanged="updateCurrentTime" @zinc-object-added="objectAdded"
-        @vue:mounted="viewerMounted"/>
+      <ScaffoldVuer
+        v-if="url"
+        ref="scaffold"
+        class="vuer"
+        :flatmapAPI="flatmapAPI"
+        :display-u-i="displayUI"
+        :url="url"
+        :help-mode="helpMode"
+        :display-latest-changes="true"
+        :display-minimap="displayMinimap"
+        :display-markers="displayMarkers"
+        :enableOpenMapUI="true"
+        :minimap-settings="minimapSettings"
+        :show-colour-picker="showColourPicker"
+        :render="render"
+        :region="region"
+        :view-u-r-l="viewURL"
+        :format="format"
+        :marker-labels="markerLabels"
+        @open-map="openMap"
+        @on-ready="onReady"
+        @scaffold-selected="onSelected"
+        @scaffold-navigated="onNavigated"
+        @timeChanged="updateCurrentTime"
+        @zinc-object-added="objectAdded"
+        @vue:mounted="viewerMounted"
+      />
     </drop-zone>
 
     <el-popover popper-class="options-container" placement="bottom" trigger="click" width="500" :teleported="false">
