@@ -13,6 +13,7 @@
         :helpModeActiveItem="helpModeActiveItem"
         @help-mode-last-item="onHelpModeLastItem"
         @shown-tooltip="onTooltipShown"
+        @shown-map-tooltip="onMapTooltipShown"
         :display-latest-changes="true"
         :display-minimap="displayMinimap"
         :display-markers="displayMarkers"
@@ -36,6 +37,7 @@
 
     <HelpModeDialog
       v-if="helpMode"
+      ref="scaffoldHelp"
       :scaffoldRef="scaffoldRef"
       :lastItem="helpModeLastItem"
       @show-next="onHelpModeShowNext"
@@ -212,7 +214,6 @@ import {
 } from "element-plus";
 import { useRoute, useRouter } from 'vue-router'
 import HelpModeDialog from './components/HelpModeDialog.vue';
-import EventBus from './scripts/EventBus';
 
 let texture_prefix = undefined;
 
@@ -563,10 +564,14 @@ export default {
       this.helpModeLastItem = false;
     },
     onTooltipShown: function () {
-      EventBus.emit('shown-tooltip');
+      if (this.$refs.scaffold && this.$refs.scaffoldHelp) {
+        this.$refs.scaffoldHelp.toggleTooltipHighlight();
+      }
     },
     onMapTooltipShown: function () {
-      EventBus.emit('shown-map-tooltip');
+      if (this.$refs.scaffold && this.$refs.scaffoldHelp) {
+        this.$refs.scaffoldHelp.toggleTooltipPinHighlight();
+      }
     },
   },
 };
