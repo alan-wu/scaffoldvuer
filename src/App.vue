@@ -36,7 +36,7 @@
 
     <HelpModeDialog
       v-if="helpMode"
-      :currentScaffoldRef="currentScaffoldRef"
+      :scaffoldRef="scaffoldRef"
       :lastItem="helpModeLastItem"
       @show-next="onHelpModeShowNext"
       @finish-help-mode="onFinishHelpMode"
@@ -276,7 +276,7 @@ export default {
       helpMode: false,
       helpModeActiveItem: 0,
       helpModeLastItem: false,
-      currentScaffoldRef: null,
+      scaffoldRef: null,
       route: useRoute(),
       router: useRouter(),
       ElIconSetting: shallowRef(ElIconSetting),
@@ -480,7 +480,7 @@ export default {
           testArmSlides(this.$refs.scaffold);
         }
       }
-      this.currentScaffoldRef = this.$refs.scaffold;
+      this.scaffoldRef = this.$refs.scaffold;
     },
     onSelected: function (data) {
       if (data && data.length > 0 && data[0].data.group) {
