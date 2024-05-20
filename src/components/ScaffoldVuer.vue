@@ -473,8 +473,8 @@ export default {
       default: false,
     },
     /**
-     * The initial index number for help mode tooltips
-     * Set -1 if there has tooltip outside of `hoverVisibilities`
+     * The initial index number for help mode tooltips.
+     * Set negative (e.g. -1) if there are other tooltips outside of `hoverVisibilities`.
      */
      helpModeInitialIndex: {
       type: Number,
