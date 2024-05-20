@@ -1867,6 +1867,8 @@ export default {
   padding: 9px 10px;
   min-width: 150px;
   font-size: 12px;
+  white-space: initial !important;
+  text-align: initial;
   color: #fff;
 }
 
