@@ -2,7 +2,6 @@ import { THREE } from 'zincjs';
 import { RendererModule } from './RendererModule.js';
 import Annotation from './Annotation.js';
 
-
 // Current model's associate data, data fields, external link, nerve map
 // informations,
 // these are proived in the organsFileMap array.
