@@ -10,6 +10,7 @@
         :display-u-i="displayUI"
         :url="url"
         :help-mode="helpMode"
+        :helpModeDialog="useHelpModeDialog"
         :helpModeActiveItem="helpModeActiveItem"
         @help-mode-last-item="onHelpModeLastItem"
         @shown-tooltip="onTooltipShown"
@@ -36,7 +37,7 @@
     </drop-zone>
 
     <HelpModeDialog
-      v-if="helpMode"
+      v-if="helpMode && useHelpModeDialog"
       ref="scaffoldHelp"
       :scaffoldRef="scaffoldRef"
       :lastItem="helpModeLastItem"
@@ -277,6 +278,7 @@ export default {
       helpMode: false,
       helpModeActiveItem: 0,
       helpModeLastItem: false,
+      useHelpModeDialog: true,
       scaffoldRef: null,
       route: useRoute(),
       router: useRouter(),

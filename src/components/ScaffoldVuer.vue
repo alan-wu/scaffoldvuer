@@ -461,14 +461,23 @@ export default {
     /**
      * The active item index of help mode.
      */
-     helpModeActiveItem: {
+    helpModeActiveItem: {
       type: Number,
       default: 0,
     },
     /**
+     * The option to use helpModeDialog.
+     * On default, `false`, clicking help will show all tooltips.
+     * If `true`, clicking help will show the help-mode-dialog.
+     */
+    helpModeDialog: {
+      type: Boolean,
+      default: false,
+    },
+    /**
      * The last item of help mode.
      */
-     helpModeLastItem: {
+    helpModeLastItem: {
       type: Boolean,
       default: false,
     },
@@ -476,7 +485,7 @@ export default {
      * The initial index number for help mode tooltips.
      * Set negative (e.g. -1) if there are other tooltips outside of `hoverVisibilities`.
      */
-     helpModeInitialIndex: {
+    helpModeInitialIndex: {
       type: Number,
       default: 0,
     },
@@ -1290,7 +1299,12 @@ export default {
         this.$emit('help-mode-last-item', true);
       }
 
-      if (helpMode && toolTipsLength > this.helpModeActiveIndex) {
+      if (helpMode && !this.helpModeDialog) {
+        this.inHelp = true;
+        this.hoverVisibilities.forEach((item) => {
+          item.value = true;
+        });
+      } else if (helpMode && this.helpModeDialog && toolTipsLength > this.helpModeActiveIndex) {
 
         // Show the map tooltip as first item
         if (this.helpModeActiveIndex > -1) {
