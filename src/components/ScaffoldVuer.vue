@@ -37,6 +37,7 @@
           trigger="manual"
           width="80"
           popper-class="flatmap-popper"
+          ref="commentPopover"
           :visible="hoverVisibilities[9].value"
         >
           <template #reference>
@@ -57,6 +58,7 @@
           trigger="manual"
           width="80"
           popper-class="flatmap-popper"
+          ref="drawPointPopover"
           :visible="hoverVisibilities[10].value"
         >
           <template #reference>
@@ -77,6 +79,7 @@
           trigger="manual"
           width="80"
           popper-class="flatmap-popper"
+          ref="drawLinePopover"
           :visible="hoverVisibilities[11].value"
         >
           <template #reference>
@@ -97,6 +100,7 @@
         :visible="hoverVisibilities[6].value"
         :content="warningMessage"
         placement="right"
+        width="max-content"
         :teleported="false"
         popper-class="scaffold-popper message-popper right-popper non-selectable"
       >
@@ -120,6 +124,7 @@
         :teleported="false"
         trigger="manual"
         popper-class="scaffold-popper message-popper right-popper non-selectable"
+        ref="whatsNewPopover"
       >
         <template #reference>
           <div
@@ -137,9 +142,11 @@
         :visible="hoverVisibilities[5].value"
         content="Change region visibility"
         placement="right"
+        width="max-content"
         :teleported="false"
         trigger="manual"
         popper-class="scaffold-popper right-popper non-selectable"
+        ref="regionVisibilityPopover"
       >
         <template #reference>
           <tree-controls
@@ -159,6 +166,7 @@
       <el-popover
         v-if="timeVarying"
         ref="sliderPopover"
+        width="max-content"
         :visible="hoverVisibilities[4].value"
         content="Move the slider to animate the region"
         placement="top"
@@ -242,10 +250,12 @@
         <el-popover
           :visible="hoverVisibilities[0].value"
           content="Zoom in"
+          width="max-content"
           placement="left"
           :teleported="false"
           trigger="manual"
           popper-class="scaffold-popper left-popper non-selectable"
+          ref="zoomInPopover"
         >
           <template #reference>
             <map-svg-icon
@@ -261,9 +271,11 @@
           :visible="hoverVisibilities[1].value"
           content="Zoom out"
           placement="top-end"
+          width="max-content"
           :teleported="false"
           trigger="manual"
           popper-class="scaffold-popper popper-zoomout non-selectable"
+          ref="zoomOutPopover"
         >
           <template #reference>
             <map-svg-icon
@@ -280,7 +292,9 @@
           placement="top"
           :teleported="false"
           trigger="manual"
+          width="max-content"
           popper-class="scaffold-popper non-selectable"
+          ref="zoomFitPopover"
         >
           <div>
             Fit to
@@ -361,7 +375,7 @@
               @click="backgroundChangeCallback(item)"
             />
           </el-row>
-        </div>  
+        </div>
       </el-popover>
       <div
         class="settings-group"
@@ -374,7 +388,9 @@
             placement="right"
             :teleported="false"
             trigger="manual"
+            width="max-content"
             popper-class="scaffold-popper right-popper non-selectable"
+            ref="openMapPopover"
           >
             <template #reference>
               <map-svg-icon
@@ -393,9 +409,11 @@
             :visible="hoverVisibilities[3].value"
             content="Change background color"
             placement="right"
+            width="max-content"
             :teleported="false"
             trigger="manual"
             popper-class="scaffold-popper right-popper non-selectable"
+            ref="settingsPopover"
           >
             <template #reference>
               <map-svg-icon
@@ -526,6 +544,37 @@ export default {
     helpMode: {
       type: Boolean,
       default: false,
+    },
+    /**
+     * The active item index of help mode.
+     */
+    helpModeActiveItem: {
+      type: Number,
+      default: 0,
+    },
+    /**
+     * The option to use helpModeDialog.
+     * On default, `false`, clicking help will show all tooltips.
+     * If `true`, clicking help will show the help-mode-dialog.
+     */
+    helpModeDialog: {
+      type: Boolean,
+      default: false,
+    },
+    /**
+     * The last item of help mode.
+     */
+    helpModeLastItem: {
+      type: Boolean,
+      default: false,
+    },
+    /**
+     * The initial index number for help mode tooltips.
+     * Set negative (e.g. -1) if there are other tooltips outside of `hoverVisibilities`.
+     */
+    helpModeInitialIndex: {
+      type: Number,
+      default: 0,
     },
     /**
      * Use for show/display beta warning icon.
@@ -694,20 +743,21 @@ export default {
       isTransitioning: false,
       tooltipAppendToBody: false,
       hoverVisibilities: [
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
-        { value: false },
+        { value: false, ref: 'zoomInPopover' }, // 0
+        { value: false, ref: 'zoomOutPopover' }, // 1
+        { value: false, ref: 'zoomFitPopover' }, // 2
+        { value: false, ref: 'settingsPopover' }, // 3
+        { value: false, ref: 'sliderPopover' }, // 4
+        { value: false, ref: 'regionVisibilityPopover' }, // 5
+        { value: false, ref: 'warningPopover' }, // 6
+        { value: false, ref: 'whatsNewPopover' }, // 7
+        { value: false, ref: 'openMapPopover' }, // 8
+        { value: false, ref: 'commentPopover' }, //9
+        { value: false, ref: 'drawPointPopover' }, //10
+        { value: false, ref: 'drawLinePopover' }, //11
       ],
       inHelp: false,
+      helpModeActiveIndex: this.helpModeInitialIndex,
       loading: false,
       duration: 3000,
       drawerOpen: true,
@@ -800,8 +850,18 @@ export default {
       },
       immediate: true,
     },
-    helpMode: function (val) {
-      this.setHelpMode(val);
+    helpMode: function (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.setHelpMode(newVal)
+      }
+    },
+    helpModeActiveItem: function () {
+      // just take the action from helpModeActiveItem
+      // work with local value since the indexing is different
+      if (this.helpMode) {
+        this.helpModeActiveIndex += 1;
+        this.setHelpMode(this.helpMode);
+      }
     },
     displayMarkers: function (val) {
       this.$module.scene.displayMarkers = val;
@@ -860,6 +920,8 @@ export default {
     this.ro = new ResizeObserver(this.adjustLayout).observe(
       this.$refs.scaffoldContainer
     );
+    this.helpTextWait = [];
+    this.helpTextWait.length = this.hoverVisibilities.length;
     this.defaultRate = this.$module.getPlayRate();
     this.$module.zincRenderer.addPreRenderCallbackFunction(() => {
       this.currentTime = this.$module.getCurrentTime();
@@ -1136,7 +1198,7 @@ export default {
     /**
      * Find and and zoom into objects with the provided list of names.
      * @arg List of names
-     * 
+     *
      * @vuese
      */
     viewRegion: function (names) {
@@ -1227,7 +1289,7 @@ export default {
     },    
     /**
      * Return renderer information
-     * 
+     *
      * @vuese
      */
     getRendererInfo: function () {
@@ -1421,7 +1483,7 @@ export default {
      *
      * @arg Selected zinc objects
      * @arg Flag to determine if callback should be triggered when new selection
-     * is made 
+     * is made
      */
     objectSelected: function (objects, propagate) {
       this.updatePrimitiveControls(objects);
@@ -1432,7 +1494,7 @@ export default {
      *
      * @arg Hovered zinc objects
      * @arg Flag to determine if callback should be triggered when new selection
-     * is made 
+     * is made
      */
     objectHovered: function (objects, propagate) {
       this.hoveredObjects = objects;
@@ -1485,11 +1547,68 @@ export default {
      * Function to toggle on/off overlay help.
      */
     setHelpMode: function (helpMode) {
-      if (helpMode) {
+      const toolTipsLength = this.hoverVisibilities.length;
+      const lastIndex = toolTipsLength - 1;
+      const activePopoverObj = this.hoverVisibilities[this.helpModeActiveIndex];
+
+      if (activePopoverObj) {
+        const popoverRefId = activePopoverObj?.ref;
+        const popoverRef = this.$refs[popoverRefId];
+
+        if (popoverRef) {
+          // Open pathway drawer if the tooltip is inside or beside
+          const { parentElement, nextElementSibling } = popoverRef.$el;
+          const isPathwayContainer = (element) => {
+            return element && (
+              element.classList.contains('pathway-container') ||
+              element.classList.contains('pathway-location')
+            );
+          };
+
+          if (
+            isPathwayContainer(parentElement) ||
+            isPathwayContainer(nextElementSibling)
+          ) {
+            this.drawerOpen = true;
+          }
+        } else {
+          // skip the unavailable tooltips
+          this.helpModeActiveIndex += 1;
+        }
+      }
+
+      if (!helpMode) {
+        // reset to iniital state
+        this.helpModeActiveIndex = this.helpModeInitialIndex;
+      }
+
+      if (helpMode && this.helpModeActiveIndex >= lastIndex) {
+        /**
+         * This event is emitted when the tooltips in help mode reach the last item.
+         */
+        this.$emit('help-mode-last-item', true);
+      }
+
+      if (helpMode && !this.helpModeDialog) {
         this.inHelp = true;
         this.hoverVisibilities.forEach((item) => {
           item.value = true;
         });
+      } else if (helpMode && this.helpModeDialog && toolTipsLength > this.helpModeActiveIndex) {
+
+        // Show the map tooltip as first item
+        if (this.helpModeActiveIndex > -1) {
+
+          // wait for CSS transition
+          setTimeout(() => {
+            this.inHelp = false;
+            this.hoverVisibilities.forEach((item) => {
+              item.value = false;
+            });
+
+            this.showHelpText(this.helpModeActiveIndex, 200);
+          }, 300);
+        }
       } else {
         this.inHelp = false;
         this.hoverVisibilities.forEach((item) => {
@@ -1730,25 +1849,32 @@ export default {
      * This is called when mouse cursor enters supported elements
      * with help tootltips.
      */
-    showHelpText: function (helpTextNumber) {
+    showHelpText: function (helpTextNumber, timeout = 500) {
       if (!this.inHelp) {
-        this.helpTextWait = setTimeout(() => {
+        clearTimeout(this.helpTextWait[helpTextNumber]);
+        this.helpTextWait[helpTextNumber] = setTimeout(() => {
           this.hoverVisibilities[helpTextNumber].value = true;
-        }, 500);
+          /**
+           * This event is emitted after a tooltip in Flatmap is shown.
+           */
+          this.$emit('shown-tooltip');
+        }, timeout);
       }
     },
     /**
      * This is called when mouse cursor exits supported element..
      */
-    hideHelpText: function (helpTextNumber) {
+    hideHelpText: function (helpTextNumber, timeout = 500) {
       if (!this.inHelp) {
-        this.hoverVisibilities[helpTextNumber].value = false;
-        clearTimeout(this.helpTextWait);
+        clearTimeout(this.helpTextWait[helpTextNumber]);
+        this.helpTextWait[helpTextNumber] = setTimeout(() => {
+          this.hoverVisibilities[helpTextNumber].value = false;
+        }, timeout);
       }
     },
     /**
      * @vuese
-     * 
+     *
      * Search a object and display the tooltip
      * @arg text to search across
      * @arg toggle the tooltip if this is set
@@ -1758,7 +1884,7 @@ export default {
         if (text === undefined || text === "" ||
           ((Array.isArray(text) && text.length === 0))
         ) {
-          this.objectSelected([], true); 
+          this.objectSelected([], true);
           return false;
         } else {
           const result = this.$_searchIndex.searchAndProcessResult(text);
@@ -1788,7 +1914,7 @@ export default {
     },
     /**
      * @vuese
-     * 
+     *
      * Get the list of suggested terms based on the provided term.
      * This can be used for autocomplete.
      */
@@ -1911,7 +2037,7 @@ export default {
     /**
      * export current scene in GLTF.
      * @arg Return in binary form when set to true
-     * 
+     *
      * @vuese
      */
     exportGLTF: function (binary) {
@@ -2004,7 +2130,7 @@ export default {
     },
     /**
      * @vuese
-     * 
+     *
      * Force the renderer to resize
      */
     forceResize: function () {
@@ -2083,6 +2209,8 @@ export default {
   padding: 9px 10px;
   min-width: 150px;
   font-size: 12px;
+  white-space: initial !important;
+  text-align: initial;
   color: #fff;
 }
 
@@ -2389,7 +2517,7 @@ export default {
   border: 1px solid $app-primary-color;
   white-space: nowrap;
   min-width: unset;
-  width: unset!important;;
+  word-break: break-word;
   pointer-events: none;
 
   .el-popper__arrow {
@@ -2421,7 +2549,7 @@ export default {
 
 :deep(.popper-zoomout) {
   padding-right: 11px;
-  left: -21px !important;
+
   .popper__arrow {
     left: 53px !important;
   }

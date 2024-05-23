@@ -37,6 +37,7 @@ declare module 'vue' {
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
     ElTabs: typeof import('element-plus/es')['ElTabs']
     ElTree: typeof import('element-plus/es')['ElTree']
+    HelpModeDialog: typeof import('./components/HelpModeDialog.vue')['default']
     LinesControls: typeof import('./components/LinesControls.vue')['default']
     OpacityControls: typeof import('./components/OpacityControls.vue')['default']
     PointsControls: typeof import('./components/PointsControls.vue')['default']

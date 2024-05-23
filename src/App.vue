@@ -2,14 +2,48 @@
   <div id="app">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Asap:400,400i,500,600,700&display=swap" />
     <drop-zone ref="dropzone" @files-drop="onFilesDrop">
-      <ScaffoldVuer v-if="url" ref="scaffold" class="vuer" :flatmapAPI="flatmapAPI" :display-u-i="displayUI" :url="url"
-        :help-mode="helpMode" :display-latest-changes="true" :display-minimap="displayMinimap"
-        :display-markers="displayMarkers" :enableOpenMapUI="true" :minimap-settings="minimapSettings"
-        :show-colour-picker="showColourPicker" :render="render" :region="region" :view-u-r-l="viewURL" :format="format"
-        :marker-labels="markerLabels" @open-map="openMap" @on-ready="onReady" @scaffold-selected="onSelected"
-        @scaffold-navigated="onNavigated" @timeChanged="updateCurrentTime" @zinc-object-added="objectAdded"
-        @vue:mounted="viewerMounted"/>
+      <ScaffoldVuer
+        v-if="url"
+        ref="scaffold"
+        class="vuer"
+        :flatmapAPI="flatmapAPI"
+        :display-u-i="displayUI"
+        :url="url"
+        :help-mode="helpMode"
+        :helpModeDialog="useHelpModeDialog"
+        :helpModeActiveItem="helpModeActiveItem"
+        @help-mode-last-item="onHelpModeLastItem"
+        @shown-tooltip="onTooltipShown"
+        @shown-map-tooltip="onMapTooltipShown"
+        :display-latest-changes="true"
+        :display-minimap="displayMinimap"
+        :display-markers="displayMarkers"
+        :enableOpenMapUI="true"
+        :minimap-settings="minimapSettings"
+        :show-colour-picker="showColourPicker"
+        :render="render"
+        :region="region"
+        :view-u-r-l="viewURL"
+        :format="format"
+        :marker-labels="markerLabels"
+        @open-map="openMap"
+        @on-ready="onReady"
+        @scaffold-selected="onSelected"
+        @scaffold-navigated="onNavigated"
+        @timeChanged="updateCurrentTime"
+        @zinc-object-added="objectAdded"
+        @vue:mounted="viewerMounted"
+      />
     </drop-zone>
+
+    <HelpModeDialog
+      v-if="helpMode && useHelpModeDialog"
+      ref="scaffoldHelp"
+      :scaffoldRef="scaffoldRef"
+      :lastItem="helpModeLastItem"
+      @show-next="onHelpModeShowNext"
+      @finish-help-mode="onFinishHelpMode"
+    />
 
     <el-popover popper-class="options-container" placement="bottom" trigger="click" width="500" :teleported="false">
       <div>
@@ -180,6 +214,7 @@ import {
   ElSwitch as Switch,
 } from "element-plus";
 import { useRoute, useRouter } from 'vue-router'
+import HelpModeDialog from './components/HelpModeDialog.vue';
 
 let texture_prefix = undefined;
 
@@ -200,6 +235,7 @@ export default {
     DropZone,
     ScaffoldVuer,
     ModelsTable,
+    HelpModeDialog,
   },
   data: function () {
     return {
@@ -291,6 +327,11 @@ export default {
       loadTextureVolumeOnReady: false,
       readyCallback: undefined,
       flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v4/",
+      helpMode: false,
+      helpModeActiveItem: 0,
+      helpModeLastItem: false,
+      useHelpModeDialog: true,
+      scaffoldRef: null,
       route: useRoute(),
       router: useRouter(),
       ElIconSetting: shallowRef(ElIconSetting),
@@ -312,6 +353,11 @@ export default {
     },
     syncMode: function (val) {
       this.$refs.scaffold.toggleSyncControl(val);
+    },
+    helpMode: function (newVal) {
+      if (!newVal) {
+        this.helpModeActiveItem = 0;
+      }
     },
   },
   mounted: function () {
@@ -499,6 +545,7 @@ export default {
           testArmSlides(this.$refs.scaffold);
         }
       }
+      this.scaffoldRef = this.$refs.scaffold;
     },
     addLines: function (coord) {
       if (this.coordinatesClicked.length === 1) {
@@ -589,7 +636,31 @@ export default {
           this.viewURL = "";
         }
       })
-    }
+    },
+    onHelpModeShowNext: function () {
+      this.helpModeActiveItem += 1;
+    },
+    onHelpModeLastItem: function (isLastItem) {
+      if (isLastItem) {
+        this.helpModeLastItem = true;
+      }
+    },
+    onFinishHelpMode: function () {
+      this.helpMode = false;
+      // reset help mode to default values
+      this.helpModeActiveItem = 0;
+      this.helpModeLastItem = false;
+    },
+    onTooltipShown: function () {
+      if (this.$refs.scaffold && this.$refs.scaffoldHelp) {
+        this.$refs.scaffoldHelp.toggleTooltipHighlight();
+      }
+    },
+    onMapTooltipShown: function () {
+      if (this.$refs.scaffold && this.$refs.scaffoldHelp) {
+        this.$refs.scaffoldHelp.toggleTooltipPinHighlight();
+      }
+    },
   },
 };
 </script>
