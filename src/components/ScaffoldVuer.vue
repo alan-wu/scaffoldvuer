@@ -606,6 +606,13 @@ export default {
       type: Boolean,
       default: false,
     },
+    /**
+     * Display adjacent markers with a cluster marker.
+     */
+    markerCluster: {
+      type: Boolean,
+      default: false,
+    },
     markerLabels : {
       type: Array,
       default: function () {
@@ -887,6 +894,12 @@ export default {
     },
     render: function (val) {
       this.toggleRendering(val);
+    },
+    markerCluster: {
+      handler: function (val) {
+        this.$module.scene.enableMarkerCluster(val);
+      },
+      immediate: true,
     },
     markerLabels: function(labels) {
       this.previousMarkerLabels.forEach((pml)=>{

@@ -19,6 +19,7 @@
         :display-minimap="displayMinimap"
         :display-markers="displayMarkers"
         :enableOpenMapUI="true"
+        :marker-cluster="markerCluster"
         :minimap-settings="minimapSettings"
         :show-colour-picker="showColourPicker"
         :render="render"
@@ -56,11 +57,15 @@
           </p>
         </el-row>
         <el-row :gutter="20">
-          <el-col :span="4" :offset="1">
+          <el-col :span="3" :offset="1">
             <el-switch v-model="displayUI" active-text="UI" />
           </el-col>
-          <el-col :span="6" :offset="1">
+          <el-col :span="4" :offset="1">
             <el-switch v-model="displayMarkers" active-text="Markers" active-icon-class="el-icon-location"
+              active-color="#8300bf" />
+          </el-col>
+          <el-col :span="6" :offset="1">
+            <el-switch v-model="markerCluster" active-text="Marker Cluster" active-icon-class="el-icon-location"
               active-color="#8300bf" />
           </el-col>
           <el-col :span="4" :offset="1">
@@ -255,6 +260,7 @@ export default {
       tumbleOn: false,
       tumbleDirection: [1.0, 0.0],
       showColourPicker: true,
+      markerCluster: false,
       minimapSettings: {
         x_offset: 16,
         y_offset: 50,
