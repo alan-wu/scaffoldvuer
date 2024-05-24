@@ -2456,9 +2456,9 @@ export default {
   &.shape {
     margin-left: 4px;
     margin-right: 4px;
-    color: var(--el-color-primary-light-5);
+    color: var(--el-color-primary-light-5)!important;
     &.active {
-      color: var(--el-color-primary);
+      color: var(--el-color-primary)!important;
     }
   }
 }
