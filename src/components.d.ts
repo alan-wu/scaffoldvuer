@@ -7,9 +7,12 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    CreateTooltipContent: typeof import('./components/CreateTooltipContent.vue')['default']
     ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCol: typeof import('element-plus/es')['ElCol']
+    ElCollapse: typeof import('element-plus/es')['ElCollapse']
+    ElCollapseItem: typeof import('element-plus/es')['ElCollapseItem']
     ElColorPicker: typeof import('element-plus/es')['ElColorPicker']
     ElContainer: typeof import('element-plus/es')['ElContainer']
     ElFooter: typeof import('element-plus/es')['ElFooter']
@@ -35,13 +38,16 @@ declare module 'vue' {
     ElTabs: typeof import('element-plus/es')['ElTabs']
     ElTree: typeof import('element-plus/es')['ElTree']
     HelpModeDialog: typeof import('./components/HelpModeDialog.vue')['default']
+    LinesControls: typeof import('./components/LinesControls.vue')['default']
     OpacityControls: typeof import('./components/OpacityControls.vue')['default']
+    PointsControls: typeof import('./components/PointsControls.vue')['default']
     PrimitiveControls: typeof import('./components/PrimitiveControls.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     ScaffoldTooltip: typeof import('./components/ScaffoldTooltip.vue')['default']
     ScaffoldVuer: typeof import('./components/ScaffoldVuer.vue')['default']
     TextureSlidesControls: typeof import('./components/TextureSlidesControls.vue')['default']
+    TransformationControls: typeof import('./components/TransformationControls.vue')['default']
     TreeControls: typeof import('./components/TreeControls.vue')['default']
   }
   export interface ComponentCustomProperties {

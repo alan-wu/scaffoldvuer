@@ -1,8 +1,5 @@
 <template>
-  <el-container v-show="settings.length > 0" class="t-slides-container">
-    <el-header height="30px" class="header">
-      <div>Texture Slides Settings</div>
-    </el-header>
+  <el-container class="t-slides-container">
     <el-main class="slides-block">
       <el-row v-for="(slide, index) in settings" :key="slide.id" class="slide-row">
         <el-col :offset="0" :span="6">
@@ -74,12 +71,13 @@ import {
   ElCol as Col,
   ElContainer as Container,
   ElFooter as Footer,
-  ElHeader as Header,
   ElIcon as Icon,
   ElInputNumber as InputNumber,
   ElMain as Main,
   ElRow as Row,
+  ElSelect as Select,
   ElSlider as Slider,
+  ElOption as Option,
 } from "element-plus";
 
 /**
@@ -91,12 +89,13 @@ export default {
     Col,
     Container,
     Footer,
-    Header,
     Icon,
     InputNumber,
     Main,
     Row,
+    Select,
     Slider,
+    Option,
     ElIconDelete,
     ElIconPlus,
   },
@@ -144,7 +143,6 @@ export default {
       }
     },
     modifySlide: function (slide) {
-      console.log(slide.value)
       if (slide) {
         this._zincObject.modifySlideSettings(slide);
       }
@@ -159,13 +157,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-.header {
-  color: #606266;
-  line-height: 1;
-  padding: 8px 17px 1px 15px;
-  border-bottom: 1px solid #ebeef5;
-  font-size: 14px;
-}
 
 .add-slides-text {
   color: $app-primary-color;
@@ -205,11 +196,8 @@ export default {
 
 .t-slides-container {
   width: 250px;
-  height: 250px;
-  border-radius: 4px;
-  border: solid 1px #d8dce6;
-  background-color: #fff;
-  overflow-y: none;
+  height: 150px;
+  overflow-y: auto;
 }
 
 .input-box {

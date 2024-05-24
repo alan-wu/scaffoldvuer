@@ -19,6 +19,7 @@
         :display-minimap="displayMinimap"
         :display-markers="displayMarkers"
         :enableOpenMapUI="true"
+        :marker-cluster="markerCluster"
         :minimap-settings="minimapSettings"
         :show-colour-picker="showColourPicker"
         :render="render"
@@ -56,11 +57,15 @@
           </p>
         </el-row>
         <el-row :gutter="20">
-          <el-col :span="4" :offset="1">
+          <el-col :span="3" :offset="1">
             <el-switch v-model="displayUI" active-text="UI" />
           </el-col>
-          <el-col :span="6" :offset="1">
+          <el-col :span="4" :offset="1">
             <el-switch v-model="displayMarkers" active-text="Markers" active-icon-class="el-icon-location"
+              active-color="#8300bf" />
+          </el-col>
+          <el-col :span="6" :offset="1">
+            <el-switch v-model="markerCluster" active-text="Marker Cluster" active-icon-class="el-icon-location"
               active-color="#8300bf" />
           </el-col>
           <el-col :span="4" :offset="1">
@@ -239,6 +244,8 @@ export default {
   },
   data: function () {
     return {
+      consoleOn: true,
+      createPoints: false, 
       url: undefined,
       input: undefined,
       displayUI: true,
@@ -253,6 +260,7 @@ export default {
       tumbleOn: false,
       tumbleDirection: [1.0, 0.0],
       showColourPicker: true,
+      markerCluster: false,
       minimapSettings: {
         x_offset: 16,
         y_offset: 50,
@@ -260,7 +268,57 @@ export default {
         height: 128,
         align: "top-right",
       },
-      markerLabels: ["left atrium", "epicardium"],
+      markerLabels: [
+        "Spinal cord",
+        "urinary bladder",
+        "lower urinary tract",
+        "Peripheral nervous system",
+        "Dorsal root ganglion",
+        "cervicothoracic ganglion",
+        "stomach",
+        "enteric ganglion",
+        "myenteric nerve plexus",
+        "colon",
+        "Enteric Nervous System",
+        "pelvic ganglion",
+        "celiac ganglion",
+        "jugular ganglion",
+        "vagus nerve",
+        "Brainstem",
+        "heart",
+        "larynx",
+        "inferior vagus X ganglion",
+        "mucosa of stomach",
+        "lung",
+        "pelvic splanchnic nerve",
+        "small intestine",
+        "type EC enteroendocrine cell",
+        "body proper",
+        "skin epidermis",
+        "Diaphragm",
+        "sinus venosus",
+        "esophagus",
+        "Solitary nucleus",
+        "urethra",
+        "sympathetic nervous system",
+        "superior cervical ganglion",
+        "cardiac nerve plexus",
+        "ganglion",
+        "pancreas",
+        "Brain",
+        "autonomic nervous system",
+        "lower digestive tract",
+        "adipose tissue",
+        "white adipose tissue",
+        "brown adipose tissue",
+        "kidney",
+        "liver",
+        "phrenic nerve",
+        "submandibular ganglion",
+        "bone tissue",
+        "sciatic nerve",
+        "glossopharyngeal nerve"
+      ],
       render: true,
       region: "",
       viewURL: "",
@@ -283,7 +341,8 @@ export default {
       route: useRoute(),
       router: useRouter(),
       ElIconSetting: shallowRef(ElIconSetting),
-      ElIconFolderOpened: shallowRef(ElIconFolderOpened)
+      ElIconFolderOpened: shallowRef(ElIconFolderOpened),
+      coordinatesClicked: [],
     };
   },
   watch: {
@@ -343,6 +402,10 @@ export default {
       });
     },
     objectAdded: function (zincObject) {
+      if (this.consoleOn) {
+        console.log(zincObject)
+        console.log(this.$refs.scaffold.$module.scene.getBoundingBox())
+      }
       if (this._objects.length === 0) {
         zincObject.setMarkerMode("on");
       }
@@ -352,7 +415,9 @@ export default {
       this._objects.push(zincObject);
     },
     openMap: function (map) {
-      console.log(map);
+      if (this.consoleOn) {
+        console.log(map);
+      }
     },
     featureTextureVolume: async function (overlap) {
       //this.$refs.scaffold.clearScene();
@@ -444,10 +509,12 @@ export default {
           };
         })
       );
-      console.log(
-        "found suggestions",
-        this.$refs.scaffold.fetchSuggestions(term)
-      );
+      if (this.consoleOn) {
+        console.log(
+          "found suggestions",
+          this.$refs.scaffold.fetchSuggestions(term)
+        );
+      }
     },
     autoTumble: function () {
       const flag = this.tumbleOn;
@@ -473,6 +540,7 @@ export default {
       });
     },
     onReady: function () {
+      if (this.consoleOn) console.log(this.$refs.scaffold)
       if (this.readyCallback) {
         this.readyCallback(this.$refs.scaffold, texture_prefix);
         this.readyCallback = undefined;
@@ -485,10 +553,34 @@ export default {
       }
       this.scaffoldRef = this.$refs.scaffold;
     },
+    addLines: function (coord) {
+      if (this.coordinatesClicked.length === 1) {
+        const returned = this.$refs.scaffold.$module.scene.createLines(
+            "test",
+            "lines",
+            [this.coordinatesClicked[0], coord],
+            0x00ee22,
+          );
+          this.coordinatesClicked.length = 0;
+          if (this.consoleOn) console.log(returned);
+      } else {
+        this.coordinatesClicked.push(coord);
+      }
+    },
     onSelected: function (data) {
       if (data && data.length > 0 && data[0].data.group) {
+        if (this.consoleOn) console.log(data[0]);
+        if (this.createPoints && data[0].extraData.worldCoords) {
+          const returned = this.$refs.scaffold.$module.scene.createPoints(
+            "test",
+            "points",
+            [data[0].extraData.worldCoords],
+            undefined,
+            0x0022ee,
+          );
+        }
         delete this.route.query["viewURL"];
-        this.$refs.scaffold.showRegionTooltipWithAnnotations(data, true, true);
+        this.$refs.scaffold.showRegionTooltipWithAnnotations(data, false, true);
         if (this.onClickMarkers) this.$refs.scaffold.setMarkerModeForObjectsWithName(data[0].data.group, "on");
       }
     },

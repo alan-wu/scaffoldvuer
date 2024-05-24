@@ -2,7 +2,6 @@ import { THREE } from 'zincjs';
 import { RendererModule } from './RendererModule.js';
 import Annotation from './Annotation.js';
 
-
 // Current model's associate data, data fields, external link, nerve map
 // informations,
 // these are proived in the organsFileMap array.
@@ -234,20 +233,30 @@ const OrgansSceneData = function() {
 		return function(intersects, window_x, window_y) {
       const intersected = _this.getIntersectedObject(intersects);
       const idObject = getIdObjectFromIntersect(intersected);
+			const extraData = {
+				worldCoords: [
+					intersected ? intersected.point.x : 0,
+					intersected ? intersected.point.y : 0,
+					intersected ? intersected.point.z : 0,
+				],
+				intersected,
+			};
       const coords = { x: window_x, y: window_y };
       if (idObject.id) {
         if (idObject.object.userData.isGlyph) { 
-          if (idObject.object.name)
-            _this.setSelectedByObjects([idObject.object], coords, true);
-          else
+          if (idObject.object.name) {
+            _this.setSelectedByObjects([idObject.object], coords,
+							extraData, true);
+					} else {
             _this.setSelectedByZincObjects(idObject.object.userData.getGlyphset(),
-              coords, true);
+							coords, extraData, true);
+					}
         } else {
-          _this.setSelectedByObjects([idObject.object], coords, true);
+          _this.setSelectedByObjects([idObject.object], coords, extraData, true);
         }
         return;
       } else {
-				_this.setSelectedByObjects([], coords, true);
+				_this.setSelectedByObjects([], coords, extraData, true);
 			}
 		}
 	};
@@ -261,15 +270,22 @@ const OrgansSceneData = function() {
 		return function(intersects, window_x, window_y) {
       const intersected = _this.getIntersectedObject(intersects);
       const idObject = getIdObjectFromIntersect(intersected);
+			const extraData = {
+				worldCoords: [
+					intersected ? intersected.point.x : 0,
+					intersected ? intersected.point.y : 0,
+					intersected ? intersected.point.z : 0,
+				],
+			}
       const coords = { x: window_x, y: window_y };
       if (idObject.id) {
         _this.displayArea.style.cursor = "pointer";
-        _this.setHighlightedByObjects([idObject.object], coords, true);
+        _this.setHighlightedByObjects([idObject.object], coords, extraData, true);
         return;
       }
       else {
 				_this.displayArea.style.cursor = "auto";
-				_this.setHighlightedByObjects([], coords, true);
+				_this.setHighlightedByObjects([], coords, extraData, true);
       }
 		}
 	};
@@ -483,6 +499,7 @@ const OrgansSceneData = function() {
 			      } else {
 			    	  organScene = _this.zincRenderer.createScene(name);
 			      }
+						_this.selectObjectOnPick = true;
 			      for (let i = 0; i < sceneChangedCallbacks.length;i++) {
 			    	  sceneChangedCallbacks[i](_this.sceneData);
 			      }
@@ -493,8 +510,8 @@ const OrgansSceneData = function() {
 			    	  _this.sceneData.viewURL = undefined;
             }
 			      _this.sceneData.metaURL = url;
-			      organScene.loadMetadataURL(url, _addOrganPartCallback(systemName, partName, false),
-			    	  downloadCompletedCallback());	      
+						organScene.addZincObjectAddedCallbacks(_addOrganPartCallback(systemName, partName, false));
+			      organScene.loadMetadataURL(url, undefined, downloadCompletedCallback());	      
 			      _this.scene = organScene;
 			      _this.zincRenderer.setCurrentScene(organScene);
 			      _this.graphicsHighlight.reset();
@@ -523,8 +540,8 @@ const OrgansSceneData = function() {
 			      }
   	    	  _this.sceneData.viewURL = undefined;
 			      _this.sceneData.metaURL = url;
-			      organScene.loadGLTF(url, _addOrganPartCallback(undefined, partName, false),
-              downloadCompletedCallback());
+						organScene.addZincObjectAddedCallbacks(_addOrganPartCallback(undefined, partName, false));
+			      organScene.loadGLTF(url, undefined, downloadCompletedCallback());
 			      _this.scene = organScene;
 			      _this.zincRenderer.setCurrentScene(organScene);
 			      _this.graphicsHighlight.reset();

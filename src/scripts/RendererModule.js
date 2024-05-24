@@ -32,6 +32,7 @@ const RendererModule = function()  {
   this.rendererContainer = undefined;
   this.displayArea = undefined;
   this.graphicsHighlight = new GraphicsHighlight();
+  this.selectObjectOnPick = true;
   this.zincRenderer = null;
   this.selectedScreenCoordinates = new THREE.Vector3();
   this.selectedCenter = undefined;
@@ -93,7 +94,7 @@ RendererModule.prototype.getAnnotationsFromObjects = function(objects) {
 }
 
 RendererModule.prototype.setHighlightedByObjects = function(
-  objects, coords, propagateChanges) {
+  objects, coords, extraData, propagateChanges) {
   const changed = this.graphicsHighlight.setHighlighted(objects);
   const zincObjects = this.objectsToZincObjects(objects);
   if (propagateChanges) {
@@ -101,8 +102,10 @@ RendererModule.prototype.setHighlightedByObjects = function(
     if (changed)
       eventType = EVENT_TYPE.HIGHLIGHTED;
     const annotations = this.getAnnotationsFromObjects(objects);
-    if (annotations.length > 0)
+    if (annotations.length > 0) {
       annotations[0].coords = coords;
+      annotations[0].extraData = extraData;
+    }
     this.publishChanges(annotations, eventType, zincObjects);
   }
   return changed;
@@ -110,7 +113,7 @@ RendererModule.prototype.setHighlightedByObjects = function(
 
 
 RendererModule.prototype.setHighlightedByZincObjects = function(
-  zincObjects, coords, propagateChanges) {
+  zincObjects, coords, extraData, propagateChanges) {
     let morphs = [];
     if (zincObjects) {
       zincObjects.forEach(zincObject => {
@@ -119,7 +122,7 @@ RendererModule.prototype.setHighlightedByZincObjects = function(
       });
     }
 
-    return this.setHighlightedByObjects(morphs, coords,propagateChanges);
+    return this.setHighlightedByObjects(morphs, coords, extraData, propagateChanges);
 }
 
 RendererModule.prototype.setupLiveCoordinates = function(zincObjects) {
@@ -127,11 +130,15 @@ RendererModule.prototype.setupLiveCoordinates = function(zincObjects) {
   if (zincObjects && (zincObjects.length > 0)) {
     const boundingBox = this.scene.getBoundingBoxOfZincObjects(zincObjects);
     let newSelectedCenter = new THREE.Vector3();
-    boundingBox.getCenter(newSelectedCenter);
-    if (this.selectedCenter == undefined) {
-      this.selectedCenter = newSelectedCenter;
+    if (boundingBox) {
+      boundingBox.getCenter(newSelectedCenter);
+      if (this.selectedCenter == undefined) {
+        this.selectedCenter = newSelectedCenter;
+      } else {
+        this.selectedCenter.copy(newSelectedCenter);
+      }
     } else {
-      this.selectedCenter.copy(newSelectedCenter);
+      this.selectedCenter = undefined;
     }
   } else {
     this.selectedCenter = undefined;
@@ -158,16 +165,25 @@ RendererModule.prototype.objectsToZincObjects = function(objects) {
 
 
 RendererModule.prototype.setSelectedByObjects = function(
-  objects, coords, propagateChanges) {
-  const changed = this.graphicsHighlight.setSelected(objects);
+  objects, coords, extraData, propagateChanges) {
+  let changed = false;
+  if (this.selectObjectOnPick) {
+    changed = this.graphicsHighlight.setSelected(objects);
+  } else {
+    changed = true;
+  }
   if (changed) {
     const zincObjects = this.objectsToZincObjects(objects);
-    this.setupLiveCoordinates(zincObjects);
+    if (this.selectObjectOnPick) {
+      this.setupLiveCoordinates(zincObjects);
+    }
     if (propagateChanges) {
       const eventType = EVENT_TYPE.SELECTED;
       const annotations = this.getAnnotationsFromObjects(objects);
-      if (annotations.length > 0)
+      if (annotations.length > 0) {
         annotations[0].coords = coords;
+        annotations[0].extraData = extraData;
+      }
       this.publishChanges(annotations, eventType, zincObjects);
     }
   }
@@ -175,7 +191,7 @@ RendererModule.prototype.setSelectedByObjects = function(
 }
 
 RendererModule.prototype.setSelectedByZincObjects = function(
-  zincObjects, coords, propagateChanges) {
+  zincObjects, coords, extraData, propagateChanges) {
   let morphs = [];
   if (zincObjects) {
     zincObjects.forEach(zincObject => {
@@ -188,7 +204,7 @@ RendererModule.prototype.setSelectedByZincObjects = function(
     });
   }
 
-  return this.setSelectedByObjects(morphs, coords, propagateChanges);
+  return this.setSelectedByObjects(morphs, coords, extraData, propagateChanges);
 }
 
 const addGlyphToArray = function(objects) {
@@ -203,12 +219,12 @@ RendererModule.prototype.findObjectsByGroupName = function(groupName) {
 
 RendererModule.prototype.setHighlightedByGroupName = function(groupName, propagateChanges) {
   const objects = this.findObjectsByGroupName(groupName);
-  return this.setHighlightedByObjects(objects, undefined, propagateChanges);
+  return this.setHighlightedByObjects(objects, undefined, {}, propagateChanges);
 }
 
 RendererModule.prototype.setSelectedByGroupName = function(groupName, propagateChanges) {
   const objects = this.findObjectsByGroupName(groupName);
-  return this.setSelectedByObjects(objects, undefined, propagateChanges);
+  return this.setSelectedByObjects(objects, undefined, {}, propagateChanges);
 }
 
 RendererModule.prototype.changeBackgroundColour = function(backgroundColourString) {

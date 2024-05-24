@@ -136,7 +136,7 @@ export default {
     this.sortedPrimitiveGroups = undefined;
   },
   methods: {
-    addTreeItem: function (parentContainer, item) {
+    addTreeItem: function (parentContainer, item, object) {
       //The following block prevent duplicate graphics with the same name
       if (parentContainer.some(child => child.label === item.label)) {
         return;
@@ -147,7 +147,10 @@ export default {
       });
       this.__nodeNumbers++;
       this.$nextTick(() => {
-        this.$refs.regionTree.setChecked(item.id, true);
+        const checked = this.$refs.regionTree.getCheckedKeys();
+        if (!checked.includes(item.id) && object.getVisibility()) {
+          this.$refs.regionTree.setChecked(item.id, true);
+        }
       });
     },
     // find or create new region, region id is always prefixed with
@@ -164,23 +167,23 @@ export default {
       }
       if (paths.length > 0) {
         const _paths = [...paths];
-        let childRegion = data.children.find(
+        let childRegionItem = data.children.find(
           (child) => child.label == _paths[0]
         );
         const path = prefix + "/" + paths[0];
         const region = this.$module.scene.getRootRegion().findChildFromPath(path);
-        if (!childRegion) {
-          childRegion = {
+        if (!childRegionItem) {
+          childRegionItem = {
             label: _paths[0],
             id: region.uuid,
             children: [],
             regionPath: path,
             isRegion: true,
           };
-          this.addTreeItem(data.children, childRegion);
+          this.addTreeItem(data.children, childRegionItem, region);
         }
         _paths.shift();
-        return this.findOrCreateRegion(childRegion, _paths, path);
+        return this.findOrCreateRegion(childRegionItem, _paths, path);
       } else {
         return data;
       }
@@ -209,7 +212,7 @@ export default {
               regionPath: zincObject.region.getFullPath(),
               isTextureSlides: zincObject.isTextureSlides ? true : false,
             };
-            this.addTreeItem(regionData.children, child);
+            this.addTreeItem(regionData.children, child, zincObject);
           }
         }
       }
@@ -371,9 +374,6 @@ export default {
           primitive.setColourHex(hexString);
         });
       }
-    },
-    viewAll: function () {
-      this.$module.viewAll();
     },
     visibilityToggle: function (item, event) {
       this.$module.changeOrganPartsVisibility(item, event);

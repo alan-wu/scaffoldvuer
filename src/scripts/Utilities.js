@@ -1,3 +1,5 @@
+import { THREE } from 'zincjs';
+
 export const createListFromPrimitives = (primitives, list) => {
   if (primitives) {
     let id = "";
@@ -12,6 +14,77 @@ export const createListFromPrimitives = (primitives, list) => {
     });
   }
   return list;
+}
+
+const getDistance = (point1, point2) => {
+  const dist0 = point1[0] - point2[0];
+  const dist1 = point1[1] - point2[1];
+  const dist2 = point1[2] - point2[2];
+  return Math.sqrt(dist0 * dist0 + dist1 * dist1 + dist2 * dist2);
+}
+
+export const getEditableLines = (event) => {
+  const zincObjects = event.zincObjects;
+  if (zincObjects.length > 0 && zincObjects[0]) {
+    const zincObject = zincObjects[0];
+    if (zincObject.isEditable && zincObject.isLines2) {
+      const info = event.identifiers[0].extraData.intersected;
+      if (info && info.faceIndex > -1) {
+        const v = zincObject.getVerticesByFaceIndex(info.faceIndex);
+        const p = event.identifiers[0].extraData.intersected.pointOnLine;
+        if (v.length > 1) {
+          const dist0 = getDistance(v[0], [p.x, p.y, p.z]);
+          const dist1 = getDistance(v[1], [p.x, p.y, p.z]);
+          if (dist0 > dist1) {
+            return { zincObject, faceIndex: info.faceIndex, vertexIndex: info.faceIndex * 2 + 1, point: v[0]};
+          } else {
+            return { zincObject, faceIndex: info.faceIndex, vertexIndex: info.faceIndex * 2, point: v[1]};
+          }
+        }
+      }
+    }
+  }
+  return undefined;
+}
+
+export const moveLine = (zincObject, faceIndex, unit) => {
+  if (zincObject && unit !== 0.0) {
+    if (zincObject.isEditable && zincObject.isLines2) {
+      if (faceIndex > -1) {
+        const v = zincObject.getVerticesByFaceIndex(faceIndex);
+        let d = [v[0][0] - v[1][0], v[0][1] - v[1][1], v[0][2] - v[1][2]];
+        const mag = Math.sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
+        for (let i = 0; i < 3; i++) {
+          d[i] = d[i] / mag * unit;
+          v[0][i] = v[0][i] + d[i];
+          v[1][i] = v[1][i] + d[i];
+        }
+        zincObject.editVertice(v, faceIndex * 2);
+        zincObject.boundingBoxUpdateRequired = true;
+      }
+    }
+  }
+  return undefined;
+}
+
+export const updateBoundingBox = (geometry, scene) => {
+  const box = scene.getBoundingBox();
+  const dim = new THREE.Vector3().subVectors(box.max, box.min);
+  const boxGeo = new THREE.BoxGeometry(dim.x, dim.y, dim.z);
+  dim.addVectors(box.min, box.max).multiplyScalar( 0.5 );
+  const positions = boxGeo.getAttribute("position");
+  const count = positions.count;
+  const vertices = [];
+  for (let i = 0; i < count; i++) {
+    vertices[i] = [
+      positions.array[i * 3],
+      positions.array[i * 3 + 1],
+      positions.array[i * 3 + 2]
+    ];
+  }
+  geometry.editVertices(vertices , 0);
+  geometry.setPosition(dim.x, dim.y, dim.z);
+  boxGeo.dispose();
 }
 
 export const extractAllFullPaths = (item, list) => {
@@ -143,4 +216,123 @@ export const getObjectsFromAnnotations = (scene, annotations) => {
     });
   }
   return returned;
+}
+
+const getCoordinatesForAnnotationFeature = (zincObject) => {
+  const mesh = zincObject.getMorph();
+  let attr = 'position';
+  if (zincObject.isLines2) {
+    attr = 'instanceStart';
+  }
+  const coords = [];
+  let vIndex = 0;
+  const position = mesh.geometry.getAttribute( attr );
+  for (let i = 0; i < zincObject.drawRange; i++) {
+    coords.push([
+      position.array[vIndex++],
+      position.array[vIndex++],
+      position.array[vIndex++],
+    ]);
+  }
+  return coords;
+}
+
+const createNewAnnotationsWithFeatures = (zincObject, region, group, scaffoldUrl, comment) => {
+  let type = undefined;
+  if (zincObject.isPointset) {
+    type = "MultiPoint";
+  } else if (zincObject.isLines2) {
+    type = "MultiLineString";
+  }
+  if (type) {
+    const coords = getCoordinatesForAnnotationFeature(zincObject);
+    const featureID = encodeURIComponent(region + group);
+    const userAnnotation = {
+      resource: encodeURIComponent(scaffoldUrl),
+      item: {
+        "id": featureID,
+      },
+      body: {
+        evidence: [],
+        comment: comment,
+      },
+      feature: {
+        "id": featureID,
+        "properties": {
+            "drawn": true,
+            "label": "Drawn annotation"
+        },
+        "geometry": {
+            "coordinates": coords,
+            "type": type
+        }
+      },
+    }
+    return userAnnotation;
+  }
+}
+
+/*
+ * Add/Update drawn annotations to the server.
+ */
+export const addUserAnnotationWithFeature = (service, userToken, zincObject, region, group, scaffoldUrl, action) => {
+  if (service && service.currentUser) {
+    const annotation = createNewAnnotationsWithFeatures(zincObject, region, group, scaffoldUrl, action);
+    console.log(annotation)
+    if (annotation) {
+      annotation.creator = {...service.currentUser};
+      if (!annotation.creator.orcid) annotation.creator.orcid = '0000-0000-0000-0000';
+      service.addAnnotation(userToken, annotation)
+      .then((response) => {
+        if (!response.annotationId) {
+          console.log('There is a problem with the submission, please try again later');
+        }
+      })
+      .catch(() => {
+        console.log('There is a problem with the submission, please try again later');
+      })
+    }
+  }
+}
+
+/*
+ * Get the drawn annotation stored on the annotation server
+ */
+export const getDrawnAnnotations = async (service, userToken, scaffoldUrl) => {
+  const resource = encodeURIComponent(scaffoldUrl);
+  return await service.drawnFeatures(userToken, resource);
+}
+
+/*
+ * Convert features store in annotation server into primitives
+ */
+export const annotationFeaturesToPrimitives = (scene, features)  => {
+  if (scene) {
+    features.forEach((feature) => {
+      console.log(feature)
+      const geometry = feature.geometry;
+      const regionGroup = decodeURIComponent(feature.id);
+      const last = regionGroup.lastIndexOf('/');
+      const region = regionGroup.substring(0, last);
+      const group = regionGroup.substring(last + 1);
+      let object = undefined;
+      if (geometry.type === "MultiPoint") {
+        object = scene.createPoints(
+          region,
+          group,
+          geometry.coordinates,
+          undefined,
+          0x0022ee,
+        );
+      } else if (geometry.type === "MultiLineString") {
+        object = scene.createLines(
+          region,
+          group,
+          geometry.coordinates,
+          0x00ee22,
+        );
+      }
+      if (object) object.zincObject.isEditable = true;
+    });
+  }
 }
