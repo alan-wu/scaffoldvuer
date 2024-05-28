@@ -278,7 +278,6 @@ const createNewAnnotationsWithFeatures = (zincObject, region, group, scaffoldUrl
 export const addUserAnnotationWithFeature = (service, userToken, zincObject, region, group, scaffoldUrl, action) => {
   if (service && service.currentUser) {
     const annotation = createNewAnnotationsWithFeatures(zincObject, region, group, scaffoldUrl, action);
-    console.log(annotation)
     if (annotation) {
       annotation.creator = {...service.currentUser};
       if (!annotation.creator.orcid) annotation.creator.orcid = '0000-0000-0000-0000';
@@ -309,7 +308,6 @@ export const getDrawnAnnotations = async (service, userToken, scaffoldUrl) => {
 export const annotationFeaturesToPrimitives = (scene, features)  => {
   if (scene) {
     features.forEach((feature) => {
-      console.log(feature)
       const geometry = feature.geometry;
       const regionGroup = decodeURIComponent(feature.id);
       const last = regionGroup.lastIndexOf('/');
