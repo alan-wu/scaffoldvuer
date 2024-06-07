@@ -19,7 +19,7 @@
           show-checkbox
           element-loading-background="rgba(0, 0, 0, 0.3)"
           :check-strictly="false"
-          :data="treeData[0].children"
+          :data="treeDataEntry"
           :expand-on-click-node="false"
           :render-after-expand="false"
           @check="checkChanged"
@@ -37,7 +37,7 @@
               <el-color-picker
                 v-if="data.isPrimitives"
                 :class="{ 'show-picker': showColourPicker }"
-                :model-value="getColour(data)"
+                v-model="colourPicker[data.id]"
                 size="small"
                 :popper-class="myPopperClass"
                 @change="setColour(data, $event)"
@@ -121,6 +121,7 @@ export default {
       hover: [],
       myPopperClass: "hide-scaffold-colour-popup",
       drawerOpen: true,
+      colourPicker: {}
     };
   },
   watch: {
@@ -130,6 +131,17 @@ export default {
         if (this.showColourPicker) this.myPopperClass = "showPicker";
         else this.myPopperClass = "hide-scaffold-colour-popup";
       },
+    },
+  },
+  computed: {
+    treeDataEntry: function () {
+      this.treeData[0].children.map((data) => {
+        const defaultColour = this.getColour(data)
+        data['colour'] = defaultColour
+        // Using separate object to store active colour to update the colour picker value
+        this.colourPicker[data['id']] = defaultColour
+      });
+      return this.treeData[0].children;
     },
   },
   unmounted: function () {
@@ -370,7 +382,10 @@ export default {
       if (nodeData && nodeData.isPrimitives) {
         const targetObjects = this.getZincObjectsFromNode(nodeData, false);
         targetObjects.forEach((primitive) => {
-          let hexString = value.replace("#", "0x");
+          // Click clear will return null, so set it to the default colour
+          const activeColour = value ? value : nodeData.colour;
+          this.colourPicker[nodeData.id] = activeColour
+          let hexString = activeColour.replace("#", "0x");
           primitive.setColourHex(hexString);
         });
       }
