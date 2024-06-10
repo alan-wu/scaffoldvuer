@@ -245,7 +245,7 @@ export default {
   data: function () {
     return {
       consoleOn: true,
-      createPoints: false, 
+      createPoints: false,
       url: undefined,
       input: undefined,
       displayUI: true,
@@ -740,6 +740,7 @@ body {
 }
 
 .search-box {
+  width: 200px;
   left: calc(50% + 100px);
   position: absolute;
 }
