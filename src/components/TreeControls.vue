@@ -37,7 +37,7 @@
               <el-color-picker
                 v-if="data.isPrimitives"
                 :class="{ 'show-picker': showColourPicker }"
-                v-model="colourPicker[data.id]"
+                v-model="data.activeColour"
                 size="small"
                 :popper-class="myPopperClass"
                 @change="setColour(data, $event)"
@@ -121,7 +121,6 @@ export default {
       hover: [],
       myPopperClass: "hide-scaffold-colour-popup",
       drawerOpen: true,
-      colourPicker: {}
     };
   },
   watch: {
@@ -136,10 +135,7 @@ export default {
   computed: {
     treeDataEntry: function () {
       this.treeData[0].children.map((data) => {
-        const defaultColour = this.getColour(data)
-        data['colour'] = defaultColour
-        // Using separate object to store active colour to update the colour picker value
-        this.colourPicker[data['id']] = defaultColour
+        this.setColourField(data)
       });
       return this.treeData[0].children;
     },
@@ -378,15 +374,26 @@ export default {
       this.$module.addOrganPartAddedCallback(this.zincObjectAdded);
 
     },
+    setColourField: function (nodeData) {
+      this.treeData[0].children
+        .filter((data) => data.id === nodeData.id)
+        .map((data) => {
+          const colour = this.getColour(data)
+          if (!data.defaultColour) {
+            data['defaultColour'] = colour
+          }
+          data['activeColour'] = colour
+        });
+    },
     setColour: function (nodeData, value) {
       if (nodeData && nodeData.isPrimitives) {
         const targetObjects = this.getZincObjectsFromNode(nodeData, false);
         targetObjects.forEach((primitive) => {
           // Click clear will return null, so set it to the default colour
-          const activeColour = value ? value : nodeData.colour;
-          this.colourPicker[nodeData.id] = activeColour
+          const activeColour = value ? value : nodeData.defaultColour;
           let hexString = activeColour.replace("#", "0x");
           primitive.setColourHex(hexString);
+          this.setColourField(nodeData)
         });
       }
     },
