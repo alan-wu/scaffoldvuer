@@ -5,3 +5,4 @@ src/credential.json
 docs/.vitepress/dist
 docs/.vitepress/cache
 docs/components
+.DS_Store
