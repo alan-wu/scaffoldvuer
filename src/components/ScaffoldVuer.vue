@@ -14,7 +14,7 @@
       :visible="tData.visible"
       :x="tData.x"
       :y="tData.y"
-      :annotationDisplay="viewingMode === 'Annotation' && tData.active === true"
+      :annotationDisplay="viewingMode === 'Annotation' && tData.active === true && activeDrawMode === 'Edit'"
       @confirm-create="confirmCreate($event)"
       @cancel-create="cancelCreate()"
     />
@@ -26,74 +26,17 @@
       @keydown.66="backgroundChangeCallback"
     />
     <div v-show="displayUI && !isTransitioning">
-      <div
-        class="bottom-draw-control"
+      <DrawToolbar
         v-if="viewingMode === 'Annotation' && userInformation"
-      >
-        <el-popover
-          content="Comment"
-          placement="top"
-          :teleported="false"
-          trigger="manual"
-          width="80"
-          popper-class="flatmap-popper"
-          ref="commentPopover"
-          :visible="hoverVisibilities[9].value"
-        >
-          <template #reference>
-            <map-svg-icon
-              icon="comment"
-              class="icon-button shape"
-              :class="[createData.shape === '' ? 'active' : '']"
-              @click="toggleDrawing('')"
-              @mouseover="showHelpText(9)"
-              @mouseout="hideHelpText(9)"
-            />
-          </template>
-        </el-popover>
-        <el-popover
-          content="Draw Point"
-          placement="top"
-          :teleported="false"
-          trigger="manual"
-          width="80"
-          popper-class="flatmap-popper"
-          ref="drawPointPopover"
-          :visible="hoverVisibilities[10].value"
-        >
-          <template #reference>
-            <map-svg-icon
-              icon="drawPoint"
-              class="icon-button shape"
-              :class="[createData.shape === 'Point' ? 'active' : '']"
-              @click="toggleDrawing('Point')"
-              @mouseover="showHelpText(10)"
-              @mouseout="hideHelpText(10)"
-            />
-          </template>
-        </el-popover>
-        <el-popover
-          content="Draw Line"
-          placement="top"
-          :teleported="false"
-          trigger="manual"
-          width="80"
-          popper-class="flatmap-popper"
-          ref="drawLinePopover"
-          :visible="hoverVisibilities[11].value"
-        >
-          <template #reference>
-            <map-svg-icon
-              icon="drawLine"
-              class="icon-button shape"
-              :class="[createData.shape === 'Line' ? 'active' : '']"
-              @click="toggleDrawing('Line')"
-              @mouseover="showHelpText(11)"
-              @mouseout="hideHelpText(11)"
-            />
-          </template>
-        </el-popover>
-      </div>
+        :toolbarOptions="toolbarOptions"
+        :activeDrawTool="activeDrawTool"
+        :activeDrawMode="activeDrawMode"
+        :hoverVisibilities=hoverVisibilities
+        @clickToolbar="toggleDrawing"
+        @showTooltip="showHelpText"
+        @hideTooltip="hideHelpText"
+        ref="toolbarPopover"
+      />
       <el-popover
         v-if="displayWarning"
         ref="warningPopover"
@@ -471,6 +414,7 @@ import { OrgansViewer } from "../scripts/OrgansRenderer.js";
 import { SearchIndex } from "../scripts/Search.js";
 import { mapState } from 'pinia';
 import { useMainStore } from "@/store/index";
+import DrawToolbar from './DrawToolbar.vue'
 
 /**
  * A vue component of the scaffold viewer.
@@ -499,6 +443,7 @@ export default {
     ElIconWarningFilled,
     ElIconArrowDown,
     ElIconArrowLeft,
+    DrawToolbar
   },
   setup(props) {
     const annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
@@ -759,9 +704,9 @@ export default {
         { value: false, ref: 'warningPopover' }, // 6
         { value: false, ref: 'whatsNewPopover' }, // 7
         { value: false, ref: 'openMapPopover' }, // 8
-        { value: false, ref: 'commentPopover' }, //9
-        { value: false, ref: 'drawPointPopover' }, //10
-        { value: false, ref: 'drawLinePopover' }, //11
+        { value: false, refs: 'toolbarPopover', ref: 'editPopover' }, // 9
+        { value: false, refs: 'toolbarPopover', ref: 'pointPopover' }, // 10
+        { value: false, refs: 'toolbarPopover', ref: 'lineStringPopover' }, // 11
       ],
       inHelp: false,
       helpModeActiveIndex: this.helpModeInitialIndex,
@@ -822,6 +767,13 @@ export default {
       openMapRef: undefined,
       backgroundIconRef: undefined,
       userInformation: undefined,
+      toolbarOptions: [
+        "Edit",
+        "Point",
+        "LineString",
+      ],
+      activeDrawTool: undefined,
+      activeDrawMode: undefined,
     };
   },
   watch: {
@@ -1056,7 +1008,7 @@ export default {
             undefined,
             0x0022ee,
           );
-        } else if (payload.shape === "Line") {
+        } else if (payload.shape === "LineString") {
           object = this.$module.scene.createLines(
             payload.region,
             payload.group,
@@ -1191,12 +1143,14 @@ export default {
      *
      * @vuese
      */
-    toggleDrawing: function (shapeName) {
-      if (shapeName === this.createData.shape) {
-        this.createData.shape = "";
+    toggleDrawing: function (type, icon) {
+      if (type === 'mode') {
+        this.activeDrawMode = icon
+        this.createData.shape = '';
         this.$module.selectObjectOnPick = true;
-      } else {
-        this.createData.shape = shapeName;
+      } else if (type === 'tool') {
+        this.activeDrawTool = icon
+        this.createData.shape = this.activeDrawTool;
         this.$module.selectObjectOnPick = false;
       }
     },
@@ -1258,7 +1212,7 @@ export default {
     },
     createEditTemporaryLines: function(worldCoords) {
       if (worldCoords) {
-        if (this.createData.shape === "Line" || this.createData.editingIndex > -1) {
+        if (this.createData.shape === "LineString" || this.createData.editingIndex > -1) {
           if (this.createData.points.length === 1)  {
             if (this._tempLine) {
               const positionAttribute = this._tempLine.geometry.getAttribute( 'position' );
@@ -1277,7 +1231,7 @@ export default {
         if (data[0].extraData.worldCoords) {
           if (this.createData.shape === "Point") {
             this.drawPoint(data[0].extraData.worldCoords, data);
-          } else if (this.createData.shape === "Line" ||
+          } else if (this.createData.shape === "LineString" ||
             this.createData.editingIndex > -1) {
             this.drawLine(data[0].extraData.worldCoords, data);
           }
