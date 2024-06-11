@@ -219,7 +219,8 @@ import {
   ElSwitch as Switch,
 } from "element-plus";
 import { useRoute, useRouter } from 'vue-router'
-import HelpModeDialog from './components/HelpModeDialog.vue';
+import { HelpModeDialog } from '@abi-software/map-utilities'
+import '@abi-software/map-utilities/dist/style.css'
 
 let texture_prefix = undefined;
 

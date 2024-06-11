@@ -36,10 +36,10 @@
 /* eslint-disable no-alert, no-console */
 import { ElPopover as Popover } from "element-plus";
 import CreateTooltiipContent from "./CreateTooltipContent.vue";
-import { Tooltip } from "@abi-software/flatmapvuer";
-import "@abi-software/flatmapvuer/dist/style.css";
 import { mapState } from 'pinia';
 import { useMainStore } from "@/store/index";
+import { Tooltip } from '@abi-software/map-utilities'
+import '@abi-software/map-utilities/dist/style.css'
 
 /**
  * A component to control the opacity of the target object.

@@ -383,8 +383,10 @@ import {
 } from '@element-plus/icons-vue'
 import PrimitiveControls from "./PrimitiveControls.vue";
 import ScaffoldTooltip from "./ScaffoldTooltip.vue";
-import TreeControls from "./TreeControls.vue";
+import ScaffoldTreeControls from "./ScaffoldTreeControls.vue";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
+import { DrawToolbar } from '@abi-software/map-utilities'
+import '@abi-software/map-utilities/dist/style.css'
 import {
   addUserAnnotationWithFeature,
   annotationFeaturesToPrimitives,
@@ -413,8 +415,6 @@ import { OrgansViewer } from "../scripts/OrgansRenderer.js";
 import { SearchIndex } from "../scripts/Search.js";
 import { mapState } from 'pinia';
 import { useMainStore } from "@/store/index";
-import DrawToolbar from './DrawToolbar.vue'
-import ScaffoldTreeControls from "./ScaffoldTreeControls.vue";
 
 /**
  * A vue component of the scaffold viewer.
@@ -439,7 +439,6 @@ export default {
     MapSvgSpriteColor,
     PrimitiveControls,
     ScaffoldTooltip,
-    TreeControls,
     ElIconWarningFilled,
     ElIconArrowDown,
     ElIconArrowLeft,

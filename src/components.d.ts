@@ -7,9 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    ConnectionDialog: typeof import('./components/ConnectionDialog.vue')['default']
     CreateTooltipContent: typeof import('./components/CreateTooltipContent.vue')['default']
-    DrawToolbar: typeof import('./components/DrawToolbar.vue')['default']
     ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElButtonGroup: typeof import('element-plus/es')['ElButtonGroup']
@@ -41,7 +39,6 @@ declare module 'vue' {
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
     ElTabs: typeof import('element-plus/es')['ElTabs']
     ElTree: typeof import('element-plus/es')['ElTree']
-    HelpModeDialog: typeof import('./components/HelpModeDialog.vue')['default']
     LinesControls: typeof import('./components/LinesControls.vue')['default']
     OpacityControls: typeof import('./components/OpacityControls.vue')['default']
     PointsControls: typeof import('./components/PointsControls.vue')['default']
@@ -53,7 +50,6 @@ declare module 'vue' {
     ScaffoldVuer: typeof import('./components/ScaffoldVuer.vue')['default']
     TextureSlidesControls: typeof import('./components/TextureSlidesControls.vue')['default']
     TransformationControls: typeof import('./components/TransformationControls.vue')['default']
-    TreeControls: typeof import('./components/TreeControls.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

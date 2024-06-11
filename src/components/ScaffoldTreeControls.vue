@@ -35,7 +35,8 @@ import {
   extractAllFullPaths,
   findObjectsWithNames,
 } from "../scripts/Utilities.js";
-import TreeControls from "./TreeControls.vue";
+import { TreeControls } from "@abi-software/map-utilities";
+import "@abi-software/map-utilities/dist/style.css";
 
 const nameSorting = (a, b) => {
   const labelA = a.label.toUpperCase();
