@@ -80,12 +80,12 @@
           <el-col :span="1"> x: </el-col>
           <el-col :span="3">
             <el-input-number class="tumble-direction" controls-position="right" v-model="tumbleDirection[0]" :min="-1.0"
-              :max="1.0" :controls="false" placeholder="Please input" label="x" @change="autoTumble" />
+              :max="1.0" :controls="false" placeholder="Please input" aria-label="x" @change="autoTumble" />
           </el-col>
           <el-col :span="1" :offset="1"> y: </el-col>
           <el-col :span="3">
             <el-input-number class="tumble-direction" controls-position="right" v-model="tumbleDirection[1]" :min="-1.0"
-              :max="1.0" :controls="false" placeholder="Please input" label="y" @change="autoTumble" />
+              :max="1.0" :controls="false" placeholder="Please input" aria-label="y" @change="autoTumble" />
           </el-col>
         </el-row>
         <el-row :gutter="20">
@@ -109,10 +109,10 @@
           <el-col :span="7" :offset="2">
             <el-switch v-model="syncMode" active-text="Sync Mode" active-color="#8300bf" />
             <el-row v-if="syncMode">
-              <el-input-number v-model="zoom" :min="1.0" :controls="false" placeholder="Please input" label="zoom" />
+              <el-input-number v-model="zoom" :min="1.0" :controls="false" placeholder="Please input" aria-label="zoom" />
               <el-input-number v-model="pos[0]" :min="-1.0" :max="1.0" :controls="false" placeholder="Please input"
-                label="x" />
-              <el-input-number v-model="pos[1]" :min="-1.0" :max="1.0" :controls="false" label="y" />
+                aria-label="x" />
+              <el-input-number v-model="pos[1]" :min="-1.0" :max="1.0" :controls="false" aria-label="y" />
             </el-row>
           </el-col>
         </el-row>
@@ -743,6 +743,7 @@ body {
 .search-box {
   left: calc(50% + 100px);
   position: absolute;
+  width: 25%
 }
 
 .models-button {
