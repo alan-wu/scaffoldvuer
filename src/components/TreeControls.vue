@@ -19,7 +19,7 @@
           show-checkbox
           element-loading-background="rgba(0, 0, 0, 0.3)"
           :check-strictly="false"
-          :data="treeData[0].children"
+          :data="treeDataEntry"
           :expand-on-click-node="false"
           :render-after-expand="false"
           @check="checkChanged"
@@ -37,7 +37,7 @@
               <el-color-picker
                 v-if="data.isPrimitives"
                 :class="{ 'show-picker': showColourPicker }"
-                :model-value="getColour(data)"
+                v-model="data.activeColour"
                 size="small"
                 :popper-class="myPopperClass"
                 @change="setColour(data, $event)"
@@ -130,6 +130,12 @@ export default {
         if (this.showColourPicker) this.myPopperClass = "showPicker";
         else this.myPopperClass = "hide-scaffold-colour-popup";
       },
+    },
+  },
+  computed: {
+    treeDataEntry: function () {
+      this.setColourField(this.treeData[0].children)
+      return this.treeData[0].children;
     },
   },
   unmounted: function () {
@@ -366,12 +372,40 @@ export default {
       this.$module.addOrganPartAddedCallback(this.zincObjectAdded);
 
     },
+    setColourField: function (treeData, nodeData = undefined) {
+      treeData
+        .filter((data) => {
+          // Filtering if single node is provided and it does not have children field
+          if (nodeData && !data.children) {
+            return data.id === nodeData.id;
+          } else {
+            return true;
+          }
+        })
+        .map((data) => {
+          if (data.children) {
+            // Using recursive to process nested data if children field exists
+            this.setColourField(data.children);
+          } else {
+            const colour = this.getColour(data);
+            if (!data.defaultColour) {
+              // Default colour used for reset
+              data["defaultColour"] = colour;
+            }
+            // Active colour used for current display
+            data["activeColour"] = colour;
+          }
+        });
+    },
     setColour: function (nodeData, value) {
       if (nodeData && nodeData.isPrimitives) {
         const targetObjects = this.getZincObjectsFromNode(nodeData, false);
         targetObjects.forEach((primitive) => {
-          let hexString = value.replace("#", "0x");
+          // Click clear will return null, so set it to the default colour
+          const activeColour = value ? value : nodeData.defaultColour;
+          let hexString = activeColour.replace("#", "0x");
           primitive.setColourHex(hexString);
+          this.setColourField(this.treeDataEntry, nodeData)
         });
       }
     },
