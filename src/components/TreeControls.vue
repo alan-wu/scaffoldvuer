@@ -134,9 +134,7 @@ export default {
   },
   computed: {
     treeDataEntry: function () {
-      this.treeData[0].children.map((data) => {
-        this.setColourField(data)
-      });
+      this.setColourField(this.treeData[0].children)
       return this.treeData[0].children;
     },
   },
@@ -374,15 +372,29 @@ export default {
       this.$module.addOrganPartAddedCallback(this.zincObjectAdded);
 
     },
-    setColourField: function (nodeData) {
-      this.treeData[0].children
-        .filter((data) => data.id === nodeData.id)
-        .map((data) => {
-          const colour = this.getColour(data)
-          if (!data.defaultColour) {
-            data['defaultColour'] = colour
+    setColourField: function (treeData, nodeData = undefined) {
+      treeData
+        .filter((data) => {
+          // Filtering if single node is provided and it does not have children field
+          if (nodeData && !data.children) {
+            return data.id === nodeData.id;
+          } else {
+            return true;
           }
-          data['activeColour'] = colour
+        })
+        .map((data) => {
+          if (data.children) {
+            // Using recursive to process nested data if children field exists
+            this.setColourField(data.children);
+          } else {
+            const colour = this.getColour(data);
+            if (!data.defaultColour) {
+              // Default colour used for reset
+              data["defaultColour"] = colour;
+            }
+            // Active colour used for current display
+            data["activeColour"] = colour;
+          }
         });
     },
     setColour: function (nodeData, value) {
@@ -393,7 +405,7 @@ export default {
           const activeColour = value ? value : nodeData.defaultColour;
           let hexString = activeColour.replace("#", "0x");
           primitive.setColourHex(hexString);
-          this.setColourField(nodeData)
+          this.setColourField(this.treeDataEntry, nodeData)
         });
       }
     },
