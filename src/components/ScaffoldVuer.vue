@@ -40,7 +40,7 @@
       <el-popover
         v-if="displayWarning"
         ref="warningPopover"
-        :visible="hoverVisibilities[6].value"
+        :visible="hoverVisibilities[7].value"
         :content="warningMessage"
         placement="right"
         width="max-content"
@@ -51,8 +51,8 @@
           <div
             v-if="displayWarning"
             class="message-icon warning-icon"
-            @mouseover="showHelpText(6)"
-            @mouseout="hideHelpText(6)"
+            @mouseover="showHelpText(7)"
+            @mouseout="hideHelpText(7)"
           >
             <el-icon><el-icon-warning-filled /></el-icon>
             <span class="message-text">Beta</span>
@@ -61,7 +61,7 @@
       </el-popover>
       <el-popover
         v-if="displayLatestChanges"
-        :visible="hoverVisibilities[7].value"
+        :visible="hoverVisibilities[8].value"
         :content="latestChangesMessage"
         placement="right"
         :teleported="false"
@@ -73,8 +73,8 @@
           <div
             v-if="displayLatestChanges && latestChangesMessage"
             class="el-icon-warning message-icon latest-changesicon"
-            @mouseover="showHelpText(7)"
-            @mouseout="hideHelpText(7)"
+            @mouseover="showHelpText(8)"
+            @mouseout="hideHelpText(8)"
           >
             <el-icon><el-icon-warning-filled /></el-icon>
             <span class="message-text">What's new?</span>
@@ -82,7 +82,7 @@
         </template>
       </el-popover>
       <el-popover
-        :visible="hoverVisibilities[5].value"
+        :visible="hoverVisibilities[6].value"
         content="Change region visibility"
         placement="right"
         width="max-content"
@@ -92,7 +92,7 @@
         ref="regionVisibilityPopover"
       >
         <template #reference>
-          <scaffold-tree-controls
+          <ScaffoldTreeControls
             ref="scaffoldTreeControls"
             :isReady="isReady"
             :show-colour-picker="showColourPicker"
@@ -109,7 +109,7 @@
         v-if="timeVarying"
         ref="sliderPopover"
         width="max-content"
-        :visible="hoverVisibilities[4].value"
+        :visible="hoverVisibilities[5].value"
         content="Move the slider to animate the region"
         placement="top"
         :teleported="false"
@@ -325,7 +325,7 @@
       >
         <el-row>
           <el-popover
-            :visible="hoverVisibilities[8].value"
+            :visible="hoverVisibilities[3].value"
             content="Open new map"
             placement="right"
             :teleported="false"
@@ -340,15 +340,15 @@
                 ref="openMapRef"
                 icon="openMap"
                 class="icon-button open-map-button"
-                @mouseover="showHelpText(8)"
-                @mouseout="hideHelpText(8)"
+                @mouseover="showHelpText(3)"
+                @mouseout="hideHelpText(3)"
               />
             </template>
           </el-popover>
         </el-row>
         <el-row>
           <el-popover
-            :visible="hoverVisibilities[3].value"
+            :visible="hoverVisibilities[4].value"
             content="Change background color"
             placement="right"
             width="max-content"
@@ -362,8 +362,8 @@
                 ref="backgroundIconRef"
                 icon="changeBckgd"
                 class="icon-button"
-                @mouseover="showHelpText(3)"
-                @mouseout="hideHelpText(3)"
+                @mouseover="showHelpText(4)"
+                @mouseout="hideHelpText(4)"
               />
             </template>
           </el-popover>
@@ -698,12 +698,12 @@ export default {
         { value: false, ref: 'zoomInPopover' }, // 0
         { value: false, ref: 'zoomOutPopover' }, // 1
         { value: false, ref: 'zoomFitPopover' }, // 2
-        { value: false, ref: 'settingsPopover' }, // 3
-        { value: false, ref: 'sliderPopover' }, // 4
-        { value: false, ref: 'regionVisibilityPopover' }, // 5
-        { value: false, ref: 'warningPopover' }, // 6
-        { value: false, ref: 'whatsNewPopover' }, // 7
-        { value: false, ref: 'openMapPopover' }, // 8
+        { value: false, ref: 'openMapPopover' }, // 3
+        { value: false, ref: 'settingsPopover' }, // 4
+        { value: false, ref: 'sliderPopover' }, // 5
+        { value: false, ref: 'regionVisibilityPopover' }, // 6
+        { value: false, ref: 'warningPopover' }, // 7
+        { value: false, ref: 'whatsNewPopover' }, // 8
         { value: false, refs: 'toolbarPopover', ref: 'editPopover' }, // 9
         { value: false, refs: 'toolbarPopover', ref: 'pointPopover' }, // 10
         { value: false, refs: 'toolbarPopover', ref: 'lineStringPopover' }, // 11
@@ -1519,26 +1519,11 @@ export default {
       const activePopoverObj = this.hoverVisibilities[this.helpModeActiveIndex];
 
       if (activePopoverObj) {
+        const popoverRefsId = activePopoverObj?.refs;
         const popoverRefId = activePopoverObj?.ref;
-        const popoverRef = this.$refs[popoverRefId];
+        const popoverRef = this.$refs[popoverRefsId ? popoverRefsId : popoverRefId];
 
-        if (popoverRef) {
-          // Open pathway drawer if the tooltip is inside or beside
-          const { parentElement, nextElementSibling } = popoverRef.$el;
-          const isPathwayContainer = (element) => {
-            return element && (
-              element.classList.contains('pathway-container') ||
-              element.classList.contains('pathway-location')
-            );
-          };
-
-          if (
-            isPathwayContainer(parentElement) ||
-            isPathwayContainer(nextElementSibling)
-          ) {
-            this.drawerOpen = true;
-          }
-        } else {
+        if (!popoverRef) {
           // skip the unavailable tooltips
           this.helpModeActiveIndex += 1;
         }
