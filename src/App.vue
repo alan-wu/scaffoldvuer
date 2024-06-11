@@ -55,10 +55,9 @@
           </el-col>
         </el-row>
 
-        <el-row :gutter="20">
+        <el-row :gutter="20" v-if="currentTime !== 0">
           <el-col>
-            <p>--- test ---</p>
-            <p v-if="currentTime !== 0">
+            <p>
               time emited is: {{ currentTime.toFixed(2) }}
             </p>
           </el-col>
