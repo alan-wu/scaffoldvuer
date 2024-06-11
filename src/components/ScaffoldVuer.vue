@@ -92,9 +92,8 @@
         ref="regionVisibilityPopover"
       >
         <template #reference>
-          <tree-controls
-            ref="treeControls"
-            :help-mode="helpMode"
+          <scaffold-tree-controls
+            ref="scaffoldTreeControls"
             :isReady="isReady"
             :show-colour-picker="showColourPicker"
             @object-selected="objectSelected"
@@ -415,6 +414,7 @@ import { SearchIndex } from "../scripts/Search.js";
 import { mapState } from 'pinia';
 import { useMainStore } from "@/store/index";
 import DrawToolbar from './DrawToolbar.vue'
+import ScaffoldTreeControls from "./ScaffoldTreeControls.vue";
 
 /**
  * A vue component of the scaffold viewer.
@@ -443,7 +443,8 @@ export default {
     ElIconWarningFilled,
     ElIconArrowDown,
     ElIconArrowLeft,
-    DrawToolbar
+    DrawToolbar,
+    ScaffoldTreeControls
   },
   setup(props) {
     const annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
@@ -875,7 +876,7 @@ export default {
   mounted: function () {
     this.openMapRef = shallowRef(this.$refs.openMapRef);
     this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef);
-    this.$refs.treeControls.setModule(this.$module);
+    this.$refs.scaffoldTreeControls.setModule(this.$module);
     let eventNotifier = new EventNotifier();
     eventNotifier.subscribe(this, this.eventNotifierCallback);
     this.$module.addNotifier(eventNotifier);
@@ -989,7 +990,7 @@ export default {
      * Function to clear current scene, the tree controls and the search index.
      */
     clearScene: function () {
-      if (this.$refs.treeControls) this.$refs.treeControls.clear();
+      if (this.$refs.scaffoldTreeControls) this.$refs.scaffoldTreeControls.clear();
       if (this.$_searchIndex) this.$_searchIndex.removeAll();
       if (this.$module.scene) this.$module.scene.clearAll();
     },
@@ -1339,14 +1340,14 @@ export default {
           this.activateAnnotationMode(names, event);
 
         } else {
-          if (this.$refs.treeControls) {
+          if (this.$refs.scaffoldTreeControls) {
             if (names.length > 0) {
-              //this.$refs.treeControls.changeActiveByNames(names, region, false);
-              this.$refs.treeControls.updateActiveUI(zincObjects);
+              //this.$refs.scaffoldTreeControls.changeActiveByNames(names, region, false);
+              this.$refs.scaffoldTreeControls.updateActiveUI(zincObjects);
               this.updatePrimitiveControls(zincObjects);
             } else {
               this.hideRegionTooltip();
-              this.$refs.treeControls.removeActive(false);
+              this.$refs.scaffoldTreeControls.removeActive(false);
             }
           }
           //Emit when an object is selected
@@ -1357,12 +1358,12 @@ export default {
         if (this.selectedObjects.length === 0) {
           this.hideRegionTooltip();
           // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
-          if (this.$refs.treeControls) {
+          if (this.$refs.scaffoldTreeControls) {
             if (names.length > 0) {
-              //this.$refs.treeControls.changeHoverByNames(names, region, false);
-              this.$refs.treeControls.updateHoverUI(zincObjects);
+              //this.$refs.scaffoldTreeControls.changeHoverByNames(names, region, false);
+              this.$refs.scaffoldTreeControls.updateHoverUI(zincObjects);
             } else {
-              this.$refs.treeControls.removeHover(true);
+              this.$refs.scaffoldTreeControls.removeHover(true);
             }
           }
           if (event.identifiers.length > 0 && event.identifiers[0]) {
@@ -1475,11 +1476,11 @@ export default {
     changeActiveByName: function (names, region, propagate) {
       const isArray = Array.isArray(names);
       if (names === undefined || (isArray && names.length === 0)) {
-        this.$refs.treeControls.removeActive(propagate);
+        this.$refs.scaffoldTreeControls.removeActive(propagate);
       } else {
         let array = names;
         if (!isArray) array = [array];
-        this.$refs.treeControls.changeActiveByNames(array, region, propagate);
+        this.$refs.scaffoldTreeControls.changeActiveByNames(array, region, propagate);
       }
     },
     /**
@@ -1490,11 +1491,11 @@ export default {
     changeHighlightedByName: function (names, region, propagate) {
       const isArray = Array.isArray(names);
       if (names === undefined || (isArray && names.length === 0)) {
-        this.$refs.treeControls.removeHover(propagate);
+        this.$refs.scaffoldTreeControls.removeHover(propagate);
       } else {
         let array = names;
         if (!isArray) array = [array];
-        this.$refs.treeControls.changeHoverByNames(array, region, propagate);
+        this.$refs.scaffoldTreeControls.changeHoverByNames(array, region, propagate);
       }
     },
     /**
@@ -1928,7 +1929,7 @@ export default {
           if (options.visibility) {
             // Some UIs may not be ready at this time.
             this.$nextTick(() => {
-              this.$refs.treeControls.setState(options.visibility);
+              this.$refs.scaffoldTreeControls.setState(options.visibility);
             });
           }
         }
@@ -1958,8 +1959,8 @@ export default {
         viewport: undefined,
         visibility: undefined,
       };
-      if (this.$refs.treeControls)
-        state.visibility = this.$refs.treeControls.getState();
+      if (this.$refs.scaffoldTreeControls)
+        state.visibility = this.$refs.scaffoldTreeControls.getState();
       if (this.$module.scene) {
         let zincCameraControls = this.$module.scene.getZincCameraControls();
         state.viewport = zincCameraControls.getCurrentViewport();
@@ -1988,7 +1989,7 @@ export default {
                   .getZincCameraControls()
                   .setCurrentCameraSettings(state.viewport);
               if (state.visibility)
-                this.$refs.treeControls.setState(state.visibility);
+                this.$refs.scaffoldTreeControls.setState(state.visibility);
             } else {
               this.$module.setFinishDownloadCallback(
                 this.setURLFinishCallback({
@@ -2024,7 +2025,7 @@ export default {
         let visibility =
           state && state.visibility ? state.visibility : undefined;
         this._currentURL = newValue;
-        if (this.$refs.treeControls) this.$refs.treeControls.clear();
+        if (this.$refs.scaffoldTreeControls) this.$refs.scaffoldTreeControls.clear();
         this.loading = true;
         this.timeVarying = false;
         this.isReady = false;

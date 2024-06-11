@@ -49,6 +49,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     ScaffoldTooltip: typeof import('./components/ScaffoldTooltip.vue')['default']
+    ScaffoldTreeControls: typeof import('./components/ScaffoldTreeControls.vue')['default']
     ScaffoldVuer: typeof import('./components/ScaffoldVuer.vue')['default']
     TextureSlidesControls: typeof import('./components/TextureSlidesControls.vue')['default']
     TransformationControls: typeof import('./components/TransformationControls.vue')['default']
