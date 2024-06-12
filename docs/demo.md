@@ -16,11 +16,17 @@
 </div>
 
 <script setup>
-import { defineClientComponent } from 'vitepress'
+import { getCurrentInstance } from 'vue';
+import { createPinia } from 'pinia';
+import { defineClientComponent } from 'vitepress';
+
+const app = getCurrentInstance();
+const pinia = createPinia();
+app.appContext.app.use(pinia);
 
 const ScaffoldVuer = defineClientComponent(() => {
-  return import('../src/components/ScaffoldVuer.vue')
-})
+  return import('../src/components/ScaffoldVuer.vue');
+});
 </script>
 
 <script>

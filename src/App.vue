@@ -48,123 +48,204 @@
 
     <el-popover popper-class="options-container" placement="bottom" trigger="click" width="500" :teleported="false">
       <div>
+
         <el-row :gutter="20">
-          <p>{{ selectedCoordinates }}</p>
+          <el-col>
+            <p>{{ selectedCoordinates }}</p>
+          </el-col>
         </el-row>
-        <el-row :gutter="20">
-          <p v-if="currentTime !== 0">
-            time emited is: {{ currentTime.toFixed(2) }}
-          </p>
+
+        <el-row :gutter="20" v-if="currentTime !== 0">
+          <el-col>
+            <p>
+              time emited is: {{ currentTime.toFixed(2) }}
+            </p>
+          </el-col>
         </el-row>
-        <el-row :gutter="20">
-          <el-col :span="3" :offset="1">
+
+        <el-row :gutter="20" justify="center" align="middle">
+          <el-col span="auto">
             <el-switch v-model="displayUI" active-text="UI" />
           </el-col>
-          <el-col :span="4" :offset="1">
+          <el-col span="auto">
             <el-switch v-model="displayMarkers" active-text="Markers" active-icon-class="el-icon-location"
               active-color="#8300bf" />
           </el-col>
-          <el-col :span="6" :offset="1">
+          <el-col span="auto">
             <el-switch v-model="markerCluster" active-text="Marker Cluster" active-icon-class="el-icon-location"
               active-color="#8300bf" />
           </el-col>
-          <el-col :span="4" :offset="1">
+          <el-col span="auto">
             <el-switch v-model="displayMinimap" active-text="Minimap" active-icon-class="el-icon-discover"
               active-color="#8300bf" />
           </el-col>
         </el-row>
-        <el-row :gutter="20">
-          <el-col :span="6">
+
+        <el-row :gutter="20" justify="center" align="middle">
+          <el-col span="auto">
             <el-switch v-model="tumbleOn" active-text="Tumble" active-color="#8300bf" />
           </el-col>
-          <el-col :span="1"> x: </el-col>
-          <el-col :span="3">
-            <el-input-number class="tumble-direction" controls-position="right" v-model="tumbleDirection[0]" :min="-1.0"
-              :max="1.0" :controls="false" placeholder="Please input" label="x" @change="autoTumble" />
+          <el-col span="auto">
+            <el-row>
+              <el-col :span="8"> x: </el-col>
+              <el-col :span="16">
+                <el-input-number class="tumble-direction" controls-position="right" v-model="tumbleDirection[0]" :min="-1.0"
+                  :max="1.0" :controls="false" placeholder="Please input" label="x" @change="autoTumble" />
+              </el-col>
+            </el-row>
           </el-col>
-          <el-col :span="1" :offset="1"> y: </el-col>
-          <el-col :span="3">
-            <el-input-number class="tumble-direction" controls-position="right" v-model="tumbleDirection[1]" :min="-1.0"
-              :max="1.0" :controls="false" placeholder="Please input" label="y" @change="autoTumble" />
-          </el-col>
-        </el-row>
-        <el-row :gutter="20">
-          <el-button size="small" @click="helpMode = !helpMode">
-            Help Mode
-          </el-button>
-          <el-button size="small" @click="screenCapture()"> Capture </el-button>
-          <el-button size="small" @click="changeMarkers"> Change Markers </el-button>
-        </el-row>
-        <el-row :gutter="10">
-          <el-button size="small" @click="saveSettings()">
-            Save Settings
-          </el-button>
-          <el-button size="small" @click="restoreSettings()">
-            Restore Settings
-          </el-button>
-          <el-button size="small" @click="exportGLB()"> Export GLB </el-button>
-          <el-button size="small" @click="exportGLTF()"> Export GLTF </el-button>
-        </el-row>
-        <el-row :gutter="30">
-          <el-col :span="7" :offset="2">
-            <el-switch v-model="syncMode" active-text="Sync Mode" active-color="#8300bf" />
-            <el-row v-if="syncMode">
-              <el-input-number v-model="zoom" :min="1.0" :controls="false" placeholder="Please input" label="zoom" />
-              <el-input-number v-model="pos[0]" :min="-1.0" :max="1.0" :controls="false" placeholder="Please input"
-                label="x" />
-              <el-input-number v-model="pos[1]" :min="-1.0" :max="1.0" :controls="false" label="y" />
+          <el-col span="auto">
+            <el-row>
+              <el-col :span="8"> y: </el-col>
+              <el-col :span="16">
+                <el-input-number class="tumble-direction" controls-position="right" v-model="tumbleDirection[1]" :min="-1.0"
+                  :max="1.0" :controls="false" placeholder="Please input" label="y" @change="autoTumble" />
+              </el-col>
             </el-row>
           </el-col>
         </el-row>
-        <el-row :gutter="30">
-          <el-col :span="7" :offset="4">
+
+        <el-row :gutter="20" justify="center" align="middle">
+          <el-col span="auto">
+            <el-button size="small" @click="helpMode = !helpMode">
+              Help Mode
+            </el-button>
+          </el-col>
+          <el-col span="auto">
+            <el-button size="small" @click="screenCapture()"> Capture </el-button>
+          </el-col>
+          <el-col span="auto">
+            <el-button size="small" @click="changeMarkers"> Change Markers </el-button>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20" justify="center" align="middle">
+          <el-col span="auto">
+            <el-button size="small" @click="saveSettings()">
+              Save Settings
+            </el-button>
+          </el-col>
+          <el-col span="auto">
+            <el-button size="small" @click="restoreSettings()">
+              Restore Settings
+            </el-button>
+          </el-col>
+          <el-col span="auto">
+            <el-button size="small" @click="exportGLB()"> Export GLB </el-button>
+          </el-col>
+          <el-col span="auto">
+            <el-button size="small" @click="exportGLTF()"> Export GLTF </el-button>
+          </el-col>
+        </el-row>
+
+        <el-row justify="center" align="middle">
+          <el-col>
+            <el-row :gutter="20" justify="center" align="middle">
+              <el-col>
+                <el-switch v-model="syncMode" active-text="Sync Mode" active-color="#8300bf" />
+              </el-col>
+            </el-row>
+            <el-row :gutter="20" justify="center" align="middle" v-if="syncMode">
+              <el-col :span="8">
+                <el-input-number v-model="zoom" :min="1.0" :controls="false" placeholder="Please input" label="zoom" />
+              </el-col>
+              <el-col :span="8">
+                <el-input-number v-model="pos[0]" :min="-1.0" :max="1.0" :controls="false" placeholder="Please input" label="x" />
+              </el-col>
+              <el-col :span="8">
+                <el-input-number v-model="pos[1]" :min="-1.0" :max="1.0" :controls="false" label="y" />
+              </el-col>
+            </el-row>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20" justify="center" align="middle">
+          <el-col span="auto">
             <el-switch v-model="render" active-text="Rendering" active-color="#8300bf" />
           </el-col>
-          <el-col :span="8" :offset="1">
+          <el-col span="auto">
             <el-switch v-model="renderInfoOn" active-text="Renderer Info" active-color="#8300bf" />
           </el-col>
         </el-row>
+
         <template v-if="renderInfoOn && rendererInfo">
-          <el-row>
-            <el-col v-for="(value, name) in rendererInfo.memory" :key="name" :offset="4" :span="6">
+          <el-row :gutter="20" justify="center" align="middle">
+            <el-col v-for="(value, name) in rendererInfo.memory" :key="name" span="auto">
               {{ name }} : {{ value }}
             </el-col>
           </el-row>
-          <el-row>
-            <el-col v-for="(value, name) in rendererInfo.render" :key="name" :offset="1" :span="6">
+          <el-row :gutter="20" justify="center" align="middle">
+            <el-col v-for="(value, name) in rendererInfo.render" :key="name" span="auto">
               {{ name }} : {{ value }}
             </el-col>
           </el-row>
         </template>
-        <el-row :gutter="20">
-          Feature Demo:
-          <el-button size="small" @click="featureTextureVolume(false)">
-            Texture volume
-          </el-button>
-          <el-button size="small" @click="featureTextureSlides(false)">
-            Texture slides
-          </el-button>
-          <el-button size="small" @click="featureTextureVolume(true)">
-            Body volume
-          </el-button>
-          <el-button size="small" @click="featureTextureSlides(true)">
-            Body slides
-          </el-button>
-          <el-button size="small" @click="featureArmSlides(true)">
-            Arm slides
-          </el-button>
-          <el-switch v-model="onClickMarkers" active-text="Markers On Selection" active-color="#8300bf" />
-          <el-switch
-              v-model="wireframe"
-              active-text="wireframe"
-              active-color="#8300bf"
-              @change="wireframeChanged"
+
+        <el-row justify="center" align="middle">
+          <el-col>
+            <el-row :gutter="20" justify="center" align="middle">
+              <el-col>
+                <p>Feature Demo:</p>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20" justify="center" align="middle">
+              <el-col span="auto">
+                <el-button size="small" @click="featureTextureVolume(false)">
+                  Texture volume
+                </el-button>
+              </el-col>
+              <el-col span="auto">
+                <el-button size="small" @click="featureTextureSlides(false)">
+                  Texture slides
+                </el-button>
+              </el-col>
+              <el-col span="auto">
+                <el-button size="small" @click="featureTextureVolume(true)">
+                  Body volume
+                </el-button>
+              </el-col>
+              <el-col span="auto">
+                <el-button size="small" @click="featureTextureSlides(true)">
+                  Body slides
+                </el-button>
+              </el-col>
+              <el-col span="auto">
+                <el-button size="small" @click="featureArmSlides(true)">
+                  Arm slides
+                </el-button>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20" justify="center" align="middle">
+              <el-col span="auto">
+                <el-switch
+                  v-model="onClickMarkers"
+                  active-text="Markers On Selection"
+                  active-color="#8300bf"
+                />
+              </el-col>
+              <el-col span="auto">
+                <el-switch
+                  v-model="wireframe"
+                  active-text="Wireframe"
+                  active-color="#8300bf"
+                  @change="wireframeChanged"
+                />
+              </el-col>
+            </el-row>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20" justify="center" align="middle">
+          <el-col :span="24">
+            <el-input
+              v-model="input"
+              type="textarea"
+              :autosize="{ minRows: 3 }"
+              placeholder="Please input"
             />
+          </el-col>
         </el-row>
-        <el-row :gutter="20">
-          <el-input v-model="input" type="textarea" autosize placeholder="Please input"
-            style="padding-left: 5%; width: 90%" />
-        </el-row>
+
       </div>
       <template #reference>
         <el-button class="options-button" :icon="ElIconSetting">
@@ -245,7 +326,7 @@ export default {
   data: function () {
     return {
       consoleOn: true,
-      createPoints: false, 
+      createPoints: false,
       url: undefined,
       input: undefined,
       displayUI: true,
@@ -693,15 +774,35 @@ body {
   text-align: center;
 
   .el-row {
-    margin-bottom: 8px;
+    .el-col {
+      &.is-guttered {
+        padding-top: 10px;
+        padding-bottom: 10px;
+      }
 
-    &:last-child {
-      margin-bottom: 0;
+      > p {
+        font-size: 12px;
+        margin: 0;
+      }
+
+      .el-input__inner,
+      .el-switch {
+        font-size: 12px;
+        height: 20px;
+      }
     }
   }
 
   .el-switch {
     white-space: pre;
+
+    .el-switch__label {
+      color: inherit;
+
+      * {
+        font-size: 12px;
+      }
+    }
   }
 }
 
@@ -717,16 +818,6 @@ body {
   position: absolute;
 }
 
-.options-container {
-  .el-row {
-    margin-bottom: 10px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-}
-
 .autocomplete-popper {
   li {
     line-height: normal;
@@ -740,12 +831,15 @@ body {
 }
 
 .search-box {
+  width: 200px;
   left: calc(50% + 100px);
   position: absolute;
+  top: 5px;
 }
 
 .models-button {
   position: absolute;
+  top: 5px;
 }
 
 .tumble-direction {
