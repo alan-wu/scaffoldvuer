@@ -260,7 +260,7 @@ export default {
       tumbleOn: false,
       tumbleDirection: [1.0, 0.0],
       showColourPicker: true,
-      markerCluster: false,
+      markerCluster: true,
       minimapSettings: {
         x_offset: 16,
         y_offset: 50,
@@ -550,11 +550,7 @@ export default {
       }
     },
     changeMarkers: function () {
-      if (this.markerLabels[0] === "right ventricle") {
-        this.markerLabels = ["left atrium", "epicardium", "stomach"];
-      } else {
-        this.markerLabels = ["right ventricle"];
-      }
+      this.markerLabels = {"left atrium": 3, "epicardium": 4 , "stomach": 5};
     },
     onNavigated: function (data) {
       this.zoom = data.zoom;
