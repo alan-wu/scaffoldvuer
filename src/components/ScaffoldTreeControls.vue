@@ -85,7 +85,10 @@ export default {
     treeDataEntry: {
       deep: true,
       handler: function (data) {
-        this.setColourField(data);
+        if (this.isReady) {
+          // Updated colour when scaffold is ready
+          this.setColourField(data);
+        }
       },
     },
   },
@@ -95,6 +98,8 @@ export default {
       if (parentContainer.some((child) => child.label === item.label)) {
         return;
       }
+      // Set initial colour for the colourPicker
+      Object.assign(item, { activeColour: this.getColour(item) });
       parentContainer.push(item);
       parentContainer.sort((a, b) => {
         return nameSorting(a, b);
@@ -324,25 +329,21 @@ export default {
     setColourField: function (treeData, nodeData = undefined) {
       treeData
         .filter((data) => {
+          // Filtering if single node is provided and it does not have children field
           if (nodeData && !data.children) {
-            // Filtering if single node is provided and it does not have children field
             return data.id === nodeData.id;
-          } else if (!nodeData && data.defaultColour) {
-            // Only when initialise default colour
-            // If defaultColour exists, it means the node has been initialized, so skip
-            return false;
           } else {
             return true;
           }
         })
         .map((data) => {
+          // Using recursive to process nested data if children field exists
           if (data.children) {
-            // Using recursive to process nested data if children field exists
             this.setColourField(data.children, nodeData);
           } else {
             const colour = this.getColour(data);
+            // Default colour will be used for reset colour action
             if (!data.defaultColour) {
-              // Default colour will be used for reset colour action
               data["defaultColour"] = colour;
             }
             // Active colour is used for current display
