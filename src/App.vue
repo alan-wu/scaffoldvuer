@@ -64,76 +64,76 @@
         </el-row>
 
         <el-row :gutter="20" justify="center" align="middle">
-          <el-col span="auto">
+          <el-col :span="auto">
             <el-switch v-model="displayUI" active-text="UI" />
           </el-col>
-          <el-col span="auto">
+          <el-col :span="auto">
             <el-switch v-model="displayMarkers" active-text="Markers" active-icon-class="el-icon-location"
               active-color="#8300bf" />
           </el-col>
-          <el-col span="auto">
+          <el-col :span="auto">
             <el-switch v-model="markerCluster" active-text="Marker Cluster" active-icon-class="el-icon-location"
               active-color="#8300bf" />
           </el-col>
-          <el-col span="auto">
+          <el-col :span="auto">
             <el-switch v-model="displayMinimap" active-text="Minimap" active-icon-class="el-icon-discover"
               active-color="#8300bf" />
           </el-col>
         </el-row>
 
         <el-row :gutter="20" justify="center" align="middle">
-          <el-col span="auto">
+          <el-col :span="auto">
             <el-switch v-model="tumbleOn" active-text="Tumble" active-color="#8300bf" />
           </el-col>
-          <el-col span="auto">
+          <el-col :span="auto">
             <el-row>
               <el-col :span="8"> x: </el-col>
               <el-col :span="16">
                 <el-input-number class="tumble-direction" controls-position="right" v-model="tumbleDirection[0]" :min="-1.0"
-                  :max="1.0" :controls="false" placeholder="Please input" label="x" @change="autoTumble" />
+                  :max="1.0" :controls="false" placeholder="Please input" aria-label="x" @change="autoTumble" />
               </el-col>
             </el-row>
           </el-col>
-          <el-col span="auto">
+          <el-col :span="auto">
             <el-row>
               <el-col :span="8"> y: </el-col>
               <el-col :span="16">
                 <el-input-number class="tumble-direction" controls-position="right" v-model="tumbleDirection[1]" :min="-1.0"
-                  :max="1.0" :controls="false" placeholder="Please input" label="y" @change="autoTumble" />
+                  :max="1.0" :controls="false" placeholder="Please input" aria-label="y" @change="autoTumble" />
               </el-col>
             </el-row>
           </el-col>
         </el-row>
 
         <el-row :gutter="20" justify="center" align="middle">
-          <el-col span="auto">
+          <el-col :span="auto">
             <el-button size="small" @click="helpMode = !helpMode">
               Help Mode
             </el-button>
           </el-col>
-          <el-col span="auto">
+          <el-col :span="auto">
             <el-button size="small" @click="screenCapture()"> Capture </el-button>
           </el-col>
-          <el-col span="auto">
+          <el-col :span="auto">
             <el-button size="small" @click="changeMarkers"> Change Markers </el-button>
           </el-col>
         </el-row>
 
         <el-row :gutter="20" justify="center" align="middle">
-          <el-col span="auto">
+          <el-col :span="auto">
             <el-button size="small" @click="saveSettings()">
               Save Settings
             </el-button>
           </el-col>
-          <el-col span="auto">
+          <el-col :span="auto">
             <el-button size="small" @click="restoreSettings()">
               Restore Settings
             </el-button>
           </el-col>
-          <el-col span="auto">
+          <el-col :span="auto">
             <el-button size="small" @click="exportGLB()"> Export GLB </el-button>
           </el-col>
-          <el-col span="auto">
+          <el-col :span="auto">
             <el-button size="small" @click="exportGLTF()"> Export GLTF </el-button>
           </el-col>
         </el-row>
@@ -147,35 +147,35 @@
             </el-row>
             <el-row :gutter="20" justify="center" align="middle" v-if="syncMode">
               <el-col :span="8">
-                <el-input-number v-model="zoom" :min="1.0" :controls="false" placeholder="Please input" label="zoom" />
+                <el-input-number v-model="zoom" :min="1.0" :controls="false" placeholder="Please input" aria-label="zoom" />
               </el-col>
               <el-col :span="8">
-                <el-input-number v-model="pos[0]" :min="-1.0" :max="1.0" :controls="false" placeholder="Please input" label="x" />
+                <el-input-number v-model="pos[0]" :min="-1.0" :max="1.0" :controls="false" placeholder="Please input" aria-label="x" />
               </el-col>
               <el-col :span="8">
-                <el-input-number v-model="pos[1]" :min="-1.0" :max="1.0" :controls="false" label="y" />
+                <el-input-number v-model="pos[1]" :min="-1.0" :max="1.0" :controls="false" aria-label="y" />
               </el-col>
             </el-row>
           </el-col>
         </el-row>
 
         <el-row :gutter="20" justify="center" align="middle">
-          <el-col span="auto">
+          <el-col :span="auto">
             <el-switch v-model="render" active-text="Rendering" active-color="#8300bf" />
           </el-col>
-          <el-col span="auto">
+          <el-col :span="auto">
             <el-switch v-model="renderInfoOn" active-text="Renderer Info" active-color="#8300bf" />
           </el-col>
         </el-row>
 
         <template v-if="renderInfoOn && rendererInfo">
           <el-row :gutter="20" justify="center" align="middle">
-            <el-col v-for="(value, name) in rendererInfo.memory" :key="name" span="auto">
+            <el-col v-for="(value, name) in rendererInfo.memory" :key="name" :span="auto">
               {{ name }} : {{ value }}
             </el-col>
           </el-row>
           <el-row :gutter="20" justify="center" align="middle">
-            <el-col v-for="(value, name) in rendererInfo.render" :key="name" span="auto">
+            <el-col v-for="(value, name) in rendererInfo.render" :key="name" :span="auto">
               {{ name }} : {{ value }}
             </el-col>
           </el-row>
@@ -189,41 +189,41 @@
               </el-col>
             </el-row>
             <el-row :gutter="20" justify="center" align="middle">
-              <el-col span="auto">
+              <el-col :span="auto">
                 <el-button size="small" @click="featureTextureVolume(false)">
                   Texture volume
                 </el-button>
               </el-col>
-              <el-col span="auto">
+              <el-col :span="auto">
                 <el-button size="small" @click="featureTextureSlides(false)">
                   Texture slides
                 </el-button>
               </el-col>
-              <el-col span="auto">
+              <el-col :span="auto">
                 <el-button size="small" @click="featureTextureVolume(true)">
                   Body volume
                 </el-button>
               </el-col>
-              <el-col span="auto">
+              <el-col :span="auto">
                 <el-button size="small" @click="featureTextureSlides(true)">
                   Body slides
                 </el-button>
               </el-col>
-              <el-col span="auto">
+              <el-col :span="auto">
                 <el-button size="small" @click="featureArmSlides(true)">
                   Arm slides
                 </el-button>
               </el-col>
             </el-row>
             <el-row :gutter="20" justify="center" align="middle">
-              <el-col span="auto">
+              <el-col :span="auto">
                 <el-switch
                   v-model="onClickMarkers"
                   active-text="Markers On Selection"
                   active-color="#8300bf"
                 />
               </el-col>
-              <el-col span="auto">
+              <el-col :span="auto">
                 <el-switch
                   v-model="wireframe"
                   active-text="Wireframe"
@@ -425,6 +425,7 @@ export default {
       ElIconSetting: shallowRef(ElIconSetting),
       ElIconFolderOpened: shallowRef(ElIconFolderOpened),
       coordinatesClicked: [],
+      auto: NaN
     };
   },
   watch: {
