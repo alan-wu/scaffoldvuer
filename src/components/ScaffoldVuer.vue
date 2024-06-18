@@ -14,9 +14,10 @@
       :visible="tData.visible"
       :x="tData.x"
       :y="tData.y"
-      :annotationDisplay="viewingMode === 'Annotation' && tData.active === true && activeDrawMode === 'Edit'"
+      :annotationDisplay="annotationDisplay"
       @confirm-create="confirmCreate($event)"
       @cancel-create="cancelCreate()"
+      @confirm-delete="confirmDelete($event)"
     />
     <div
       id="organsDisplayArea"
@@ -27,7 +28,7 @@
     />
     <div v-show="displayUI && !isTransitioning">
       <DrawToolbar
-        v-if="viewingMode === 'Annotation' && userInformation"
+        v-if="viewingMode === 'Annotation' && (userInformation || enableLocalAnnotations)"
         :toolbarOptions="toolbarOptions"
         :activeDrawTool="activeDrawTool"
         :activeDrawMode="activeDrawMode"
@@ -388,8 +389,10 @@ import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
 import { DrawToolbar } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 import {
+  addLabelToObject,
   addUserAnnotationWithFeature,
   annotationFeaturesToPrimitives,
+  getDeletableObjects,
   getDrawnAnnotations,
   getEditableLines,
   getObjectsFromAnnotations,
@@ -664,6 +667,13 @@ export default {
       type: String,
       default: "https://mapcore-demo.org/current/flatmap/v3/"
     },
+    /**
+     * Enable local annotations
+     */
+     enableLocalAnnotations: {
+      type: Boolean,
+      default: false
+    },
   },
   provide() {
     return {
@@ -684,6 +694,7 @@ export default {
         y: 0,
         editingIndex: -1,
         faceIndex: -1,
+        toBeDeleted: false,
       },
       currentTime: 0.0,
       timeVarying: false,
@@ -707,6 +718,7 @@ export default {
         { value: false, refs: 'toolbarPopover', ref: 'editPopover' }, // 9
         { value: false, refs: 'toolbarPopover', ref: 'pointPopover' }, // 10
         { value: false, refs: 'toolbarPopover', ref: 'lineStringPopover' }, // 11
+        { value: false, refs: 'toolbarPopover', ref: 'deletePopover' }, // 11
       ],
       inHelp: false,
       helpModeActiveIndex: this.helpModeInitialIndex,
@@ -768,12 +780,14 @@ export default {
       backgroundIconRef: undefined,
       userInformation: undefined,
       toolbarOptions: [
+        "Delete",
         "Edit",
         "Point",
         "LineString",
       ],
       activeDrawTool: undefined,
       activeDrawMode: undefined,
+      createdList: markRaw([])
     };
   },
   watch: {
@@ -899,6 +913,10 @@ export default {
   },
   computed: {
     ...mapState(useMainStore,  ['userToken']),
+    annotationDisplay: function() {
+      return this.viewingMode === 'Annotation' && this.tData.active === true &&
+        (this.activeDrawMode === 'Edit' || this.activeDrawMode === 'Delete');
+    }
   },
   methods: {
     /**
@@ -1008,6 +1026,7 @@ export default {
             undefined,
             0x0022ee,
           );
+          addLabelToObject(object.zincObject, this.createData.points[0], payload.group);
         } else if (payload.shape === "LineString") {
           object = this.$module.scene.createLines(
             payload.region,
@@ -1021,13 +1040,19 @@ export default {
               payload.editingIndex);
             const region = this._editingZincObject.region.getFullPath() + "/";
             const group = this._editingZincObject.groupName;
-            addUserAnnotationWithFeature(this.annotator, this.userToken, this._editingZincObject,
+            const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken, this._editingZincObject,
               region, group, this.url, "Position Updated");
           }
         }
         if (object) {
-          addUserAnnotationWithFeature(this.annotator, this.userToken, object.zincObject,
+          const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken, object.zincObject,
             payload.region, payload.group, this.url, "Create");
+          //Store the object in a local list
+          if (this.enableLocalAnnotations) {
+            annotation.group = payload.group;
+            annotation.region = payload.region;
+            this.createdList.push(annotation);
+          }
           object.zincObject.isEditable = true;
           this.tData.region = payload.region;
           this.tData.label = payload.group;
@@ -1043,6 +1068,7 @@ export default {
       this.createData.editingIndex = -1;
       this.createData.faceIndex = -1;
       this.tData.visible = false;
+      this.createData.toBeDeleted = false;
       if (this._tempLine) {
         this.$module.scene.removeTemporaryPrimitive(this._tempLine);
         this._tempLine = undefined;
@@ -1144,12 +1170,13 @@ export default {
      * @vuese
      */
     toggleDrawing: function (type, icon) {
+      this.createData.toBeDeleted = false;
       if (type === 'mode') {
-        this.activeDrawMode = icon
+        this.activeDrawMode = icon;
         this.createData.shape = '';
         this.$module.selectObjectOnPick = true;
       } else if (type === 'tool') {
-        this.activeDrawTool = icon
+        this.activeDrawTool = icon;
         this.createData.shape = this.activeDrawTool;
         this.$module.selectObjectOnPick = false;
       }
@@ -1281,7 +1308,8 @@ export default {
       }
     },
     activateAnnotationMode: function(names, event) {
-      if (this.userInformation) {
+      if (this.userInformation || this.enableLocalAnnotations) {
+        this.createData.toBeDeleted = false;
         if ((this.createData.shape !== "") || (this.createData.editingIndex > -1)) {
           // Create new shape bsaed on current settings
           if (names.length > 0) {
@@ -1292,11 +1320,19 @@ export default {
             }
           }
         } else {
-          //Make sure the tooltip is displayed with annotation mode
-          const editing = getEditableLines(event);
-          if (editing) {
-            this.activateEditingMode(editing.zincObject, editing.faceIndex,
-              editing.vertexIndex, editing.point);
+          //Make sure the tooltip is displayed with annotaion mode
+          if (this.activeDrawMode === "Edit") {
+            const editing = getEditableLines(event);
+            if (editing) {
+              this.activateEditingMode(editing.zincObject, editing.faceIndex,
+                editing.vertexIndex, editing.point);
+            }
+          } else if (this.activeDrawMode === "Delete") {
+            const zincObject = getDeletableObjects(event);
+            if (zincObject) {
+              this.createData.toBeDeleted = true;
+              this._editingZincObject = zincObject;
+            }
           }
           this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
         }
@@ -1746,6 +1782,10 @@ export default {
               }
             }
           });
+        } else if (this.viewingMode === "Exploration") {
+          this.activeDrawTool = undefined;
+          this.activeDrawMode = undefined;
+          this.createData.shape = "";
         }
         if ((this.viewingMode === "Exploration") ||
           (this.viewingMode === "Annotation") &&
@@ -2267,17 +2307,6 @@ export default {
   padding-left: 8px;
 }
 
-.bottom-draw-control {
-  background-color: var(--el-color-primary-light-9);
-  padding: 4px 4px 2px 4px;
-  border-style: solid;
-  border-color: var(--el-color-primary-light-5);
-  border-radius: 1rem;
-  position: absolute;
-  right: calc(50vw - 100px);;
-  bottom: 16px;
-}
-
 :deep(.non-selectable) {
   user-select: none;
 }
@@ -2390,15 +2419,6 @@ export default {
   &:focus {
     border: none;
     outline: none;
-  }
-
-  &.shape {
-    margin-left: 4px;
-    margin-right: 4px;
-    color: var(--el-color-primary-light-5)!important;
-    &.active {
-      color: var(--el-color-primary)!important;
-    }
   }
 }
 

@@ -27,6 +27,7 @@
         :view-u-r-l="viewURL"
         :format="format"
         :marker-labels="markerLabels"
+        :enableLocalAnnotations="true"
         @open-map="openMap"
         @on-ready="onReady"
         @scaffold-selected="onSelected"
