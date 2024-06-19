@@ -894,6 +894,7 @@ export default {
     eventNotifier.subscribe(this, this.eventNotifierCallback);
     this.$module.addNotifier(eventNotifier);
     this.$module.addOrganPartAddedCallback(this.zincObjectAdded);
+    this.$module.addOrganPartRemovedCallback(this.zincObjectRemoved);
     this.$module.initialiseRenderer(this.$refs.display);
     this.toggleRendering(this.render);
     this.ro = new ResizeObserver(this.adjustLayout).observe(
@@ -944,6 +945,30 @@ export default {
       //Emit when a new object is added to the scene
       //@arg The object added to the sceene
       this.$emit("zinc-object-added", zincObject);
+    },
+    /**
+     * Internal only.
+     * This is called when a zinc object is removed.
+     */
+     zincObjectRemoved: function (zincObject) {
+      if (this.$module.scene) {
+        // zincObjectAdded will be alled in sequential callback
+        const regionPath = zincObject.region.getFullPath() + "/";
+        const group = zincObject.groupName;
+        const objects = zincObject.region.findObjectsWithGroupName(group, false);
+        //Remove relevant objects from the rest of the app.
+        if (objects.length === 0) {
+          this.$_searchIndex.removeZincObject(zincObject, zincObject.uuid);
+          for (let i = 0; i < this.createdList.length; i++) {
+            const annotation = this.createdList[i];
+            if (annotation.region === regionPath &&
+              annotation.group === group) {
+              this.createdList.splice(i, 1);
+              return;
+            }
+          }
+        }
+      }
     },
     /**
      * Internal only.
@@ -1078,6 +1103,24 @@ export default {
         this._tempPoint = undefined;
       }
     },
+    /**
+     * @vuese
+     * Confirm delete of user created primitive.
+     * This is only called from callback.
+     */
+     confirmDelete: function() {
+      if (this._editingZincObject?.isEditable) {
+        const regionPath = this._editingZincObject.region.getFullPath() + "/";
+        const group = this._editingZincObject.groupName;
+        const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken,
+          this._editingZincObject, regionPath, group, this.url, "Deleted");
+        if (annotation) {
+          const childRegion = this.$module.scene.getRootRegion().
+            findChildFromPath(regionPath);
+          childRegion.removeZincObject(this._editingZincObject);
+        }
+      }
+    },  
     formatTooltip(val) {
       if (this.timeMax >= 1000) {
         if (val) {

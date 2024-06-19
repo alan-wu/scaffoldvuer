@@ -279,6 +279,10 @@ const createNewAnnotationsWithFeatures = (zincObject, region, group, scaffoldUrl
         }
       },
     }
+    if (comment === "Deleted") {
+      userAnnotation.feature = undefined;
+    }
+
     return userAnnotation;
   }
 }
@@ -286,7 +290,8 @@ const createNewAnnotationsWithFeatures = (zincObject, region, group, scaffoldUrl
 /*
  * Add/Update drawn annotations to the server.
  */
-export const addUserAnnotationWithFeature = (service, userToken, zincObject, region, group, scaffoldUrl, action) => {
+export const addUserAnnotationWithFeature = (service, userToken, zincObject,
+  region, group, scaffoldUrl, action) => {
   const annotation = createNewAnnotationsWithFeatures(zincObject, region, group, scaffoldUrl, action);
   if (annotation) {
     if (service && service.currentUser) {
