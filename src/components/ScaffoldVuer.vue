@@ -787,7 +787,7 @@ export default {
       ],
       activeDrawTool: undefined,
       activeDrawMode: undefined,
-      createdList: markRaw([])
+      localAnnotationsList: markRaw([])
     };
   },
   watch: {
@@ -948,25 +948,33 @@ export default {
     },
     /**
      * Internal only.
+     * Remove an entry matching region and group from
+     * local annotation list.
+     */
+    removeFromLocalAnnotationList: function(regionPath, groupName) {
+      for (let i = 0; i < this.localAnnotationsList.length; i++) {
+        const annotation = this.localAnnotationsList[i];
+        if (annotation.region === regionPath &&
+          annotation.group === groupName) {
+          this.localAnnotationsList.splice(i, 1);
+          return;
+        }
+      }
+    },
+    /**
+     * Internal only.
      * This is called when a zinc object is removed.
      */
-     zincObjectRemoved: function (zincObject) {
+    zincObjectRemoved: function (zincObject) {
       if (this.$module.scene) {
         // zincObjectAdded will be alled in sequential callback
         const regionPath = zincObject.region.getFullPath() + "/";
-        const group = zincObject.groupName;
-        const objects = zincObject.region.findObjectsWithGroupName(group, false);
+        const groupName = zincObject.groupName;
+        const objects = zincObject.region.findObjectsWithGroupName(groupName, false);
         //Remove relevant objects from the rest of the app.
         if (objects.length === 0) {
           this.$_searchIndex.removeZincObject(zincObject, zincObject.uuid);
-          for (let i = 0; i < this.createdList.length; i++) {
-            const annotation = this.createdList[i];
-            if (annotation.region === regionPath &&
-              annotation.group === group) {
-              this.createdList.splice(i, 1);
-              return;
-            }
-          }
+          this.removeFromLocalAnnotationList(regionPath, groupName);
         }
       }
     },
@@ -1074,9 +1082,11 @@ export default {
             payload.region, payload.group, this.url, "Create");
           //Store the object in a local list
           if (this.enableLocalAnnotations) {
+            //Remove previous entry if there is matching region and group
+            this.removeFromLocalAnnotationList(payload.region, payload.group);
             annotation.group = payload.group;
             annotation.region = payload.region;
-            this.createdList.push(annotation);
+            this.localAnnotationsList.push(annotation);
           }
           object.zincObject.isEditable = true;
           this.tData.region = payload.region;
@@ -1086,6 +1096,10 @@ export default {
       }
       this.cancelCreate();
     },
+    /**
+     * Internal only.
+     * Cancel create workflows. Reset all relevant UIs and data.
+     */
     cancelCreate: function() {
       this.createData.points.length = 0;
       this.createData.toBeConfirmed = false;
@@ -1104,7 +1118,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * Internal only.
      * Confirm delete of user created primitive.
      * This is only called from callback.
      */
@@ -1120,6 +1134,7 @@ export default {
           childRegion.removeZincObject(this._editingZincObject);
         }
       }
+      this.cancelCreate();
     },  
     formatTooltip(val) {
       if (this.timeMax >= 1000) {
@@ -2000,6 +2015,7 @@ export default {
             });
           }
         }
+        this.localAnnotationsList.length = 0;
         this.updateSettingsfromScene();
         this.$module.updateTime(0.01);
         this.$module.updateTime(0);
@@ -2077,6 +2093,33 @@ export default {
      */
     exportGLTF: function (binary) {
       return this.$module.scene.exportGLTF(binary);
+    },
+    /**
+     * Return a copy of the local annotations list.
+     * This list is used for storing user created annotation
+     * when enableLocalAnnotations is set to true.
+     *
+     * @vuese
+     */
+     getLocalAnnotations: function () {
+      return [...this.localAnnotationsList];
+    },
+    /**
+     * Import local annotations. The annotations will only
+     * be imported when enableLocalAnnotations is set to
+     * true;
+     *
+     * @vuese
+     */
+     importLocalAnnotations: function (annotationsList) {
+      if (this.enableLocalAnnotations) {
+        const featuresList = annotationsList.map((annotation) => annotation.feature);
+        annotationFeaturesToPrimitives(this.$module.scene, featuresList);
+        //Make a local non-reactive copy.
+        annotationsList.forEach((annotation) => {
+          this.localAnnotationsList.push({...annotation});
+        });
+      }
     },
     /**
      * Function used for reading in new scaffold metadata and a custom

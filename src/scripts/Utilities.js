@@ -339,7 +339,7 @@ export const annotationFeaturesToPrimitives = (scene, features)  => {
           undefined,
           0x0022ee,
         );
-        addLabelToObject(object.zincObject, geometry.coordinates, group);
+        addLabelToObject(object.zincObject, geometry.coordinates[0], group);
       } else if (geometry.type === "MultiLineString") {
         object = scene.createLines(
           region,
@@ -359,7 +359,7 @@ export const annotationFeaturesToPrimitives = (scene, features)  => {
  */
 const addLabelToObject = (zincObject, coords, groupName) => {
   if (groupName) {
-    const colour = new THREE.Color(0x222222);
+    const colour = new THREE.Color(0x0022ee);
     const label = new Label(groupName, colour);
     label.setPosition(coords[0], coords[1], coords[2]);
     const sprite  = label.getSprite();
