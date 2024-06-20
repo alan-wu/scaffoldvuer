@@ -1324,19 +1324,28 @@ export default {
       }
     },
     drawPoint: function(coords, data) {
-      this.createData.points.length = 0;
-      this.createData.points.push(coords);
-      this.showRegionTooltipWithAnnotations(data, true, true);
-      this.createData.toBeConfirmed = true;
+      if (this.createData.toBeConfirmed === false) {
+        this.createData.points.length = 0;
+        this.createData.points.push(coords);
+        this.showRegionTooltipWithAnnotations(data, true, false);
+        this.tData.x = 50;
+        this.tData.y = 200;
+        this._tempPoint = this.$module.scene.addTemporaryPoints([coords], 0xffff00);
+        this.createData.toBeConfirmed = true;
+      }
     },
     drawLine: function(coords, data) {
-      if (this.createData.points.length === 1) {
-        this.createData.points.push(coords);
-        this.showRegionTooltipWithAnnotations(data, true, true);
-        this.createData.toBeConfirmed = true;
-      } else {
-        this._tempPoint = this.$module.scene.addTemporaryPoints([coords], 0xffff00);
-        this.createData.points.push(coords);
+      if (this.createData.toBeConfirmed === false) {
+        if (this.createData.points.length === 1) {
+          this.createData.points.push(coords);
+          this.showRegionTooltipWithAnnotations(data, true, false);
+          this.tData.x = 50;
+          this.tData.y = 200;
+          this.createData.toBeConfirmed = true;
+        } else {
+          this._tempPoint = this.$module.scene.addTemporaryPoints([coords], 0xffff00);
+          this.createData.points.push(coords);
+        }
       }
     },    
     /**
@@ -1410,89 +1419,90 @@ export default {
      *
      */
     eventNotifierCallback: function (event) {
-      const names = [];
-      let zincObjects = [];
-      if (event.eventType == 1 || event.eventType == 2) {
-        event.identifiers.forEach((identifier) => {
-          if (identifier) {
-            let id = identifier.data.id
-              ? identifier.data.id
-              : identifier.data.group;
-            names.push(id);
-          }
-        });
-        zincObjects = event.zincObjects;
-      }
-      /*
-       * Event Type 1: Selected
-       * Event Type 2: Highlighted
-       * Event Type 3: Move
-       */
-      if (event.eventType == 1) {
-        if (this.viewingMode === 'Annotation') {
-          this.activateAnnotationMode(names, event);
-
-        } else {
-          if (this.$refs.scaffoldTreeControls) {
-            if (names.length > 0) {
-              //this.$refs.scaffoldTreeControls.changeActiveByNames(names, region, false);
-              this.$refs.scaffoldTreeControls.updateActiveUI(zincObjects);
-              this.updatePrimitiveControls(zincObjects);
-            } else {
-              this.hideRegionTooltip();
-              this.$refs.scaffoldTreeControls.removeActive(false);
+      if (!this.createData.toBeConfirmed) {
+        const names = [];
+        let zincObjects = [];
+        if (event.eventType == 1 || event.eventType == 2) {
+          event.identifiers.forEach((identifier) => {
+            if (identifier) {
+              let id = identifier.data.id
+                ? identifier.data.id
+                : identifier.data.group;
+              names.push(id);
             }
-          }
-          //Emit when an object is selected
-          //@arg Identifier of selected objects
-          this.$emit("scaffold-selected", event.identifiers);
+          });
+          zincObjects = event.zincObjects;
         }
-      } else if (event.eventType == 2) {
-        if (this.selectedObjects.length === 0) {
-          this.hideRegionTooltip();
-          // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
-          if (this.$refs.scaffoldTreeControls) {
-            if (names.length > 0) {
-              //this.$refs.scaffoldTreeControls.changeHoverByNames(names, region, false);
-              this.$refs.scaffoldTreeControls.updateHoverUI(zincObjects);
-            } else {
-              this.$refs.scaffoldTreeControls.removeHover(true);
+        /*
+        * Event Type 1: Selected
+        * Event Type 2: Highlighted
+        * Event Type 3: Move
+        */
+        if (event.eventType == 1) {
+          if (this.viewingMode === 'Annotation') {
+            this.activateAnnotationMode(names, event);
+          } else {
+            if (this.$refs.scaffoldTreeControls) {
+              if (names.length > 0) {
+                //this.$refs.scaffoldTreeControls.changeActiveByNames(names, region, false);
+                this.$refs.scaffoldTreeControls.updateActiveUI(zincObjects);
+                this.updatePrimitiveControls(zincObjects);
+              } else {
+                this.hideRegionTooltip();
+                this.$refs.scaffoldTreeControls.removeActive(false);
+              }
             }
+            //Emit when an object is selected
+            //@arg Identifier of selected objects
+            this.$emit("scaffold-selected", event.identifiers);
           }
+        } else if (event.eventType == 2) {
+          if (this.selectedObjects.length === 0) {
+            this.hideRegionTooltip();
+            // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
+            if (this.$refs.scaffoldTreeControls) {
+              if (names.length > 0) {
+                //this.$refs.scaffoldTreeControls.changeHoverByNames(names, region, false);
+                this.$refs.scaffoldTreeControls.updateHoverUI(zincObjects);
+              } else {
+                this.$refs.scaffoldTreeControls.removeHover(true);
+              }
+            }
+            if (event.identifiers.length > 0 && event.identifiers[0]) {
+              let id = event.identifiers[0].data.id
+                ? event.identifiers[0].data.id
+                : event.identifiers[0].data.group;
+              if (event.identifiers[0].coords) {
+                this.tData.active = false;
+                this.tData.visible = true;
+                this.tData.label = id;
+                if (event.identifiers[0].data.region) {
+                  this.tData.region = event.identifiers[0].data.region;
+                }
+                else {
+                  this.tData.region = undefined;
+                }
+                this.tData.x = event.identifiers[0].coords.x;
+                this.tData.y = event.identifiers[0].coords.y;
+                this.createEditTemporaryLines(event.identifiers[0].extraData.worldCoords);
+              }
+            }
+            //Emit when an object is highlighted
+            //@arg Identifier of selected objects
+            this.$emit("scaffold-highlighted", event.identifiers);
+          }
+        } else if (event.eventType == 3) {
+          //MOVE
           if (event.identifiers.length > 0 && event.identifiers[0]) {
-            let id = event.identifiers[0].data.id
-              ? event.identifiers[0].data.id
-              : event.identifiers[0].data.group;
             if (event.identifiers[0].coords) {
-              this.tData.active = false;
-              this.tData.visible = true;
-              this.tData.label = id;
-              if (event.identifiers[0].data.region) {
-                this.tData.region = event.identifiers[0].data.region;
-              }
-              else {
-                this.tData.region = undefined;
-              }
-              this.tData.x = event.identifiers[0].coords.x;
-              this.tData.y = event.identifiers[0].coords.y;
+              const offsets =
+                this.$refs.scaffoldContainer.getBoundingClientRect();
+              this.tData.x = event.identifiers[0].coords.x - offsets.left;
+              this.tData.y = event.identifiers[0].coords.y - offsets.top;
               this.createEditTemporaryLines(event.identifiers[0].extraData.worldCoords);
             }
-          }
-          //Emit when an object is highlighted
-          //@arg Identifier of selected objects
-          this.$emit("scaffold-highlighted", event.identifiers);
-        }
-      } else if (event.eventType == 3) {
-        //MOVE
-        if (event.identifiers.length > 0 && event.identifiers[0]) {
-          if (event.identifiers[0].coords) {
-            const offsets =
-              this.$refs.scaffoldContainer.getBoundingClientRect();
-            this.tData.x = event.identifiers[0].coords.x - offsets.left;
-            this.tData.y = event.identifiers[0].coords.y - offsets.top;
             this.createEditTemporaryLines(event.identifiers[0].extraData.worldCoords);
           }
-          this.createEditTemporaryLines(event.identifiers[0].extraData.worldCoords);
         }
       }
     },
