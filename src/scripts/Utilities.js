@@ -339,7 +339,9 @@ export const annotationFeaturesToPrimitives = (scene, features)  => {
           undefined,
           0x0022ee,
         );
-        addLabelToObject(object.zincObject, geometry.coordinates[0], group);
+        geometry.coordinates.forEach((coordinates) => {
+          addLabelToObject(object.zincObject, coordinates, group);
+        });
       } else if (geometry.type === "MultiLineString") {
         object = scene.createLines(
           region,

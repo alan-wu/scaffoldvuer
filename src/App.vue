@@ -139,6 +139,25 @@
           </el-col>
         </el-row>
 
+        <el-row :gutter="20" justify="center" align="middle">
+          <el-col :span="auto">
+            <el-button size="small" @click="exportLocalAnnotations()">
+              Export Annotations
+            </el-button>
+          </el-col>
+          <el-col :span="auto">
+              <el-button size="small">
+                <label for="annotations-upload">Import Annotations</label>
+                <input
+                  id="annotations-upload"
+                  type="file"
+                  accept="application/json"
+                  @change="importLocalAnnotations" 
+                />
+              </el-button>
+          </el-col>
+        </el-row>
+
         <el-row justify="center" align="middle">
           <el-col>
             <el-row :gutter="20" justify="center" align="middle">
@@ -298,6 +317,7 @@ import {
   ElInputNumber as InputNumber,
   ElPopover as Popover,
   ElRow as Row,
+  ElUpload as Upload,
   ElSwitch as Switch,
 } from "element-plus";
 import { useRoute, useRouter } from 'vue-router'
@@ -305,6 +325,18 @@ import { HelpModeDialog } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 
 let texture_prefix = undefined;
+
+const writeTextFile = (filename, data) => {
+  let dataStr =
+    "data:text/json;charset=utf-8," +
+    encodeURIComponent(JSON.stringify(data));
+  let hrefElement = document.createElement("a");
+  document.body.append(hrefElement);
+  hrefElement.download = filename;
+  hrefElement.href = dataStr;
+  hrefElement.click();
+  hrefElement.remove();
+} 
 
 export default {
   name: "app",
@@ -318,6 +350,7 @@ export default {
     Popover,
     Row,
     Switch,
+    Upload,
     ElIconFolderOpened,
     ElIconSetting,
     DropZone,
@@ -462,15 +495,8 @@ export default {
   methods: {
     exportGLTF: function () {
       this.$refs.scaffold.exportGLTF(false).then((data) => {
-        let dataStr =
-          "data:text/json;charset=utf-8," +
-          encodeURIComponent(JSON.stringify(data));
-        let hrefElement = document.createElement("a");
-        document.body.append(hrefElement);
-        hrefElement.download = `export.gltf`;
-        hrefElement.href = dataStr;
-        hrefElement.click();
-        hrefElement.remove();
+        const filename = 'export' + JSON.stringify(new Date()) + '.gltf';
+        writeTextFile(filename, data);
       });
     },
     exportGLB: function () {
@@ -484,6 +510,21 @@ export default {
         hrefElement.click();
         hrefElement.remove();
       });
+    },
+    exportLocalAnnotations: function() {
+      const annotations = this.$refs.scaffold.getLocalAnnotations();
+      const filename = 'scaffoldAnnotations' + JSON.stringify(new Date()) + '.json';
+      writeTextFile(filename, annotations);
+    },
+    onReaderLoad: function(event) {
+      const annotationsList = JSON.parse(event.target.result);
+      this.$refs.scaffold.importLocalAnnotations(annotationsList);
+    },
+    importLocalAnnotations: function() {
+      const selectedFile = document.getElementById("annotations-upload").files[0];
+      const reader = new FileReader();
+      reader.onload = this.onReaderLoad;
+      reader.readAsText(selectedFile);
     },
     objectAdded: function (zincObject) {
       if (this.consoleOn) {
@@ -868,4 +909,9 @@ body {
 svg.map-icon {
   color: $app-primary-color;
 }
+
+input[type="file"] {
+  display: none;
+}
+
 </style>
