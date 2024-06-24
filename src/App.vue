@@ -115,9 +115,6 @@
           <el-col :span="auto">
             <el-button size="small" @click="screenCapture()"> Capture </el-button>
           </el-col>
-          <el-col :span="auto">
-            <el-button size="small" @click="changeMarkers"> Change Markers </el-button>
-          </el-col>
         </el-row>
 
         <el-row :gutter="20" justify="center" align="middle">
@@ -376,7 +373,7 @@ export default {
       tumbleOn: false,
       tumbleDirection: [1.0, 0.0],
       showColourPicker: true,
-      markerCluster: true,
+      markerCluster: false,
       minimapSettings: {
         x_offset: 16,
         y_offset: 50,
@@ -384,22 +381,7 @@ export default {
         height: 128,
         align: "top-right",
       },
-      markerLabels: {
-        "body proper": 9,
-        "Spinal cord": 8,
-        "lung": 11,
-        "stomach": 12,
-        "urinary bladder": 11,
-        "Brainstem": 11,
-        "heart": 9,
-        "skin epidermis": 5,
-        "Diaphragm": 7,
-        "colon": 9,
-        "vagus nerve": 3,
-        "myenteric nerve plexus": 2,
-        "esophagus": 1,
-        "urethra": 3
-      },
+      markerLabels: { },
       render: true,
       region: "",
       viewURL: "",
@@ -433,6 +415,28 @@ export default {
     },
     tumbleOn: function () {
       this.autoTumble();
+    },
+    markerCluster: function(val) {
+      if (val) {
+        this.markerLabels = {
+          "body proper": 9,
+          "Spinal cord": 8,
+          "lung": 11,
+          "stomach": 12,
+          "urinary bladder": 11,
+          "Brainstem": 11,
+          "heart": 9,
+          "skin epidermis": 5,
+          "Diaphragm": 7,
+          "colon": 9,
+          "vagus nerve": 3,
+          "myenteric nerve plexus": 2,
+          "esophagus": 1,
+          "urethra": 3
+        };
+      } else {
+        this.markerLabels = { };
+      }
     },
     "route.query": {
       handler: "parseQuery",
@@ -495,9 +499,6 @@ export default {
       if (this.consoleOn) {
         console.log(zincObject)
         console.log(this.$refs.scaffold.$module.scene.getBoundingBox())
-      }
-      if (this._objects.length === 0) {
-        zincObject.setMarkerMode("on");
       }
       if (zincObject.isGeometry) {
         zincObject._lod._material.wireframe = this.wireframe;
@@ -674,9 +675,7 @@ export default {
         if (this.onClickMarkers) this.$refs.scaffold.setMarkerModeForObjectsWithName(data[0].data.group, "on");
       }
     },
-    changeMarkers: function () {
-      this.markerLabels = {"left atrium": 3, "epicardium": 4 , "stomach": 5};
-    },
+
     onNavigated: function (data) {
       this.zoom = data.zoom;
       this.pos[0] = data.target[0];
