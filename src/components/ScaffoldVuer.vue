@@ -562,9 +562,9 @@ export default {
       default: false,
     },
     markerLabels : {
-      type: Array,
+      type: Object,
       default: function () {
-        return []
+        return {}
       }
     },
     /**
@@ -770,7 +770,7 @@ export default {
         active: false,
       },
       fileFormat: "metadata",
-      previousMarkerLabels: [],
+      previousMarkerLabels: markRaw({}),
       viewingMode: "Exploration",
       viewingModes: [
         "Annotation",
@@ -868,13 +868,13 @@ export default {
       immediate: true,
     },
     markerLabels: function(labels) {
-      this.previousMarkerLabels.forEach((pml)=>{
-        this.setMarkerModeForObjectsWithName(pml, "off");
-      })
-      labels.forEach((l)=>{
-        this.setMarkerModeForObjectsWithName(l, "on");
-      })
-      this.previousMarkerLabels = labels;
+      for (const [key, value] of Object.entries(this.previousMarkerLabels)) {
+        this.setMarkerModeForObjectsWithName(key, value, "off");
+      }
+      for (const [key, value] of Object.entries(labels)) {
+        this.setMarkerModeForObjectsWithName(key, value, "on");
+      }
+      this.previousMarkerLabels = markRaw({...labels});
     },
   },
   beforeCreate: function () {
@@ -1891,12 +1891,12 @@ export default {
      * Set the marker modes for objects with the provided name, mode can
      * be "on", "off" or "inherited".
      */
-    setMarkerModeForObjectsWithName: function (name, mode) {
+    setMarkerModeForObjectsWithName: function (name, number, mode) {
       if (name && this.$module.scene) {
         const rootRegion = this.$module.scene.getRootRegion();
         const groups = [name];
         const objects = findObjectsWithNames(rootRegion, groups, "", true);
-        objects.forEach(object => object.setMarkerMode(mode));
+        objects.forEach(object => object.setMarkerMode(mode, { number }));
       }
     },
     /**
@@ -2257,9 +2257,9 @@ export default {
      * Set the markers for the scene.
      */
     setMarkers: function () {
-      this.markerLabels.forEach((l)=>{
-        this.setMarkerModeForObjectsWithName(l, "on");
-      })
+      for (const [key, value] of Object.entries(this.markerLabels)) {
+        this.setMarkerModeForObjectsWithName(key, value, "on");
+      }
     },
   },
 };
