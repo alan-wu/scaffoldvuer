@@ -1401,7 +1401,13 @@ export default {
               this._editingZincObject = zincObject;
             }
           }
-          this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
+          if (this.activeDrawMode === "Edit" || this.activeDrawMode === "Delete") {
+            this.showRegionTooltipWithAnnotations(event.identifiers, true, false);
+            this.tData.x = 50;
+            this.tData.y = 200;
+          } else {
+            this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
+          }
         }
       } else {
         this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
@@ -1419,7 +1425,7 @@ export default {
      *
      */
     eventNotifierCallback: function (event) {
-      if (!this.createData.toBeConfirmed) {
+      if (!(this.createData.toBeConfirmed || this.createData.toBeDeleted)) {
         const names = [];
         let zincObjects = [];
         if (event.eventType == 1 || event.eventType == 2) {
@@ -2199,12 +2205,14 @@ export default {
      * Callback using ResizeObserver.
      */
     adjustLayout: function () {
-      let width = this.$refs.scaffoldContainer.clientWidth;
-      this.minimisedSlider = width < 812;
-      if (this.minimisedSlider) {
-        this.sliderPosition = this.drawerOpen ? "right" : "left";
-      } else {
-        this.sliderPosition = "";
+      if (this.$refs.scaffoldContainer) {
+        let width = this.$refs.scaffoldContainer.clientWidth;
+        this.minimisedSlider = width < 812;
+        if (this.minimisedSlider) {
+          this.sliderPosition = this.drawerOpen ? "right" : "left";
+        } else {
+          this.sliderPosition = "";
+        }
       }
     },
     toggleRendering: function (flag) {

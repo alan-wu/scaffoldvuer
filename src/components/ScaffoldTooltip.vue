@@ -29,14 +29,22 @@
         />
         <div v-if="createData.toBeDeleted" class="delete-container">
           <el-row>
-            <el-col :span="12">Delete this feature?</el-col>
-            <el-col :span="2">
+            <el-col :span="10">Delete this feature?</el-col>
+            <el-col :span="7">
               <el-button
                 class="delete-button"
                 :icon="ElIconDelete"
                 @click="$emit('confirm-delete')"
                 >
                   Delete
+              </el-button>
+            </el-col>
+            <el-col :span="6">
+              <el-button
+                class="delete-button"
+                @click="$emit('cancel-create')"
+                >
+                  Dismiss
               </el-button>
             </el-col>
           </el-row>
@@ -243,6 +251,8 @@ export default {
       pointer-events: auto;
       cursor: pointer;
       margin-left:8px;
+      padding-left: 8px;
+      padding-right: 8px;
       height: 24px !important;
       color: $app-primary-color;
       &:hover {
