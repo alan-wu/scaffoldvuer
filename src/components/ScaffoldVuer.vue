@@ -14,7 +14,7 @@
       :visible="tData.visible"
       :x="tData.x"
       :y="tData.y"
-      :annotationDisplay="viewingMode === 'Annotation' && tData.active === true"
+      :annotationDisplay="viewingMode === 'Annotation' && tData.active === true && activeDrawMode === 'Edit'"
       @confirm-create="confirmCreate($event)"
       @cancel-create="cancelCreate()"
     />
@@ -26,78 +26,21 @@
       @keydown.66="backgroundChangeCallback"
     />
     <div v-show="displayUI && !isTransitioning">
-      <div
-        class="bottom-draw-control"
+      <DrawToolbar
         v-if="viewingMode === 'Annotation' && userInformation"
-      >
-        <el-popover
-          content="Comment"
-          placement="top"
-          :teleported="false"
-          trigger="manual"
-          width="80"
-          popper-class="flatmap-popper"
-          ref="commentPopover"
-          :visible="hoverVisibilities[9].value"
-        >
-          <template #reference>
-            <map-svg-icon
-              icon="comment"
-              class="icon-button shape"
-              :class="[createData.shape === '' ? 'active' : '']"
-              @click="toggleDrawing('')"
-              @mouseover="showHelpText(9)"
-              @mouseout="hideHelpText(9)"
-            />
-          </template>
-        </el-popover>
-        <el-popover
-          content="Draw Point"
-          placement="top"
-          :teleported="false"
-          trigger="manual"
-          width="80"
-          popper-class="flatmap-popper"
-          ref="drawPointPopover"
-          :visible="hoverVisibilities[10].value"
-        >
-          <template #reference>
-            <map-svg-icon
-              icon="drawPoint"
-              class="icon-button shape"
-              :class="[createData.shape === 'Point' ? 'active' : '']"
-              @click="toggleDrawing('Point')"
-              @mouseover="showHelpText(10)"
-              @mouseout="hideHelpText(10)"
-            />
-          </template>
-        </el-popover>
-        <el-popover
-          content="Draw Line"
-          placement="top"
-          :teleported="false"
-          trigger="manual"
-          width="80"
-          popper-class="flatmap-popper"
-          ref="drawLinePopover"
-          :visible="hoverVisibilities[11].value"
-        >
-          <template #reference>
-            <map-svg-icon
-              icon="drawLine"
-              class="icon-button shape"
-              :class="[createData.shape === 'Line' ? 'active' : '']"
-              @click="toggleDrawing('Line')"
-              @mouseover="showHelpText(11)"
-              @mouseout="hideHelpText(11)"
-            />
-          </template>
-        </el-popover>
-      </div>
+        :toolbarOptions="toolbarOptions"
+        :activeDrawTool="activeDrawTool"
+        :activeDrawMode="activeDrawMode"
+        :hoverVisibilities=hoverVisibilities
+        @clickToolbar="toggleDrawing"
+        @showTooltip="showHelpText"
+        @hideTooltip="hideHelpText"
+        ref="toolbarPopover"
+      />
       <el-popover
         v-if="displayWarning"
         ref="warningPopover"
-        :visible="hoverVisibilities[6].value"
+        :visible="hoverVisibilities[7].value"
         :content="warningMessage"
         placement="right"
         width="max-content"
@@ -108,8 +51,8 @@
           <div
             v-if="displayWarning"
             class="message-icon warning-icon"
-            @mouseover="showHelpText(6)"
-            @mouseout="hideHelpText(6)"
+            @mouseover="showHelpText(7)"
+            @mouseout="hideHelpText(7)"
           >
             <el-icon><el-icon-warning-filled /></el-icon>
             <span class="message-text">Beta</span>
@@ -118,7 +61,7 @@
       </el-popover>
       <el-popover
         v-if="displayLatestChanges"
-        :visible="hoverVisibilities[7].value"
+        :visible="hoverVisibilities[8].value"
         :content="latestChangesMessage"
         placement="right"
         :teleported="false"
@@ -130,8 +73,8 @@
           <div
             v-if="displayLatestChanges && latestChangesMessage"
             class="el-icon-warning message-icon latest-changesicon"
-            @mouseover="showHelpText(7)"
-            @mouseout="hideHelpText(7)"
+            @mouseover="showHelpText(8)"
+            @mouseout="hideHelpText(8)"
           >
             <el-icon><el-icon-warning-filled /></el-icon>
             <span class="message-text">What's new?</span>
@@ -139,7 +82,7 @@
         </template>
       </el-popover>
       <el-popover
-        :visible="hoverVisibilities[5].value"
+        :visible="hoverVisibilities[6].value"
         content="Change region visibility"
         placement="right"
         width="max-content"
@@ -149,9 +92,8 @@
         ref="regionVisibilityPopover"
       >
         <template #reference>
-          <tree-controls
-            ref="treeControls"
-            :help-mode="helpMode"
+          <ScaffoldTreeControls
+            ref="scaffoldTreeControls"
             :isReady="isReady"
             :show-colour-picker="showColourPicker"
             @object-selected="objectSelected"
@@ -167,7 +109,7 @@
         v-if="timeVarying"
         ref="sliderPopover"
         width="max-content"
-        :visible="hoverVisibilities[4].value"
+        :visible="hoverVisibilities[5].value"
         content="Move the slider to animate the region"
         placement="top"
         :teleported="false"
@@ -383,7 +325,7 @@
       >
         <el-row>
           <el-popover
-            :visible="hoverVisibilities[8].value"
+            :visible="hoverVisibilities[3].value"
             content="Open new map"
             placement="right"
             :teleported="false"
@@ -398,15 +340,15 @@
                 ref="openMapRef"
                 icon="openMap"
                 class="icon-button open-map-button"
-                @mouseover="showHelpText(8)"
-                @mouseout="hideHelpText(8)"
+                @mouseover="showHelpText(3)"
+                @mouseout="hideHelpText(3)"
               />
             </template>
           </el-popover>
         </el-row>
         <el-row>
           <el-popover
-            :visible="hoverVisibilities[3].value"
+            :visible="hoverVisibilities[4].value"
             content="Change background color"
             placement="right"
             width="max-content"
@@ -420,8 +362,8 @@
                 ref="backgroundIconRef"
                 icon="changeBckgd"
                 class="icon-button"
-                @mouseover="showHelpText(3)"
-                @mouseout="hideHelpText(3)"
+                @mouseover="showHelpText(4)"
+                @mouseout="hideHelpText(4)"
               />
             </template>
           </el-popover>
@@ -441,8 +383,10 @@ import {
 } from '@element-plus/icons-vue'
 import PrimitiveControls from "./PrimitiveControls.vue";
 import ScaffoldTooltip from "./ScaffoldTooltip.vue";
-import TreeControls from "./TreeControls.vue";
+import ScaffoldTreeControls from "./ScaffoldTreeControls.vue";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
+import { DrawToolbar } from '@abi-software/map-utilities'
+import '@abi-software/map-utilities/dist/style.css'
 import {
   addUserAnnotationWithFeature,
   annotationFeaturesToPrimitives,
@@ -495,10 +439,11 @@ export default {
     MapSvgSpriteColor,
     PrimitiveControls,
     ScaffoldTooltip,
-    TreeControls,
     ElIconWarningFilled,
     ElIconArrowDown,
     ElIconArrowLeft,
+    DrawToolbar,
+    ScaffoldTreeControls
   },
   setup(props) {
     const annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
@@ -753,15 +698,15 @@ export default {
         { value: false, ref: 'zoomInPopover' }, // 0
         { value: false, ref: 'zoomOutPopover' }, // 1
         { value: false, ref: 'zoomFitPopover' }, // 2
-        { value: false, ref: 'settingsPopover' }, // 3
-        { value: false, ref: 'sliderPopover' }, // 4
-        { value: false, ref: 'regionVisibilityPopover' }, // 5
-        { value: false, ref: 'warningPopover' }, // 6
-        { value: false, ref: 'whatsNewPopover' }, // 7
-        { value: false, ref: 'openMapPopover' }, // 8
-        { value: false, ref: 'commentPopover' }, //9
-        { value: false, ref: 'drawPointPopover' }, //10
-        { value: false, ref: 'drawLinePopover' }, //11
+        { value: false, ref: 'openMapPopover' }, // 3
+        { value: false, ref: 'settingsPopover' }, // 4
+        { value: false, ref: 'sliderPopover' }, // 5
+        { value: false, ref: 'regionVisibilityPopover' }, // 6
+        { value: false, ref: 'warningPopover' }, // 7
+        { value: false, ref: 'whatsNewPopover' }, // 8
+        { value: false, refs: 'toolbarPopover', ref: 'editPopover' }, // 9
+        { value: false, refs: 'toolbarPopover', ref: 'pointPopover' }, // 10
+        { value: false, refs: 'toolbarPopover', ref: 'lineStringPopover' }, // 11
       ],
       inHelp: false,
       helpModeActiveIndex: this.helpModeInitialIndex,
@@ -822,6 +767,13 @@ export default {
       openMapRef: undefined,
       backgroundIconRef: undefined,
       userInformation: undefined,
+      toolbarOptions: [
+        "Edit",
+        "Point",
+        "LineString",
+      ],
+      activeDrawTool: undefined,
+      activeDrawMode: undefined,
     };
   },
   watch: {
@@ -923,7 +875,7 @@ export default {
   mounted: function () {
     this.openMapRef = shallowRef(this.$refs.openMapRef);
     this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef);
-    this.$refs.treeControls.setModule(this.$module);
+    this.$refs.scaffoldTreeControls.setModule(this.$module);
     let eventNotifier = new EventNotifier();
     eventNotifier.subscribe(this, this.eventNotifierCallback);
     this.$module.addNotifier(eventNotifier);
@@ -1037,7 +989,7 @@ export default {
      * Function to clear current scene, the tree controls and the search index.
      */
     clearScene: function () {
-      if (this.$refs.treeControls) this.$refs.treeControls.clear();
+      if (this.$refs.scaffoldTreeControls) this.$refs.scaffoldTreeControls.clear();
       if (this.$_searchIndex) this.$_searchIndex.removeAll();
       if (this.$module.scene) this.$module.scene.clearAll();
     },
@@ -1056,7 +1008,7 @@ export default {
             undefined,
             0x0022ee,
           );
-        } else if (payload.shape === "Line") {
+        } else if (payload.shape === "LineString") {
           object = this.$module.scene.createLines(
             payload.region,
             payload.group,
@@ -1191,12 +1143,14 @@ export default {
      *
      * @vuese
      */
-    toggleDrawing: function (shapeName) {
-      if (shapeName === this.createData.shape) {
-        this.createData.shape = "";
+    toggleDrawing: function (type, icon) {
+      if (type === 'mode') {
+        this.activeDrawMode = icon
+        this.createData.shape = '';
         this.$module.selectObjectOnPick = true;
-      } else {
-        this.createData.shape = shapeName;
+      } else if (type === 'tool') {
+        this.activeDrawTool = icon
+        this.createData.shape = this.activeDrawTool;
         this.$module.selectObjectOnPick = false;
       }
     },
@@ -1258,7 +1212,7 @@ export default {
     },
     createEditTemporaryLines: function(worldCoords) {
       if (worldCoords) {
-        if (this.createData.shape === "Line" || this.createData.editingIndex > -1) {
+        if (this.createData.shape === "LineString" || this.createData.editingIndex > -1) {
           if (this.createData.points.length === 1)  {
             if (this._tempLine) {
               const positionAttribute = this._tempLine.geometry.getAttribute( 'position' );
@@ -1277,7 +1231,7 @@ export default {
         if (data[0].extraData.worldCoords) {
           if (this.createData.shape === "Point") {
             this.drawPoint(data[0].extraData.worldCoords, data);
-          } else if (this.createData.shape === "Line" ||
+          } else if (this.createData.shape === "LineString" ||
             this.createData.editingIndex > -1) {
             this.drawLine(data[0].extraData.worldCoords, data);
           }
@@ -1385,14 +1339,14 @@ export default {
           this.activateAnnotationMode(names, event);
 
         } else {
-          if (this.$refs.treeControls) {
+          if (this.$refs.scaffoldTreeControls) {
             if (names.length > 0) {
-              //this.$refs.treeControls.changeActiveByNames(names, region, false);
-              this.$refs.treeControls.updateActiveUI(zincObjects);
+              //this.$refs.scaffoldTreeControls.changeActiveByNames(names, region, false);
+              this.$refs.scaffoldTreeControls.updateActiveUI(zincObjects);
               this.updatePrimitiveControls(zincObjects);
             } else {
               this.hideRegionTooltip();
-              this.$refs.treeControls.removeActive(false);
+              this.$refs.scaffoldTreeControls.removeActive(false);
             }
           }
           //Emit when an object is selected
@@ -1403,12 +1357,12 @@ export default {
         if (this.selectedObjects.length === 0) {
           this.hideRegionTooltip();
           // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
-          if (this.$refs.treeControls) {
+          if (this.$refs.scaffoldTreeControls) {
             if (names.length > 0) {
-              //this.$refs.treeControls.changeHoverByNames(names, region, false);
-              this.$refs.treeControls.updateHoverUI(zincObjects);
+              //this.$refs.scaffoldTreeControls.changeHoverByNames(names, region, false);
+              this.$refs.scaffoldTreeControls.updateHoverUI(zincObjects);
             } else {
-              this.$refs.treeControls.removeHover(true);
+              this.$refs.scaffoldTreeControls.removeHover(true);
             }
           }
           if (event.identifiers.length > 0 && event.identifiers[0]) {
@@ -1521,11 +1475,11 @@ export default {
     changeActiveByName: function (names, region, propagate) {
       const isArray = Array.isArray(names);
       if (names === undefined || (isArray && names.length === 0)) {
-        this.$refs.treeControls.removeActive(propagate);
+        this.$refs.scaffoldTreeControls.removeActive(propagate);
       } else {
         let array = names;
         if (!isArray) array = [array];
-        this.$refs.treeControls.changeActiveByNames(array, region, propagate);
+        this.$refs.scaffoldTreeControls.changeActiveByNames(array, region, propagate);
       }
     },
     /**
@@ -1536,11 +1490,11 @@ export default {
     changeHighlightedByName: function (names, region, propagate) {
       const isArray = Array.isArray(names);
       if (names === undefined || (isArray && names.length === 0)) {
-        this.$refs.treeControls.removeHover(propagate);
+        this.$refs.scaffoldTreeControls.removeHover(propagate);
       } else {
         let array = names;
         if (!isArray) array = [array];
-        this.$refs.treeControls.changeHoverByNames(array, region, propagate);
+        this.$refs.scaffoldTreeControls.changeHoverByNames(array, region, propagate);
       }
     },
     /**
@@ -1565,26 +1519,11 @@ export default {
       const activePopoverObj = this.hoverVisibilities[this.helpModeActiveIndex];
 
       if (activePopoverObj) {
+        const popoverRefsId = activePopoverObj?.refs;
         const popoverRefId = activePopoverObj?.ref;
-        const popoverRef = this.$refs[popoverRefId];
+        const popoverRef = this.$refs[popoverRefsId ? popoverRefsId : popoverRefId];
 
-        if (popoverRef) {
-          // Open pathway drawer if the tooltip is inside or beside
-          const { parentElement, nextElementSibling } = popoverRef.$el;
-          const isPathwayContainer = (element) => {
-            return element && (
-              element.classList.contains('pathway-container') ||
-              element.classList.contains('pathway-location')
-            );
-          };
-
-          if (
-            isPathwayContainer(parentElement) ||
-            isPathwayContainer(nextElementSibling)
-          ) {
-            this.drawerOpen = true;
-          }
-        } else {
+        if (!popoverRef) {
           // skip the unavailable tooltips
           this.helpModeActiveIndex += 1;
         }
@@ -1974,7 +1913,7 @@ export default {
           if (options.visibility) {
             // Some UIs may not be ready at this time.
             this.$nextTick(() => {
-              this.$refs.treeControls.setState(options.visibility);
+              this.$refs.scaffoldTreeControls.setState(options.visibility);
             });
           }
         }
@@ -2004,8 +1943,8 @@ export default {
         viewport: undefined,
         visibility: undefined,
       };
-      if (this.$refs.treeControls)
-        state.visibility = this.$refs.treeControls.getState();
+      if (this.$refs.scaffoldTreeControls)
+        state.visibility = this.$refs.scaffoldTreeControls.getState();
       if (this.$module.scene) {
         let zincCameraControls = this.$module.scene.getZincCameraControls();
         state.viewport = zincCameraControls.getCurrentViewport();
@@ -2034,7 +1973,7 @@ export default {
                   .getZincCameraControls()
                   .setCurrentCameraSettings(state.viewport);
               if (state.visibility)
-                this.$refs.treeControls.setState(state.visibility);
+                this.$refs.scaffoldTreeControls.setState(state.visibility);
             } else {
               this.$module.setFinishDownloadCallback(
                 this.setURLFinishCallback({
@@ -2070,7 +2009,7 @@ export default {
         let visibility =
           state && state.visibility ? state.visibility : undefined;
         this._currentURL = newValue;
-        if (this.$refs.treeControls) this.$refs.treeControls.clear();
+        if (this.$refs.scaffoldTreeControls) this.$refs.scaffoldTreeControls.clear();
         this.loading = true;
         this.timeVarying = false;
         this.isReady = false;

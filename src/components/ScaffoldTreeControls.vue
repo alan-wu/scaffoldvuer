@@ -1,55 +1,20 @@
 <template>
-  <div
-    class="tree-controls"
-    :class="{ open: drawerOpen, close: !drawerOpen }"
-  >
+  <div class="tree-controls" :class="{ open: drawerOpen, close: !drawerOpen }">
     <div class="traditional-container">
-      <el-row>
-        <el-col :span="12">
-          <div class="regions-display-text">
-            Regions
-          </div>
-        </el-col>
-      </el-row>
-      <div class="tree-container">
-        <el-tree
-          ref="regionTree"
-          node-key="id"
-          v-loading="!isReady"
-          show-checkbox
-          element-loading-background="rgba(0, 0, 0, 0.3)"
-          :check-strictly="false"
-          :data="treeData[0].children"
-          :expand-on-click-node="false"
-          :render-after-expand="false"
-          @check="checkChanged"
-        >
-          <template #default="{ node, data }">
-            <span
-              class="region-tree-node"
-              :class="{
-                activeItem: active.includes(data.id),
-                hoverItem: hover.includes(data.id),
-              }"
-              @click="changeActiveByNode(data, true)"
-              @mouseover="changeHoverByNode(data, true)"
-            >
-              <el-color-picker
-                v-if="data.isPrimitives"
-                :class="{ 'show-picker': showColourPicker }"
-                :model-value="getColour(data)"
-                size="small"
-                :popper-class="myPopperClass"
-                @change="setColour(data, $event)"
-              />
-              <span>{{ node.label }}</span>
-              <span v-if="data.isTextureSlides" class="node-options">
-                (Texture)
-              </span>
-          </span>
-          </template>
-        </el-tree>
-      </div>
+      <TreeControls
+        mapType="scaffold"
+        title="Regions"
+        :isReady="isReady"
+        :treeData="treeDataEntry"
+        :active="active"
+        :hover="hover"
+        :showColourPicker="showColourPicker"
+        @setColour="setColour"
+        @checkChanged="checkChanged"
+        @changeActive="changeActiveByNode"
+        @changeHover="changeHoverByNode"
+        ref="treeControls"
+      />
     </div>
     <div
       class="drawer-button"
@@ -63,23 +28,15 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import {
-  ArrowLeft as ElIconArrowLeft,
-} from '@element-plus/icons-vue'
-import {
-  ElCheckbox as Checkbox,
-  ElCheckboxGroup as CheckboxGroup,
-  ElColorPicker as ColorPicker,
-  ElLoading as Loading,
-  ElRow as Row,
-  ElTree as Tree,
-} from "element-plus";
+import { ArrowLeft as ElIconArrowLeft } from "@element-plus/icons-vue";
 import {
   convertUUIDsToFullPaths,
   createListFromPrimitives,
   extractAllFullPaths,
   findObjectsWithNames,
 } from "../scripts/Utilities.js";
+import { TreeControls } from "@abi-software/map-utilities";
+import "@abi-software/map-utilities/dist/style.css";
 
 const nameSorting = (a, b) => {
   const labelA = a.label.toUpperCase();
@@ -97,15 +54,10 @@ const nameSorting = (a, b) => {
  * A vue component for toggling visibility of various regions.
  */
 export default {
-  name: "TreeControls",
+  name: "ScaffoldTreeControls",
   components: {
     ElIconArrowLeft,
-    Checkbox,
-    CheckboxGroup,
-    ColorPicker,
-    Loading,
-    Row,
-    Tree,
+    TreeControls,
   },
   props: {
     /**
@@ -116,40 +68,48 @@ export default {
   },
   data: function () {
     return {
-      treeData: [{ label: "Root", regionPath: "", id: undefined, children: [] }],
+      treeData: [
+        { label: "Root", regionPath: "", id: undefined, children: [] },
+      ],
       active: [],
       hover: [],
-      myPopperClass: "hide-scaffold-colour-popup",
       drawerOpen: true,
     };
   },
-  watch: {
-    showColourPicker: {
-      immediate: true,
-      handler: function () {
-        if (this.showColourPicker) this.myPopperClass = "showPicker";
-        else this.myPopperClass = "hide-scaffold-colour-popup";
-      },
+  computed: {
+    treeDataEntry: function () {
+      return this.treeData[0].children;
     },
   },
-  unmounted: function () {
-    this.sortedPrimitiveGroups = undefined;
+  watch: {
+    treeDataEntry: {
+      deep: true,
+      handler: function (data) {
+        if (this.isReady) {
+          // Updated colour when scaffold is ready
+          this.setColourField(data);
+        }
+      },
+    },
   },
   methods: {
     addTreeItem: function (parentContainer, item, object) {
       //The following block prevent duplicate graphics with the same name
-      if (parentContainer.some(child => child.label === item.label)) {
+      if (parentContainer.some((child) => child.label === item.label)) {
         return;
       }
+      // Set initial colour for the colourPicker
+      Object.assign(item, { activeColour: this.getColour(item) });
       parentContainer.push(item);
       parentContainer.sort((a, b) => {
         return nameSorting(a, b);
       });
       this.__nodeNumbers++;
       this.$nextTick(() => {
-        const checked = this.$refs.regionTree.getCheckedKeys();
+        const checked =
+          this.$refs.treeControls.$refs.regionTree.getCheckedKeys();
         if (!checked.includes(item.id) && object.getVisibility()) {
-          this.$refs.regionTree.setChecked(item.id, true);
+          this.$refs.treeControls.$refs.regionTree.setChecked(item.id, true);
         }
       });
     },
@@ -157,11 +117,7 @@ export default {
     // '__r/'
     findOrCreateRegion: function (data, paths, prefix) {
       //check if root region has been set
-      if (
-        this.rootID === undefined &&
-        this.$module &&
-        this.$module.scene
-      ) {
+      if (this.rootID === undefined && this.$module && this.$module.scene) {
         this.treeData[0].id = this.$module.scene.getRootRegion().uuid;
         this.treeData[0].isRegion = true;
       }
@@ -171,7 +127,9 @@ export default {
           (child) => child.label == _paths[0]
         );
         const path = prefix + "/" + paths[0];
-        const region = this.$module.scene.getRootRegion().findChildFromPath(path);
+        const region = this.$module.scene
+          .getRootRegion()
+          .findChildFromPath(path);
         if (!childRegionItem) {
           childRegionItem = {
             label: _paths[0],
@@ -319,7 +277,10 @@ export default {
       this.active.length = 0;
       this.hover.length = 0;
       this.__nodeNumbers = 0;
-      this.$refs.regionTree.updateKeyChildren(this.treeData[0].id, []);
+      this.$refs.treeControls.$refs.regionTree.updateKeyChildren(
+        this.treeData[0].id,
+        []
+      );
       this.treeData[0].children.length = 0;
       this.treeData[0].id = undefined;
       this.$emit("object-selected", []);
@@ -364,14 +325,41 @@ export default {
         this.zincObjectAdded(zincObject);
       });
       this.$module.addOrganPartAddedCallback(this.zincObjectAdded);
-
+    },
+    setColourField: function (treeData, nodeData = undefined) {
+      treeData
+        .filter((data) => {
+          // Filtering if single node is provided and it does not have children field
+          if (nodeData && !data.children) {
+            return data.id === nodeData.id;
+          } else {
+            return true;
+          }
+        })
+        .map((data) => {
+          // Using recursive to process nested data if children field exists
+          if (data.children) {
+            this.setColourField(data.children, nodeData);
+          } else {
+            const colour = this.getColour(data);
+            // Default colour will be used for reset colour action
+            if (!data.defaultColour) {
+              data["defaultColour"] = colour;
+            }
+            // Active colour is used for current display
+            data["activeColour"] = colour;
+          }
+        });
     },
     setColour: function (nodeData, value) {
       if (nodeData && nodeData.isPrimitives) {
         const targetObjects = this.getZincObjectsFromNode(nodeData, false);
         targetObjects.forEach((primitive) => {
-          let hexString = value.replace("#", "0x");
+          // Click clear will return null, so set it to the default colour
+          const activeColour = value ? value : nodeData.defaultColour;
+          let hexString = activeColour.replace("#", "0x");
           primitive.setColourHex(hexString);
+          this.setColourField(this.treeData[0].children, nodeData);
         });
       }
     },
@@ -411,7 +399,7 @@ export default {
       const region = this.$module.scene
         .getRootRegion()
         .findChildFromPath(node.regionPath);
-      if (nodeName && (nodeName !== "__r")) {
+      if (nodeName && nodeName !== "__r") {
         if (node.isPrimitives) {
           const primitives = region.findObjectsWithGroupName(node.label);
           primitives.forEach((primitive) => primitive.setVisibility(flag));
@@ -427,19 +415,26 @@ export default {
       const keysList = [];
       const ids = [];
       extractAllFullPaths(this.treeData[0], keysList);
-      this.setTreeVisibilityWithFullPaths(this.treeData[0],
-        keysList, ids, true);
-      this.$refs.regionTree.setCheckedKeys(ids);
+      this.setTreeVisibilityWithFullPaths(
+        this.treeData[0],
+        keysList,
+        ids,
+        true
+      );
+      this.$refs.treeControls.$refs.regionTree.setCheckedKeys(ids);
     },
     getState: function () {
-      let checkedItems = this.$refs.regionTree.getCheckedKeys();
+      let checkedItems =
+        this.$refs.treeControls.$refs.regionTree.getCheckedKeys();
       if (checkedItems.length === this.__nodeNumbers) {
         return { checkAll: true, version: "2.0" };
       } else {
         //We cannot use the generated uuid as the identifier for permastate,
         //convert it back to paths
-        let paths = convertUUIDsToFullPaths(this.$module.scene.getRootRegion(),
-          checkedItems);
+        let paths = convertUUIDsToFullPaths(
+          this.$module.scene.getRootRegion(),
+          checkedItems
+        );
         return { checkedItems: paths, version: "2.0" };
       }
     },
@@ -456,9 +451,13 @@ export default {
             list.push(...state.checkedItems);
           }
           const ids = [];
-          this.setTreeVisibilityWithFullPaths(this.treeData[0], list,
-            ids, true);
-          this.$refs.regionTree.setCheckedKeys(ids);
+          this.setTreeVisibilityWithFullPaths(
+            this.treeData[0],
+            list,
+            ids,
+            true
+          );
+          this.$refs.treeControls.$refs.regionTree.setCheckedKeys(ids);
         }
       }
     },
@@ -468,21 +467,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-
-:deep(.el-loading-spinner) {
-  .path {
-    stroke: $app-primary-color;
-  }
-  .el-loading-text {
-    color: $app-primary-color;
-  }
-}
-
-.checkbox-container {
-  display: flex;
-  cursor: pointer;
-}
-
 .tree-controls {
   position: absolute;
   bottom: 0px;
@@ -520,116 +504,6 @@ export default {
   background: #ffffff;
 }
 
-.regions-display-text {
-  width: 59px;
-  height: 20px;
-  color: rgb(48, 49, 51);
-  font-size: 14px;
-  font-weight: normal;
-  line-height: 20px;
-  margin-left: 8px;
-}
-
-.all-checkbox {
-  float: right;
-}
-
-.tree-container {
-  width: 260px;
-  border: 1px solid rgb(144, 147, 153);
-  border-radius: 4px;
-  background: #ffffff;
-  margin-top: 6px;
-  scrollbar-width: thin;
-
-  :deep(.el-tree) {
-    max-height: 240px;
-    min-height: 130px;
-    overflow: auto;
-    &::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      border-radius: 10px;
-      box-shadow: inset 0 0 6px #c0c4cc;
-    }
-  }
-
-  :deep(.el-tree-node__content) {
-    height: 22px;
-  }
-}
-
-:deep(.el-checkbox__input) {
-  &.is-indeterminate,
-  &.is-checked {
-    .el-checkbox__inner {
-      background-color: $app-primary-color;
-      border-color: $app-primary-color;
-    }
-  }
-}
-
-:deep(.el-color-picker__color) {
-  border: 1px solid $app-primary-color;
-}
-
-:deep(.el-checkbox__label) {
-  padding-left: 5px;
-  color: $app-primary-color !important;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0px;
-  line-height: 14px;
-}
-
-.activeItem {
-  background-color: #bbb !important;
-}
-
-.region-tree-node {
-  flex: 1;
-  color: $app-primary-color !important;
-  display: flex;
-  font-size: 12px;
-  line-height: 14px;
-  padding-left: 0px;
-  background-color: #fff;
-  width: 100%;
-
-  :deep(.el-color-picker) {
-    height: 14px !important;
-  }
-
-  :deep(.el-color-picker__trigger) {
-    margin-left: 8px;
-    margin-right: 8px;
-    padding: 0px;
-    height: 14px;
-    width: 14px;
-    border: 0px;
-  }
-}
-
-.hoverItem {
-  background-color: #eee !important;
-}
-
-:deep(.el-color-picker__icon) {
-  &.el-icon-arrow-down {
-    display: none;
-  }
-}
-
-:deep(.show-picker) {
-  .el-color-picker__icon {
-    &.el-icon-arrow-down {
-      display: block;
-    }
-  }
-}
-
 .drawer-button {
   float: left;
   width: 20px;
@@ -663,10 +537,6 @@ export default {
   }
 }
 
-.node-options {
-  text-align: right;
-}
-
 .drawer-button.open i {
   transform: rotate(0deg) scaleY(2.5);
 }
@@ -675,10 +545,3 @@ export default {
   transform: rotate(180deg) scaleY(2.5);
 }
 </style>
-
-<style>
-.hide-scaffold-colour-popup {
-  display: none;
-}
-</style>
-
