@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/scaffoldvuer",
-  "version": "1.2.0-beta.0",
+  "version": "1.2.1",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -55,7 +55,7 @@
     "vue": "^3.4.15",
     "vue-router": "^4.2.5",
     "vue3-component-svg-sprite": "^0.0.1",
-    "zincjs": "^1.8.2"
+    "zincjs": "^1.8.3"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.6.2",
