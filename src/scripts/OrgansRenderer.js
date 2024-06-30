@@ -420,7 +420,6 @@ const OrgansSceneData = function() {
 		 */
 	  const _removeOrganPartCallback = function(systemName, partName, useDefautColour) {
 	    return function(zincObject) {
-				console.log("removed")
 	    	removeOrganPart(systemName, partName, useDefautColour, zincObject);
 	    }
 	  }

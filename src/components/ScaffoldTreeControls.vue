@@ -176,7 +176,6 @@ export default {
       }
     },
     zincObjectRemoved: function(zincObject) {
-      console.log(zincObject)
       const group = zincObject.groupName;
       const objects = zincObject.region.findObjectsWithGroupName(group, false);
       if (objects.length === 0) {
