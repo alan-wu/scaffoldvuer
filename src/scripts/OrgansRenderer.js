@@ -149,9 +149,9 @@ const OrgansSceneData = function() {
 		}
 	}
 	
-	 /**
-		 * Add a callback which will be called when time has changed
-		 */
+	/**
+	 * Add a callback which will be called when time has changed
+	 */
 	this.addTimeChangedCallback = function(callback) {
 	  if (typeof(callback === "function"))
 	    timeChangedCallbacks.push(callback);
@@ -249,6 +249,7 @@ const OrgansSceneData = function() {
 			};
       const coords = { x: window_x, y: window_y };
       if (idObject.id) {
+				extraData.threeID = idObject.object?.id;
         if (idObject.object.userData.isGlyph) { 
           if (idObject.object.name) {
             _this.setSelectedByObjects([idObject.object], coords,
@@ -285,6 +286,7 @@ const OrgansSceneData = function() {
 			}
       const coords = { x: window_x, y: window_y };
       if (idObject.id) {
+				extraData.threeID = idObject.object?.id;
         _this.displayArea.style.cursor = "pointer";
         _this.setHighlightedByObjects([idObject.object], coords, extraData, true);
         return;
@@ -486,6 +488,19 @@ const OrgansSceneData = function() {
 	    }
 	    return availableSpecies;
 	  }
+
+		/**
+		 * Return the center and size of the cuurrent viewing scene
+		 */
+		this.getCentreAndSize = function() {
+			const vector = new THREE.Vector3();
+			const boundingBox = this.scene.getBoundingBox();
+			boundingBox.getCenter(vector);
+			const centre = [vector.x, vector.y, vector.z];
+			boundingBox.getSize(vector);
+			const size = [vector.x, vector.y, vector.z];
+			return {centre, size};
+		}
 	  
 	  const setSceneData = function(speciesName, systemName, partName, organsDetails) {
       _this.sceneData.nerveMapIsActive = false;

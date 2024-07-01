@@ -680,6 +680,7 @@ export default {
       flatmapAPI: this.flatmapAPI,
       scaffoldUrl: this.url,
       $annotator: this.annotator,
+      boundingDims: this.boundingDims,
     };
   },
   data: function () {
@@ -787,7 +788,11 @@ export default {
       ],
       activeDrawTool: undefined,
       activeDrawMode: undefined,
-      localAnnotationsList: markRaw([])
+      localAnnotationsList: markRaw([]),
+      boundingDims: {
+        centre: [0, 0, 0],
+        size:[1, 1, 1],
+      },
     };
   },
   watch: {
@@ -2040,8 +2045,16 @@ export default {
         //Emit when all objects have been loaded
         this.$emit("on-ready");
         this.setMarkers();
+        //Create a bounding box.
         this._boundingBoxGeo = this.$module.scene.addBoundingBoxPrimitive(
           "_helper", "boundingBox", 0x40E0D0, 0.15);
+        //Create planes.
+        this._slides = this.$module.scene.addSlicesPrimitive(
+          "_helper", ["x-plane", "y-plane", "z-plane"], [0xFF5555, 0x55FF55, 0x5555FF],
+          0.5);
+        const {centre, size} = this.$module.getCentreAndSize();
+        this.boundingDims.centre = centre;
+        this.boundingDims.size = size;
         this.isReady = true;
       };
     },
