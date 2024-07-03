@@ -44,7 +44,6 @@ RendererModule.prototype = Object.create(BaseModule.prototype);
 RendererModule.prototype.getIntersectedObject = function(intersects) {
 	if (intersects) {
     const typeMap = intersects.map(intersect => {
-      
       if (intersect && intersect.object &&
         intersect.object.userData) {
         if (intersect.object.userData.isMarker) {

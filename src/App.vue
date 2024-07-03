@@ -358,7 +358,7 @@ export default {
   data: function () {
     return {
       consoleOn: true,
-      createPoints: false,
+      createLinesWithNormal: true,
       url: undefined,
       input: undefined,
       displayUI: true,
@@ -405,7 +405,6 @@ export default {
       router: useRouter(),
       ElIconSetting: shallowRef(ElIconSetting),
       ElIconFolderOpened: shallowRef(ElIconFolderOpened),
-      coordinatesClicked: [],
       auto: NaN
     };
   },
@@ -644,34 +643,32 @@ export default {
       }
       this.scaffoldRef = this.$refs.scaffold;
     },
-    addLines: function (coord) {
-      if (this.coordinatesClicked.length === 1) {
+    addLinesWithNormal: function (coord, normal) {
+      if (coord && normal) {
+        const newCoords = [
+          coord[0] + normal.x * 1000,
+          coord[1] + normal.y * 1000,
+          coord[2] + normal.z * 1000,
+        ];
+        console.log(coord, newCoords)
         const returned = this.$refs.scaffold.$module.scene.createLines(
-            "test",
-            "lines",
-            [this.coordinatesClicked[0], coord],
-            0x00ee22,
-          );
-          this.coordinatesClicked.length = 0;
-          if (this.consoleOn) console.log(returned);
-      } else {
-        this.coordinatesClicked.push(coord);
+          "test",
+          "lines",
+          [coord, newCoords],
+          0x00ee22,
+        );
+        if (this.consoleOn) console.log(returned);
       }
     },
     onSelected: function (data) {
       if (data && data.length > 0 && data[0].data.group) {
-        if (this.consoleOn) console.log(data[0]);
-        if (this.createPoints && data[0].extraData.worldCoords) {
-          const returned = this.$refs.scaffold.$module.scene.createPoints(
-            "test",
-            "points",
-            [data[0].extraData.worldCoords],
-            undefined,
-            0x0022ee,
-          );
+        if (this.consoleOn) console.log(data[0], data[0].extraData.intersected);
+        if (this.createLinesWithNormal && data[0].extraData.worldCoords &&
+          data[0].extraData.intersected?.face) {
+          this.addLinesWithNormal(data[0].extraData.worldCoords, data[0].extraData.intersected.face.normal)
         }
         delete this.route.query["viewURL"];
-        this.$refs.scaffold.showRegionTooltipWithAnnotations(data, false, true);
+        //this.$refs.scaffold.showRegionTooltipWithAnnotations(data, false, true);
         if (this.onClickMarkers) this.$refs.scaffold.setMarkerModeForObjectsWithName(data[0].data.group, "on");
       }
     },

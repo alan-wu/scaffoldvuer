@@ -110,7 +110,7 @@ export default {
       this.isPointset = false;
       this.isTextureSlides = false;
       this.isLines = false;
-      this.activeName  = "oControls";
+      this.activeName  = "trControls";
       if (object) {
         if (object.isTextureSlides) {
           this.isTextureSlides = true;

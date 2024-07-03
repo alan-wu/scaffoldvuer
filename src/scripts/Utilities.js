@@ -257,7 +257,10 @@ const createNewAnnotationsWithFeatures = (zincObject, region, group, scaffoldUrl
   }
   if (type) {
     const coords = getCoordinatesForAnnotationFeature(zincObject);
-    const featureID = encodeURIComponent(region + group);
+    //Check if region ends with a slash
+    let fullName = region.slice(-1) === "/" ? region : region + "/";
+    fullName = fullName + group;
+    const featureID = encodeURIComponent(fullName);
     const userAnnotation = {
       resource: encodeURIComponent(scaffoldUrl),
       item: {

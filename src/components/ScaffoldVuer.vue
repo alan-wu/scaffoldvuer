@@ -973,7 +973,7 @@ export default {
     zincObjectRemoved: function (zincObject) {
       if (this.$module.scene) {
         // zincObjectAdded will be alled in sequential callback
-        const regionPath = zincObject.region.getFullPath() + "/";
+        const regionPath = zincObject.region.getFullPath();
         const groupName = zincObject.groupName;
         const objects = zincObject.region.findObjectsWithGroupName(groupName, false);
         //Remove relevant objects from the rest of the app.
@@ -1090,7 +1090,11 @@ export default {
             //Remove previous entry if there is matching region and group
             this.removeFromLocalAnnotationList(payload.region, payload.group);
             annotation.group = payload.group;
-            annotation.region = payload.region;
+            let regionPath = payload.region; 
+            if (regionPath.slice(-1) === "/") {
+              regionPath = regionPath.slice(0, -1);
+            }
+            annotation.region = regionPath;
             this.localAnnotationsList.push(annotation);
           }
           object.zincObject.isEditable = true;
@@ -2142,6 +2146,18 @@ export default {
      */
      importLocalAnnotations: function (annotationsList) {
       if (this.enableLocalAnnotations) {
+        //Make sure the annotations are encoded correctly
+        annotationsList.forEach(annotation => {
+          const group = annotation.group;
+          const region = annotation.region;
+          let fullName = region.slice(-1) === "/" ? region : region + "/";
+          const noSlash = fullName.slice(0, -1);
+          annotation.region = noSlash; 
+          fullName = fullName + group;
+          const featureID = encodeURIComponent(fullName);
+          annotation.item.id = featureID;
+          annotation.feature.id = featureID;
+        });
         const featuresList = annotationsList.map((annotation) => annotation.feature);
         annotationFeaturesToPrimitives(this.$module.scene, featuresList);
         //Make a local non-reactive copy.
