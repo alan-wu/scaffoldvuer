@@ -58,6 +58,17 @@ export const getDeletableObjects = (event) => {
   return undefined;
 }
 
+export const getLineDistance = (zincObject, faceIndex) => {
+  if (zincObject?.isEditable && zincObject?.isLines2) {
+    if (faceIndex > -1) {
+      const v = zincObject.getVerticesByFaceIndex(faceIndex);
+      let d = [v[0][0] - v[1][0], v[0][1] - v[1][1], v[0][2] - v[1][2]];
+      return Math.sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
+    }
+  }
+  return 0;
+}
+
 export const moveLine = (zincObject, faceIndex, unit) => {
   if (zincObject && unit !== 0.0) {
     if (zincObject.isEditable && zincObject.isLines2) {

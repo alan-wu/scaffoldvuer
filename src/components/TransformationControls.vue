@@ -117,6 +117,7 @@ import {
   ElContainer as Container,
   ElInputNumber as InputNumber,
   ElMain as Main,
+  ElSlider as Slider,
 } from "element-plus";
 
 /**
@@ -129,6 +130,7 @@ export default {
     Container,
     InputNumber,
     Main,
+    Slider,
   },
   inject: ['boundingDims'],
   data: function () {

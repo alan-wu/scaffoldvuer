@@ -27,22 +27,20 @@
           />
         </el-col>
       </el-row>
-      <el-row v-if="createData.faceIndex > -1">
-        <el-col :offset="0" :span="4">
-          <el-button :icon="ElIconArrowLeft" @click="onMoveClick(-unit)"/>
+      <el-row v-if="currentIndex > -1 && distance > 0">
+        <el-col :offset="0" :span="6">
+          Move:
         </el-col>
-        <el-col :offset="3" :span="3">
-          Move
-        </el-col>
-        <el-col :offset="0" :span="7">
-          <el-input-number
-            v-model="unit"
-            :controls="false"
-            class="input-box number-input"
+        <el-col :offset="0" :span="16">
+          <el-slider
+            v-model="adjust"
+            :step="0.01"
+            :min="-3"
+            :max="3"
+            :show-tooltip="false"
+            @input="onSliding()"
+            @change="reset()"
           />
-        </el-col>
-        <el-col :offset="2" :span="2">
-          <el-button :icon="ElIconArrowRight" @click="onMoveClick(unit)"/>
         </el-col>
       </el-row>
     </el-main>
@@ -55,6 +53,7 @@
 // limited support to line width
 import { shallowRef } from 'vue';
 import {
+  getLineDistance,
   moveLine,
 } from "../scripts/Utilities.js";
 import {
@@ -63,14 +62,8 @@ import {
   ElContainer as Container,
   ElInputNumber as InputNumber,
   ElMain as Main,
-  ElSelect as Select,
   ElSlider as Slider,
-  ElOption as Option,
 } from "element-plus";
-import {
-  ArrowLeft as ElIconArrowLeft,
-  ArrowRight as ElIconArrowRight,
-} from '@element-plus/icons-vue';
 
 /**
  * A component to control the opacity of the target object.
@@ -83,11 +76,7 @@ export default {
     Container,
     InputNumber,
     Main,
-    Select,
     Slider,
-    Option,
-    ElIconArrowLeft,
-    ElIconArrowRight,
   },
   props: {
     createData: {
@@ -96,26 +85,51 @@ export default {
   },
   data: function () {
     return {
+      adjust: 0,
+      pAdjust: 0,
+      distance: 0,
       width: 1,
-      unit: 0.1,
-      ElIconArrowLeft: shallowRef(ElIconArrowLeft),
-      ElIconArrowRight: shallowRef(ElIconArrowRight),
+      currentIndex: 0,
     };
+  },
+  watch: {
+    "createData.faceIndex": {
+      handler: function (value) {
+        if (this._zincObject?.isLines2) {
+          this.currentIndex = value;
+          this.distance = getLineDistance(this._zincObject, this.currentIndex);
+        }
+      },
+      immediate: true,
+    },
   },
   mounted: function () {
     this._zincObject = undefined;
   },
   methods: {
-    onMoveClick: function(unit) {
-      moveLine(this._zincObject, this.createData.faceIndex, unit);
+    onSliding: function() {
+      const diff = (this.pAdjust - this.adjust) * this.distance;
+      moveLine(this._zincObject, this.currentIndex, diff);
+      this.pAdjust = this.adjust;
+    },
+    reset: function() {
+      this.adjust = 0;
+      this.pAdjust = 0;
     },
     setObject: function (object) {
-      if (object.isLines) {
+      this.currentIndex = -1;
+      this.distance = 0;
+      if (object.isLines2) {
         this._zincObject = object;
         this.width = this._zincObject.getMorph().material.linewidth;
+        if (object.isEditable) {
+          this.currentIndex = 0;
+          this.distance = getLineDistance(object, this.currentIndex);
+        }
       } else {
         this._zincObject = undefined;
         this.linewidth = 10;
+        
       }
     },
     modifyWidth: function () {

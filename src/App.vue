@@ -657,6 +657,7 @@ export default {
           [coord, newCoords],
           0x00ee22,
         );
+        returned.zincObject.isEditable = true;
         if (this.consoleOn) console.log(returned);
       }
     },
