@@ -38,7 +38,23 @@
             :min="-3"
             :max="3"
             :show-tooltip="false"
-            @input="onSliding()"
+            @input="onMoveSliding()"
+            @change="reset()"
+          />
+        </el-col>
+      </el-row>
+      <el-row v-if="currentIndex > -1 && distance > 0">
+        <el-col :offset="0" :span="6">
+          Length:
+        </el-col>
+        <el-col :offset="0" :span="16">
+          <el-slider
+            v-model="length"
+            :step="0.01"
+            :min="-1"
+            :max="1"
+            :show-tooltip="false"
+            @input="onLengthSliding()"
             @change="reset()"
           />
         </el-col>
@@ -54,7 +70,7 @@
 import { shallowRef } from 'vue';
 import {
   getLineDistance,
-  moveLine,
+  moveAndExtendLine,
 } from "../scripts/Utilities.js";
 import {
   ElButton as Button,
@@ -87,6 +103,7 @@ export default {
     return {
       adjust: 0,
       pAdjust: 0,
+      length: 0,
       distance: 0,
       width: 1,
       currentIndex: 0,
@@ -107,14 +124,20 @@ export default {
     this._zincObject = undefined;
   },
   methods: {
-    onSliding: function() {
+    onLengthSliding: function() {
+      const dist = Math.pow(10, this.length) * this.distance;
+      moveAndExtendLine(this._zincObject, this.currentIndex, dist, true);
+    },
+    onMoveSliding: function() {
       const diff = (this.pAdjust - this.adjust) * this.distance;
-      moveLine(this._zincObject, this.currentIndex, diff);
+      moveAndExtendLine(this._zincObject, this.currentIndex, diff, false);
       this.pAdjust = this.adjust;
     },
     reset: function() {
       this.adjust = 0;
       this.pAdjust = 0;
+      this.length = 0;
+      this.distance = getLineDistance(this._zincObject, this.currentIndex);
     },
     setObject: function (object) {
       this.currentIndex = -1;

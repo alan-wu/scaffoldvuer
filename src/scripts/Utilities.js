@@ -62,24 +62,29 @@ export const getLineDistance = (zincObject, faceIndex) => {
   if (zincObject?.isEditable && zincObject?.isLines2) {
     if (faceIndex > -1) {
       const v = zincObject.getVerticesByFaceIndex(faceIndex);
-      let d = [v[0][0] - v[1][0], v[0][1] - v[1][1], v[0][2] - v[1][2]];
+      let d = [v[1][0] - v[0][0], v[1][1] - v[0][1], v[1][2] - v[0][2]];
       return Math.sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
     }
   }
   return 0;
 }
-
-export const moveLine = (zincObject, faceIndex, unit) => {
+ 
+//Move or extend a line
+export const moveAndExtendLine = (zincObject, faceIndex, unit, extendOnly) => {
   if (zincObject && unit !== 0.0) {
     if (zincObject.isEditable && zincObject.isLines2) {
       if (faceIndex > -1) {
         const v = zincObject.getVerticesByFaceIndex(faceIndex);
-        let d = [v[0][0] - v[1][0], v[0][1] - v[1][1], v[0][2] - v[1][2]];
+        let d = [v[1][0] - v[0][0], v[1][1] - v[0][1], v[1][2] - v[0][2]];
         const mag = Math.sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
         for (let i = 0; i < 3; i++) {
           d[i] = d[i] / mag * unit;
-          v[0][i] = v[0][i] + d[i];
-          v[1][i] = v[1][i] + d[i];
+          if (!extendOnly) {
+            v[0][i] = v[0][i] + d[i];
+            v[1][i] = v[1][i] + d[i];
+          } else {
+            v[1][i] = v[0][i] + d[i];
+          }
         }
         zincObject.editVertice(v, faceIndex * 2);
         zincObject.boundingBoxUpdateRequired = true;

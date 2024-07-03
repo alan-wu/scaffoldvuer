@@ -650,11 +650,10 @@ export default {
           coord[1] + normal.y * 1000,
           coord[2] + normal.z * 1000,
         ];
-        console.log(coord, newCoords)
         const returned = this.$refs.scaffold.$module.scene.createLines(
           "test",
           "lines",
-          [coord, newCoords],
+          [newCoords, coord],
           0x00ee22,
         );
         returned.zincObject.isEditable = true;
