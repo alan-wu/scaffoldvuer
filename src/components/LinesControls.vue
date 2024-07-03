@@ -47,15 +47,23 @@
         <el-col :offset="0" :span="6">
           Length:
         </el-col>
-        <el-col :offset="0" :span="16">
+        <el-col :offset="0" :span="10">
           <el-slider
-            v-model="length"
+            v-model="lengthScale"
             :step="0.01"
             :min="-1"
             :max="1"
             :show-tooltip="false"
             @input="onLengthSliding()"
             @change="reset()"
+          />
+        </el-col>
+        <el-col :offset="0" :span="6">
+          <el-input-number
+            v-model="newDistance"
+            :controls="false"
+            class="input-box number-input"
+            @change="onLengthInput"
           />
         </el-col>
       </el-row>
@@ -103,8 +111,8 @@ export default {
     return {
       adjust: 0,
       pAdjust: 0,
-      length: 0,
-      distance: 0,
+      lengthScale: 0,
+      newDistance: 0, 
       width: 1,
       currentIndex: 0,
     };
@@ -124,9 +132,17 @@ export default {
     this._zincObject = undefined;
   },
   methods: {
+    onLengthInput: function() {
+      if (this.newDistance !== 0) {
+        this.distance = this.newDistance;
+        moveAndExtendLine(this._zincObject, this.currentIndex, this.newDistance, true);
+      } else {
+        this.newDistance = this.distance;
+      }
+    },
     onLengthSliding: function() {
-      const dist = Math.pow(10, this.length) * this.distance;
-      moveAndExtendLine(this._zincObject, this.currentIndex, dist, true);
+      this.newDistance = Math.pow(10, this.lengthScale) * this.distance;
+      moveAndExtendLine(this._zincObject, this.currentIndex, this.newDistance, true);
     },
     onMoveSliding: function() {
       const diff = (this.pAdjust - this.adjust) * this.distance;
@@ -136,8 +152,9 @@ export default {
     reset: function() {
       this.adjust = 0;
       this.pAdjust = 0;
-      this.length = 0;
+      this.lengthScale = 0;
       this.distance = getLineDistance(this._zincObject, this.currentIndex);
+      this.newDistance = this.distance;
     },
     setObject: function (object) {
       this.currentIndex = -1;
