@@ -5,7 +5,7 @@
         <el-col :offset="0" :span="6">
           Width:
         </el-col>
-        <el-col :offset="0" :span="10">
+        <el-col :offset="0" :span="12">
           <el-slider
             v-model="width"
             class="my-slider"
@@ -16,7 +16,7 @@
             @input="modifyWidth"
           />
         </el-col>
-        <el-col :offset="0" :span="6">
+        <el-col :offset="0" :span="4">
           <el-input-number
             v-model="width"
             :step="1"
@@ -24,6 +24,26 @@
             :max="100"
             :controls="false"
             class="input-box number-input"
+          />
+        </el-col>
+      </el-row>
+      <el-row v-if="currentIndex > -1">
+        <el-col :offset="0" :span="4">
+          <el-button
+            size='small'
+            :disabled="currentIndex === 0"
+            :icon="ElIconArrowLeft"
+            @click="changeIndex(false)"
+          />
+        </el-col>
+        <el-col :offset="4" :span="9">
+          Editing Line {{ currentIndex + 1}}
+        </el-col>
+        <el-col :offset="2" :span="2">
+          <el-button
+            size='small'
+            :icon="ElIconArrowRight"
+            @click="changeIndex(true)"
           />
         </el-col>
       </el-row>
@@ -88,7 +108,10 @@ import {
   ElMain as Main,
   ElSlider as Slider,
 } from "element-plus";
-
+import{
+  ArrowLeft as ElIconArrowLeft,
+  ArrowRight as ElIconArrowRight,
+} from '@element-plus/icons-vue';
 /**
  * A component to control the opacity of the target object.
  */
@@ -101,6 +124,8 @@ export default {
     InputNumber,
     Main,
     Slider,
+    ElIconArrowLeft,
+    ElIconArrowRight,
   },
   props: {
     createData: {
@@ -115,6 +140,8 @@ export default {
       newDistance: 0, 
       width: 1,
       currentIndex: 0,
+      ElIconArrowLeft: shallowRef(ElIconArrowLeft),
+      ElIconArrowRight: shallowRef(ElIconArrowRight),
     };
   },
   watch: {
@@ -132,6 +159,18 @@ export default {
     this._zincObject = undefined;
   },
   methods: {
+    changeIndex: function(increment) {
+      if (increment) {
+        const dist = getLineDistance(this._zincObject, this.currentIndex + 1);
+        if (dist > 0) {
+          this.currentIndex++;
+          this.reset();
+        }
+      } else {
+        this.currentIndex--;
+        this.reset();
+      }
+    },
     onLengthInput: function() {
       if (this.newDistance !== 0) {
         this.distance = this.newDistance;
@@ -169,7 +208,6 @@ export default {
       } else {
         this._zincObject = undefined;
         this.linewidth = 10;
-        
       }
     },
     modifyWidth: function () {

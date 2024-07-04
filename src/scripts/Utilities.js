@@ -62,8 +62,9 @@ export const getLineDistance = (zincObject, faceIndex) => {
   if (zincObject?.isEditable && zincObject?.isLines2) {
     if (faceIndex > -1) {
       const v = zincObject.getVerticesByFaceIndex(faceIndex);
-      let d = [v[1][0] - v[0][0], v[1][1] - v[0][1], v[1][2] - v[0][2]];
-      return Math.sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
+      if (v && v.length > 1) {
+        return getDistance(v[1], v[0]);
+      }
     }
   }
   return 0;
