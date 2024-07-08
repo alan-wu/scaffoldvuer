@@ -12,7 +12,7 @@
             :zincObject="zincObject"
             ref="opacityControls" />
         </el-collapse-item>
-        <el-collapse-item title="Transformation" name="trControls">
+        <el-collapse-item v-show="!isEditable" title="Transformation" name="trControls">
           <transformation-controls
             class="transformation-controls"
             ref="transformationControls" />
@@ -25,13 +25,17 @@
         <el-collapse-item v-show="isPointset" title="Points" name="pControls">
           <points-controls
             class="pointset-controls"
-            ref="pointsetControls" />
+            ref="pointsetControls"
+            @primitivesUpdated="$emit('primitivesUpdated', $event)"
+          />
         </el-collapse-item>
         <el-collapse-item v-show="isLines" title="Lines" name="lControls">
           <lines-controls
             class="lines-controls"
             ref="linesControls"
-            :createData="createData" />
+            :createData="createData"
+            @primitivesUpdated="$emit('primitivesUpdated', $event)"
+          />
         </el-collapse-item>
       </el-collapse>
     </div>
@@ -91,6 +95,7 @@ export default {
       isLines: false,
       drawerOpen: true,
       zincObject: undefined,
+      isEditable: false,
     };
   },
   methods: {
@@ -107,6 +112,7 @@ export default {
       } else {
         this.zincObject = undefined;
       }
+      this.isEditable = this.zincObject?.isEditable ? true : false;
       this.isPointset = false;
       this.isTextureSlides = false;
       this.isLines = false;

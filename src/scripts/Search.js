@@ -142,7 +142,7 @@ export class SearchIndex
       }
       result["zincObjects"] = createUnqiuesFromObjects(zincObjects);
       return result;
-    } 
+    }
 
     search(text) {
         const results = this._searchEngine.search(text, {prefix: true});

@@ -27,7 +27,7 @@
           />
         </el-col>
       </el-row>
-      <el-row v-if="currentIndex > -1">
+      <template v-if="currentIndex > -1 && distance > 0">
         <el-col :offset="0" :span="4">
           <el-button
             size='small'
@@ -46,47 +46,47 @@
             @click="changeIndex(true)"
           />
         </el-col>
-      </el-row>
-      <el-row v-if="currentIndex > -1 && distance > 0">
-        <el-col :offset="0" :span="6">
-          Move:
-        </el-col>
-        <el-col :offset="0" :span="16">
-          <el-slider
-            v-model="adjust"
-            :step="0.01"
-            :min="-3"
-            :max="3"
-            :show-tooltip="false"
-            @input="onMoveSliding()"
-            @change="reset()"
-          />
-        </el-col>
-      </el-row>
-      <el-row v-if="currentIndex > -1 && distance > 0">
-        <el-col :offset="0" :span="6">
-          Length:
-        </el-col>
-        <el-col :offset="0" :span="10">
-          <el-slider
-            v-model="lengthScale"
-            :step="0.01"
-            :min="-1"
-            :max="1"
-            :show-tooltip="false"
-            @input="onLengthSliding()"
-            @change="reset()"
-          />
-        </el-col>
-        <el-col :offset="0" :span="6">
-          <el-input-number
-            v-model="newDistance"
-            :controls="false"
-            class="input-box number-input"
-            @change="onLengthInput"
-          />
-        </el-col>
-      </el-row>
+        <el-row>
+          <el-col :offset="0" :span="6">
+            Move:
+          </el-col>
+          <el-col :offset="0" :span="16">
+            <el-slider
+              v-model="adjust"
+              :step="0.01"
+              :min="-3"
+              :max="3"
+              :show-tooltip="false"
+              @input="onMoveSliding()"
+              @change="reset()"
+            />
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :offset="0" :span="6">
+            Length:
+          </el-col>
+          <el-col :offset="0" :span="10">
+            <el-slider
+              v-model="lengthScale"
+              :step="0.01"
+              :min="-1"
+              :max="1"
+              :show-tooltip="false"
+              @input="onLengthSliding()"
+              @change="reset()"
+            />
+          </el-col>
+          <el-col :offset="0" :span="6">
+            <el-input-number
+              v-model="newDistance"
+              :controls="false"
+              class="input-box number-input"
+              @change="onLengthInput"
+            />
+          </el-col>
+        </el-row>
+      </template>
     </el-main>
   </el-container>
 </template>
@@ -142,6 +142,7 @@ export default {
       currentIndex: 0,
       ElIconArrowLeft: shallowRef(ElIconArrowLeft),
       ElIconArrowRight: shallowRef(ElIconArrowRight),
+      edited: false,
     };
   },
   watch: {
@@ -174,18 +175,21 @@ export default {
     onLengthInput: function() {
       if (this.newDistance !== 0) {
         this.distance = this.newDistance;
-        moveAndExtendLine(this._zincObject, this.currentIndex, this.newDistance, true);
+        this.edited = moveAndExtendLine(
+          this._zincObject, this.currentIndex, this.newDistance, true) || this.edited;
       } else {
         this.newDistance = this.distance;
       }
     },
     onLengthSliding: function() {
       this.newDistance = Math.pow(10, this.lengthScale) * this.distance;
-      moveAndExtendLine(this._zincObject, this.currentIndex, this.newDistance, true);
+      this.edited = moveAndExtendLine(
+        this._zincObject, this.currentIndex, this.newDistance, true) || this.edited;
     },
     onMoveSliding: function() {
-      const diff = (this.pAdjust - this.adjust) * this.distance;
-      moveAndExtendLine(this._zincObject, this.currentIndex, diff, false);
+      const diff = (this.adjust - this.pAdjust) * this.distance;
+      this.edited =  moveAndExtendLine(
+        this._zincObject, this.currentIndex, diff, false) || this.edited;
       this.pAdjust = this.adjust;
     },
     reset: function() {
@@ -194,6 +198,10 @@ export default {
       this.lengthScale = 0;
       this.distance = getLineDistance(this._zincObject, this.currentIndex);
       this.newDistance = this.distance;
+      if (this.edited) {
+        this.$emit("primitivesUpdated", this._zincObject);
+        this.edited = false;
+      }
     },
     setObject: function (object) {
       this.currentIndex = -1;

@@ -58,6 +58,29 @@ export const getDeletableObjects = (event) => {
   return undefined;
 }
 
+export const movePoint = (zincObject, index, diff) => {
+  if (zincObject?.isEditable && zincObject?.isPointset) {
+    let found = false;
+    for (let i = 0; i < 3 && !found; i++) {
+      if (diff[i] !== 0) {
+        found = true;
+      }
+    }
+    if (found && index > -1) {
+      const v = zincObject.getVerticesByIndex(index);
+      if (v) {
+        v[0] = v[0] + diff[0];
+        v[1] = v[1] + diff[1];
+        v[2] = v[2] + diff[2];
+      }
+      zincObject.editVertices([v], index);
+      zincObject.boundingBoxUpdateRequired = true;
+      return true;
+    }
+  }
+  return false;
+}
+
 export const getLineDistance = (zincObject, faceIndex) => {
   if (zincObject?.isEditable && zincObject?.isLines2) {
     if (faceIndex > -1) {
@@ -87,12 +110,13 @@ export const moveAndExtendLine = (zincObject, faceIndex, unit, extendOnly) => {
             v[1][i] = v[0][i] + d[i];
           }
         }
-        zincObject.editVertice(v, faceIndex * 2);
+        zincObject.editVertices(v, faceIndex * 2);
         zincObject.boundingBoxUpdateRequired = true;
+        return true;
       }
     }
   }
-  return undefined;
+  return false;
 }
 
 export const updateBoundingBox = (geometry, scene) => {
@@ -356,12 +380,9 @@ export const annotationFeaturesToPrimitives = (scene, features)  => {
           region,
           group,
           geometry.coordinates,
-          undefined,
+          group,
           0x0022ee,
         );
-        geometry.coordinates.forEach((coordinates) => {
-          addLabelToObject(object.zincObject, coordinates, group);
-        });
       } else if (geometry.type === "MultiLineString") {
         object = scene.createLines(
           region,
@@ -375,23 +396,3 @@ export const annotationFeaturesToPrimitives = (scene, features)  => {
   }
 }
 
-/*
- * Add a label at the specified local and put it 
- * into the object's group
- */
-const addLabelToObject = (zincObject, coords, groupName) => {
-  if (groupName) {
-    const colour = new THREE.Color(0x0022ee);
-    const label = new Label(groupName, colour);
-    label.setPosition(coords[0], coords[1], coords[2]);
-    const sprite  = label.getSprite();
-    sprite.material.sizeAttenuation = false;
-    sprite.material.alphaTest = 0.5;
-    sprite.material.transparent = true;
-    sprite.material.depthWrite = false;
-    sprite.material.depthTest = false;
-    zincObject.group.add(sprite);
-  }
-}
-
-export { addLabelToObject }

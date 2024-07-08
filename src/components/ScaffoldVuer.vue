@@ -104,7 +104,11 @@
         </template>
       </el-popover>
       <div class="primitive-controls-box">
-        <primitive-controls ref="primitiveControls" :createData="createData"/>
+        <primitive-controls
+          ref="primitiveControls"
+          :createData="createData"
+          @primitivesUpdated="primitivesUpdated"
+        />
       </div>
       <el-popover
         v-if="timeVarying"
@@ -389,7 +393,6 @@ import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
 import { DrawToolbar } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 import {
-  addLabelToObject,
   addUserAnnotationWithFeature,
   annotationFeaturesToPrimitives,
   getDeletableObjects,
@@ -1051,6 +1054,38 @@ export default {
     },
     /**
      * @vuese
+     * Add and edit local annotations
+     */
+    addAndEditAnnotations: function (region, group, zincObject, comment) {
+      const annotation =addUserAnnotationWithFeature(this.annotator, this.userToken, zincObject,
+        region, group, this.url, comment);
+      if (this.enableLocalAnnotations) {
+        annotation.group = group;
+        let regionPath = region; 
+        if (regionPath.slice(-1) === "/") {
+          regionPath = regionPath.slice(0, -1);
+        }
+        annotation.region = regionPath;
+        //Remove previous entry if there is matching region and group
+        this.removeFromLocalAnnotationList(regionPath, group);
+        this.localAnnotationsList.push(annotation);
+      }
+    },
+    /**
+     * @vuese
+     * Callback for when primitives have been update using primitive controls.
+     * This is only called from callback.
+     */
+    primitivesUpdated: function(object) {
+      if (object.isZincObject && object.isEditable) {
+        const group = object.groupName;
+        const region = object.region.getFullPath();
+        this.addAndEditAnnotations(region, group, object, "Position Updated");
+      }
+
+    },
+    /**
+     * @vuese
      * Confirm creation of new primitive. This is only called from callback.
      */
     confirmCreate: function(payload) {
@@ -1061,10 +1096,9 @@ export default {
             payload.region,
             payload.group,
             this.createData.points,
-            undefined,
+            payload.group,
             0x0022ee,
           );
-          addLabelToObject(object.zincObject, this.createData.points[0], payload.group);
         } else if (payload.shape === "LineString") {
           object = this.$module.scene.createLines(
             payload.region,
@@ -1074,29 +1108,15 @@ export default {
           );
         } else if (payload.editingIndex > -1) {
           if (this._editingZincObject) {
-            this._editingZincObject.editVertice([this.createData.points[1]],
+            this._editingZincObject.editVertices([this.createData.points[1]],
               payload.editingIndex);
             const region = this._editingZincObject.region.getFullPath() + "/";
             const group = this._editingZincObject.groupName;
-            const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken, this._editingZincObject,
-              region, group, this.url, "Position Updated");
+            this.addAndEditAnnotations(region, group, this._editingZincObject, "Position Updated");
           }
         }
         if (object) {
-          const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken, object.zincObject,
-            payload.region, payload.group, this.url, "Create");
-          //Store the object in a local list
-          if (this.enableLocalAnnotations) {
-            //Remove previous entry if there is matching region and group
-            this.removeFromLocalAnnotationList(payload.region, payload.group);
-            annotation.group = payload.group;
-            let regionPath = payload.region; 
-            if (regionPath.slice(-1) === "/") {
-              regionPath = regionPath.slice(0, -1);
-            }
-            annotation.region = regionPath;
-            this.localAnnotationsList.push(annotation);
-          }
+          this.addAndEditAnnotations(payload.region, payload.group, object.zincObject, "Create");
           object.zincObject.isEditable = true;
           this.tData.region = payload.region;
           this.tData.label = payload.group;
