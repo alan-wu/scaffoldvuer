@@ -28,24 +28,26 @@
         </el-col>
       </el-row>
       <template v-if="currentIndex > -1 && distance > 0">
-        <el-col :offset="0" :span="4">
-          <el-button
-            size='small'
-            :disabled="currentIndex === 0"
-            :icon="ElIconArrowLeft"
-            @click="changeIndex(false)"
-          />
-        </el-col>
-        <el-col :offset="4" :span="9">
-          Editing Line {{ currentIndex + 1}}
-        </el-col>
-        <el-col :offset="2" :span="2">
-          <el-button
-            size='small'
-            :icon="ElIconArrowRight"
-            @click="changeIndex(true)"
-          />
-        </el-col>
+        <el-row>
+          <el-col :offset="0" :span="4">
+            <el-button
+              size='small'
+              :disabled="currentIndex === 0"
+              :icon="ElIconArrowLeft"
+              @click="changeIndex(false)"
+            />
+          </el-col>
+          <el-col :offset="4" :span="9">
+            Editing Line {{ currentIndex + 1}}
+          </el-col>
+          <el-col :offset="2" :span="2">
+            <el-button
+              size='small'
+              :icon="ElIconArrowRight"
+              @click="changeIndex(true)"
+            />
+          </el-col>
+        </el-row>
         <el-row>
           <el-col :offset="0" :span="6">
             Move:

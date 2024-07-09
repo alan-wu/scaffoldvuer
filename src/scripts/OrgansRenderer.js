@@ -245,7 +245,8 @@ const OrgansSceneData = function() {
 					intersected ? intersected.point.y : 0,
 					intersected ? intersected.point.z : 0,
 				],
-				intersected,
+				intersected: intersected,
+				intersects: intersects,
 			};
       const coords = { x: window_x, y: window_y };
       if (idObject.id) {

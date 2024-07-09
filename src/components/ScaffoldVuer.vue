@@ -1057,7 +1057,7 @@ export default {
      * Add and edit local annotations
      */
     addAndEditAnnotations: function (region, group, zincObject, comment) {
-      const annotation =addUserAnnotationWithFeature(this.annotator, this.userToken, zincObject,
+      const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken, zincObject,
         region, group, this.url, comment);
       if (this.enableLocalAnnotations) {
         annotation.group = group;
@@ -1070,6 +1070,7 @@ export default {
         this.removeFromLocalAnnotationList(regionPath, group);
         this.localAnnotationsList.push(annotation);
       }
+      this.$emit('userPrimitivesUpdated', {region, group, zincObject});
     },
     /**
      * @vuese
@@ -1082,7 +1083,6 @@ export default {
         const region = object.region.getFullPath();
         this.addAndEditAnnotations(region, group, object, "Position Updated");
       }
-
     },
     /**
      * @vuese

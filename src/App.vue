@@ -32,6 +32,7 @@
         @on-ready="onReady"
         @scaffold-selected="onSelected"
         @scaffold-navigated="onNavigated"
+        @user-primitives-updated="userPrimitivesUpdated"
         @timeChanged="updateCurrentTime"
         @zinc-object-added="objectAdded"
         @vue:mounted="viewerMounted"
@@ -571,6 +572,9 @@ export default {
     },
     viewModelClicked: function (location) {
       this.input = location;
+    },
+    userPrimitivesUpdated: function (event) {
+      console.log(event);
     },
     screenCapture: function () {
       this.$refs.scaffold.captureScreenshot("capture.png");
