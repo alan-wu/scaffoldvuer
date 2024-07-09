@@ -37,6 +37,7 @@ const RendererModule = function()  {
   this.selectedScreenCoordinates = new THREE.Vector3();
   this.selectedCenter = undefined;
   this.liveUpdatesObjects = undefined;
+  this.ignorePreviousSelected = false;
 }
 
 RendererModule.prototype = Object.create(BaseModule.prototype);
@@ -87,6 +88,9 @@ RendererModule.prototype.getAnnotationsFromObjects = function(objects) {
         if (annotation && annotation.data){
           annotation.data.id = objects[i].name;
         }
+      }
+      if (annotation) {
+        annotation.data.zincObject = zincObject;
       }
     }
     if (annotation)
@@ -174,7 +178,7 @@ RendererModule.prototype.setSelectedByObjects = function(
   } else {
     changed = true;
   }
-  if (changed) {
+  if (changed || this.ignorePreviousSelected) {
     const zincObjects = this.objectsToZincObjects(objects);
     if (this.selectObjectOnPick) {
       this.setupLiveCoordinates(zincObjects);
