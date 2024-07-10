@@ -139,6 +139,7 @@ export default {
       adjust: 0,
       pAdjust: 0,
       lengthScale: 0,
+      distance: 0,
       newDistance: 0, 
       width: 1,
       currentIndex: 0,
