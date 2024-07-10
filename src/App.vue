@@ -359,7 +359,7 @@ export default {
   data: function () {
     return {
       consoleOn: true,
-      createLinesWithNormal: true,
+      createLinesWithNormal: false,
       url: undefined,
       input: undefined,
       displayUI: true,
@@ -675,6 +675,7 @@ export default {
         //this.$refs.scaffold.showRegionTooltipWithAnnotations(data, false, true);
         if (this.onClickMarkers) this.$refs.scaffold.setMarkerModeForObjectsWithName(data[0].data.group, "on");
       }
+      if (this.consoleOn) console.log(data);
     },
 
     onNavigated: function (data) {
