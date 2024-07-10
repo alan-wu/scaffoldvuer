@@ -37,6 +37,7 @@ const RendererModule = function()  {
   this.selectedScreenCoordinates = new THREE.Vector3();
   this.selectedCenter = undefined;
   this.liveUpdatesObjects = undefined;
+  this.ignorePreviousSelected = false;
 }
 
 RendererModule.prototype = Object.create(BaseModule.prototype);
@@ -44,17 +45,18 @@ RendererModule.prototype = Object.create(BaseModule.prototype);
 RendererModule.prototype.getIntersectedObject = function(intersects) {
 	if (intersects) {
     const typeMap = intersects.map(intersect => {
-        if (intersect && intersect.object &&
-          intersect.object.userData) {
-          if (intersect.object.userData.isMarker) {
-            return 1;
-          } else if (intersect.object.name && 
-            intersect.object.userData.isZincObject) {
-            return 2;
-          }
+      if (intersect && intersect.object &&
+        intersect.object.userData) {
+        if (intersect.object.userData.isMarker) {
+          return 1;
+        } else if (intersect.object.name && 
+          intersect.object.userData.isZincObject) {
+          return 2;
         }
-        return 0;
+      }
+      return 0;
     });
+    //prioritise markers
     let i = typeMap.indexOf(1);
     i = (i > -1) ? i : typeMap.indexOf(2);
     return intersects[i];
@@ -71,8 +73,9 @@ RendererModule.prototype.getAnnotationsFromObjects = function(objects) {
     if (zincObject) {
       if (zincObject.isGlyph || zincObject.isGlyphset) {
         let glyphset = zincObject;
-        if (zincObject.isGlyph)
+        if (zincObject.isGlyph) {
           glyphset = zincObject.getGlyphset();
+        }
         annotation = glyphset.userData ? glyphset.userData.annotation : undefined;
         if (annotation && annotation.data) {
           if (objects[i].name && objects[i].name != "")
@@ -85,6 +88,9 @@ RendererModule.prototype.getAnnotationsFromObjects = function(objects) {
         if (annotation && annotation.data){
           annotation.data.id = objects[i].name;
         }
+      }
+      if (annotation) {
+        annotation.data.zincObject = zincObject;
       }
     }
     if (annotation)
@@ -172,7 +178,7 @@ RendererModule.prototype.setSelectedByObjects = function(
   } else {
     changed = true;
   }
-  if (changed) {
+  if (changed || this.ignorePreviousSelected) {
     const zincObjects = this.objectsToZincObjects(objects);
     if (this.selectObjectOnPick) {
       this.setupLiveCoordinates(zincObjects);

@@ -76,6 +76,22 @@ export class SearchIndex
         this.zincObjects.push(zincObject);
     }
 
+    removeZincObject(zincObject, id)
+    //=======================
+    {
+        const path = zincObject.getRegion().getFullPath();
+        const fullPath = path ? `${path}/${zincObject.groupName}` : zincObject.groupName;
+        const item = { path: fullPath, name: zincObject.groupName, id };
+        this._searchEngine.remove(item, {fields: ['path', 'name']});
+        for (let i = 0; i < this.zincObjects.length; i++) {
+          if (id === this.zincObjects[i].uuid) {
+            this.zincObjects.splice(i, 1);
+            return;
+          }
+        }
+        
+    }
+
     addRegion(region, id)
     //=======================
     {
@@ -126,7 +142,7 @@ export class SearchIndex
       }
       result["zincObjects"] = createUnqiuesFromObjects(zincObjects);
       return result;
-    } 
+    }
 
     search(text) {
         const results = this._searchEngine.search(text, {prefix: true});

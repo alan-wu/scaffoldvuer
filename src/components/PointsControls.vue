@@ -49,22 +49,100 @@
           </el-select>
         </el-col>
       </el-row>
+      <template v-if="currentIndex > -1">
+        <el-row>
+          <el-col :offset="0" :span="4">
+            <el-button
+              size='small'
+              :disabled="currentIndex === 0"
+              :icon="ElIconArrowLeft"
+              @click="changeIndex(false)"
+            />
+          </el-col>
+          <el-col :offset="4" :span="9">
+            Editing Point {{ currentIndex + 1}}
+          </el-col>
+          <el-col :offset="2" :span="2">
+            <el-button
+              size='small'
+              :icon="ElIconArrowRight"
+              @click="changeIndex(true)"
+            />
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :offset="0" :span="6">
+            x:
+          </el-col>
+          <el-col :offset="0" :span="16">
+            <el-slider
+              v-model="translation[0]"
+              :step="0.01"
+              :min="min[0]"
+              :max="max[0]"
+              :show-tooltip="false"
+              @input="onMoveSliding()"
+              @change="reset()"
+            />
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :offset="0" :span="6">
+            y:
+          </el-col>
+          <el-col :offset="0" :span="16">
+            <el-slider
+              v-model="translation[1]"
+              :step="0.01"
+              :min="min[1]"
+              :max="max[1]"
+              :show-tooltip="false"
+              @input="onMoveSliding()"
+              @change="reset()"
+            />
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :offset="0" :span="6">
+            z:
+          </el-col>
+          <el-col :offset="0" :span="16">
+            <el-slider
+              v-model="translation[2]"
+              :step="0.01"
+              :min="min[2]"
+              :max="max[2]"
+              :show-tooltip="false"
+              @input="onMoveSliding()"
+              @change="reset()"
+            />
+          </el-col>
+        </el-row>
+      </template>
     </el-main>
   </el-container>
 </template>
 
 <script>
 /* eslint-disable no-alert, no-console */
-
+import { shallowRef } from 'vue';
+import {
+  movePoint,
+} from "../scripts/Utilities.js";
 import {
   ElCol as Col,
   ElContainer as Container,
   ElInputNumber as InputNumber,
   ElMain as Main,
+  ElRow as Row,
   ElSelect as Select,
   ElSlider as Slider,
   ElOption as Option,
 } from "element-plus";
+import{
+  ArrowLeft as ElIconArrowLeft,
+  ArrowRight as ElIconArrowRight,
+} from '@element-plus/icons-vue';
 
 /**
  * A component to control the opacity of the target object.
@@ -78,8 +156,12 @@ export default {
     Main,
     Select,
     Slider,
+    Row,
     Option,
+    ElIconArrowLeft,
+    ElIconArrowRight,
   },
+  inject: ['boundingDims'],
   data: function () {
     return {
       attenuation: false,
@@ -94,17 +176,80 @@ export default {
           label: "off",
         },
       ],
+      min: [0, 0, 0],
+      max: [1, 1, 1],
+      translation: [0, 0, 0],
+      pTranslation: [0, 0, 0],
+      currentIndex: -1,
+      ElIconArrowLeft: shallowRef(ElIconArrowLeft),
+      ElIconArrowRight: shallowRef(ElIconArrowRight),
+      edited: false,
     };
   },
   mounted: function () {
     this._zincObject = undefined;
   },
+  watch: {
+    boundingDims: {
+      handler: function (value) {
+        const size = value.size;
+        this.min = [
+          -size[0] / 2,
+          -size[1] / 2,
+          -size[2] / 2,
+        ];
+        this.max = [
+          size[0] / 2,
+          size[1] / 2,
+          size[2] / 2,
+        ];
+      },
+      immediate: true,
+      deep: true,
+    },
+  },
   methods: {
+    changeIndex: function(increment) {
+      if (increment) {
+        if (this._zincObject.drawRange > this.currentIndex + 1) {
+          this.currentIndex++;
+          this.reset();
+        }
+      } else {
+        this.currentIndex--;
+        this.reset();
+      }
+    },
+    onMoveSliding: function() {
+      const diff = [
+        this.translation[0] - this.pTranslation[0],
+        this.translation[1] - this.pTranslation[1],
+        this.translation[2] - this.pTranslation[2],
+      ];
+      this.edited = movePoint(this._zincObject, this.currentIndex, diff) || this.edited;
+      for (let i = 0; i < 3; i++) {
+        this.pTranslation[i] = this.translation[i];
+      }
+    },
+    reset: function() {
+      this.translation = [0, 0, 0];
+      this.pTranslation = [0, 0, 0];
+      if (this.edited) {
+        this.$emit("primitivesUpdated", this._zincObject);
+        this.edited = false;
+      }
+    },
     setObject: function (object) {
+      this.currentIndex = -1;
       if (object.isPointset) {
         this._zincObject = object;
         this.size = this._zincObject.morph.material.size;
-        this.attenuation = this._zincObject.morph.material.sizeAttenuation
+        this.attenuation = this._zincObject.morph.material.sizeAttenuation;
+        if (object.isEditable) {
+          if (this._zincObject.drawRange > 0) {
+            this.currentIndex = 0;
+          }
+        }
       } else {
         this._zincObject = undefined;
         this.size = 10;

@@ -38,6 +38,7 @@ const OrgansSceneData = function() {
 	const timeChangedCallbacks = new Array();
 	const sceneChangedCallbacks = new Array();
   const organPartAddedCallbacks = new Array();
+	const organPartRemovedCallbacks = new Array();
   let finishDownloadCallback = undefined;
 	const modelsLoader = ModelsLoaderIn;
   this.NDCCameraControl = undefined;
@@ -148,9 +149,9 @@ const OrgansSceneData = function() {
 		}
 	}
 	
-	 /**
-		 * Add a callback which will be called when time has changed
-		 */
+	/**
+	 * Add a callback which will be called when time has changed
+	 */
 	this.addTimeChangedCallback = function(callback) {
 	  if (typeof(callback === "function"))
 	    timeChangedCallbacks.push(callback);
@@ -170,6 +171,11 @@ const OrgansSceneData = function() {
 	this.addOrganPartAddedCallback = function(callback) {
     if (typeof(callback === "function"))
       organPartAddedCallbacks.push(callback);
+  }
+
+	this.addOrganPartRemovedCallback = function(callback) {
+    if (typeof(callback === "function"))
+      organPartRemovedCallbacks.push(callback);
   }
 
   this.setFinishDownloadCallback = function(callback) {
@@ -239,10 +245,12 @@ const OrgansSceneData = function() {
 					intersected ? intersected.point.y : 0,
 					intersected ? intersected.point.z : 0,
 				],
-				intersected,
+				intersected: intersected,
+				intersects: intersects,
 			};
       const coords = { x: window_x, y: window_y };
       if (idObject.id) {
+				extraData.threeID = idObject.object?.id;
         if (idObject.object.userData.isGlyph) { 
           if (idObject.object.name) {
             _this.setSelectedByObjects([idObject.object], coords,
@@ -279,6 +287,7 @@ const OrgansSceneData = function() {
 			}
       const coords = { x: window_x, y: window_y };
       if (idObject.id) {
+				extraData.threeID = idObject.object?.id;
         _this.displayArea.style.cursor = "pointer";
         _this.setHighlightedByObjects([idObject.object], coords, extraData, true);
         return;
@@ -393,6 +402,12 @@ const OrgansSceneData = function() {
 		zincObject.userData["annotation"] = annotation;
 	}
 
+	const removeOrganPart = function(systemName, partName, useDefautColour, zincObject) {
+    for (let i = 0; i < organPartRemovedCallbacks.length;i++) {
+      organPartRemovedCallbacks[i](zincObject);
+    }
+	}
+
 	  /**
 		 * New organs geometry has been added to the scene, add UIs and make
 		 * sure the viewport is correct.
@@ -400,6 +415,15 @@ const OrgansSceneData = function() {
 	  const _addOrganPartCallback = function(systemName, partName, useDefautColour) {
 	    return function(zincObject) {
 	    	addOrganPart(systemName, partName, useDefautColour, zincObject);
+	    }
+	  }
+
+	  /**
+		 * Organs geometry has been removed to the scene.
+		 */
+	  const _removeOrganPartCallback = function(systemName, partName, useDefautColour) {
+	    return function(zincObject) {
+	    	removeOrganPart(systemName, partName, useDefautColour, zincObject);
 	    }
 	  }
 	  
@@ -465,6 +489,19 @@ const OrgansSceneData = function() {
 	    }
 	    return availableSpecies;
 	  }
+
+		/**
+		 * Return the center and size of the cuurrent viewing scene
+		 */
+		this.getCentreAndSize = function() {
+			const vector = new THREE.Vector3();
+			const boundingBox = this.scene.getBoundingBox();
+			boundingBox.getCenter(vector);
+			const centre = [vector.x, vector.y, vector.z];
+			boundingBox.getSize(vector);
+			const size = [vector.x, vector.y, vector.z];
+			return {centre, size};
+		}
 	  
 	  const setSceneData = function(speciesName, systemName, partName, organsDetails) {
       _this.sceneData.nerveMapIsActive = false;
@@ -511,7 +548,8 @@ const OrgansSceneData = function() {
             }
 			      _this.sceneData.metaURL = url;
 						organScene.addZincObjectAddedCallbacks(_addOrganPartCallback(systemName, partName, false));
-			      organScene.loadMetadataURL(url, undefined, downloadCompletedCallback());	      
+			      organScene.addZincObjectRemovedCallbacks(_removeOrganPartCallback(undefined, partName, false));
+						organScene.loadMetadataURL(url, undefined, downloadCompletedCallback());	      
 			      _this.scene = organScene;
 			      _this.zincRenderer.setCurrentScene(organScene);
 			      _this.graphicsHighlight.reset();
@@ -541,7 +579,8 @@ const OrgansSceneData = function() {
   	    	  _this.sceneData.viewURL = undefined;
 			      _this.sceneData.metaURL = url;
 						organScene.addZincObjectAddedCallbacks(_addOrganPartCallback(undefined, partName, false));
-			      organScene.loadGLTF(url, undefined, downloadCompletedCallback());
+			      organScene.addZincObjectRemovedCallbacks(_removeOrganPartCallback(undefined, partName, false));
+						organScene.loadGLTF(url, undefined, downloadCompletedCallback());
 			      _this.scene = organScene;
 			      _this.zincRenderer.setCurrentScene(organScene);
 			      _this.graphicsHighlight.reset();

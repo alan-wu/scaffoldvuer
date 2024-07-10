@@ -1,4 +1,4 @@
-import { THREE } from 'zincjs';
+import { Label, THREE } from 'zincjs';
 
 export const createListFromPrimitives = (primitives, list) => {
   if (primitives) {
@@ -47,24 +47,76 @@ export const getEditableLines = (event) => {
   return undefined;
 }
 
-export const moveLine = (zincObject, faceIndex, unit) => {
+export const getDeletableObjects = (event) => {
+  const zincObjects = event.zincObjects;
+  if (zincObjects.length > 0 && zincObjects[0]) {
+    const zincObject = zincObjects[0];
+    if (zincObject.isEditable) {
+      return zincObject;
+    }
+  }
+  return undefined;
+}
+
+export const movePoint = (zincObject, index, diff) => {
+  if (zincObject?.isEditable && zincObject?.isPointset) {
+    let found = false;
+    for (let i = 0; i < 3 && !found; i++) {
+      if (diff[i] !== 0) {
+        found = true;
+      }
+    }
+    if (found && index > -1) {
+      const v = zincObject.getVerticesByIndex(index);
+      if (v) {
+        v[0] = v[0] + diff[0];
+        v[1] = v[1] + diff[1];
+        v[2] = v[2] + diff[2];
+      }
+      zincObject.editVertices([v], index);
+      zincObject.boundingBoxUpdateRequired = true;
+      return true;
+    }
+  }
+  return false;
+}
+
+export const getLineDistance = (zincObject, faceIndex) => {
+  if (zincObject?.isEditable && zincObject?.isLines2) {
+    if (faceIndex > -1) {
+      const v = zincObject.getVerticesByFaceIndex(faceIndex);
+      if (v && v.length > 1) {
+        return getDistance(v[1], v[0]);
+      }
+    }
+  }
+  return 0;
+}
+ 
+//Move or extend a line
+export const moveAndExtendLine = (zincObject, faceIndex, unit, extendOnly) => {
   if (zincObject && unit !== 0.0) {
     if (zincObject.isEditable && zincObject.isLines2) {
       if (faceIndex > -1) {
         const v = zincObject.getVerticesByFaceIndex(faceIndex);
-        let d = [v[0][0] - v[1][0], v[0][1] - v[1][1], v[0][2] - v[1][2]];
+        let d = [v[1][0] - v[0][0], v[1][1] - v[0][1], v[1][2] - v[0][2]];
         const mag = Math.sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
         for (let i = 0; i < 3; i++) {
           d[i] = d[i] / mag * unit;
-          v[0][i] = v[0][i] + d[i];
-          v[1][i] = v[1][i] + d[i];
+          if (!extendOnly) {
+            v[0][i] = v[0][i] + d[i];
+            v[1][i] = v[1][i] + d[i];
+          } else {
+            v[1][i] = v[0][i] + d[i];
+          }
         }
-        zincObject.editVertice(v, faceIndex * 2);
+        zincObject.editVertices(v, faceIndex * 2);
         zincObject.boundingBoxUpdateRequired = true;
+        return true;
       }
     }
   }
-  return undefined;
+  return false;
 }
 
 export const updateBoundingBox = (geometry, scene) => {
@@ -246,7 +298,10 @@ const createNewAnnotationsWithFeatures = (zincObject, region, group, scaffoldUrl
   }
   if (type) {
     const coords = getCoordinatesForAnnotationFeature(zincObject);
-    const featureID = encodeURIComponent(region + group);
+    //Check if region ends with a slash
+    let fullName = region.slice(-1) === "/" ? region : region + "/";
+    fullName = fullName + group;
+    const featureID = encodeURIComponent(fullName);
     const userAnnotation = {
       resource: encodeURIComponent(scaffoldUrl),
       item: {
@@ -268,6 +323,10 @@ const createNewAnnotationsWithFeatures = (zincObject, region, group, scaffoldUrl
         }
       },
     }
+    if (comment === "Deleted") {
+      userAnnotation.feature = undefined;
+    }
+
     return userAnnotation;
   }
 }
@@ -275,10 +334,11 @@ const createNewAnnotationsWithFeatures = (zincObject, region, group, scaffoldUrl
 /*
  * Add/Update drawn annotations to the server.
  */
-export const addUserAnnotationWithFeature = (service, userToken, zincObject, region, group, scaffoldUrl, action) => {
-  if (service && service.currentUser) {
-    const annotation = createNewAnnotationsWithFeatures(zincObject, region, group, scaffoldUrl, action);
-    if (annotation) {
+export const addUserAnnotationWithFeature = (service, userToken, zincObject,
+  region, group, scaffoldUrl, action) => {
+  const annotation = createNewAnnotationsWithFeatures(zincObject, region, group, scaffoldUrl, action);
+  if (annotation) {
+    if (service && service.currentUser) {
       annotation.creator = {...service.currentUser};
       if (!annotation.creator.orcid) annotation.creator.orcid = '0000-0000-0000-0000';
       service.addAnnotation(userToken, annotation)
@@ -291,6 +351,7 @@ export const addUserAnnotationWithFeature = (service, userToken, zincObject, reg
         console.log('There is a problem with the submission, please try again later');
       })
     }
+    return annotation;
   }
 }
 
@@ -319,7 +380,7 @@ export const annotationFeaturesToPrimitives = (scene, features)  => {
           region,
           group,
           geometry.coordinates,
-          undefined,
+          group,
           0x0022ee,
         );
       } else if (geometry.type === "MultiLineString") {
@@ -334,3 +395,4 @@ export const annotationFeaturesToPrimitives = (scene, features)  => {
     });
   }
 }
+

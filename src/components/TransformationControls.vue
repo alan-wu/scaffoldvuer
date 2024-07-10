@@ -1,46 +1,81 @@
 <template>
   <el-container class="transformation-container">
     <el-main class="slides-block">
-      <el-row>
-        <el-col :offset="0" :span="8">
-          Position:
-        </el-col>
-      </el-row>
-      <el-row class="">
-        <el-col :offset="3" :span="1">
+      <el-row class="tool-row">
+        <el-col :offset="0" :span="6">
           x:
         </el-col>
-        <el-col :span="3">
+        <el-col :offset="0" :span="10">
+          <el-slider
+            v-model="x"
+            :step="0.01"
+            :min="min[0]"
+            :max="max[0]"
+            :show-tooltip="false"
+            @input="modifyPosition()"
+          />
+        </el-col>
+        <el-col :offset="0" :span="6">
           <el-input-number
             v-model="x"
-            :step="1"
+            :step="0.01"
+            :min="min[0]"
+            :max="max[0]"
             :controls="false"
             class="input-box number-input"
-            @change="modifyPosition"
+            @change="modifyPosition()"
           />
         </el-col>
-        <el-col :offset="3" :span="1">
+      </el-row>
+      <el-row class="tool-row">
+        <el-col :offset="0" :span="6">
           y:
         </el-col>
-        <el-col :span="3">
-          <el-input-number
+        <el-col :offset="0" :span="10">
+          <el-slider
             v-model="y"
-            :step="1"
-            :controls="false"
-            class="input-box number-input"
-            @change="modifyPosition"
+            :step="0.01"
+            :min="min[1]"
+            :max="max[1]"
+            :show-tooltip="false"
+            @input="modifyPosition()"
           />
         </el-col>
-        <el-col :offset="3" :span="1">
-          z:
-        </el-col>
-        <el-col :span="3">
+        <el-col :offset="0" :span="6">
           <el-input-number
-            v-model="z"
-            :step="1"
+            v-model="y"
+            :step="0.01"
+            :min="min[1]"
+            :max="max[1]"
             :controls="false"
             class="input-box number-input"
-            @change="modifyPosition"
+            @change="modifyPosition()"
+          />
+        </el-col>
+      </el-row>
+      <el-row class="tool-row">
+        <el-col :offset="0" :span="6">
+          z:
+        </el-col>
+        <el-col :offset="0" :span="10">
+          <el-slider
+            v-model="z"
+            :step="0.01"
+            :min="min[2]"
+            :max="max[2]"
+            :show-tooltip="false"
+            @input="modifyPosition()"
+          />
+        </el-col>
+        <el-col :offset="0" :span="6">
+          <el-input-number
+            v-model="z"
+            :step="0.01"
+            :min="min[2]"
+            :max="max[2]"
+            :controls="false"
+            class="input-box number-input"
+            @change="modifyPosition()"
           />
         </el-col>
       </el-row>
@@ -82,6 +117,7 @@ import {
   ElContainer as Container,
   ElInputNumber as InputNumber,
   ElMain as Main,
+  ElSlider as Slider,
 } from "element-plus";
 
 /**
@@ -94,14 +130,38 @@ export default {
     Container,
     InputNumber,
     Main,
+    Slider,
   },
+  inject: ['boundingDims'],
   data: function () {
     return {
       x: 0,
       y: 0,
       z: 0,
       scale: 1,
+      min: [0, 0, 0],
+      max: [1, 1, 1],
     };
+  },
+  watch: {
+    boundingDims: {
+      handler: function (value) {
+        const centre = value.centre;
+        const size = value.size;
+        this.min = [
+          centre[0] - size[0],
+          centre[1] - size[1],
+          centre[2] - size[2]
+        ];
+        this.max = [
+          centre[0] + size[0],
+          centre[1] + size[1],
+          centre[2] + size[2]
+        ];
+      },
+      immediate: true,
+      deep: true,
+    },
   },
   mounted: function () {
     this._zincObject = undefined;
