@@ -1799,7 +1799,7 @@ export default {
      * Setting liveUpdates to true will update the tooltip location
      * at every rendering loop.
      */
-    showRegionTooltipWithObjects: function (label, zincObjects, regionPath, resetView, liveUpdates) {
+    showRegionTooltipWithObjects: function (label, zincObjects, regionPath, resetView, liveUpdates) 
       if (label && zincObjects && zincObjects.length > 0 && this.$module.scene) {
         return this.displayTooltipOfObjects(
           label,
