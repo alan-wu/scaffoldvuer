@@ -79,6 +79,7 @@ import {
   ElSlider as Slider,
   ElOption as Option,
 } from "element-plus";
+import { markRaw } from 'vue';
 
 /**
  * A component to control the opacity of the target object.
@@ -116,39 +117,37 @@ export default {
           label: "z",
         },
       ],
+      zincObject: undefined,
     };
-  },
-  mounted: function () {
-    this._zincObject = undefined;
   },
   methods: {
     setObject: function (object) {
       if (object.isTextureSlides) {
-        this._zincObject = object;
-        this.settings = this._zincObject.getTextureSettings();
+        this.zincObject = markRaw(object);
+        this.settings = this.zincObject.getTextureSettings();
       } else {
-        this._zincObject = undefined;
+        this.zincObject = undefined;
         this.settings = [];
       }
     },
     addNewSlide: function () {
       const newSettings = { direction: "x", value: 0 };
-      const returnSettings = this._zincObject.createSlide(newSettings);
+      const returnSettings = this.zincObject.createSlide(newSettings);
       this.settings.push(returnSettings);
     },
     modifyDirection: function(direction, slide) {
       if (slide) {
         slide.direction = direction;
-        this._zincObject.modifySlideSettings(slide);
+        this.zincObject.modifySlideSettings(slide);
       }
     },
     modifySlide: function (slide) {
       if (slide) {
-        this._zincObject.modifySlideSettings(slide);
+        this.zincObject.modifySlideSettings(slide);
       }
     },
     removeSlide: function (index, slide) {
-      this._zincObject.removeSlideWithId(slide.id);
+      this.zincObject.removeSlideWithId(slide.id);
       this.settings.splice(index, 1);
     },
   },
