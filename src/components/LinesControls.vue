@@ -97,7 +97,7 @@
 /* eslint-disable no-alert, no-console */
 // This is not in use at this moment, due to
 // limited support to line width
-import { shallowRef } from 'vue';
+import { markRaw, shallowRef } from 'vue';
 import {
   getLineDistance,
   moveAndExtendLine,
@@ -146,26 +146,24 @@ export default {
       ElIconArrowLeft: shallowRef(ElIconArrowLeft),
       ElIconArrowRight: shallowRef(ElIconArrowRight),
       edited: false,
+      zincObject: undefined,
     };
   },
   watch: {
     "createData.faceIndex": {
       handler: function (value) {
-        if (this._zincObject?.isLines2) {
+        if (this.zincObject?.isLines2) {
           this.currentIndex = value;
-          this.distance = getLineDistance(this._zincObject, this.currentIndex);
+          this.distance = getLineDistance(this.zincObject, this.currentIndex);
         }
       },
       immediate: true,
     },
   },
-  mounted: function () {
-    this._zincObject = undefined;
-  },
   methods: {
     changeIndex: function(increment) {
       if (increment) {
-        const dist = getLineDistance(this._zincObject, this.currentIndex + 1);
+        const dist = getLineDistance(this.zincObject, this.currentIndex + 1);
         if (dist > 0) {
           this.currentIndex++;
           this.reset();
@@ -179,7 +177,7 @@ export default {
       if (this.newDistance !== 0) {
         this.distance = this.newDistance;
         this.edited = moveAndExtendLine(
-          this._zincObject, this.currentIndex, this.newDistance, true) || this.edited;
+          this.zincObject, this.currentIndex, this.newDistance, true) || this.edited;
       } else {
         this.newDistance = this.distance;
       }
@@ -187,22 +185,22 @@ export default {
     onLengthSliding: function() {
       this.newDistance = Math.pow(10, this.lengthScale) * this.distance;
       this.edited = moveAndExtendLine(
-        this._zincObject, this.currentIndex, this.newDistance, true) || this.edited;
+        this.zincObject, this.currentIndex, this.newDistance, true) || this.edited;
     },
     onMoveSliding: function() {
       const diff = (this.adjust - this.pAdjust) * this.distance;
       this.edited =  moveAndExtendLine(
-        this._zincObject, this.currentIndex, diff, false) || this.edited;
+        this.zincObject, this.currentIndex, diff, false) || this.edited;
       this.pAdjust = this.adjust;
     },
     reset: function() {
       this.adjust = 0;
       this.pAdjust = 0;
       this.lengthScale = 0;
-      this.distance = getLineDistance(this._zincObject, this.currentIndex);
+      this.distance = getLineDistance(this.zincObject, this.currentIndex);
       this.newDistance = this.distance;
       if (this.edited) {
-        this.$emit("primitivesUpdated", this._zincObject);
+        this.$emit("primitivesUpdated", this.zincObject);
         this.edited = false;
       }
     },
@@ -210,19 +208,19 @@ export default {
       this.currentIndex = -1;
       this.distance = 0;
       if (object.isLines2) {
-        this._zincObject = object;
-        this.width = this._zincObject.getMorph().material.linewidth;
+        this.zincObject = markRaw(object);
+        this.width = this.zincObject.getMorph().material.linewidth;
         if (object.isEditable) {
           this.currentIndex = 0;
           this.distance = getLineDistance(object, this.currentIndex);
         }
       } else {
-        this._zincObject = undefined;
+        this.zincObject = undefined;
         this.linewidth = 10;
       }
     },
     modifyWidth: function () {
-      this._zincObject.setWidth(this.width);
+      this.zincObject.setWidth(this.width);
     },
   },
 };

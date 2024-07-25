@@ -119,6 +119,7 @@ import {
   ElMain as Main,
   ElSlider as Slider,
 } from "element-plus";
+import { markRaw } from "vue";
 
 /**
  * A component to control the opacity of the target object.
@@ -141,6 +142,7 @@ export default {
       scale: 1,
       min: [0, 0, 0],
       max: [1, 1, 1],
+      zincObject: undefined,
     };
   },
   watch: {
@@ -163,14 +165,11 @@ export default {
       deep: true,
     },
   },
-  mounted: function () {
-    this._zincObject = undefined;
-  },
   methods: {
     setObject: function (object) {
       if (object.isZincObject) {
-        this._zincObject = object;
-        const morph = this._zincObject.getGroup();
+        this.zincObject = markRaw(object);
+        const morph = this.zincObject.getGroup();
         if (morph && morph.position) {
           this.x = morph.position.x;
           this.y = morph.position.y;
@@ -178,7 +177,7 @@ export default {
           this.scale = morph.scale.x;
         }
       } else {
-        this._zincObject = undefined;
+        this.zincObject = undefined;
         this.x = 0;
         this.y = 0;
         this.z = 0;
@@ -186,10 +185,10 @@ export default {
       }
     },
     modifyPosition: function() {
-      this._zincObject.setPosition(this.x, this.y, this.z);
+      this.zincObject.setPosition(this.x, this.y, this.z);
     },
     modifyScale: function() {
-      this._zincObject.setScaleAll(this.scale);
+      this.zincObject.setScaleAll(this.scale);
     },
   },
 };
