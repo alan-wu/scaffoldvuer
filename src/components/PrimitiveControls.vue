@@ -51,7 +51,7 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { ref, shallowRef } from 'vue';
+import { markRaw } from 'vue';
 import {
   ArrowRight as ElIconArrowRight,
 } from '@element-plus/icons-vue';
@@ -96,6 +96,7 @@ export default {
       drawerOpen: true,
       zincObject: undefined,
       isEditable: false,
+      displayString: "100%"
     };
   },
   methods: {
@@ -108,7 +109,7 @@ export default {
     },
     setObject: function(object) {
       if (object) {
-        this.zincObject = shallowRef(object);
+        this.zincObject = markRaw(object);
       } else {
         this.zincObject = undefined;
       }
@@ -136,7 +137,7 @@ export default {
         }
       }
       if (object && object.getMorph()) {
-        this.material = ref(object.getMorph().material);
+        this.material = object.getMorph().material;
       } else {
         this.material = undefined;
       }

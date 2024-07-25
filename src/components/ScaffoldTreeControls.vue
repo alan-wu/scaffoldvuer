@@ -37,6 +37,7 @@ import {
 } from "../scripts/Utilities.js";
 import { TreeControls } from "@abi-software/map-utilities";
 import "@abi-software/map-utilities/dist/style.css";
+import { markRaw } from "vue";
 
 const nameSorting = (a, b) => {
   const labelA = a.label.toUpperCase();
@@ -74,6 +75,8 @@ export default {
       active: [],
       hover: [],
       drawerOpen: true,
+      nodeNumbers: 0,
+      module: undefined,
     };
   },
   computed: {
@@ -104,7 +107,7 @@ export default {
       parentContainer.sort((a, b) => {
         return nameSorting(a, b);
       });
-      this.__nodeNumbers++;
+      this.nodeNumbers++;
       this.$nextTick(() => {
         const checked =
           this.$refs.treeControls.$refs.regionTree.getCheckedKeys();
@@ -117,8 +120,8 @@ export default {
     // '__r/'
     findOrCreateRegion: function (data, paths, prefix) {
       //check if root region has been set
-      if (this.rootID === undefined && this.$module && this.$module.scene) {
-        this.treeData[0].id = this.$module.scene.getRootRegion().uuid;
+      if (this.module && this.module.scene) {
+        this.treeData[0].id = this.module.scene.getRootRegion().uuid;
         this.treeData[0].isRegion = true;
       }
       if (paths.length > 0) {
@@ -127,7 +130,7 @@ export default {
           (child) => child.label == _paths[0]
         );
         const path = prefix + "/" + paths[0];
-        const region = this.$module.scene
+        const region = this.module.scene
           .getRootRegion()
           .findChildFromPath(path);
         if (!childRegionItem) {
@@ -185,7 +188,7 @@ export default {
           for (let i = 0; i < regionData.children.length; i++) {
             if (regionData.children[i].label === group) {
               regionData.children.splice(i, 1);
-              this.__nodeNumbers--;
+              this.nodeNumbers--;
               return;
             }
           }
@@ -196,7 +199,7 @@ export default {
       const isRegion = node.isRegion;
       const isPrimitives = node.isPrimitives;
       const isChecked = data.checkedKeys.includes(node.id);
-      const region = this.$module.scene
+      const region = this.module.scene
         .getRootRegion()
         .findChildFromPath(node.regionPath);
       if (isRegion) {
@@ -238,7 +241,7 @@ export default {
      * Select a region by its name.
      */
     changeActiveByNames: function (names, regionPath, propagate) {
-      const rootRegion = this.$module.scene.getRootRegion();
+      const rootRegion = this.module.scene.getRootRegion();
       const targetObjects = findObjectsWithNames(
         rootRegion,
         names,
@@ -251,7 +254,7 @@ export default {
      * Hover a region by its name.
      */
     changeHoverByNames: function (names, regionPath, propagate) {
-      const rootRegion = this.$module.scene.getRootRegion();
+      const rootRegion = this.module.scene.getRootRegion();
       const targetObjects = findObjectsWithNames(
         rootRegion,
         names,
@@ -293,7 +296,7 @@ export default {
     clear: function () {
       this.active.length = 0;
       this.hover.length = 0;
-      this.__nodeNumbers = 0;
+      this.nodeNumbers = 0;
       this.$refs.treeControls.$refs.regionTree.updateKeyChildren(
         this.treeData[0].id,
         []
@@ -315,7 +318,7 @@ export default {
       return "#FFFFFF";
     },
     getZincObjectsFromNode: function (node, transverse) {
-      const rootRegion = this.$module.scene.getRootRegion();
+      const rootRegion = this.module.scene.getRootRegion();
       if (node.isPrimitives) {
         return findObjectsWithNames(
           rootRegion,
@@ -335,14 +338,14 @@ export default {
     },
     //Set this right at the beginning.
     setModule: function (moduleIn) {
-      this.$module = moduleIn;
-      this.__nodeNumbers = 0;
-      const objects = this.$module.scene.getRootRegion().getAllObjects(true);
+      this.module = markRaw(moduleIn);
+      this.nodeNumbers = 0;
+      const objects = this.module.scene.getRootRegion().getAllObjects(true);
       objects.forEach((zincObject) => {
         this.zincObjectAdded(zincObject);
       });
-      this.$module.addOrganPartAddedCallback(this.zincObjectAdded);
-      this.$module.addOrganPartRemovedCallback(this.zincObjectRemoved);
+      this.module.addOrganPartAddedCallback(this.zincObjectAdded);
+      this.module.addOrganPartRemovedCallback(this.zincObjectRemoved);
     },
     setColourField: function (treeData, nodeData = undefined) {
       treeData
@@ -382,7 +385,7 @@ export default {
       }
     },
     visibilityToggle: function (item, event) {
-      this.$module.changeOrganPartsVisibility(item, event);
+      this.module.changeOrganPartsVisibility(item, event);
       if (event == false) {
         if (this.activeRegion === item) {
           this.removeActive(true);
@@ -414,7 +417,7 @@ export default {
         list.splice(index, 1);
         ids.push(node.id);
       }
-      const region = this.$module.scene
+      const region = this.module.scene
         .getRootRegion()
         .findChildFromPath(node.regionPath);
       if (nodeName && nodeName !== "__r") {
@@ -444,13 +447,13 @@ export default {
     getState: function () {
       let checkedItems =
         this.$refs.treeControls.$refs.regionTree.getCheckedKeys();
-      if (checkedItems.length === this.__nodeNumbers) {
+      if (checkedItems.length === this.nodeNumbers) {
         return { checkAll: true, version: "2.0" };
       } else {
         //We cannot use the generated uuid as the identifier for permastate,
         //convert it back to paths
         let paths = convertUUIDsToFullPaths(
-          this.$module.scene.getRootRegion(),
+          this.module.scene.getRootRegion(),
           checkedItems
         );
         return { checkedItems: paths, version: "2.0" };

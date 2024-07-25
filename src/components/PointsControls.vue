@@ -125,7 +125,7 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { shallowRef } from 'vue';
+import { markRaw, shallowRef } from 'vue';
 import {
   movePoint,
 } from "../scripts/Utilities.js";
@@ -184,10 +184,8 @@ export default {
       ElIconArrowLeft: shallowRef(ElIconArrowLeft),
       ElIconArrowRight: shallowRef(ElIconArrowRight),
       edited: false,
+      zincObject: undefined,
     };
-  },
-  mounted: function () {
-    this._zincObject = undefined;
   },
   watch: {
     boundingDims: {
@@ -211,7 +209,7 @@ export default {
   methods: {
     changeIndex: function(increment) {
       if (increment) {
-        if (this._zincObject.drawRange > this.currentIndex + 1) {
+        if (this.zincObject.drawRange > this.currentIndex + 1) {
           this.currentIndex++;
           this.reset();
         }
@@ -226,7 +224,7 @@ export default {
         this.translation[1] - this.pTranslation[1],
         this.translation[2] - this.pTranslation[2],
       ];
-      this.edited = movePoint(this._zincObject, this.currentIndex, diff) || this.edited;
+      this.edited = movePoint(this.zincObject, this.currentIndex, diff) || this.edited;
       for (let i = 0; i < 3; i++) {
         this.pTranslation[i] = this.translation[i];
       }
@@ -235,33 +233,33 @@ export default {
       this.translation = [0, 0, 0];
       this.pTranslation = [0, 0, 0];
       if (this.edited) {
-        this.$emit("primitivesUpdated", this._zincObject);
+        this.$emit("primitivesUpdated", this.zincObject);
         this.edited = false;
       }
     },
     setObject: function (object) {
       this.currentIndex = -1;
       if (object.isPointset) {
-        this._zincObject = object;
-        this.size = this._zincObject.morph.material.size;
-        this.attenuation = this._zincObject.morph.material.sizeAttenuation;
+        this.zincObject = markRaw(object);
+        this.size = this.zincObject.morph.material.size;
+        this.attenuation = this.zincObject.morph.material.sizeAttenuation;
         if (object.isEditable) {
-          if (this._zincObject.drawRange > 0) {
+          if (this.zincObject.drawRange > 0) {
             this.currentIndex = 0;
           }
         }
       } else {
-        this._zincObject = undefined;
+        this.zincObject = undefined;
         this.size = 10;
         this.attenuation = false;
       }
     },
     modifyAttenuation: function(flag) {
       this.attenuation = flag;
-      this._zincObject.setSizeAttenuation(flag);
+      this.zincObject.setSizeAttenuation(flag);
     },
     modifySize: function () {
-      this._zincObject.setSize(this.size);
+      this.zincObject.setSize(this.size);
     },
   },
 };
