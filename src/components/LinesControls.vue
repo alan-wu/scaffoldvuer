@@ -216,7 +216,7 @@ export default {
         }
       } else {
         this.zincObject = undefined;
-        this.linewidth = 10;
+        this.width = 10;
       }
     },
     modifyWidth: function () {

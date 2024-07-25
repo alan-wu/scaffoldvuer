@@ -120,7 +120,7 @@ export default {
     // '__r/'
     findOrCreateRegion: function (data, paths, prefix) {
       //check if root region has been set
-      if (this.rootID === undefined && this.module && this.module.scene) {
+      if (this.module && this.module.scene) {
         this.treeData[0].id = this.module.scene.getRootRegion().uuid;
         this.treeData[0].isRegion = true;
       }
