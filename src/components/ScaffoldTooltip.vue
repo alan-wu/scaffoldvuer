@@ -14,6 +14,7 @@
       <template #default>
         <div class="tooltip-text">{{ label }}</div>
         <div class="tooltip-text" v-if="region">Region: {{ region }}</div>
+        <div v-show="imageSrc"><el-image :src="imageSrc" /></div>
         <CreateTooltiipContent
           v-show="createData.toBeConfirmed"
           :createData="createData"
@@ -121,6 +122,10 @@ export default {
       type: Number,
       default: 200,
     },
+    regionImages: {
+      type: Object,
+      default: [],
+    },
   },
   inject: ['scaffoldUrl'],
   provide() {
@@ -144,6 +149,11 @@ export default {
       }
       const x = this.x - 40;
       return { left: x + "px", top: this.y - yOffset + "px" };
+    },
+    imageSrc: function () {
+      if (this.label in this.regionImages) {
+        return this.regionImages[this.label][0].thumbnail;
+      }
     },
   },
   methods: {

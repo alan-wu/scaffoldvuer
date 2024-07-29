@@ -15,6 +15,7 @@
       :x="tData.x"
       :y="tData.y"
       :annotationDisplay="annotationDisplay"
+      :regionImages="regionImages"
       @confirm-create="confirmCreate($event)"
       @cancel-create="cancelCreate()"
       @confirm-delete="confirmDelete($event)"
@@ -97,6 +98,8 @@
             ref="scaffoldTreeControls"
             :isReady="isReady"
             :show-colour-picker="showColourPicker"
+            :label="tData.label"
+            :regionImages="regionImages"
             @object-selected="objectSelected"
             @object-hovered="objectHovered"
             @drawer-toggled="drawerToggled"
@@ -421,6 +424,8 @@ import { OrgansViewer } from "../scripts/OrgansRenderer.js";
 import { SearchIndex } from "../scripts/Search.js";
 import { mapState } from 'pinia';
 import { useMainStore } from "@/store/index";
+import scicrunchMixin from '../services/scicrunchMixin.js'
+import imageMixin from '../mixins/imageMixin.js'
 
 /**
  * A vue component of the scaffold viewer.
@@ -430,6 +435,7 @@ import { useMainStore } from "@/store/index";
  */
 export default {
   name: "ScaffoldVuer",
+  mixins: [scicrunchMixin,imageMixin],
   components: {
     Button,
     Col,
@@ -673,9 +679,16 @@ export default {
     /**
      * Enable local annotations
      */
-     enableLocalAnnotations: {
+    enableLocalAnnotations: {
       type: Boolean,
       default: false
+    },
+    /**
+     * Specify the endpoint of the SPARC API.
+     */
+    sparcAPI: {
+      type: String,
+      default: 'https://api.sparc.science/',
     },
   },
   provide() {
@@ -796,6 +809,8 @@ export default {
         centre: [0, 0, 0],
         size:[1, 1, 1],
       },
+      images: [],
+      regionImages: {},
     };
   },
   watch: {
@@ -2069,6 +2084,7 @@ export default {
         //Emit when all objects have been loaded
         this.$emit("on-ready");
         this.setMarkers();
+        this.addImagesToMap();
         //Create a bounding box.
         this._boundingBoxGeo = this.$module.scene.addBoundingBoxPrimitive(
           "_helper", "boundingBox", 0x40E0D0, 0.15);
@@ -2301,7 +2317,6 @@ export default {
       this.$module.toggleSyncControl(flag, rotateMode);
       this.$module.setSyncControlCallback(this.syncControlCallback);
     },
-
     /**
      * Set the markers for the scene.
      */
@@ -2310,6 +2325,16 @@ export default {
         this.setMarkerModeForObjectsWithName(key, value, "on");
       }
     },
+    /**
+     * Get the images from Scicrunch and add them to the map.
+     */
+    addImagesToMap: async function () {
+      let response = await this.getImagesFromScicrunch()
+      if (response && response.success) {
+        this.images = response.images
+        this.regionImages = this.assignImagesToRegions(this.images, this.markerLabels)
+      }
+    }
   },
 };
 </script>

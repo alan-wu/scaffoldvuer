@@ -1,6 +1,14 @@
 <template>
   <div class="tree-controls" :class="{ open: drawerOpen, close: !drawerOpen }">
     <div class="traditional-container">
+      <div v-show="filteredImages?.length">
+        <div>{{ label }}</div>
+        <el-carousel>
+          <el-carousel-item v-for="image, index in filteredImages" :key="index">
+            <el-image :src="image.thumbnail"/>
+          </el-carousel-item>
+        </el-carousel>
+      </div>
       <TreeControls
         mapType="scaffold"
         title="Regions"
@@ -28,6 +36,10 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
+import {
+  ElCarousel as Carousel,
+  ElImage as Image,
+} from "element-plus";
 import { ArrowLeft as ElIconArrowLeft } from "@element-plus/icons-vue";
 import {
   convertUUIDsToFullPaths,
@@ -59,6 +71,8 @@ export default {
   components: {
     ElIconArrowLeft,
     TreeControls,
+    Carousel,
+    Image,
   },
   props: {
     /**
@@ -66,6 +80,14 @@ export default {
      */
     showColourPicker: Boolean,
     isReady: Boolean,
+    label: {
+      type: String,
+      default: "",
+    },
+    regionImages: {
+      type: Object,
+      default: [],
+    },
   },
   data: function () {
     return {
@@ -82,6 +104,15 @@ export default {
   computed: {
     treeDataEntry: function () {
       return this.treeData[0].children;
+    },
+    filteredImages: function () {
+      if (this.label in this.regionImages) {
+        const images = this.regionImages[this.label];
+        if (images.length > 6) {
+          return images.slice(0, 6);
+        }
+        return images;
+      }
     },
   },
   watch: {
