@@ -22,17 +22,13 @@
         />
         <Tooltip
           class="p-tooltip"
-          v-show="annotationDisplay && !createData.toBeConfirmed"
-          ref="annotationTooltip"
-          :tooltipType="'annotation'"
-          :annotationDisplay="annotationDisplay"
+          v-show="
+            (annotationDisplay && !createData.toBeConfirmed) ||
+            imageEntry.length
+          "
+          ref="tooltip"
+          :tooltipType="annotationDisplay ? 'annotation' : 'image'"
           :annotationEntry="annotationEntry"
-        />
-        <Tooltip
-          class="p-tooltip"
-          v-show="imageEntry.length"
-          ref="imageTooltip"
-          :tooltipType="'image'"
           :imageEntry="imageEntry"
         />
         <div v-if="createData.toBeDeleted" class="delete-container">
@@ -131,7 +127,7 @@ export default {
     },
     regionImages: {
       type: Object,
-      default: [],
+      default: {},
     },
   },
   inject: ['scaffoldUrl'],

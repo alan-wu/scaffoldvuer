@@ -50,7 +50,7 @@ export default {
           })
         }
       });
-      return imageObject
+      return imageObjects
     },
     createImageThumbnailMarkerUrl: function (mapImp, id, image) {
       return new Promise((resolve, reject) => {

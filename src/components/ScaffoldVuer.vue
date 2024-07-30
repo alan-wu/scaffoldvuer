@@ -15,7 +15,7 @@
       :x="tData.x"
       :y="tData.y"
       :annotationDisplay="annotationDisplay"
-      :regionImages="regionImages"
+      :regionImages="viewingMode === 'Exploration' ? regionImages : {}"
       @confirm-create="confirmCreate($event)"
       @cancel-create="cancelCreate()"
       @confirm-delete="confirmDelete($event)"
