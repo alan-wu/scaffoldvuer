@@ -98,8 +98,6 @@
             ref="scaffoldTreeControls"
             :isReady="isReady"
             :show-colour-picker="showColourPicker"
-            :label="tData.label"
-            :regionImages="regionImages"
             @object-selected="objectSelected"
             @object-hovered="objectHovered"
             @drawer-toggled="drawerToggled"
@@ -2332,7 +2330,7 @@ export default {
       let response = await this.getImagesFromScicrunch()
       if (response && response.success) {
         this.images = response.images
-        this.regionImages = this.assignImagesToRegions(this.images, this.markerLabels)
+        this.regionImages = this.assignImagesToRegions(this.images)
       }
     }
   },

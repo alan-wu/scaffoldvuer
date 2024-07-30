@@ -14,8 +14,7 @@
       <template #default>
         <div class="tooltip-text">{{ label }}</div>
         <div class="tooltip-text" v-if="region">Region: {{ region }}</div>
-        <div v-show="imageSrc"><el-image :src="imageSrc" /></div>
-        <CreateTooltiipContent
+        <CreateTooltipContent
           v-show="createData.toBeConfirmed"
           :createData="createData"
           @confirm-create="$emit('confirm-create', $event)"
@@ -25,8 +24,16 @@
           class="p-tooltip"
           v-show="annotationDisplay && !createData.toBeConfirmed"
           ref="annotationTooltip"
-          :annotationDisplay="true"
+          :tooltipType="'annotation'"
+          :annotationDisplay="annotationDisplay"
           :annotationEntry="annotationEntry"
+        />
+        <Tooltip
+          class="p-tooltip"
+          v-show="imageEntry.length"
+          ref="imageTooltip"
+          :tooltipType="'image'"
+          :imageEntry="imageEntry"
         />
         <div v-if="createData.toBeDeleted" class="delete-container">
           <el-row>
@@ -67,9 +74,9 @@ import {
 import {
   Delete as ElIconDelete,
 } from '@element-plus/icons-vue'
-import CreateTooltiipContent from "./CreateTooltipContent.vue";
 import { mapState } from 'pinia';
 import { useMainStore } from "@/store/index";
+import CreateTooltipContent from "./CreateTooltipContent.vue";
 import { Tooltip } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 
@@ -80,7 +87,7 @@ export default {
   name: "ScaffoldTooltip",
   components: {
     Col,
-    CreateTooltiipContent,
+    CreateTooltipContent,
     ElIconDelete,
     Icon,
     Popover,
@@ -135,7 +142,6 @@ export default {
   },
   data: function () {
     return {
-      display: false,
       annotationEntry: { },
       ElIconDelete: shallowRef(ElIconDelete),
     };
@@ -150,16 +156,16 @@ export default {
       const x = this.x - 40;
       return { left: x + "px", top: this.y - yOffset + "px" };
     },
-    imageSrc: function () {
+    imageEntry: function () {
       if (this.label in this.regionImages) {
-        return this.regionImages[this.label][0].thumbnail;
+        return this.regionImages[this.label];
       }
+      return [];
     },
   },
   methods: {
     checkForDisplay: function () {
       if (this.visible && this.label && this.label !== "") {
-        this.display = true;
         if (this.annotationDisplay) {
           const region = this.region ? this.region +"/" : "";
           this.annotationEntry = {
@@ -168,9 +174,7 @@ export default {
             "resource": encodeURIComponent(this.scaffoldUrl),
           };
         }
-      }
-      else {
-        this.display = false;
+      } else {
         this.annotationEntry = { };
       }
     },

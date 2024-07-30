@@ -34,20 +34,17 @@ export default {
       })
       return imageList
     },
-    assignImagesToRegions: function (images, regions) {
-      let imageObject = {}
+    assignImagesToRegions: function (images) {
+      let imageObjects = {}
       images.forEach((image) => {
         if (image.value && image.value.length > 0) {
           image.value.forEach((image) => {
             if (image.anatomy && image.anatomy.length > 0) {
               image.anatomy.forEach((anatomy) => {
-                if (Object.keys(regions).includes(anatomy.name) || Object.keys(regions).includes(anatomy.name.toLowerCase())) {
-                  if (anatomy.name in imageObject) {
-                    imageObject[anatomy.name].push(image)
-                  } else {
-                    imageObject[anatomy.name] = [image]
-                  }
+                if (!(anatomy.name in imageObjects)) {
+                  imageObjects[anatomy.name] = []
                 }
+                imageObjects[anatomy.name].push(image)
               })
             }
           })
