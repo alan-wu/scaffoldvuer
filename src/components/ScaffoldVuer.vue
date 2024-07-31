@@ -423,7 +423,6 @@ import { SearchIndex } from "../scripts/Search.js";
 import { mapState } from 'pinia';
 import { useMainStore } from "@/store/index";
 import scicrunchMixin from '../services/scicrunchMixin.js'
-import imageMixin from '../mixins/imageMixin.js'
 
 /**
  * A vue component of the scaffold viewer.
@@ -433,7 +432,7 @@ import imageMixin from '../mixins/imageMixin.js'
  */
 export default {
   name: "ScaffoldVuer",
-  mixins: [scicrunchMixin,imageMixin],
+  mixins: [scicrunchMixin],
   components: {
     Button,
     Col,
@@ -680,6 +679,13 @@ export default {
     enableLocalAnnotations: {
       type: Boolean,
       default: false
+    },
+    /**
+     * Specify the root url of the SPARC portal.
+     */
+    rootURL: {
+      type: String,
+      default: 'https://sparc.science/',
     },
     /**
      * Specify the endpoint of the SPARC API.
@@ -2330,7 +2336,22 @@ export default {
       let response = await this.getImagesFromScicrunch()
       if (response && response.success) {
         this.images = response.images
-        this.regionImages = this.assignImagesToRegions(this.images)
+        let imageObjects = {}
+        this.images.forEach((image) => {
+          if (image.value && image.value.length > 0) {
+            image.value.forEach((image) => {
+              if (image.anatomy && image.anatomy.length > 0) {
+                image.anatomy.forEach((anatomy) => {
+                  if (!(anatomy.name in imageObjects)) {
+                    imageObjects[anatomy.name] = []
+                  }
+                  imageObjects[anatomy.name].push(image)
+                })
+              }
+            })
+          }
+        });
+        this.regionImages = imageObjects
       }
     }
   },

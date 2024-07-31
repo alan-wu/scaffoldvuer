@@ -28,6 +28,7 @@
         :format="format"
         :marker-labels="markerLabels"
         :enableLocalAnnotations="false"
+        :rootURL="rootURL"
         :sparcAPI="sparcAPI"
         @open-map="openMap"
         @on-ready="onReady"
@@ -408,7 +409,8 @@ export default {
       ElIconSetting: shallowRef(ElIconSetting),
       ElIconFolderOpened: shallowRef(ElIconFolderOpened),
       auto: NaN,
-      sparcAPI: "http://localhost:8000"
+      rootURL: "http://localhost:3000/",
+      sparcAPI: "http://localhost:8000/"
     };
   },
   watch: {
