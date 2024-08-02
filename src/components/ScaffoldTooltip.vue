@@ -125,7 +125,7 @@ export default {
       type: Number,
       default: 200,
     },
-    regionImages: {
+    anatomyImages: {
       type: Object,
       default: {},
     },
@@ -153,8 +153,8 @@ export default {
       return { left: x + "px", top: this.y - yOffset + "px" };
     },
     imageEntry: function () {
-      if (this.label in this.regionImages) {
-        return this.regionImages[this.label];
+      if (this.label in this.anatomyImages) {
+        return this.anatomyImages[this.label];
       }
       return [];
     },

@@ -15,7 +15,7 @@
       :x="tData.x"
       :y="tData.y"
       :annotationDisplay="annotationDisplay"
-      :regionImages="viewingMode === 'Exploration' ? regionImages : {}"
+      :anatomyImages="viewingMode === 'Exploration' ? anatomyImages : {}"
       @confirm-create="confirmCreate($event)"
       @cancel-create="cancelCreate()"
       @confirm-delete="confirmDelete($event)"
@@ -422,7 +422,7 @@ import { OrgansViewer } from "../scripts/OrgansRenderer.js";
 import { SearchIndex } from "../scripts/Search.js";
 import { mapState } from 'pinia';
 import { useMainStore } from "@/store/index";
-import scicrunchMixin from '../services/scicrunchMixin.js'
+import imageMixin from '../services/imageMixin.js'
 
 /**
  * A vue component of the scaffold viewer.
@@ -432,7 +432,7 @@ import scicrunchMixin from '../services/scicrunchMixin.js'
  */
 export default {
   name: "ScaffoldVuer",
-  mixins: [scicrunchMixin],
+  mixins: [imageMixin],
   components: {
     Button,
     Col,
@@ -814,7 +814,7 @@ export default {
         size:[1, 1, 1],
       },
       images: [],
-      regionImages: {},
+      anatomyImages: {},
     };
   },
   watch: {
@@ -2333,25 +2333,9 @@ export default {
      * Get the images from Scicrunch and add them to the map.
      */
     addImagesToMap: async function () {
-      let response = await this.getImagesFromScicrunch()
+      let response = await this.getImageDatasetFromScicrunch()
       if (response && response.success) {
-        this.images = response.images
-        let imageObjects = {}
-        this.images.forEach((image) => {
-          if (image.value && image.value.length > 0) {
-            image.value.forEach((image) => {
-              if (image.anatomy && image.anatomy.length > 0) {
-                image.anatomy.forEach((anatomy) => {
-                  if (!(anatomy.name in imageObjects)) {
-                    imageObjects[anatomy.name] = []
-                  }
-                  imageObjects[anatomy.name].push(image)
-                })
-              }
-            })
-          }
-        });
-        this.regionImages = imageObjects
+        this.anatomyImages = this.populateViewerWithImages(response.datasets)
       }
     }
   },
