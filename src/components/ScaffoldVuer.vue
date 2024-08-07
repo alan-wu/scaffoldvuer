@@ -299,7 +299,7 @@
               placeholder="Select"
               class="scaffold-select-box viewing-mode"
               popper-class="scaffold_viewer_dropdown"
-              @change="viewingModeChange"
+              @change="changeViewingMode"
             >
               <el-option v-for="item in viewingModes" :key="item" :label="item" :value="item">
                 <el-row>
@@ -1863,9 +1863,13 @@ export default {
     },
     /**
      * Callback on viewing mode change
+     * Optional, can be used to update the view mode.
      */
-    viewingModeChange: function () {
+    changeViewingMode: function (modeName) {
       if (this.$module) {
+        if (modeName) {
+          this.viewingMode = modeName
+        }
         if (this.viewingMode === "Annotation") {
           let authenticated = false;
           if (this.userInformation) {
