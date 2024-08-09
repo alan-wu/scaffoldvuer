@@ -566,6 +566,16 @@ export default {
     },
     /**
      * GroupName to value pair.
+     * The value can be a single number or and object in the following
+     * form:
+     * 
+     * {
+     *  number: Number,
+     *  imgURL: String
+     * }
+     * 
+     * When imgURL is specified, scaffoldvuer will attempt to render
+     * the image in imgURL as marker instead.
      *
      */
     markerLabels : {
