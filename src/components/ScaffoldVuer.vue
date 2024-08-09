@@ -564,6 +564,20 @@ export default {
       type: Boolean,
       default: false,
     },
+    /**
+     * GroupName to value pair.
+     * The value can be a single number or and object in the following
+     * form:
+     * 
+     * {
+     *  number: Number,
+     *  imgURL: String
+     * }
+     * 
+     * When imgURL is specified, scaffoldvuer will attempt to render
+     * the image in imgURL as marker instead.
+     *
+     */
     markerLabels : {
       type: Object,
       default: function () {
@@ -1919,13 +1933,19 @@ export default {
     /**
      * Set the marker modes for objects with the provided name, mode can
      * be "on", "off" or "inherited".
+     * Value can either be number or an object containing number and 
+     * imgURL.
      */
-    setMarkerModeForObjectsWithName: function (name, number, mode) {
+    setMarkerModeForObjectsWithName: function (name, value, mode) {
       if (name && this.$module.scene) {
+        let options = value;
+        if (typeof value === 'number') {
+          options = { number: value, imgURL: undefined };
+        }
         const rootRegion = this.$module.scene.getRootRegion();
         const groups = [name];
         const objects = findObjectsWithNames(rootRegion, groups, "", true);
-        objects.forEach(object => object.setMarkerMode(mode, { number }));
+        objects.forEach(object => object.setMarkerMode(mode, options));
       }
     },
     /**
