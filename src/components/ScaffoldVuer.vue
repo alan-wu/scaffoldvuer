@@ -793,7 +793,7 @@ export default {
       previousMarkerLabels: markRaw({}),
       viewingMode: "Exploration",
       viewingModes: {
-        "Exploration": "View detailed visualization by adjusting opacity and transforming 3D scaffolds.",
+        "Exploration": "View and explore detailed visualization of 3D scaffolds",
         "Annotation": "View internal identifiers of features",
       },
       openMapRef: undefined,
