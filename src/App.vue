@@ -38,6 +38,7 @@
         @timeChanged="updateCurrentTime"
         @zinc-object-added="objectAdded"
         @vue:mounted="viewerMounted"
+        @images-loaded="imagesLoaded"
       />
     </drop-zone>
 
@@ -77,6 +78,10 @@
           </el-col>
           <el-col :span="auto">
             <el-switch v-model="markerCluster" active-text="Marker Cluster" active-icon-class="el-icon-location"
+              active-color="#8300bf" />
+          </el-col>
+          <el-col :span="auto">
+            <el-switch v-show="Object.keys(images).length > 0" v-model="markerCluster" active-text="Marker Images" active-icon-class="el-icon-location"
               active-color="#8300bf" />
           </el-col>
           <el-col :span="auto">
@@ -360,7 +365,7 @@ export default {
   },
   data: function () {
     return {
-      consoleOn: true,
+      consoleOn: false,
       createLinesWithNormal: false,
       url: undefined,
       input: undefined,
@@ -410,7 +415,8 @@ export default {
       ElIconFolderOpened: shallowRef(ElIconFolderOpened),
       auto: NaN,
       rootURL: "http://localhost:3000/",
-      sparcAPI: "http://localhost:8000/"
+      sparcAPI: "http://localhost:8000/",
+      images: {}
     };
   },
   watch: {
@@ -438,6 +444,14 @@ export default {
           "esophagus": 1,
           "urethra": 3
         };
+        if (Object.keys(this.images).length) {
+          for (const [key, value] of Object.entries(this.markerLabels)) {
+            const imageLabel = key.toLowerCase()
+            if (imageLabel in this.images) {
+              this.markerLabels[key] = { number: value, imgURL: this.images[imageLabel][0].thumbnail }
+            }
+          }
+        }
       } else {
         this.markerLabels = { };
       }
@@ -466,6 +480,9 @@ export default {
     this.$refs.dropzone.revokeURLs();
   },
   methods: {
+    imagesLoaded:function (value) {
+      this.images = value 
+    },
     exportGLTF: function () {
       this.$refs.scaffold.exportGLTF(false).then((data) => {
         const filename = 'export' + JSON.stringify(new Date()) + '.gltf';

@@ -1939,12 +1939,16 @@ export default {
      * Set the marker modes for objects with the provided name, mode can
      * be "on", "off" or "inherited".
      */
-    setMarkerModeForObjectsWithName: function (name, number, mode) {
+    setMarkerModeForObjectsWithName: function (name, value, mode) {
       if (name && this.$module.scene) {
+        let options = value;
+        if (typeof value === 'number') {
+          options = { number: value, imgURL: undefined };
+        }
         const rootRegion = this.$module.scene.getRootRegion();
         const groups = [name];
         const objects = findObjectsWithNames(rootRegion, groups, "", true);
-        objects.forEach(object => object.setMarkerMode(mode, { number }));
+        objects.forEach(object => object.setMarkerMode(mode, options));
       }
     },
     /**
@@ -2336,6 +2340,7 @@ export default {
       let response = await this.getImageDatasetFromScicrunch()
       if (response && response.success) {
         this.anatomyImages = this.populateViewerWithImages(response.datasets)
+        this.$emit("images-loaded", this.anatomyImages)
       }
     }
   },

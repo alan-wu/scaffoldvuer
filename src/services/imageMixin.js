@@ -114,8 +114,8 @@ export default {
               for (let k = 0; k < anatomyLength; k++) {
                 const anatomy = image.anatomy[k];
                 const locationIdentifier = mapImp
-                  ? anatomy.curie
-                  : anatomy.name;
+                  ? anatomy.curie.toLowerCase()
+                  : anatomy.name.toLowerCase();
                 if (!(locationIdentifier in anatomyImageObjects)) {
                   anatomyImageObjects[locationIdentifier] = [];
                   if (mapImp) {
