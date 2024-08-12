@@ -287,26 +287,28 @@
         width="128"
         :teleported="false"
         trigger="click"
-        popper-class="background-popper non-selectable"
+        popper-class="background-popper non-selectable h-auto"
         virtual-triggering
       >
         <div>
           <el-row class="backgroundText">Viewing Mode</el-row>
           <el-row class="backgroundControl">
-            <el-select
-              :teleported="false"
-              v-model="viewingMode"
-              placeholder="Select"
-              class="scaffold-select-box viewing-mode"
-              popper-class="scaffold_viewer_dropdown"
-              @change="viewingModeChange"
-            >
-              <el-option v-for="item in viewingModes" :key="item" :label="item" :value="item">
-                <el-row>
-                  <el-col :span="12">{{ item }}</el-col>
-                </el-row>
-              </el-option>
-            </el-select>
+            <div style="margin-bottom: 2px;">
+              <template
+                  v-for="(value, key, index) in viewingModes"
+                  :key="key"
+                >
+                  <template v-if="key === viewingMode">
+                    <span class="viewing-mode-title"><b >{{ key }}</b></span>
+                  </template>
+                  <template v-else>
+                    <span class="viewing-mode-unselected" @click="changeViewingMode(key)">{{ key }}</span>
+                  </template>
+              </template>
+            </div>
+            <el-row class="viewing-mode-description">
+              {{ viewingModes[viewingMode] }}
+            </el-row>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText"> Change background </el-row>
@@ -790,10 +792,10 @@ export default {
       fileFormat: "metadata",
       previousMarkerLabels: markRaw({}),
       viewingMode: "Exploration",
-      viewingModes: [
-        "Annotation",
-        "Exploration",
-      ],
+      viewingModes: {
+        "Exploration": "View detailed visualization by adjusting opacity and transforming 3D scaffolds.",
+        "Annotation": "View internal identifiers of features",
+      },
       openMapRef: undefined,
       backgroundIconRef: undefined,
       userInformation: undefined,
@@ -1878,7 +1880,10 @@ export default {
     /**
      * Callback on viewing mode change
      */
-    viewingModeChange: function () {
+    changeViewingMode: function (modeName) {
+      if (modeName) {
+        this.viewingMode = modeName;
+      }
       if (this.$module) {
         if (this.viewingMode === "Annotation") {
           let authenticated = false;
@@ -2498,6 +2503,10 @@ export default {
   }
 }
 
+:deep(.background-popper.el-popover.el-popper.h-auto) {
+  height: auto !important;
+}
+
 :deep(.open-map-popper.el-popover.el-popper) {
   padding-top: 5px;
   padding-bottom: 5px;
@@ -2700,15 +2709,38 @@ export default {
   }
 }
 
+.viewing-mode-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: $app-primary-color;
+  margin: 8px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.viewing-mode-unselected {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgb(48, 49, 51);
+  margin: 8px;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.viewing-mode-description {
+  font-size: 12px;
+  color: rgb(48, 49, 51);
+  text-align: left;
+  padding-bottom: 4px;
+  margin-left: 8px;
+}
+
 .scaffold-select-box {
   border-radius: 4px;
   border: 1px solid rgb(144, 147, 153);
   background-color: var(--white);
   font-weight: 500;
   color: rgb(48, 49, 51);
-  &.viewing-mode {
-    width: 150px!important;
-  }
 
   &.speed {
     margin-left: 8px;
