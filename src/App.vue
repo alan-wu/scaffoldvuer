@@ -422,7 +422,7 @@ export default {
           "body proper": 9,
           "Spinal cord": 8,
           "lung": 11,
-          "stomach": 12,
+          "stomach": {number:12, imgURL: 'https://mapcore-bucket1.s3.us-west-2.amazonaws.com/texture/arm1/jpg/0984.jpg'},
           "urinary bladder": 11,
           "Brainstem": 11,
           "heart": 9,
