@@ -1879,12 +1879,13 @@ export default {
     },
     /**
      * Callback on viewing mode change
+     * Optional, can be used to update the view mode.
      */
     changeViewingMode: function (modeName) {
-      if (modeName) {
-        this.viewingMode = modeName;
-      }
       if (this.$module) {
+        if (modeName) {
+          this.viewingMode = modeName
+        }
         if (this.viewingMode === "Annotation") {
           let authenticated = false;
           if (this.userInformation) {

@@ -646,6 +646,7 @@ export default {
         }
       }
       this.scaffoldRef = this.$refs.scaffold;
+      // this.scaffoldRef.changeViewingMode('Annotation')
     },
     addLinesWithNormal: function (coord, normal) {
       if (coord && normal) {
