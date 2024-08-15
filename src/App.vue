@@ -81,8 +81,8 @@
               active-color="#8300bf" />
           </el-col>
           <el-col :span="auto">
-            <el-switch v-show="Object.keys(images).length > 0" v-model="markerCluster" active-text="Marker Images" active-icon-class="el-icon-location"
-              active-color="#8300bf" />
+            <el-switch v-model="imageMarker" active-text="Marker Images" active-icon-class="el-icon-location"
+              active-color="#8300bf" :disabled="!this.markerCluster" @change="imageMarkerLabels" />
           </el-col>
           <el-col :span="auto">
             <el-switch v-model="displayMinimap" active-text="Minimap" active-icon-class="el-icon-discover"
@@ -416,7 +416,8 @@ export default {
       auto: NaN,
       rootURL: "http://localhost:3000/",
       sparcAPI: "http://localhost:8000/",
-      images: {}
+      anatomyImages: {},
+      imageMarker: false
     };
   },
   watch: {
@@ -444,14 +445,6 @@ export default {
           "esophagus": 1,
           "urethra": 3
         };
-        if (Object.keys(this.images).length) {
-          for (const [key, value] of Object.entries(this.markerLabels)) {
-            const imageLabel = key.toLowerCase()
-            if (imageLabel in this.images) {
-              this.markerLabels[key] = { number: value, imgURL: this.images[imageLabel][0].thumbnail }
-            }
-          }
-        }
       } else {
         this.markerLabels = { };
       }
@@ -480,8 +473,29 @@ export default {
     this.$refs.dropzone.revokeURLs();
   },
   methods: {
+    imageMarkerLabels:function (value) {
+      let imageLabels = {}
+      if (value) {
+        for (const [key, value] of Object.entries(this.markerLabels)) {
+          const imageLabel = key.toLowerCase()
+          imageLabels[key] = value
+          if (imageLabel in this.anatomyImages) {
+            imageLabels[key] = { number: value, imgURL: this.anatomyImages[imageLabel][0].thumbnail }
+          }
+        }
+      } else {
+        for (const [key, value] of Object.entries(this.markerLabels)) {
+          if (typeof value === "object") {
+            imageLabels[key] = this.markerLabels[key].number
+          } else {
+            imageLabels[key] = value
+          }
+        }
+      }
+      this.markerLabels = imageLabels
+    },
     imagesLoaded:function (value) {
-      this.images = value 
+      this.anatomyImages = value
     },
     exportGLTF: function () {
       this.$refs.scaffold.exportGLTF(false).then((data) => {

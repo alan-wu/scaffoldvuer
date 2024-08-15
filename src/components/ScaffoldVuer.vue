@@ -422,7 +422,7 @@ import { OrgansViewer } from "../scripts/OrgansRenderer.js";
 import { SearchIndex } from "../scripts/Search.js";
 import { mapState } from 'pinia';
 import { useMainStore } from "@/store/index";
-import imageMixin from '../services/imageMixin.js'
+import imageMixin from '../mixins/imageMixin.js'
 
 /**
  * A vue component of the scaffold viewer.
