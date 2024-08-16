@@ -38,7 +38,7 @@
         @timeChanged="updateCurrentTime"
         @zinc-object-added="objectAdded"
         @vue:mounted="viewerMounted"
-        @images-loaded="imagesLoaded"
+        :anatomyImages=anatomyImages
       />
     </drop-zone>
 
@@ -79,10 +79,6 @@
           <el-col :span="auto">
             <el-switch v-model="markerCluster" active-text="Marker Cluster" active-icon-class="el-icon-location"
               active-color="#8300bf" />
-          </el-col>
-          <el-col :span="auto">
-            <el-switch v-model="imageMarker" active-text="Marker Images" active-icon-class="el-icon-location"
-              active-color="#8300bf" :disabled="!this.markerCluster" @change="imageMarkerLabels" />
           </el-col>
           <el-col :span="auto">
             <el-switch v-model="displayMinimap" active-text="Minimap" active-icon-class="el-icon-discover"
@@ -328,6 +324,7 @@ import {
 import { useRoute, useRouter } from 'vue-router'
 import { HelpModeDialog } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
+import imageMixin from './mixins/imageMixin';
 
 let texture_prefix = undefined;
 
@@ -345,6 +342,7 @@ const writeTextFile = (filename, data) => {
 
 export default {
   name: "app",
+  mixins:[imageMixin],
   components: {
     Autocomplete,
     Button,
@@ -417,7 +415,6 @@ export default {
       rootURL: "http://localhost:3000/",
       sparcAPI: "http://localhost:8000/",
       anatomyImages: {},
-      imageMarker: false
     };
   },
   watch: {
@@ -433,7 +430,7 @@ export default {
           "body proper": 9,
           "Spinal cord": 8,
           "lung": 11,
-          "stomach": {number:12, imgURL: 'https://mapcore-bucket1.s3.us-west-2.amazonaws.com/texture/arm1/jpg/0984.jpg'},
+          "stomach": 12,
           "urinary bladder": 11,
           "Brainstem": 11,
           "heart": 9,
@@ -465,6 +462,7 @@ export default {
   },
   mounted: function () {
     this._objects = [];
+    this.processAnatomyImages()
   },
   created: function () {
     texture_prefix = import.meta.env.VITE_TEXTURE_FOOT_PREFIX;
@@ -493,9 +491,6 @@ export default {
         }
       }
       this.markerLabels = imageLabels
-    },
-    imagesLoaded:function (value) {
-      this.anatomyImages = value
     },
     exportGLTF: function () {
       this.$refs.scaffold.exportGLTF(false).then((data) => {
@@ -788,6 +783,12 @@ export default {
     onMapTooltipShown: function () {
       if (this.$refs.scaffold && this.$refs.scaffoldHelp) {
         this.$refs.scaffoldHelp.toggleTooltipPinHighlight();
+      }
+    },
+    processAnatomyImages: async function () {
+      let response = await this.getImageDatasetFromScicrunch()
+      if (response && response.success) {
+        this.anatomyImages = this.populateAnatomyImageObjects(response.datasets).anatomyName
       }
     },
   },

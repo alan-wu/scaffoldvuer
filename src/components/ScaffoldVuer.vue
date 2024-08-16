@@ -15,7 +15,7 @@
       :x="tData.x"
       :y="tData.y"
       :annotationDisplay="annotationDisplay"
-      :anatomyImages="viewingMode === 'Exploration' ? anatomyImages : {}"
+      :anatomyImages="imageRadio ? anatomyImages : {}"
       @confirm-create="confirmCreate($event)"
       @cancel-create="cancelCreate()"
       @confirm-delete="confirmDelete($event)"
@@ -310,6 +310,18 @@
             <el-row class="viewing-mode-description">
               {{ viewingModes[viewingMode] }}
             </el-row>
+          </el-row>
+          <el-row class="backgroundSpacer" v-if="viewingMode === 'Exploration'"></el-row>
+          <el-row class="backgroundText" v-if="viewingMode === 'Exploration'">View Image</el-row>
+          <el-row class="backgroundControl" v-if="viewingMode === 'Exploration'">
+            <el-radio-group
+              v-model="imageRadio"
+              class="flatmap-radio"
+              @change="setImage"
+            >
+            <el-radio :value="false">Hide</el-radio>
+            <el-radio :value="true">Show</el-radio>
+            </el-radio-group>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText"> Change background </el-row>
@@ -710,6 +722,10 @@ export default {
       type: String,
       default: 'https://api.sparc.science/',
     },
+    anatomyImages: {
+      type: Object,
+      default: {},
+    },
   },
   provide() {
     return {
@@ -717,6 +733,7 @@ export default {
       scaffoldUrl: this.url,
       $annotator: this.annotator,
       boundingDims: this.boundingDims,
+      getFeaturesAlert: () => undefined,
     };
   },
   data: function () {
@@ -807,7 +824,8 @@ export default {
         active: false,
       },
       fileFormat: "metadata",
-      previousMarkerLabels: markRaw({}),
+      markerLabelEntry: markRaw({}),
+      previousMarkerLabelEntry: markRaw({}),
       viewingMode: "Exploration",
       viewingModes: {
         "Exploration": "View and explore detailed visualization of 3D scaffolds",
@@ -829,8 +847,7 @@ export default {
         centre: [0, 0, 0],
         size:[1, 1, 1],
       },
-      images: [],
-      anatomyImages: {},
+      imageRadio: false,
     };
   },
   watch: {
@@ -911,14 +928,17 @@ export default {
       immediate: true,
     },
     markerLabels: function(labels) {
-      for (const [key, value] of Object.entries(this.previousMarkerLabels)) {
+      this.markerLabelEntry = markRaw({...labels})
+    },
+    markerLabelEntry: function (entry) {
+      for (const [key, value] of Object.entries(this.previousMarkerLabelEntry)) {
         this.setMarkerModeForObjectsWithName(key, value, "off");
       }
-      for (const [key, value] of Object.entries(labels)) {
+      for (const [key, value] of Object.entries(entry)) {
         this.setMarkerModeForObjectsWithName(key, value, "on");
       }
-      this.previousMarkerLabels = markRaw({...labels});
-    },
+      this.previousMarkerLabelEntry = markRaw({...entry});
+    }
   },
   beforeCreate: function () {
     this.$module = new OrgansViewer();
@@ -2114,7 +2134,6 @@ export default {
         //Emit when all objects have been loaded
         this.$emit("on-ready");
         this.setMarkers();
-        this.addImagesToMap();
         //Create a bounding box.
         this._boundingBoxGeo = this.$module.scene.addBoundingBoxPrimitive(
           "_helper", "boundingBox", 0x40E0D0, 0.15);
@@ -2351,19 +2370,30 @@ export default {
      * Set the markers for the scene.
      */
     setMarkers: function () {
-      for (const [key, value] of Object.entries(this.markerLabels)) {
+      for (const [key, value] of Object.entries(this.markerLabelEntry)) {
         this.setMarkerModeForObjectsWithName(key, value, "on");
       }
     },
-    /**
-     * Get the images from Scicrunch and add them to the map.
-     */
-    addImagesToMap: async function () {
-      let response = await this.getImageDatasetFromScicrunch()
-      if (response && response.success) {
-        this.anatomyImages = this.populateViewerWithImages(response.datasets)
-        this.$emit("images-loaded", this.anatomyImages)
+    setImage: function (flag) {
+      let imageLabels = {}
+      if (flag) {
+        for (const [key, value] of Object.entries(this.markerLabels)) {
+          const imageLabel = key.toLowerCase()
+          imageLabels[key] = value
+          if (imageLabel in this.anatomyImages) {
+            imageLabels[key] = { number: value, imgURL: this.anatomyImages[imageLabel][0].thumbnail }
+          }
+        }
+      } else {
+        for (const [key, value] of Object.entries(this.markerLabels)) {
+          if (typeof value === "object") {
+            imageLabels[key] = this.markerLabels[key].number
+          } else {
+            imageLabels[key] = value
+          }
+        }
       }
+      this.markerLabelEntry = imageLabels
     }
   },
 };
