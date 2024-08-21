@@ -15,7 +15,7 @@
       :x="tData.x"
       :y="tData.y"
       :annotationDisplay="annotationDisplay"
-      :anatomyImages="imageRadio ? anatomyImages : {}"
+      :anatomyImages="imageRadio ? anatomyImages[imageType] : {}"
       @confirm-create="confirmCreate($event)"
       @cancel-create="cancelCreate()"
       @confirm-delete="confirmDelete($event)"
@@ -285,7 +285,7 @@
         ref="backgroundPopover"
         :virtual-ref="backgroundIconRef"
         placement="top-start"
-        width="128"
+        width="320"
         :teleported="false"
         trigger="click"
         popper-class="background-popper non-selectable h-auto"
@@ -314,14 +314,37 @@
           <el-row class="backgroundSpacer" v-if="viewingMode === 'Exploration'"></el-row>
           <el-row class="backgroundText" v-if="viewingMode === 'Exploration'">View Image</el-row>
           <el-row class="backgroundControl" v-if="viewingMode === 'Exploration'">
-            <el-radio-group
-              v-model="imageRadio"
-              class="flatmap-radio"
-              @change="setImage"
-            >
-            <el-radio :value="false">Hide</el-radio>
-            <el-radio :value="true">Show</el-radio>
-            </el-radio-group>
+            <el-col :span="12">
+              <el-radio-group
+                v-model="imageRadio"
+                class="flatmap-radio"
+                @change="setImage"
+              >
+                <el-radio :value="false">Hide</el-radio>
+                <el-radio :value="true">Show</el-radio>
+              </el-radio-group>
+            </el-col>
+            <el-col :span="12" v-if="imageRadio">
+              <el-select
+                :teleported="false"
+                v-model="imageType"
+                placeholder="Select"
+                class="select-box"
+                popper-class="scaffold_viewer_dropdown"
+                @change="setImageType"
+              >
+                <el-option
+                  v-for="item in imageTypes"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+                >
+                  <el-row>
+                    <el-col :span="12">{{ item }}</el-col>
+                  </el-row>
+                </el-option>
+              </el-select>
+            </el-col>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText"> Change background </el-row>
@@ -395,7 +418,7 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { markRaw, shallowRef } from 'vue';
+import { markRaw, toRaw, shallowRef } from 'vue';
 import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
@@ -436,6 +459,7 @@ import { OrgansViewer } from "../scripts/OrgansRenderer.js";
 import { SearchIndex } from "../scripts/Search.js";
 import { mapState } from 'pinia';
 import { useMainStore } from "@/store/index";
+import scicrunchMixin from '../mixins/scicrunchMixin.js'
 import imageMixin from '../mixins/imageMixin.js'
 
 /**
@@ -446,7 +470,7 @@ import imageMixin from '../mixins/imageMixin.js'
  */
 export default {
   name: "ScaffoldVuer",
-  mixins: [imageMixin],
+  mixins: [scicrunchMixin,imageMixin],
   components: {
     Button,
     Col,
@@ -709,22 +733,11 @@ export default {
       default: false
     },
     /**
-     * Specify the root url of the SPARC portal.
-     */
-    rootURL: {
-      type: String,
-      default: 'https://sparc.science/',
-    },
-    /**
      * Specify the endpoint of the SPARC API.
      */
     sparcAPI: {
       type: String,
       default: 'https://api.sparc.science/',
-    },
-    anatomyImages: {
-      type: Object,
-      default: {},
     },
   },
   provide() {
@@ -847,7 +860,10 @@ export default {
         centre: [0, 0, 0],
         size:[1, 1, 1],
       },
+      anatomyImages: markRaw({}),
       imageRadio: false,
+      imageType: 'Image',
+      imageTypes: ['Image', 'Plot', 'Scaffold', 'Segmentation']
     };
   },
   watch: {
@@ -2374,26 +2390,32 @@ export default {
         this.setMarkerModeForObjectsWithName(key, value, "on");
       }
     },
+    removeImageFromMap: function () {
+      this.markerLabelEntry = this.markerLabels
+    },
     setImage: function (flag) {
-      let imageLabels = {}
       if (flag) {
-        for (const [key, value] of Object.entries(this.markerLabels)) {
-          const imageLabel = key.toLowerCase()
-          imageLabels[key] = value
-          if (imageLabel in this.anatomyImages) {
-            imageLabels[key] = { number: value, imgURL: this.anatomyImages[imageLabel][0].thumbnail }
-          }
-        }
+        this.setImageType(this.imageType)
       } else {
-        for (const [key, value] of Object.entries(this.markerLabels)) {
-          if (typeof value === "object") {
-            imageLabels[key] = this.markerLabels[key].number
-          } else {
-            imageLabels[key] = value
-          }
-        }
+        this.removeImageFromMap()
       }
-      this.markerLabelEntry = imageLabels
+    },
+    setImageType: async function (type) {
+      this.imageType = type
+      this.loading = true
+      if (type === "Image"  && !(type in this.anatomyImages)) {
+        this.anatomyImages["Image"] = await this.getBiolucidaThumbnails("name", Object.keys(this.markerLabels))
+      } else if (type === "Segmentation" && !(type in this.anatomyImages)) {
+        this.anatomyImages["Segmentation"] = await this.getSegmentationThumbnails("name", Object.keys(this.markerLabels))
+      } else {
+        console.log('switch to', type);
+        this.removeImageFromMap()
+      }
+      if (this.anatomyImages[type]) {
+        console.log("🚀 ~ this.anatomyImages[type]:", this.anatomyImages[type])
+        this.populateMapWithImages(this.anatomyImages[type], type)
+      }
+      this.loading = false
     }
   },
 };

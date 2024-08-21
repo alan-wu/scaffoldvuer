@@ -28,7 +28,6 @@
         :format="format"
         :marker-labels="markerLabels"
         :enableLocalAnnotations="false"
-        :rootURL="rootURL"
         :sparcAPI="sparcAPI"
         @open-map="openMap"
         @on-ready="onReady"
@@ -324,7 +323,6 @@ import {
 import { useRoute, useRouter } from 'vue-router'
 import { HelpModeDialog } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
-import imageMixin from './mixins/imageMixin';
 
 let texture_prefix = undefined;
 
@@ -342,7 +340,6 @@ const writeTextFile = (filename, data) => {
 
 export default {
   name: "app",
-  mixins:[imageMixin],
   components: {
     Autocomplete,
     Button,
@@ -412,8 +409,8 @@ export default {
       ElIconSetting: shallowRef(ElIconSetting),
       ElIconFolderOpened: shallowRef(ElIconFolderOpened),
       auto: NaN,
-      rootURL: "http://localhost:3000/",
-      sparcAPI: "http://localhost:8000/",
+      sparcAPI: import.meta.env.VITE_SPARC_API,
+      // sparcAPI: "http://localhost:8000/",
       anatomyImages: {},
     };
   },
@@ -462,7 +459,6 @@ export default {
   },
   mounted: function () {
     this._objects = [];
-    this.processAnatomyImages()
   },
   created: function () {
     texture_prefix = import.meta.env.VITE_TEXTURE_FOOT_PREFIX;
@@ -783,12 +779,6 @@ export default {
     onMapTooltipShown: function () {
       if (this.$refs.scaffold && this.$refs.scaffoldHelp) {
         this.$refs.scaffoldHelp.toggleTooltipPinHighlight();
-      }
-    },
-    processAnatomyImages: async function () {
-      let response = await this.getImageDatasetFromScicrunch()
-      if (response && response.success) {
-        this.anatomyImages = this.populateAnatomyImageObjects(response.datasets).anatomyName
       }
     },
   },

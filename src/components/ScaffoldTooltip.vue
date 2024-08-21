@@ -153,8 +153,12 @@ export default {
       return { left: x + "px", top: this.y - yOffset + "px" };
     },
     imageEntry: function () {
-      if (this.label in this.anatomyImages) {
-        return this.anatomyImages[this.label];
+      const anatomyImageEntries = {}
+      Object.entries(this.anatomyImages).forEach(([key, value]) => {
+        Object.assign(anatomyImageEntries, { [key.toLowerCase()]: value })
+      })
+      if (this.label in anatomyImageEntries) {
+        return anatomyImageEntries[this.label];
       }
       return [];
     },
