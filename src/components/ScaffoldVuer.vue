@@ -293,7 +293,7 @@
       >
         <div>
           <el-row class="backgroundText">Viewing Mode</el-row>
-          <el-row class="backgroundControl">
+          <el-row class="backgroundChooser">
             <div style="margin-bottom: 2px;">
               <template
                   v-for="(value, key, index) in viewingModes"
@@ -312,8 +312,8 @@
             </el-row>
           </el-row>
           <el-row class="backgroundSpacer" v-if="viewingMode === 'Exploration'"></el-row>
-          <el-row class="backgroundText" v-if="viewingMode === 'Exploration'">View Image</el-row>
-          <el-row class="backgroundControl" v-if="viewingMode === 'Exploration'">
+          <el-row class="backgroundText" v-if="viewingMode === 'Exploration'">Images Display</el-row>
+          <el-row class="backgroundChooser" v-if="viewingMode === 'Exploration'">
             <el-col :span="12">
               <el-radio-group
                 v-model="imageRadio"
@@ -459,7 +459,12 @@ import { OrgansViewer } from "../scripts/OrgansRenderer.js";
 import { SearchIndex } from "../scripts/Search.js";
 import { mapState } from 'pinia';
 import { useMainStore } from "@/store/index";
-import scicrunchMixin from '../mixins/scicrunchMixin.js'
+import {
+  getBiolucidaThumbnails,
+  getSegmentationThumbnails,
+  getScaffoldThumbnails,
+  getPlotThumbnails
+} from '../services/scicrunchQueries'
 import imageMixin from '../mixins/imageMixin.js'
 
 /**
@@ -470,7 +475,7 @@ import imageMixin from '../mixins/imageMixin.js'
  */
 export default {
   name: "ScaffoldVuer",
-  mixins: [scicrunchMixin,imageMixin],
+  mixins: [imageMixin],
   components: {
     Button,
     Col,
@@ -863,7 +868,7 @@ export default {
       anatomyImages: markRaw({}),
       imageRadio: false,
       imageType: 'Image',
-      imageTypes: ['Image', 'Plot', 'Scaffold', 'Segmentation']
+      imageTypes: ['Image', 'Segmentation', 'Scaffold', 'Plot'],
     };
   },
   watch: {
@@ -2403,16 +2408,17 @@ export default {
     setImageType: async function (type) {
       this.imageType = type
       this.loading = true
+      this.removeImageFromMap()
       if (type === "Image"  && !(type in this.anatomyImages)) {
-        this.anatomyImages["Image"] = await this.getBiolucidaThumbnails("name", Object.keys(this.markerLabels))
+        this.anatomyImages["Image"] = await getBiolucidaThumbnails(this.sparcAPI, "name", Object.keys(this.markerLabels))
       } else if (type === "Segmentation" && !(type in this.anatomyImages)) {
-        this.anatomyImages["Segmentation"] = await this.getSegmentationThumbnails("name", Object.keys(this.markerLabels))
-      } else {
-        console.log('switch to', type);
-        this.removeImageFromMap()
+        this.anatomyImages["Segmentation"] = await getSegmentationThumbnails(this.sparcAPI, "name", Object.keys(this.markerLabels))
+      } else if (type === "Scaffold" && !(type in this.anatomyImages)) {
+        this.anatomyImages["Scaffold"] = await getScaffoldThumbnails(this.sparcAPI, "name", Object.keys(this.markerLabels))
+      } else if (type === "Plot" && !(type in this.anatomyImages)) {
+        this.anatomyImages["Plot"] = await getPlotThumbnails(this.sparcAPI, "name", Object.keys(this.markerLabels))
       }
       if (this.anatomyImages[type]) {
-        console.log("🚀 ~ this.anatomyImages[type]:", this.anatomyImages[type])
         this.populateMapWithImages(this.anatomyImages[type], type)
       }
       this.loading = false
@@ -2440,6 +2446,7 @@ export default {
 .backgroundSpacer {
   border-bottom: 1px solid #e4e7ed;
   margin-bottom: 10px;
+  margin-top: 5px;
 }
 
 .warning-icon {
@@ -2576,7 +2583,7 @@ export default {
   background-color: #ffffff;
   border: 1px solid $app-primary-color;
   box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
-  height: 140px;
+  height: fit-content;
   min-width: 200px;
   .el-popper__arrow {
     &:before {
