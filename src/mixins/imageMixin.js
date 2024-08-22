@@ -1,9 +1,16 @@
 export default {
   methods: {
-    populateMapWithImages: function (images, type) {
+    populateMapWithImages: async function (images, type) {
+      let imageMarkerLabels = {};
       for (const [key, list] of Object.entries(images)) {
-        this.downloadImageThumbnail(key, list, type);
+        const response = await this.downloadImageThumbnail(key, list, type);
+        if (response) {
+          imageMarkerLabels[key] = response;
+        } else {
+          imageMarkerLabels[key] = this.markerLabels[key];
+        }
       }
+      return imageMarkerLabels;
     },
     downloadImageThumbnail: async function (key, list, type) {
       const count = list.length;
@@ -11,21 +18,21 @@ export default {
         //Pick a random image
         const index = Math.floor(Math.random() * count);
         const thumbnail = list[index].thumbnail;
-        this.getThumbnail(thumbnail, type)
-          .then((source) => {
-            this.addImageThumbnailMarker(key, source);
-          })
-          .catch(() => {
-            //Failed to download, pick another one
-            list.splice(index);
-            this.downloadImageThumbnail(key, list, type);
-          });
+        try {
+          const response = await this.getImageThumbnail(thumbnail, type);
+          const markerObject = await this.addImageThumbnailMarker(key, response);
+          return markerObject;
+        } catch (error) {
+          // Failed to download, pick another one
+          list.splice(index);
+          this.downloadImageThumbnail(key, list, type);
+        }
       }
     },
-    getThumbnail: async function (url, type) {
+    getImageThumbnail: async function (url, type) {
       return new Promise((resolve, reject) => {
-        if (type === "Segmentation" || type === "Image") {
-          return this.getBinaryThumbnail(url)
+        if (type === "Image" || type === "Segmentation") {
+          this.getBinaryThumbnail(url)
             .then((response) => resolve(response))
             .catch((response) => reject(response));
         } else {
@@ -48,10 +55,7 @@ export default {
           .then((data) => {
             if (data) {
               let img = new Image();
-              let wrapperElement = document.createElement("div");
-              img.style = "height: auto;width: 50px;margin-right: 80px;";
               img.onload = function () {
-                wrapperElement.appendChild(img);
                 resolve(`data:'image/png';base64,${data}`);
               };
               img.onerror = function () {
@@ -67,10 +71,7 @@ export default {
     getGenericThumbnail: async function (url) {
       return new Promise((resolve, reject) => {
         let img = new Image();
-        let wrapperElement = document.createElement("div");
-        img.style = "height: auto;width: 50px;margin-right: 80px;";
         img.onload = function () {
-          wrapperElement.appendChild(img);
           resolve(url);
         };
         img.onerror = function () {
@@ -82,10 +83,7 @@ export default {
     addImageThumbnailMarker: async function (id, source) {
       const blob = await (await fetch(source)).blob();
       const blobUrl = URL.createObjectURL(blob);
-      let imageMarker = {};
-      imageMarker[id] = { number: this.markerLabels[id], imgURL: blobUrl };
-      this.setMarkerModeForObjectsWithName(id, { number: this.markerLabels[id], imgURL: blobUrl }, "on");
-      // this.markerLabelEntry = imageMarker;
+      return { number: this.markerLabels[id], imgURL: blobUrl };
     },
   },
 };

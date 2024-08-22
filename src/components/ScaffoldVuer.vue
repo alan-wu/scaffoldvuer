@@ -2395,21 +2395,24 @@ export default {
         this.setMarkerModeForObjectsWithName(key, value, "on");
       }
     },
-    removeImageFromMap: function () {
-      this.markerLabelEntry = this.markerLabels
-    },
     setImage: function (flag) {
       if (flag) {
         this.setImageType(this.imageType)
       } else {
-        this.removeImageFromMap()
+        this.removeImageThumbnails()
       }
     },
-    setImageType: async function (type) {
+    setImageType: function (type) {
       this.imageType = type
+      this.removeImageThumbnails()
+      this.populateImageThumbnails(type)
+    },
+    removeImageThumbnails: function () {
+      this.markerLabelEntry = markRaw(this.markerLabels)
+    },
+    populateImageThumbnails: async function (type) {
       this.loading = true
-      this.removeImageFromMap()
-      if (type === "Image"  && !(type in this.anatomyImages)) {
+      if (type === "Image" && !(type in this.anatomyImages)) {
         this.anatomyImages["Image"] = await getBiolucidaThumbnails(this.sparcAPI, "name", Object.keys(this.markerLabels))
       } else if (type === "Segmentation" && !(type in this.anatomyImages)) {
         this.anatomyImages["Segmentation"] = await getSegmentationThumbnails(this.sparcAPI, "name", Object.keys(this.markerLabels))
@@ -2419,7 +2422,7 @@ export default {
         this.anatomyImages["Plot"] = await getPlotThumbnails(this.sparcAPI, "name", Object.keys(this.markerLabels))
       }
       if (this.anatomyImages[type]) {
-        this.populateMapWithImages(this.anatomyImages[type], type)
+        this.markerLabelEntry = markRaw(await this.populateMapWithImages(this.anatomyImages[type], type))
       }
       this.loading = false
     }
