@@ -37,7 +37,6 @@
         @timeChanged="updateCurrentTime"
         @zinc-object-added="objectAdded"
         @vue:mounted="viewerMounted"
-        :anatomyImages=anatomyImages
       />
     </drop-zone>
 
@@ -323,6 +322,9 @@ import {
 import { useRoute, useRouter } from 'vue-router'
 import { HelpModeDialog } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
+import { mapStores } from 'pinia';
+import { useSettingsStore } from '@/stores/settings';
+import { getOrganCuries } from '@/services/scicrunchQueries'
 
 let texture_prefix = undefined;
 
@@ -411,8 +413,10 @@ export default {
       auto: NaN,
       sparcAPI: import.meta.env.VITE_SPARC_API,
       // sparcAPI: "http://localhost:8000/",
-      anatomyImages: {},
     };
+  },
+  computed: {
+    ...mapStores(useSettingsStore),
   },
   watch: {
     input: function () {
@@ -459,6 +463,7 @@ export default {
   },
   mounted: function () {
     this._objects = [];
+    getOrganCuries(this.sparcAPI).then((organCuries) => this.settingsStore.updateOrganCuries(organCuries))
   },
   created: function () {
     texture_prefix = import.meta.env.VITE_TEXTURE_FOOT_PREFIX;
@@ -467,27 +472,6 @@ export default {
     this.$refs.dropzone.revokeURLs();
   },
   methods: {
-    imageMarkerLabels:function (value) {
-      let imageLabels = {}
-      if (value) {
-        for (const [key, value] of Object.entries(this.markerLabels)) {
-          const imageLabel = key.toLowerCase()
-          imageLabels[key] = value
-          if (imageLabel in this.anatomyImages) {
-            imageLabels[key] = { number: value, imgURL: this.anatomyImages[imageLabel][0].thumbnail }
-          }
-        }
-      } else {
-        for (const [key, value] of Object.entries(this.markerLabels)) {
-          if (typeof value === "object") {
-            imageLabels[key] = this.markerLabels[key].number
-          } else {
-            imageLabels[key] = value
-          }
-        }
-      }
-      this.markerLabels = imageLabels
-    },
     exportGLTF: function () {
       this.$refs.scaffold.exportGLTF(false).then((data) => {
         const filename = 'export' + JSON.stringify(new Date()) + '.gltf';

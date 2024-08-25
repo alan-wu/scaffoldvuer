@@ -457,8 +457,9 @@ import { AnnotationService } from '@abi-software/sparc-annotation';
 import { EventNotifier } from "../scripts/EventNotifier.js";
 import { OrgansViewer } from "../scripts/OrgansRenderer.js";
 import { SearchIndex } from "../scripts/Search.js";
-import { mapState } from 'pinia';
-import { useMainStore } from "@/store/index";
+import { mapState, mapStores } from 'pinia';
+import { useMainStore } from "@/stores/index";
+import { useSettingsStore } from '@/stores/settings'
 import {
   getBiolucidaThumbnails,
   getSegmentationThumbnails,
@@ -949,7 +950,7 @@ export default {
       },
       immediate: true,
     },
-    markerLabels: function(labels) {
+    markerLabels: function (labels) {
       this.markerLabelEntry = markRaw({...labels})
     },
     markerLabelEntry: function (entry) {
@@ -960,7 +961,7 @@ export default {
         this.setMarkerModeForObjectsWithName(key, value, "on");
       }
       this.previousMarkerLabelEntry = markRaw({...entry});
-    }
+    },
   },
   beforeCreate: function () {
     this.$module = new OrgansViewer();
@@ -999,6 +1000,7 @@ export default {
   },
   computed: {
     ...mapState(useMainStore,  ['userToken']),
+    ...mapStores(useSettingsStore),
     annotationDisplay: function() {
       return this.viewingMode === 'Annotation' && this.tData.active === true &&
         (this.activeDrawMode === 'Edit' || this.activeDrawMode === 'Delete');
@@ -2404,6 +2406,9 @@ export default {
         this.setMarkerModeForObjectsWithName(key, value, "on");
       }
     },
+    removeImageThumbnails: function () {
+      this.markerLabelEntry = markRaw(this.markerLabels)
+    },
     setImage: function (flag) {
       if (flag) {
         this.setImageType(this.imageType)
@@ -2413,23 +2418,24 @@ export default {
     },
     setImageType: function (type) {
       this.imageType = type
-      this.removeImageThumbnails()
       this.populateImageThumbnails(type)
-    },
-    removeImageThumbnails: function () {
-      this.markerLabelEntry = markRaw(this.markerLabels)
     },
     populateImageThumbnails: async function (type) {
       this.loading = true
-      if (type === "Image" && !(type in this.anatomyImages)) {
-        this.anatomyImages["Image"] = await getBiolucidaThumbnails(this.sparcAPI, "name", Object.keys(this.markerLabels))
-      } else if (type === "Segmentation" && !(type in this.anatomyImages)) {
-        this.anatomyImages["Segmentation"] = await getSegmentationThumbnails(this.sparcAPI, "name", Object.keys(this.markerLabels))
-      } else if (type === "Scaffold" && !(type in this.anatomyImages)) {
-        this.anatomyImages["Scaffold"] = await getScaffoldThumbnails(this.sparcAPI, "name", Object.keys(this.markerLabels))
-      } else if (type === "Plot" && !(type in this.anatomyImages)) {
-        this.anatomyImages["Plot"] = await getPlotThumbnails(this.sparcAPI, "name", Object.keys(this.markerLabels))
-      }
+      const identifiers = Object.keys(this.markerLabels)
+      const organCuries = this.settingsStore.organCuries
+      this.removeImageThumbnails()
+      if (!(type in this.anatomyImages)) {
+        if (type === "Image") {
+          this.anatomyImages["Image"] = await getBiolucidaThumbnails(this.sparcAPI, "name", identifiers, organCuries)
+        } else if (type === "Segmentation") {
+          this.anatomyImages["Segmentation"] = await getSegmentationThumbnails(this.sparcAPI, "name", identifiers, organCuries)
+        } else if (type === "Scaffold") {
+          this.anatomyImages["Scaffold"] = await getScaffoldThumbnails(this.sparcAPI, "name", identifiers, organCuries)
+        } else if (type === "Plot") {
+          this.anatomyImages["Plot"] = await getPlotThumbnails(this.sparcAPI, "name", identifiers, organCuries)
+        }
+    }
       if (this.anatomyImages[type]) {
         this.markerLabelEntry = markRaw(await this.populateMapWithImages(this.anatomyImages[type], type))
       }

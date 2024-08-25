@@ -71,7 +71,7 @@ import {
   Delete as ElIconDelete,
 } from '@element-plus/icons-vue'
 import { mapState } from 'pinia';
-import { useMainStore } from "@/store/index";
+import { useMainStore } from "@/stores/index";
 import CreateTooltipContent from "./CreateTooltipContent.vue";
 import { Tooltip } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
