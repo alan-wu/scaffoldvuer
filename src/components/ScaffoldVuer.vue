@@ -15,7 +15,7 @@
       :x="tData.x"
       :y="tData.y"
       :annotationDisplay="annotationDisplay"
-      :anatomyImages="imageRadio ? anatomyImages[imageType] : {}"
+      :anatomyImages="anatomyImagesEntry"
       @confirm-create="confirmCreate($event)"
       @cancel-create="cancelCreate()"
       @confirm-delete="confirmDelete($event)"
@@ -285,7 +285,7 @@
         ref="backgroundPopover"
         :virtual-ref="backgroundIconRef"
         placement="top-start"
-        width="320"
+        width="350"
         :teleported="false"
         trigger="click"
         popper-class="background-popper non-selectable h-auto"
@@ -312,7 +312,7 @@
             </el-row>
           </el-row>
           <el-row class="backgroundSpacer" v-if="viewingMode === 'Exploration'"></el-row>
-          <el-row class="backgroundText" v-if="viewingMode === 'Exploration'">Images Display</el-row>
+          <el-row class="backgroundText" v-if="viewingMode === 'Exploration'">Types display</el-row>
           <el-row class="backgroundChooser" v-if="viewingMode === 'Exploration'">
             <el-col :span="12">
               <el-radio-group
@@ -320,8 +320,8 @@
                 class="flatmap-radio"
                 @change="setImage"
               >
-                <el-radio :value="false">Hide</el-radio>
-                <el-radio :value="true">Show</el-radio>
+                <el-radio :value="false">Marker</el-radio>
+                <el-radio :value="true">Image</el-radio>
               </el-radio-group>
             </el-col>
             <el-col :span="12" v-if="imageRadio">
@@ -869,6 +869,7 @@ export default {
       imageRadio: false,
       imageType: 'Image',
       imageTypes: ['Image', 'Segmentation', 'Scaffold', 'Plot'],
+      imageClicked: false,
     };
   },
   watch: {
@@ -1001,6 +1002,9 @@ export default {
     annotationDisplay: function() {
       return this.viewingMode === 'Annotation' && this.tData.active === true &&
         (this.activeDrawMode === 'Edit' || this.activeDrawMode === 'Delete');
+    },
+    anatomyImagesEntry: function() {
+      return this.imageClicked ? this.anatomyImages[this.imageType] : {};
     }
   },
   methods: {
@@ -1562,6 +1566,11 @@ export default {
                 this.hideRegionTooltip();
                 this.$refs.scaffoldTreeControls.removeActive(false);
               }
+            }
+            if (this.imageRadio && event.identifiers.length) {
+              this.imageClicked = true
+            } else {
+              this.imageClicked = false
             }
             //Emit when an object is selected
             //@arg Identifier of selected objects
