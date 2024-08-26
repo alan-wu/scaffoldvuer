@@ -877,7 +877,7 @@ export default {
       },
       anatomyImages: markRaw({}),
       imageRadio: false,
-      imageType: 'Scaffold',
+      imageType: 'Image',
       imageTypes: ['Image', 'Segmentation', 'Scaffold', 'Plot'],
       imageClicked: false,
     };
