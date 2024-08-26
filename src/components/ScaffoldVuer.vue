@@ -15,10 +15,12 @@
       :x="tData.x"
       :y="tData.y"
       :annotationDisplay="annotationDisplay"
+      :imageThumbnailSidebar="imageThumbnailSidebar"
       :anatomyImages="anatomyImagesEntry"
       @confirm-create="confirmCreate($event)"
       @cancel-create="cancelCreate()"
       @confirm-delete="confirmDelete($event)"
+      @image-thumbnail-open="onImageThumbnailOpen"
     />
     <div
       id="organsDisplayArea"
@@ -745,6 +747,13 @@ export default {
       type: String,
       default: 'https://api.sparc.science/',
     },
+    /**
+     * The option to show image thumbnail in sidebar
+     */
+    imageThumbnailSidebar: {
+      type: Boolean,
+      default: false,
+    },
   },
   provide() {
     return {
@@ -868,7 +877,7 @@ export default {
       },
       anatomyImages: markRaw({}),
       imageRadio: false,
-      imageType: 'Image',
+      imageType: 'Scaffold',
       imageTypes: ['Image', 'Segmentation', 'Scaffold', 'Plot'],
       imageClicked: false,
     };
@@ -2440,7 +2449,10 @@ export default {
         this.markerLabelEntry = markRaw(await this.populateMapWithImages(this.anatomyImages[type], type))
       }
       this.loading = false
-    }
+    },
+    onImageThumbnailOpen: function (payload) {
+      this.$emit('image-thumbnail-open', payload);
+    },
   },
 };
 </script>

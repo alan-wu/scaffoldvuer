@@ -129,6 +129,10 @@ export default {
       type: Object,
       default: {},
     },
+    imageThumbnailSidebar: {
+      type: Boolean,
+      default: false,
+    },
   },
   inject: ['scaffoldUrl'],
   provide() {
@@ -154,13 +158,18 @@ export default {
     },
     imageEntry: function () {
       const anatomyImageEntries = {}
+      let imageEntries = []
       Object.entries(this.anatomyImages).forEach(([key, value]) => {
         Object.assign(anatomyImageEntries, { [key.toLowerCase()]: value })
       })
       if (this.label in anatomyImageEntries) {
-        return anatomyImageEntries[this.label];
+        imageEntries = anatomyImageEntries[this.label];
       }
-      return [];
+      if (this.imageThumbnailSidebar) {
+        this.$emit('image-thumbnail-open', imageEntries)
+        return [];
+      }
+      return imageEntries;
     },
   },
   methods: {
