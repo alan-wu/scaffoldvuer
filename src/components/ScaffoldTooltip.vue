@@ -125,7 +125,7 @@ export default {
       type: Number,
       default: 200,
     },
-    anatomyImages: {
+    imageThumbnails: {
       type: Object,
       default: {},
     },
@@ -157,13 +157,14 @@ export default {
       return { left: x + "px", top: this.y - yOffset + "px" };
     },
     imageEntry: function () {
-      const anatomyImageEntries = {}
       let imageEntries = []
-      Object.entries(this.anatomyImages).forEach(([key, value]) => {
-        Object.assign(anatomyImageEntries, { [key.toLowerCase()]: value })
-      })
-      if (this.label in anatomyImageEntries) {
-        imageEntries = anatomyImageEntries[this.label];
+      const imageThumbnailsEntries = Object.assign({},
+        Object.fromEntries(
+          Object.entries(this.imageThumbnails)
+            .filter(([key, value]) => value.length > 0)
+            .map(([key, value]) => [key.toLowerCase(), value])))
+      if (this.label in imageThumbnailsEntries) {
+        imageEntries = imageThumbnailsEntries[this.label];
       }
       if (this.imageThumbnailSidebar) {
         this.$emit('image-thumbnail-open', imageEntries)

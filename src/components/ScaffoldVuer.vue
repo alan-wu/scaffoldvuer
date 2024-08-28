@@ -16,7 +16,7 @@
       :y="tData.y"
       :annotationDisplay="annotationDisplay"
       :imageThumbnailSidebar="imageThumbnailSidebar"
-      :anatomyImages="anatomyImagesEntry"
+      :imageThumbnails="imageThumbnailsEntry"
       @confirm-create="confirmCreate($event)"
       @cancel-create="cancelCreate()"
       @confirm-delete="confirmDelete($event)"
@@ -875,11 +875,10 @@ export default {
         centre: [0, 0, 0],
         size:[1, 1, 1],
       },
-      anatomyImages: markRaw({}),
       imageRadio: false,
       imageType: 'Image',
       imageTypes: ['Image', 'Segmentation', 'Scaffold', 'Plot'],
-      imageClicked: false,
+      imageClicked: '',
     };
   },
   watch: {
@@ -1014,8 +1013,8 @@ export default {
       return this.viewingMode === 'Annotation' && this.tData.active === true &&
         (this.activeDrawMode === 'Edit' || this.activeDrawMode === 'Delete');
     },
-    anatomyImagesEntry: function() {
-      return this.imageClicked ? this.anatomyImages[this.imageType] : {};
+    imageThumbnailsEntry: function() {
+      return this.imageClicked ? this.convertUberonToName() : {};
     }
   },
   methods: {
@@ -1578,10 +1577,12 @@ export default {
                 this.$refs.scaffoldTreeControls.removeActive(false);
               }
             }
-            if (this.imageRadio && event.identifiers.length) {
-              this.imageClicked = true
+            if (this.imageRadio && event.identifiers.length && event.identifiers[0]) {
+              this.imageClicked = event.identifiers[0].data.id
+                ? event.identifiers[0].data.id
+                : event.identifiers[0].data.group;
             } else {
-              this.imageClicked = false
+              this.imageClicked = ''
             }
             //Emit when an object is selected
             //@arg Identifier of selected objects
@@ -1633,6 +1634,12 @@ export default {
               this.createEditTemporaryLines(event.identifiers[0].extraData.worldCoords);
             }
             this.createEditTemporaryLines(event.identifiers[0].extraData.worldCoords);
+            const id = event.identifiers[0].data.id
+              ? event.identifiers[0].data.id
+              : event.identifiers[0].data.group;
+            if (this.imageClicked !== id) {
+              this.imageClicked = ''
+            }
           }
         }
       }
@@ -2416,6 +2423,7 @@ export default {
       }
     },
     removeImageThumbnails: function () {
+      this.imageThumbnails = {}
       this.markerLabelEntry = markRaw(this.markerLabels)
     },
     setImage: function (flag) {
@@ -2425,29 +2433,43 @@ export default {
         this.removeImageThumbnails()
       }
     },
-    setImageType: function (type) {
+    setImageType: async function (type) {
       this.imageType = type
+      if (!this.settingsStore.imageTypeCached(type)) {
+        this.loading = true
+        await this.fetchImageThumbnails(type)
+        this.loading = false
+      }
       this.populateImageThumbnails(type)
     },
-    populateImageThumbnails: async function (type) {
-      this.loading = true
-      const identifiers = Object.keys(this.markerLabels)
+    fetchImageThumbnails: async function (type) {
+      let thumbnails = {}
       const organCuries = this.settingsStore.organCuries
-      this.removeImageThumbnails()
-      if (!(type in this.anatomyImages)) {
-        if (type === "Image") {
-          this.anatomyImages["Image"] = await getBiolucidaThumbnails(this.sparcAPI, "name", identifiers, organCuries)
-        } else if (type === "Segmentation") {
-          this.anatomyImages["Segmentation"] = await getSegmentationThumbnails(this.sparcAPI, "name", identifiers, organCuries)
-        } else if (type === "Scaffold") {
-          this.anatomyImages["Scaffold"] = await getScaffoldThumbnails(this.sparcAPI, "name", identifiers, organCuries)
-        } else if (type === "Plot") {
-          this.anatomyImages["Plot"] = await getPlotThumbnails(this.sparcAPI, "name", identifiers, organCuries)
-        }
-    }
-      if (this.anatomyImages[type]) {
-        this.markerLabelEntry = markRaw(await this.populateMapWithImages(this.anatomyImages[type], type))
+      if (type === 'Image') {
+        thumbnails = await getBiolucidaThumbnails(this.sparcAPI, organCuries, type)
+      } else if (type === 'Segmentation') {
+        thumbnails = await getSegmentationThumbnails(this.sparcAPI, organCuries, type)
+      } else if (type === 'Scaffold') {
+        thumbnails = await getScaffoldThumbnails(this.sparcAPI, organCuries, type)
+      } else if (type === 'Plot') {
+        thumbnails = await getPlotThumbnails(this.sparcAPI, organCuries, type)
       }
+      this.settingsStore.updateImageThumbnails(type, thumbnails)
+    },
+    convertUberonToName: function () {
+      const organCuries = this.settingsStore.organCuries
+      const identifiers = organCuries.filter((curie) => curie.name in this.markerLabels).map((curie) => curie.id)
+      const imageThumbnails = this.settingsStore.getImageThumbnails(this.imageType, identifiers)
+      return Object.assign({},
+        Object.fromEntries(
+          Object.entries(imageThumbnails)
+            .map(([key, value]) => [organCuries.filter((curie) => curie.id === key)[0].name, value])))
+    },
+    populateImageThumbnails: async function (type) {
+      this.removeImageThumbnails()
+      const thumbnails = this.convertUberonToName()
+      this.loading = true
+      this.markerLabelEntry = markRaw(await this.populateMapWithImages(thumbnails, type))
       this.loading = false
     },
     onImageThumbnailOpen: function (payload) {
@@ -2476,7 +2498,6 @@ export default {
 .backgroundSpacer {
   border-bottom: 1px solid #e4e7ed;
   margin-bottom: 10px;
-  margin-top: 5px;
 }
 
 .warning-icon {
