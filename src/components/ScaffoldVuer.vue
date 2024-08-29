@@ -2893,7 +2893,7 @@ export default {
   }
 
   &.imageSelector {
-    width: 120px!important;
+    width: 125px!important;
   }
 }
 
