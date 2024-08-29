@@ -287,7 +287,7 @@
         ref="backgroundPopover"
         :virtual-ref="backgroundIconRef"
         placement="top-start"
-        width="350"
+        width="330"
         :teleported="false"
         trigger="click"
         popper-class="background-popper non-selectable h-auto"
@@ -314,24 +314,24 @@
             </el-row>
           </el-row>
           <el-row class="backgroundSpacer" v-if="viewingMode === 'Exploration'"></el-row>
-          <el-row class="backgroundText" v-if="viewingMode === 'Exploration'">Types display</el-row>
+          <el-row class="backgroundText" v-if="viewingMode === 'Exploration'">Markers display</el-row>
           <el-row class="backgroundChooser" v-if="viewingMode === 'Exploration'">
-            <el-col :span="12">
+            <el-col :span="14">
               <el-radio-group
                 v-model="imageRadio"
                 class="flatmap-radio"
                 @change="setImage"
               >
-                <el-radio :value="false">Marker</el-radio>
+                <el-radio :value="false">Standard</el-radio>
                 <el-radio :value="true">Image</el-radio>
               </el-radio-group>
             </el-col>
-            <el-col :span="12" v-if="imageRadio">
+            <el-col :span="10" v-if="imageRadio">
               <el-select
                 :teleported="false"
                 v-model="imageType"
                 placeholder="Select"
-                class="select-box"
+                class="scaffold-select-box imageSelector"
                 popper-class="scaffold_viewer_dropdown"
                 @change="setImageType"
               >
@@ -2890,6 +2890,10 @@ export default {
       padding: 0;
       min-height: 24px
     }
+  }
+
+  &.imageSelector {
+    width: 120px!important;
   }
 }
 
