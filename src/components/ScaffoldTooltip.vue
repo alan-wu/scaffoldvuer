@@ -163,8 +163,9 @@ export default {
           Object.entries(this.imageThumbnails)
             .filter(([key, value]) => value.length > 0)
             .map(([key, value]) => [key.toLowerCase(), value])))
-      if (this.label in imageThumbnailsEntries) {
-        imageEntries = imageThumbnailsEntries[this.label];
+      const lowerCaseLabel = this.label.toLowerCase()
+      if (lowerCaseLabel in imageThumbnailsEntries) {
+        imageEntries = imageThumbnailsEntries[lowerCaseLabel];
       }
       if (this.imageThumbnailSidebar) {
         this.$emit('image-thumbnail-open', imageEntries)
