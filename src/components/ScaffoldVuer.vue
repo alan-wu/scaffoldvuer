@@ -1554,6 +1554,9 @@ export default {
                 ? identifier.data.id
                 : identifier.data.group;
               names.push(id);
+              if (identifier.data) {
+                identifier.data.imageType = this.imageRadio ? this.imageType : "Standard"
+              }
             }
           });
           zincObjects = event.zincObjects;
