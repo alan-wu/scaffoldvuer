@@ -313,41 +313,43 @@
               {{ viewingModes[viewingMode] }}
             </el-row>
           </el-row>
-          <el-row class="backgroundSpacer" v-if="viewingMode === 'Exploration'"></el-row>
-          <el-row class="backgroundText" v-if="viewingMode === 'Exploration'">Markers display</el-row>
-          <el-row class="backgroundChooser" v-if="viewingMode === 'Exploration'">
-            <el-col :span="14">
-              <el-radio-group
-                v-model="imageRadio"
-                class="flatmap-radio"
-                @change="setImage"
-              >
-                <el-radio :value="false">Standard</el-radio>
-                <el-radio :value="true">Image</el-radio>
-              </el-radio-group>
-            </el-col>
-            <el-col :span="10" v-if="imageRadio">
-              <el-select
-                :teleported="false"
-                v-model="imageType"
-                placeholder="Select"
-                class="scaffold-select-box imageSelector"
-                popper-class="scaffold_viewer_dropdown"
-                @change="setImageType"
-              >
-                <el-option
-                  v-for="item in imageTypes"
-                  :key="item"
-                  :label="item"
-                  :value="item"
+          <template v-if="viewingMode === 'Exploration' && sparcAPI">
+            <el-row class="backgroundSpacer"></el-row>
+            <el-row class="backgroundText">Markers display</el-row>
+            <el-row class="backgroundChooser">
+              <el-col :span="14">
+                <el-radio-group
+                  v-model="imageRadio"
+                  class="flatmap-radio"
+                  @change="setImage"
                 >
-                  <el-row>
-                    <el-col :span="12">{{ item }}</el-col>
-                  </el-row>
-                </el-option>
-              </el-select>
-            </el-col>
-          </el-row>
+                  <el-radio :value="false">Standard</el-radio>
+                  <el-radio :value="true">Image</el-radio>
+                </el-radio-group>
+              </el-col>
+              <el-col :span="10" v-if="imageRadio">
+                <el-select
+                  :teleported="false"
+                  v-model="imageType"
+                  placeholder="Select"
+                  class="scaffold-select-box imageSelector"
+                  popper-class="scaffold_viewer_dropdown"
+                  @change="setImageType"
+                >
+                  <el-option
+                    v-for="item in imageTypes"
+                    :key="item"
+                    :label="item"
+                    :value="item"
+                  >
+                    <el-row>
+                      <el-col :span="12">{{ item }}</el-col>
+                    </el-row>
+                  </el-option>
+                </el-select>
+              </el-col>
+            </el-row>
+          </template>
           <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText"> Change background </el-row>
           <el-row class="backgroundChooser">
@@ -745,7 +747,7 @@ export default {
      */
     sparcAPI: {
       type: String,
-      default: 'https://api.sparc.science/',
+      default: '',
     },
     /**
      * The option to show image thumbnail in sidebar
