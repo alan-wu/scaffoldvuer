@@ -6,8 +6,6 @@ export default {
         const response = await this.downloadImageThumbnail(key, list, type);
         if (response) {
           imageMarkerLabels[key] = response;
-        } else {
-          imageMarkerLabels[key] = this.markerLabels[key];
         }
       }
       return imageMarkerLabels;

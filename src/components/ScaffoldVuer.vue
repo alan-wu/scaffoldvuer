@@ -879,6 +879,10 @@ export default {
       imageType: 'Image',
       imageTypes: ['Image', 'Segmentation', 'Scaffold', 'Plot'],
       imageClicked: '',
+      /**
+       * List of group names 
+       */
+      groupNames: markRaw([]),
     };
   },
   watch: {
@@ -959,7 +963,10 @@ export default {
       immediate: true,
     },
     markerLabels: function (labels) {
-      this.markerLabelEntry = markRaw({...labels})
+      if (this.imageRadio === false) {
+        //Only updates the following if marker mode is standard
+        this.markerLabelEntry = markRaw({...labels});
+      }
     },
     markerLabelEntry: function (entry) {
       for (const [key, value] of Object.entries(this.previousMarkerLabelEntry)) {
@@ -1039,6 +1046,9 @@ export default {
       this.$_searchIndex.addZincObject(zincObject, zincObject.uuid);
       if (this.timeVarying === false && zincObject.isTimeVarying()) {
         this.timeVarying = true;
+      }
+      if (zincObject.groupName) {
+        this.groupNames.push(zincObject.groupName.toLowerCase());
       }
       //Emit when a new object is added to the scene
       //@arg The object added to the sceene
@@ -2330,6 +2340,7 @@ export default {
             visibility: visibility,
           })
         );
+        this.groupNames.length = 0;
         if (this.fileFormat === "gltf") {
           this.$module.loadGLTFFromURL(newValue, "scene", true);
         } else {
@@ -2426,54 +2437,57 @@ export default {
       }
     },
     removeImageThumbnails: function () {
-      this.imageThumbnails = {}
-      this.markerLabelEntry = markRaw(this.markerLabels)
+      this.imageThumbnails = {};
+      this.markerLabelEntry = markRaw(this.markerLabels);
     },
-    setImage: function (flag) {
+    setImage: async function (flag) {
       if (flag) {
-        this.setImageType(this.imageType)
+        await this.setImageType(this.imageType);
+        this.$module.scene.enableMarkerCluster(false);
       } else {
-        this.removeImageThumbnails()
+        this.removeImageThumbnails();
+        this.$module.scene.enableMarkerCluster(this.markerCluster);
       }
     },
     setImageType: async function (type) {
-      this.imageType = type
+      this.imageType = type;
       if (!this.settingsStore.imageTypeCached(type)) {
-        this.loading = true
-        await this.fetchImageThumbnails(type)
-        this.loading = false
+        this.loading = true;
+        await this.fetchImageThumbnails(type);
+        this.loading = false;
       }
-      this.populateImageThumbnails(type)
+      this.populateImageThumbnails(type);
     },
     fetchImageThumbnails: async function (type) {
-      let thumbnails = {}
-      const organCuries = this.settingsStore.organCuries
+      let thumbnails = {};
+      const organCuries = this.settingsStore.organCuries;
       if (type === 'Image') {
-        thumbnails = await getBiolucidaThumbnails(this.sparcAPI, organCuries, type)
+        thumbnails = await getBiolucidaThumbnails(this.sparcAPI, organCuries, type);
       } else if (type === 'Segmentation') {
-        thumbnails = await getSegmentationThumbnails(this.sparcAPI, organCuries, type)
+        thumbnails = await getSegmentationThumbnails(this.sparcAPI, organCuries, type);
       } else if (type === 'Scaffold') {
-        thumbnails = await getScaffoldThumbnails(this.sparcAPI, organCuries, type)
+        thumbnails = await getScaffoldThumbnails(this.sparcAPI, organCuries, type);
       } else if (type === 'Plot') {
-        thumbnails = await getPlotThumbnails(this.sparcAPI, organCuries, type)
+        thumbnails = await getPlotThumbnails(this.sparcAPI, organCuries, type);
       }
-      this.settingsStore.updateImageThumbnails(type, thumbnails)
+      this.settingsStore.updateImageThumbnails(type, thumbnails);
     },
     convertUberonToName: function () {
-      const organCuries = this.settingsStore.organCuries
-      const identifiers = organCuries.filter((curie) => curie.name in this.markerLabels).map((curie) => curie.id)
-      const imageThumbnails = this.settingsStore.getImageThumbnails(this.imageType, identifiers)
-      return Object.assign({},
-        Object.fromEntries(
+      const organCuries = this.settingsStore.organCuries;
+      const identifiers = organCuries.filter(
+        (curie) => this.groupNames.includes(curie.name.toLowerCase())
+        ).map((curie) => curie.id);
+      const imageThumbnails = this.settingsStore.getImageThumbnails(this.imageType, identifiers);
+      return Object.fromEntries(
           Object.entries(imageThumbnails)
-            .map(([key, value]) => [organCuries.filter((curie) => curie.id === key)[0].name, value])))
+            .map(([key, value]) => [organCuries.filter((curie) => curie.id === key)[0].name, value]));
     },
     populateImageThumbnails: async function (type) {
-      this.removeImageThumbnails()
-      const thumbnails = this.convertUberonToName()
-      this.loading = true
-      this.markerLabelEntry = markRaw(await this.populateMapWithImages(thumbnails, type))
-      this.loading = false
+      this.removeImageThumbnails();
+      const thumbnails = this.convertUberonToName();
+      this.loading = true;
+      this.markerLabelEntry = markRaw(await this.populateMapWithImages(thumbnails, type));
+      this.loading = false;
     },
     onImageThumbnailOpen: function (payload) {
       this.$emit('image-thumbnail-open', payload);
