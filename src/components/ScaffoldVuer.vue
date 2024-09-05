@@ -313,41 +313,45 @@
               {{ viewingModes[viewingMode] }}
             </el-row>
           </el-row>
-          <el-row class="backgroundSpacer" v-if="viewingMode === 'Exploration'"></el-row>
-          <el-row class="backgroundText" v-if="viewingMode === 'Exploration'">Markers display</el-row>
-          <el-row class="backgroundChooser" v-if="viewingMode === 'Exploration'">
-            <el-col :span="14">
-              <el-radio-group
-                v-model="imageRadio"
-                class="flatmap-radio"
-                @change="setImage"
-              >
-                <el-radio :value="false">Standard</el-radio>
-                <el-radio :value="true">Image</el-radio>
-              </el-radio-group>
-            </el-col>
-            <el-col :span="10" v-if="imageRadio">
-              <el-select
-                :teleported="false"
-                v-model="imageType"
-                placeholder="Select"
-                class="scaffold-select-box imageSelector"
-                popper-class="scaffold_viewer_dropdown"
-                @change="setImageType"
-              >
-                <el-option
-                  v-for="item in imageTypes"
-                  :key="item"
-                  :label="item"
-                  :value="item"
+          <template v-if="viewingMode === 'Exploration' && sparcAPI">
+            <el-row class="backgroundSpacer"></el-row>
+            <el-row class="backgroundText">Markers display</el-row>
+            <el-row class="backgroundChooser">
+              <el-col :span="14">
+                <el-radio-group
+                  v-model="imageRadio"
+                  class="flatmap-radio"
+                  :disabled="imagesDownloading"
+                  @change="setImage"
                 >
-                  <el-row>
-                    <el-col :span="12">{{ item }}</el-col>
-                  </el-row>
-                </el-option>
-              </el-select>
-            </el-col>
-          </el-row>
+                  <el-radio :value="false">Standard</el-radio>
+                  <el-radio :value="true">Image</el-radio>
+                </el-radio-group>
+              </el-col>
+              <el-col :span="10" v-if="imageRadio">
+                <el-select
+                  :teleported="false"
+                  v-model="imageType"
+                  placeholder="Select"
+                  class="scaffold-select-box imageSelector"
+                  popper-class="scaffold_viewer_dropdown"
+                  :disabled="imagesDownloading"
+                  @change="setImageType"
+                >
+                  <el-option
+                    v-for="item in imageTypes"
+                    :key="item"
+                    :label="item"
+                    :value="item"
+                  >
+                    <el-row>
+                      <el-col :span="12">{{ item }}</el-col>
+                    </el-row>
+                  </el-option>
+                </el-select>
+              </el-col>
+            </el-row>
+          </template>
           <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText"> Change background </el-row>
           <el-row class="backgroundChooser">
@@ -617,12 +621,12 @@ export default {
      * GroupName to value pair.
      * The value can be a single number or and object in the following
      * form:
-     * 
+     *
      * {
      *  number: Number,
      *  imgURL: String
      * }
-     * 
+     *
      * When imgURL is specified, scaffoldvuer will attempt to render
      * the image in imgURL as marker instead.
      *
@@ -745,7 +749,7 @@ export default {
      */
     sparcAPI: {
       type: String,
-      default: 'https://api.sparc.science/',
+      default: '',
     },
     /**
      * The option to show image thumbnail in sidebar
@@ -805,6 +809,7 @@ export default {
       inHelp: false,
       helpModeActiveIndex: this.helpModeInitialIndex,
       loading: false,
+      imagesDownloading: false,
       duration: 3000,
       drawerOpen: true,
       currentBackground: "white",
@@ -1161,7 +1166,7 @@ export default {
         region, group, this.url, comment);
       if (this.enableLocalAnnotations) {
         annotation.group = group;
-        let regionPath = region; 
+        let regionPath = region;
         if (regionPath.slice(-1) === "/") {
           regionPath = regionPath.slice(0, -1);
         }
@@ -1264,7 +1269,7 @@ export default {
         }
       }
       this.cancelCreate();
-    },  
+    },
     formatTooltip(val) {
       if (this.timeMax >= 1000) {
         if (val) {
@@ -1351,7 +1356,7 @@ export default {
       return objects;
     },
     /**
-     * Switch active drawing type 
+     * Switch active drawing type
      * @arg shapeName shape to toggle
      *
      * @vuese
@@ -1476,7 +1481,7 @@ export default {
           this.createData.points.push(coords);
         }
       }
-    },    
+    },
     /**
      * Return renderer information
      *
@@ -2039,7 +2044,7 @@ export default {
     /**
      * Set the marker modes for objects with the provided name, mode can
      * be "on", "off" or "inherited".
-     * Value can either be number or an object containing number and 
+     * Value can either be number or an object containing number and
      * imgURL.
      */
     setMarkerModeForObjectsWithName: function (name, value, mode) {
@@ -2298,7 +2303,7 @@ export default {
           const region = annotation.region;
           let fullName = region.slice(-1) === "/" ? region : region + "/";
           const noSlash = fullName.slice(0, -1);
-          annotation.region = noSlash; 
+          annotation.region = noSlash;
           fullName = fullName + group;
           const featureID = encodeURIComponent(fullName);
           annotation.item.id = featureID;
@@ -2451,6 +2456,7 @@ export default {
     },
     setImageType: async function (type) {
       this.imageType = type;
+      this.imagesDownloading = true;
       if (!this.settingsStore.imageTypeCached(type)) {
         this.loading = true;
         await this.fetchImageThumbnails(type);
@@ -2488,6 +2494,7 @@ export default {
       this.loading = true;
       this.markerLabelEntry = markRaw(await this.populateMapWithImages(thumbnails, type));
       this.loading = false;
+      this.imagesDownloading = false;
     },
     onImageThumbnailOpen: function (payload) {
       this.$emit('image-thumbnail-open', payload);

@@ -412,7 +412,6 @@ export default {
       ElIconFolderOpened: shallowRef(ElIconFolderOpened),
       auto: NaN,
       sparcAPI: import.meta.env.VITE_SPARC_API,
-      // sparcAPI: "http://localhost:8000/",
     };
   },
   computed: {
@@ -463,7 +462,9 @@ export default {
   },
   mounted: function () {
     this._objects = [];
-    getOrganCuries(this.sparcAPI).then((organCuries) => this.settingsStore.updateOrganCuries(organCuries))
+    if (this.sparcAPI) {
+      getOrganCuries(this.sparcAPI).then((organCuries) => this.settingsStore.updateOrganCuries(organCuries))
+    }
   },
   created: function () {
     texture_prefix = import.meta.env.VITE_TEXTURE_FOOT_PREFIX;
