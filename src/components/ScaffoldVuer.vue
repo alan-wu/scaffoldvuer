@@ -1893,7 +1893,7 @@ export default {
           }
           this.userInformation = undefined;
           this.annotator.authenticate(this.userToken).then((userData) => {
-            if (userData.name && userData.email) {
+            if (userData.name && userData.email && userData.canUpdate) {
               this.userInformation = userData;
               //Only draw annotations stored in the server on initial authentication
               if (!authenticated) {
