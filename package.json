@@ -64,7 +64,6 @@
     "auto-changelog": "^2.4.0",
     "babel-eslint": "^10.1.0",
     "babel-plugin-component": "^1.1.1",
-    "base64-inline-loader": "^2.0.1",
     "chokidar": "^3.6.0",
     "concurrently": "^8.2.2",
     "eslint": "^8.56.0",
@@ -72,8 +71,7 @@
     "sass": "^1.69.5",
     "vite": "^5.0.10",
     "vite-plugin-node-polyfills": "^0.21.0",
-    "vitepress": "^1.0.0-rc.42",
-    "webpack-node-externals": "^2.5.2"
+    "vitepress": "^1.0.0-rc.42"
   },
   "eslintConfig": {
     "root": true,
