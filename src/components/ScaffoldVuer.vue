@@ -570,12 +570,12 @@ export default {
      * GroupName to value pair.
      * The value can be a single number or and object in the following
      * form:
-     * 
+     *
      * {
      *  number: Number,
      *  imgURL: String
      * }
-     * 
+     *
      * When imgURL is specified, scaffoldvuer will attempt to render
      * the image in imgURL as marker instead.
      *
@@ -870,8 +870,10 @@ export default {
     },
     currentTime: {
       handler: function () {
-        //Emit when time in the current scene has changed
-        //@arg Current time in scene
+        /**
+         * Emit when time in the current scene has changed
+         * @arg {String} "Current time in scene"
+         */
         this.$emit("timeChanged", this.currentTime);
       },
     },
@@ -945,10 +947,10 @@ export default {
   },
   methods: {
     /**
-     * @vuese
+     * @public
      * Call this to manually add a zinc object into the current scene.
      * This will subsequently trigger a zincObjectAdded
-     * @arg ZincObject object to be added
+     * @arg {Object} "ZincObject object to be added"
      */
     addZincObject: function (zincObject) {
       if (this.$module.scene) {
@@ -966,8 +968,10 @@ export default {
       if (this.timeVarying === false && zincObject.isTimeVarying()) {
         this.timeVarying = true;
       }
-      //Emit when a new object is added to the scene
-      //@arg The object added to the sceene
+      /**
+       * Emit when a new object is added to the scene
+       * @arg {Object} "The object added to the sceene"
+       */
       this.$emit("zinc-object-added", zincObject);
     },
     /**
@@ -1048,10 +1052,10 @@ export default {
       hrefElement.remove();
     },
     /**
-     * @vuese
+     * @public
      * Function for capturing a screenshot of the current rendering.
      *
-     * @arg filename given to the screenshot.
+     * @arg {String} "filename given to the screenshot."
      */
     captureScreenshot: function (filename) {
       this.captureFilename = filename;
@@ -1060,7 +1064,7 @@ export default {
       );
     },
     /**
-     * @vuese
+     * @public
      * Function to clear current scene, the tree controls and the search index.
      */
     clearScene: function () {
@@ -1069,15 +1073,19 @@ export default {
       if (this.$module.scene) this.$module.scene.clearAll();
     },
     /**
-     * @vuese
+     * @public
      * Add and edit local annotations
+     * @arg `region`,
+     * @arg `group`,
+     * @arg `zincObject`,
+     * @arg `comment`
      */
     addAndEditAnnotations: function (region, group, zincObject, comment) {
       const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken, zincObject,
         region, group, this.url, comment);
       if (this.enableLocalAnnotations) {
         annotation.group = group;
-        let regionPath = region; 
+        let regionPath = region;
         if (regionPath.slice(-1) === "/") {
           regionPath = regionPath.slice(0, -1);
         }
@@ -1089,9 +1097,10 @@ export default {
       this.$emit('userPrimitivesUpdated', {region, group, zincObject});
     },
     /**
-     * @vuese
+     * @public
      * Callback for when primitives have been update using primitive controls.
      * This is only called from callback.
+     * @arg `object`
      */
     primitivesUpdated: function(object) {
       if (object.isZincObject && object.isEditable) {
@@ -1101,8 +1110,9 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Confirm creation of new primitive. This is only called from callback.
+     * @arg `payload`
      */
     confirmCreate: function(payload) {
       if (payload) {
@@ -1180,7 +1190,7 @@ export default {
         }
       }
       this.cancelCreate();
-    },  
+    },
     formatTooltip(val) {
       if (this.timeMax >= 1000) {
         if (val) {
@@ -1192,7 +1202,7 @@ export default {
       return val ? val.toFixed(2) + " ms" : "0 ms";
     },
     /**
-     * @vuese
+     * @public
      * Function to reset the view to default.
      * Also called when the associated button is pressed.
      */
@@ -1214,7 +1224,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Function to zoom in.
      * Also called when the associated button is pressed.
      */
@@ -1227,7 +1237,7 @@ export default {
      * Function to zoom out.
      * Also called when the associated button is pressed.
      *
-     * @vuese
+     * @public
      */
     zoomOut: function () {
       if (this.$module.scene) {
@@ -1237,7 +1247,8 @@ export default {
     /**
      * Function to change the current play speed.
      *
-     * @vuese
+     * @public
+     * @arg `speed`
      */
     speedChanged: function (speed) {
       this.currentSpeed = speed;
@@ -1246,7 +1257,7 @@ export default {
     /**
      * Function used to stop the free spin
      *
-     * @vuese
+     * @public
      */
     stopFreeSpin: function () {
       let cameracontrol = this.$module.scene.getZincCameraControls();
@@ -1255,9 +1266,9 @@ export default {
     },
     /**
      * Return a list of obejcts with the provided name.
-     * @arg Group name to search.
+     * @arg "Group name to search."
      *
-     * @vuese
+     * @public
      */
     findObjectsWithGroupName: function (name) {
       let objects = [];
@@ -1267,10 +1278,10 @@ export default {
       return objects;
     },
     /**
-     * Switch active drawing type 
-     * @arg shapeName shape to toggle
-     *
-     * @vuese
+     * @public
+     * Switch active drawing type
+     * @arg {String} `type`
+     * @arg {String} `icon`
      */
     toggleDrawing: function (type, icon) {
       this.createData.toBeDeleted = false;
@@ -1287,16 +1298,16 @@ export default {
     /**
      * Toggle the drawing box which aid the drawing
      *
-     * @vuese
+     * @public
      */
      toggleDrawingBox: function () {
       this.createData.drawingBox = !this.createData.drawingBox;
     },
     /**
      * Find and and zoom into objects with the provided list of names.
-     * @arg List of names
+     * @arg "List of names"
      *
-     * @vuese
+     * @public
      */
     viewRegion: function (names) {
       const rootRegion = this.$module.scene.getRootRegion();
@@ -1392,11 +1403,11 @@ export default {
           this.createData.points.push(coords);
         }
       }
-    },    
+    },
     /**
      * Return renderer information
      *
-     * @vuese
+     * @public
      */
     getRendererInfo: function () {
       if (this.$module.zincRenderer) {
@@ -1408,7 +1419,7 @@ export default {
      * Function used to rotate the scene.
      * Also called when the associated button is pressed.
      *
-     * @vuese
+     * @public
      */
     freeSpin: function () {
       if (this.$module.scene) {
@@ -1503,8 +1514,10 @@ export default {
                 this.$refs.scaffoldTreeControls.removeActive(false);
               }
             }
-            //Emit when an object is selected
-            //@arg Identifier of selected objects
+            /**
+             * Emit when an object is selected
+             * @arg {Object} "Identifier of selected objects"
+             */
             this.$emit("scaffold-selected", event.identifiers);
           }
         } else if (event.eventType == 2) {
@@ -1538,8 +1551,10 @@ export default {
                 this.createEditTemporaryLines(event.identifiers[0].extraData.worldCoords);
               }
             }
-            //Emit when an object is highlighted
-            //@arg Identifier of selected objects
+            /**
+             * Emit when an object is highlighted
+             * @arg {Object} "Identifier of selected objects"
+             */
             this.$emit("scaffold-highlighted", event.identifiers);
           }
         } else if (event.eventType == 3) {
@@ -1560,7 +1575,7 @@ export default {
     /**
      * Get the coordinates of the current selected region.
      *
-     * @vuese
+     * @public
      */
     getCoordinatesOfSelected: function () {
       if (this.selectedObjects && this.selectedObjects.length > 0) {
@@ -1573,7 +1588,7 @@ export default {
      * current selected region which will be updated after each render
      * loop.
      *
-     * @vuese
+     * @public
      */
     getDynamicSelectedCoordinates: function () {
       return this.$module.selectedScreenCoordinates;
@@ -1653,10 +1668,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Start the animation.
      *
-     * @arg flag to turn the animation on/off
+     * @arg "flag to turn the animation on/off"
      */
     play: function (flag) {
       this.$module.playAnimation(flag);
@@ -1665,7 +1680,7 @@ export default {
       //this.hideRegionTooltip();
     },
     /**
-     * @vuese
+     * @public
      * Function to toggle on/off overlay help.
      */
     setHelpMode: function (helpMode) {
@@ -1921,7 +1936,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Hide the tooltip
      */
     hideRegionTooltip: function () {
@@ -1939,7 +1954,7 @@ export default {
     /**
      * Set the marker modes for objects with the provided name, mode can
      * be "on", "off" or "inherited".
-     * Value can either be number or an object containing number and 
+     * Value can either be number or an object containing number and
      * imgURL.
      */
     setMarkerModeForObjectsWithName: function (name, value, mode) {
@@ -1955,8 +1970,10 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      * Set the marker modes for objects specified by the list of annotations
+     * @arg `annotations`
+     * @arg `mode`
      */
     setMarkerModeWithAnnotations: function (annotations, mode) {
       if (this.$module.scene) {
@@ -1994,11 +2011,11 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      *
      * Search a object and display the tooltip
-     * @arg text to search across
-     * @arg toggle the tooltip if this is set
+     * @arg "text to search across"
+     * @arg "toggle the tooltip if this is set"
      */
     search: function (text, displayLabel) {
       if (this.$_searchIndex) {
@@ -2034,10 +2051,11 @@ export default {
       return false;
     },
     /**
-     * @vuese
+     * @public
      *
      * Get the list of suggested terms based on the provided term.
      * This can be used for autocomplete.
+     * @arg `term`
      */
     fetchSuggestions: function (term) {
       if (this.$_searchIndex === undefined) return [];
@@ -2092,7 +2110,9 @@ export default {
         this.$module.updateTime(0);
         this.$module.unsetFinishDownloadCallback();
         this.addRegionsToSearchIndex();
-        //Emit when all objects have been loaded
+        /**
+         * Emit when all objects have been loaded
+         */
         this.$emit("on-ready");
         this.setMarkers();
         //Create a bounding box.
@@ -2112,7 +2132,7 @@ export default {
      * Function used for getting the current states of the scene. This exported states
      * can be imported using the importStates method.
      *
-     * @vuese
+     * @public
      */
     getState: function () {
       let state = {
@@ -2133,7 +2153,8 @@ export default {
      * Function used for importing the states of the scene. This exported states
      * can be imported using the read states method.
      *
-     * @vuese
+     * @public
+     * @arg `state`
      */
     setState: function (state) {
       if (state) {
@@ -2166,9 +2187,9 @@ export default {
     },
     /**
      * export current scene in GLTF.
-     * @arg Return in binary form when set to true
+     * @arg "Return in binary form when set to true"
      *
-     * @vuese
+     * @public
      */
     exportGLTF: function (binary) {
       return this.$module.scene.exportGLTF(binary);
@@ -2178,7 +2199,7 @@ export default {
      * This list is used for storing user created annotation
      * when enableLocalAnnotations is set to true.
      *
-     * @vuese
+     * @public
      */
      getLocalAnnotations: function () {
       return [...this.localAnnotationsList];
@@ -2188,7 +2209,8 @@ export default {
      * be imported when enableLocalAnnotations is set to
      * true;
      *
-     * @vuese
+     * @public
+     * @arg {Array} `annotationsList`
      */
      importLocalAnnotations: function (annotationsList) {
       if (this.enableLocalAnnotations) {
@@ -2198,7 +2220,7 @@ export default {
           const region = annotation.region;
           let fullName = region.slice(-1) === "/" ? region : region + "/";
           const noSlash = fullName.slice(0, -1);
-          annotation.region = noSlash; 
+          annotation.region = noSlash;
           fullName = fullName + group;
           const featureID = encodeURIComponent(fullName);
           annotation.item.id = featureID;
@@ -2217,7 +2239,9 @@ export default {
      * viewport. This function will ignore the state prop and
      * read in the new url.
      *
-     * @vuese
+     * @public
+     * @arg `newValue`
+     * @arg `state`
      */
     setURLAndState: function (newValue, state) {
       if (newValue != this._currentURL) {
@@ -2264,7 +2288,8 @@ export default {
      * Function used for reading in new scaffold metadata. This function will ignore
      * the state prop and read in the new url.
      *
-     * @vuese
+     * @public
+     * @arg `newValue`
      */
     setURL: function (newValue) {
       this.setURLAndState(newValue, undefined);
@@ -2300,7 +2325,7 @@ export default {
       }
     },
     /**
-     * @vuese
+     * @public
      *
      * Force the renderer to resize
      */
@@ -2314,9 +2339,11 @@ export default {
       if (this.tData.visible) {
         this.showRegionTooltip(this.tData.label, true, true);
       }
-      //Emit when the scene has been transformed due to navigation,
-      //only triggered during syncControl mode
-      //@arg Information on the navigation
+      /**
+       * Emit when the scene has been transformed due to navigation,
+       * only triggered during syncControl mode
+       * @arg {Object} "Information on the navigation"
+       */
       this.$emit("scaffold-navigated", payload);
     },
     /**
