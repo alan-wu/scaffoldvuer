@@ -153,9 +153,9 @@ export default {
         if (this.annotationDisplay) {
           const region = this.region ? this.region +"/" : "";
           this.annotationEntry = {
-            "featureId": encodeURIComponent(region + this.label),
-            "resourceId": encodeURIComponent(this.scaffoldUrl),
-            "resource": encodeURIComponent(this.scaffoldUrl),
+            "featureId": region + this.label,
+            "resourceId": this.scaffoldUrl,
+            "resource": this.scaffoldUrl,
           };
         }
       }

@@ -301,9 +301,9 @@ const createNewAnnotationsWithFeatures = (zincObject, region, group, scaffoldUrl
     //Check if region ends with a slash
     let fullName = region.slice(-1) === "/" ? region : region + "/";
     fullName = fullName + group;
-    const featureID = encodeURIComponent(fullName);
+    const featureID = fullName;
     const userAnnotation = {
-      resource: encodeURIComponent(scaffoldUrl),
+      resource: scaffoldUrl,
       item: {
         "id": featureID,
       },
@@ -359,7 +359,7 @@ export const addUserAnnotationWithFeature = (service, userToken, zincObject,
  * Get the drawn annotation stored on the annotation server
  */
 export const getDrawnAnnotations = async (service, userToken, scaffoldUrl) => {
-  const resource = encodeURIComponent(scaffoldUrl);
+  const resource = scaffoldUrl;
   return await service.drawnFeatures(userToken, resource);
 }
 
