@@ -1351,10 +1351,14 @@ export default {
         }
       }
     },
-    createEditTemporaryLines: function(worldCoords) {
+    createEditTemporaryLines: function(identifiers) {
+      const worldCoords = identifiers[0].extraData.worldCoords;
       if (worldCoords) {
         if (this.createData.shape === "LineString" || this.createData.editingIndex > -1) {
           if (this.createData.points.length === 1)  {
+            this.showRegionTooltipWithAnnotations(identifiers, true, false);
+            this.tData.x = 50;
+            this.tData.y = 200;
             if (this._tempLine) {
               const positionAttribute = this._tempLine.geometry.getAttribute( 'position' );
               positionAttribute.setXYZ(1, worldCoords[0], worldCoords[1], worldCoords[2]);
@@ -1548,7 +1552,7 @@ export default {
                 }
                 this.tData.x = event.identifiers[0].coords.x;
                 this.tData.y = event.identifiers[0].coords.y;
-                this.createEditTemporaryLines(event.identifiers[0].extraData.worldCoords);
+                this.createEditTemporaryLines(event.identifiers);
               }
             }
             /**
@@ -1565,9 +1569,8 @@ export default {
                 this.$refs.scaffoldContainer.getBoundingClientRect();
               this.tData.x = event.identifiers[0].coords.x - offsets.left;
               this.tData.y = event.identifiers[0].coords.y - offsets.top;
-              this.createEditTemporaryLines(event.identifiers[0].extraData.worldCoords);
             }
-            this.createEditTemporaryLines(event.identifiers[0].extraData.worldCoords);
+            this.createEditTemporaryLines(event.identifiers);
           }
         }
       }
