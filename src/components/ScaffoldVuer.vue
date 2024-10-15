@@ -942,7 +942,7 @@ export default {
     ...mapState(useMainStore,  ['userToken']),
     annotationDisplay: function() {
       return this.viewingMode === 'Annotation' && this.tData.active === true &&
-        (this.activeDrawMode === 'Edit' || this.activeDrawMode === 'Delete');
+        (this.activeDrawMode !== "Point" && this.activeDrawMode !== 'LineString');
     }
   },
   methods: {
@@ -1457,7 +1457,7 @@ export default {
               this._editingZincObject = zincObject;
             }
           }
-          if (this.activeDrawMode === "Edit" || this.activeDrawMode === "Delete") {
+          if (this.activeDrawMode !== "Point" && this.activeDrawMode !== "LineString") {
             this.showRegionTooltipWithAnnotations(event.identifiers, true, false);
             this.tData.x = 50;
             this.tData.y = 200;
@@ -1924,7 +1924,6 @@ export default {
                   }
                 });
               }
-              this.activeDrawMode = "Edit";
             }
           });
         } else if (this.viewingMode === "Exploration") {
