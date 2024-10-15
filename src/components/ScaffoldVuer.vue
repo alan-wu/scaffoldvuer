@@ -1924,6 +1924,7 @@ export default {
                   }
                 });
               }
+              this.activeDrawMode = "Edit";
             }
           });
         } else if (this.viewingMode === "Exploration") {
