@@ -1917,6 +1917,12 @@ export default {
                     annotationFeaturesToPrimitives(this.$module.scene, payload.features);
                   }
                 });
+                //Support previously supported encoded resource
+                getDrawnAnnotations(this.annotator, this.userToken, encodeURIComponent(this.url)).then((payload) => {
+                  if (payload && payload.features) {
+                    annotationFeaturesToPrimitives(this.$module.scene, payload.features);
+                  }
+                });
               }
             }
           });
@@ -2222,7 +2228,7 @@ export default {
           const noSlash = fullName.slice(0, -1);
           annotation.region = noSlash;
           fullName = fullName + group;
-          const featureID = encodeURIComponent(fullName);
+          const featureID = fullName;
           annotation.item.id = featureID;
           annotation.feature.id = featureID;
         });
