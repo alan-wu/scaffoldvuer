@@ -1463,8 +1463,6 @@ export default {
           }
           if (this.activeDrawMode !== "Point" && this.activeDrawMode !== "LineString") {
             this.showRegionTooltipWithAnnotations(event.identifiers, true, false);
-            this.tData.x = 50;
-            this.tData.y = 200;
           } else {
             this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
           }
