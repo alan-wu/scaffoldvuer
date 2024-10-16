@@ -7,6 +7,7 @@
         :isReady="isReady"
         :treeData="treeDataEntry"
         :active="active"
+        :filterText="filterText"
         :hover="hover"
         :showColourPicker="showColourPicker"
         @setColour="setColour"
@@ -66,6 +67,7 @@ export default {
      */
     showColourPicker: Boolean,
     isReady: Boolean,
+    filterText: String,
   },
   data: function () {
     return {
