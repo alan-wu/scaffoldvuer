@@ -584,7 +584,6 @@ export default {
     },
     search: function (term) {
       this.$refs.scaffold.search(term, true);
-      this.$refs.scaffold.filterTree(term);
     },
     viewerMounted: function() {
       this.selectedCoordinates =
@@ -609,7 +608,6 @@ export default {
           "found suggestions",
           this.$refs.scaffold.fetchSuggestions(term)
         );
-        this.$refs.scaffold.filterTree(term);
       }
     },
     autoTumble: function () {

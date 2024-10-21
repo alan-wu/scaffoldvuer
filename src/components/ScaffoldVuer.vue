@@ -95,7 +95,6 @@
         <template #reference>
           <ScaffoldTreeControls
             ref="scaffoldTreeControls"
-            :filterText="filterText"
             :isReady="isReady"
             :show-colour-picker="showColourPicker"
             @object-selected="objectSelected"
@@ -718,7 +717,6 @@ export default {
         toBeDeleted: false,
       },
       currentTime: 0.0,
-      filterText: "",
       timeVarying: false,
       isPlaying: false,
       isReady: false,
@@ -2018,9 +2016,6 @@ export default {
           this.hoverVisibilities[helpTextNumber].value = false;
         }, timeout);
       }
-    },
-    filterTree: function(text) {
-      this.filterText = text;
     },
     /**
      * @public
