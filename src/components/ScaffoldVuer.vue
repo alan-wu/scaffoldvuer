@@ -382,7 +382,7 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { markRaw, shallowRef } from 'vue';
+import { inject, markRaw, provide, shallowRef } from 'vue';
 import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
@@ -454,8 +454,16 @@ export default {
     ScaffoldTreeControls
   },
   setup(props) {
-    const annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
-    return { annotator };
+    let annotator = inject('$annotator')
+    if (!annotator) {
+      console.log("Not defined")
+      annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
+      provide('$annotator', annotator)
+    } else {
+      console.log("defined")
+    }
+    console.log(annotator)
+    return { annotator }
   },
   props: {
     /**
@@ -698,7 +706,6 @@ export default {
     return {
       flatmapAPI: this.flatmapAPI,
       scaffoldUrl: this.url,
-      $annotator: this.annotator,
       boundingDims: this.boundingDims,
     };
   },
