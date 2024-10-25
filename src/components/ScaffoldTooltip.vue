@@ -14,7 +14,7 @@
       <template #default>
         <div class="tooltip-text">{{ label }}</div>
         <div class="tooltip-text" v-if="region">Region: {{ region }}</div>
-        <CreateTooltiipContent
+        <CreateTooltipContent
           v-show="createData.toBeConfirmed"
           :createData="createData"
           @confirm-create="$emit('confirm-create', $event)"
@@ -66,10 +66,9 @@ import {
 import {
   Delete as ElIconDelete,
 } from '@element-plus/icons-vue'
-import CreateTooltiipContent from "./CreateTooltipContent.vue";
 import { mapState } from 'pinia';
 import { useMainStore } from "@/store/index";
-import { Tooltip } from '@abi-software/map-utilities'
+import { CreateTooltipContent, Tooltip } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 
 /**
@@ -79,7 +78,7 @@ export default {
   name: "ScaffoldTooltip",
   components: {
     Col,
-    CreateTooltiipContent,
+    CreateTooltipContent,
     ElIconDelete,
     Icon,
     Popover,

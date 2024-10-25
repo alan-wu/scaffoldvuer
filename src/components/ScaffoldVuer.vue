@@ -712,6 +712,13 @@ export default {
   data: function () {
     return {
       annotator: undefined,
+      /**
+      * The option to show connectivity information in sidebar
+      */
+      annotationSidebar: {
+        type: Boolean,
+        default: false,
+      },
       createData: {
         drawingBox: false,
         toBeConfirmed: false,
