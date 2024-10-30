@@ -164,9 +164,7 @@ export default {
       }
     },
     hideTriggered: function() {
-      if (this.createData.toBeConfirmed) {
-        this.$emit('cancel-create');
-      }
+      this.$emit('tooltip-hide');
     },
   },
   watch: {
