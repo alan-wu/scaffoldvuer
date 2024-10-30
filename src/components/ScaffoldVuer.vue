@@ -457,13 +457,9 @@ export default {
   setup(props) {
     let annotator = inject('$annotator')
     if (!annotator) {
-      console.log("Not defined")
       annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
       provide('$annotator', annotator)
-    } else {
-      console.log("defined")
     }
-    console.log(annotator)
     return { annotator }
   },
   props: {
@@ -1189,7 +1185,6 @@ export default {
      * Cancel create workflows. Reset all relevant UIs and data.
      */
     cancelCreate: function() {
-      console.log("cancel Create on scaffold")
       this.createData.points.length = 0;
       this.createData.toBeConfirmed = false;
       this._editingZincObject = undefined;
