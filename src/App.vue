@@ -596,7 +596,7 @@ export default {
       }
       cb(
         this.$refs.scaffold.fetchSuggestions(term).map((item) => {
-          const value = item.terms.length > 1 ? item.terms[1] : item.terms[0];
+          const value = item.suggestion;
           return {
             value: value,
             label: value
