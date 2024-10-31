@@ -44,60 +44,47 @@ export class SearchIndex
         this._searchEngine =  new MiniSearch({
             fields: ['path', 'name'],
             storeFields: ['path'],
-            tokenize: (string, _fieldName) => string.split('"'), // indexing tokenizer
+            tokenize: (string, _fieldName) => string.split(/[\s/]+/), // indexing tokenizer
         });
-        this._featureIds = [];
-        this.zincObjects = [];
-        this.regions = [];
-    }
-
-    indexMetadata(featureId, metadata)
-    //================================
-    {
-        const textSeen = [];
-        for (const prop of indexedProperties) {
-            if (prop in metadata) {
-                const text = metadata[prop];
-                if (!textSeen.includes(text)) {
-                    this.addTerm_(featureId, text);
-                    textSeen.push(text);
-                }
-            }
-        }
+        this.idMaps = {};
     }
 
     addZincObject(zincObject, id)
     //=======================
     {
         const path = zincObject.getRegion().getFullPath();
-        const fullPath = path ? `${path}/${zincObject.groupName}` : zincObject.groupName;
-        const item = { path: fullPath, name: zincObject.groupName, id };
-        this._searchEngine.add(item, {fields: ['path', 'name']});
-        this.zincObjects.push(zincObject);
+        let groupName = zincObject.groupName;
+        let fullPath = path ? `${path}/${zincObject.groupName}` : zincObject.groupName;
+        groupName = groupName.replaceAll('"', '');
+        fullPath = fullPath.replaceAll('"', '');
+        const item = { path: fullPath, name: groupName, id };
+        this._searchEngine.add(item);
+        this.idMaps[id] = { path: fullPath, zincObject };
     }
 
     removeZincObject(zincObject, id)
     //=======================
     {
         const path = zincObject.getRegion().getFullPath();
-        const fullPath = path ? `${path}/${zincObject.groupName}` : zincObject.groupName;
-        const item = { path: fullPath, name: zincObject.groupName, id };
-        this._searchEngine.remove(item, {fields: ['path', 'name']});
-        for (let i = 0; i < this.zincObjects.length; i++) {
-          if (id === this.zincObjects[i].uuid) {
-            this.zincObjects.splice(i, 1);
-            return;
-          }
-        }
-        
+        let groupName = zincObject.groupName;
+        let fullPath = path ? `${path}/${zincObject.groupName}` : zincObject.groupName;
+        groupName = groupName.replaceAll('"', '');
+        fullPath = fullPath.replaceAll('"', '');
+        const item = { path: fullPath, name: groupName, id };
+        this._searchEngine.remove(item);
+        delete this.idMaps[id];
     }
 
     addRegion(region, id)
     //=======================
     {
-        const item = { path: region.getFullPath(), name: region.getName(), id };
-        this._searchEngine.add(item, {fields: ['path', 'name']});
-        this.regions.push(region);
+        let path = region.getFullPath();
+        let regionName = region.getName();
+        path = path.replaceAll('"', '');
+        regionName = regionName.replaceAll('"', '');
+        const item = { path, name: regionName, id };
+        this._searchEngine.add(item);
+        this.idMaps[id] = { path, zincObject: region };
     }
 
     clearResults()
@@ -110,16 +97,31 @@ export class SearchIndex
     //=======================
     {
         this._searchEngine.removeAll();
-        this.zincObjects.length = 0;
-        this.regions.length = 0;
+        //this.zincObjects.length = 0;
+        //this.regions.length = 0;
+        this.idMaps = {};
     }
 
-    auto_suggest(text)
-    //================
-    {
-        const results = this._searchEngine.autoSuggest(text, {prefix: true});
-        return results;
+    auto_suggest(text) {
+      let results = [];
+      if (text.length > 2 && ["'", '"'].includes(text.slice(0, 1))) {
+        text = text.replaceAll(text.slice(0, 1), '')
+        results = this._searchEngine.search(text, {prefix: true, combineWith: 'AND'})
+      } else if (text.length > 1) {
+          results = this._searchEngine.search(text, {prefix: true})
+      }
+      const items = [];
+      results.forEach(r => {
+        if (r.id in this.idMaps) {
+          items.push(this.idMaps[r.id].path);
+        }
+      });
+      const unique = [...new Set(items)];
+      const returned = [];
+      unique.forEach(u => returned.push({suggestion: '"' + u + '"'}));
+      return returned;
     }
+
 
     processResults(zincObjects, searchText) {
       const result = {
@@ -145,11 +147,21 @@ export class SearchIndex
     }
 
     search(text) {
-        const results = this._searchEngine.search(text, {prefix: true});
-        const zincResults = this.zincObjects.filter(zincObject => results.map(r => r.id).includes(zincObject.uuid));
-        const regionResults = this.regions.filter(region => results.map(r => r.id).includes(region.uuid));
-        zincResults.push(...regionResults);
-        return zincResults;
+      let results = undefined;
+      if (text.length > 2 && ["'", '"'].includes(text.slice(0, 1))) {
+          text = text.replaceAll(text.slice(0, 1), '')
+          console.log(text)
+          results = this._searchEngine.search(text, {prefix: true, combineWith: 'AND'})
+      } else if (text.length > 1) {
+          results = this._searchEngine.search(text, {prefix: true})
+      }
+      const zincResults = [];
+      results.forEach(r => {
+        if (r.id in this.idMaps) {
+          zincResults.push(this.idMaps[r.id].zincObject);
+        }
+      });
+      return zincResults;
     }
 
     searchTerms(terms) {
@@ -174,25 +186,3 @@ export class SearchIndex
 
 }
 
-//==============================================================================
-
-class SearchResults
-{
-    constructor(results)
-    {
-        this.__results = results.sort((a, b) => (b.score - a.score));
-        this.__featureIds = results.map(r => r.featureId);
-    }
-
-    get featureIds()
-    {
-        return this.__featureIds;
-    }
-
-    get results()
-    {
-        return this.__results;
-    }
-}
-
-//==============================================================================
