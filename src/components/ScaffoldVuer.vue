@@ -1513,7 +1513,6 @@ export default {
           } else {
             if (this.$refs.scaffoldTreeControls) {
               if (names.length > 0) {
-                //this.$refs.scaffoldTreeControls.changeActiveByNames(names, region, false);
                 this.$refs.scaffoldTreeControls.updateActiveUI(zincObjects);
                 this.updatePrimitiveControls(zincObjects);
               } else {
@@ -1521,10 +1520,8 @@ export default {
                 this.$refs.scaffoldTreeControls.removeActive(false);
               }
             }
-            /**
-             * Emit when an object is selected
-             * @arg {Object} "Identifier of selected objects"
-             */
+            //Store the following for state saving. Search will handle the case with more than 1
+            //identifiers.
             if (event.identifiers.length === 1) {
               this.lastSelected.isSearch = false;
               this.lastSelected.region = event.identifiers[0].data.region;
@@ -1534,15 +1531,17 @@ export default {
               this.lastSelected.region = "";
               this.lastSelected.group = "";
             }
+            /**
+             * Emit when an object is selected
+             * @arg {Object} "Identifier of selected objects"
+             */
             this.$emit("scaffold-selected", event.identifiers);
           }
         } else if (event.eventType == 2) {
           if (this.selectedObjects.length === 0) {
             this.hideRegionTooltip();
-            // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
             if (this.$refs.scaffoldTreeControls) {
               if (names.length > 0) {
-                //this.$refs.scaffoldTreeControls.changeHoverByNames(names, region, false);
                 this.$refs.scaffoldTreeControls.updateHoverUI(zincObjects);
               } else {
                 this.$refs.scaffoldTreeControls.removeHover(true);
@@ -1914,7 +1913,7 @@ export default {
     changeViewingMode: function (modeName) {
       if (this.$module) {
         if (modeName) {
-          this.viewingMode = modeName
+          this.viewingMode = modeName;
         }
         if (this.viewingMode === "Annotation") {
           let authenticated = false;
@@ -2132,6 +2131,9 @@ export default {
         if (options.background) {
           this.backgroundChangeCallback(options.background);
         }
+        if (options.viewingMode) {
+          this.changeViewingMode(options.viewingMode);
+        }
         const search = options.search;
         if (search && search.group) {
           if (search.isSearch) {
@@ -2182,6 +2184,7 @@ export default {
         viewport: undefined,
         visibility: undefined,
         background: this.currentBackground,
+        viewingMode: this.viewingMode,
       };
       if (this.$refs.scaffoldTreeControls)
         state.visibility = this.$refs.scaffoldTreeControls.getState();
@@ -2209,16 +2212,18 @@ export default {
             viewport: state.viewport,
             visibility: state.visibility,
             background: state.background,
+            viewingMode: this.viewingMode,
             search: state.search,
           });
         } else {
-          if (state.search || state.viewport || state.visibility || state.background) {
+          if (state.background || state.search || state.viewport || state.viewingMode || state.visibility) {
             if (this.isReady && this.$module.scene) {
               this.restoreSettings(state);
             } else {
               this.$module.setFinishDownloadCallback(
                 this.setURLFinishCallback({
                   background: state.background,
+                  viewingMode: state.viewingMode,
                   viewport: state.viewport,
                   visibility: state.visibility,
                   search: state.search,
@@ -2303,6 +2308,7 @@ export default {
             background: state?.background,
             region: this.region,
             search: state?.search,
+            viewingMode: state?.viewingMode,
             viewURL: this.viewURL,
             viewport: state?.viewport,
             visibility: state?.visibility,
