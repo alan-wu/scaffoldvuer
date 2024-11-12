@@ -2146,7 +2146,6 @@ export default {
     },
     setURLFinishCallback: function (options) {
       return () => {
-        this.restoreSettings(options);
         this.localAnnotationsList.length = 0;
         this.updateSettingsfromScene();
         this.$module.updateTime(0.01);
@@ -2168,6 +2167,7 @@ export default {
         const {centre, size} = this.$module.getCentreAndSize();
         this.boundingDims.centre = centre;
         this.boundingDims.size = size;
+        this.$nextTick(() => this.restoreSettings(options) );
         this.isReady = true;
       };
     },
