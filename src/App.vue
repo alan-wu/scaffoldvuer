@@ -297,7 +297,8 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { shallowRef } from 'vue';
+import { AnnotationService } from '@abi-software/sparc-annotation'
+import { markRaw, shallowRef } from 'vue';
 import { ScaffoldVuer } from "./components/index.js";
 import DropZone from "./app/DropZone.vue";
 import ModelsTable from "./app/ModelsTable.vue";
@@ -356,6 +357,11 @@ export default {
     ModelsTable,
     HelpModeDialog,
   },
+  provide() {
+    return {
+      $annotator: this.annotator,
+    }
+  },
   data: function () {
     return {
       consoleOn: true,
@@ -406,7 +412,8 @@ export default {
       router: useRouter(),
       ElIconSetting: shallowRef(ElIconSetting),
       ElIconFolderOpened: shallowRef(ElIconFolderOpened),
-      auto: NaN
+      auto: NaN,
+      annotator: markRaw(new AnnotationService(`https://mapcore-demo.org/devel/flatmap/v4/annotator`)),
     };
   },
   watch: {
