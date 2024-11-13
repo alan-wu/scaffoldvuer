@@ -1332,6 +1332,7 @@ export default {
     toggleDrawing: function (type, icon) {
       this.createData.toBeDeleted = false;
       if (type === 'mode') {
+        this.cancelCreate()
         this.activeDrawMode = icon;
         this.createData.shape = '';
         this.$module.selectObjectOnPick = true;
@@ -1594,7 +1595,9 @@ export default {
                 : event.identifiers[0].data.group;
               if (event.identifiers[0].coords) {
                 this.tData.active = false;
-                this.tData.visible = true;
+                if (!this.annotationSidebar) {
+                  this.tData.visible = true;
+                }
                 this.tData.label = id;
                 if (event.identifiers[0].data.region) {
                   this.tData.region = event.identifiers[0].data.region;
@@ -1944,7 +1947,6 @@ export default {
               liveUpdates
             );
           } else {
-            this.tData.visible = false;
             const region = this.tData.region ? this.tData.region +"/" : "";
             const annotationEntry = {
               "featureId": region + this.tData.label,
