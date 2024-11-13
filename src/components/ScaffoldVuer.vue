@@ -812,6 +812,11 @@ export default {
         centre: [0, 0, 0],
         size:[1, 1, 1],
       },
+      lastSelected: markRaw({
+        region: "",
+        group: "",
+        isSearch: false,
+      })
     };
   },
   watch: {
@@ -1508,13 +1513,23 @@ export default {
           } else {
             if (this.$refs.scaffoldTreeControls) {
               if (names.length > 0) {
-                //this.$refs.scaffoldTreeControls.changeActiveByNames(names, region, false);
                 this.$refs.scaffoldTreeControls.updateActiveUI(zincObjects);
                 this.updatePrimitiveControls(zincObjects);
               } else {
                 this.hideRegionTooltip();
                 this.$refs.scaffoldTreeControls.removeActive(false);
               }
+            }
+            //Store the following for state saving. Search will handle the case with more than 1
+            //identifiers.
+            if (event.identifiers.length === 1) {
+              this.lastSelected.isSearch = false;
+              this.lastSelected.region = event.identifiers[0].data.region;
+              this.lastSelected.group = event.identifiers[0].data.group;
+            } else if (event.identifiers.length === 0) {
+              this.lastSelected.isSearch = false;
+              this.lastSelected.region = "";
+              this.lastSelected.group = "";
             }
             /**
              * Emit when an object is selected
@@ -1525,10 +1540,8 @@ export default {
         } else if (event.eventType == 2) {
           if (this.selectedObjects.length === 0) {
             this.hideRegionTooltip();
-            // const offsets = this.$refs.scaffoldContainer.getBoundingClientRect();
             if (this.$refs.scaffoldTreeControls) {
               if (names.length > 0) {
-                //this.$refs.scaffoldTreeControls.changeHoverByNames(names, region, false);
                 this.$refs.scaffoldTreeControls.updateHoverUI(zincObjects);
               } else {
                 this.$refs.scaffoldTreeControls.removeHover(true);
@@ -1900,7 +1913,7 @@ export default {
     changeViewingMode: function (modeName) {
       if (this.$module) {
         if (modeName) {
-          this.viewingMode = modeName
+          this.viewingMode = modeName;
         }
         if (this.viewingMode === "Annotation") {
           let authenticated = false;
@@ -2029,9 +2042,15 @@ export default {
         if (text === undefined || text === "" ||
           ((Array.isArray(text) && text.length === 0))
         ) {
+          this.lastSelected.region = "";
+          this.lastSelected.group = "";
+          this.lastSelected.isSearch = true;
           this.objectSelected([], true);
           return false;
         } else {
+          this.lastSelected.region = "";
+          this.lastSelected.group = text;
+          this.lastSelected.isSearch = true;
           const result = this.$_searchIndex.searchAndProcessResult(text);
           const zincObjects = result.zincObjects;
           if (zincObjects.length > 0) {
@@ -2091,26 +2110,42 @@ export default {
       }
       this.timeMax = this.$module.scene.getDuration();
     },
-    setURLFinishCallback: function (options) {
-      return () => {
-        if (options) {
-          if (options.viewport) {
-            this.$module.scene
-              .getZincCameraControls()
-              .setCurrentCameraSettings(options.viewport);
-          } else if (options.viewURL && options.viewURL !== "") {
-            const url = new URL(options.viewURL, this.url);
-            this.$module.scene.loadViewURL(url);
-          } else if (options.region && options.region !== "") {
-            this.viewRegion(options.region);
-          }
-          if (options.visibility) {
-            // Some UIs may not be ready at this time.
-            this.$nextTick(() => {
-              this.$refs.scaffoldTreeControls.setState(options.visibility);
-            });
+    restoreSettings: function(options) {
+      if (options) {
+        if (options.viewport) {
+          this.$module.scene
+            .getZincCameraControls()
+            .setCurrentCameraSettings(options.viewport);
+        } else if (options.viewURL && options.viewURL !== "") {
+          const url = new URL(options.viewURL, this.url);
+          this.$module.scene.loadViewURL(url);
+        } else if (options.region && options.region !== "") {
+          this.viewRegion(options.region);
+        }
+        if (options.visibility) {
+          // Some UIs may not be ready at this time.
+          this.$nextTick(() => {
+            this.$refs.scaffoldTreeControls.setState(options.visibility);
+          });
+        }
+        if (options.background) {
+          this.backgroundChangeCallback(options.background);
+        }
+        if (options.viewingMode) {
+          this.changeViewingMode(options.viewingMode);
+        }
+        const search = options.search;
+        if (search && search.group) {
+          if (search.isSearch) {
+            this.search(search.group, true);
+          } else {
+            this.changeActiveByName(search.group, search.region, true);
           }
         }
+      }
+    },
+    setURLFinishCallback: function (options) {
+      return () => {
         this.localAnnotationsList.length = 0;
         this.updateSettingsfromScene();
         this.$module.updateTime(0.01);
@@ -2132,6 +2167,7 @@ export default {
         const {centre, size} = this.$module.getCentreAndSize();
         this.boundingDims.centre = centre;
         this.boundingDims.size = size;
+        this.$nextTick(() => this.restoreSettings(options) );
         this.isReady = true;
       };
     },
@@ -2147,12 +2183,17 @@ export default {
         url: this._currentURL,
         viewport: undefined,
         visibility: undefined,
+        background: this.currentBackground,
+        viewingMode: this.viewingMode,
       };
       if (this.$refs.scaffoldTreeControls)
         state.visibility = this.$refs.scaffoldTreeControls.getState();
       if (this.$module.scene) {
         let zincCameraControls = this.$module.scene.getZincCameraControls();
         state.viewport = zincCameraControls.getCurrentViewport();
+      }
+      if (this.lastSelected && this.lastSelected.group) {
+        state.search = {...this.lastSelected};
       }
       return state;
     },
@@ -2170,21 +2211,22 @@ export default {
             fileFormat: state.fileFormat,
             viewport: state.viewport,
             visibility: state.visibility,
+            background: state.background,
+            viewingMode: this.viewingMode,
+            search: state.search,
           });
         } else {
-          if (state.viewport || state.visibility) {
+          if (state.background || state.search || state.viewport || state.viewingMode || state.visibility) {
             if (this.isReady && this.$module.scene) {
-              if (state.viewport)
-                this.$module.scene
-                  .getZincCameraControls()
-                  .setCurrentCameraSettings(state.viewport);
-              if (state.visibility)
-                this.$refs.scaffoldTreeControls.setState(state.visibility);
+              this.restoreSettings(state);
             } else {
               this.$module.setFinishDownloadCallback(
                 this.setURLFinishCallback({
+                  background: state.background,
+                  viewingMode: state.viewingMode,
                   viewport: state.viewport,
                   visibility: state.visibility,
+                  search: state.search,
                 })
               );
             }
@@ -2241,6 +2283,7 @@ export default {
         });
       }
     },
+
     /**
      * Function used for reading in new scaffold metadata and a custom
      * viewport. This function will ignore the state prop and
@@ -2252,10 +2295,7 @@ export default {
      */
     setURLAndState: function (newValue, state) {
       if (newValue != this._currentURL) {
-        if (state && state.format) this.fileFormat = state.format;
-        let viewport = state && state.viewport ? state.viewport : undefined;
-        let visibility =
-          state && state.visibility ? state.visibility : undefined;
+        if (state?.format) this.fileFormat = state.format;
         this._currentURL = newValue;
         if (this.$refs.scaffoldTreeControls) this.$refs.scaffoldTreeControls.clear();
         this.loading = true;
@@ -2265,10 +2305,13 @@ export default {
         this.hideRegionTooltip();
         this.$module.setFinishDownloadCallback(
           this.setURLFinishCallback({
-            viewport: viewport,
+            background: state?.background,
             region: this.region,
+            search: state?.search,
+            viewingMode: state?.viewingMode,
             viewURL: this.viewURL,
-            visibility: visibility,
+            viewport: state?.viewport,
+            visibility: state?.visibility,
           })
         );
         if (this.fileFormat === "gltf") {

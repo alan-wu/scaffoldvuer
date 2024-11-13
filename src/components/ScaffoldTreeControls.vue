@@ -142,6 +142,12 @@ export default {
             isRegion: true,
           };
           this.addTreeItem(data.children, childRegionItem, region);
+          //Special case for helper region
+          if (path === "/_helper") {
+            this.$nextTick(() => {
+              this.$refs.treeControls.$refs.regionTree.setChecked(childRegionItem.id, false);
+            });
+          }
         }
         _paths.shift();
         return this.findOrCreateRegion(childRegionItem, _paths, path);
