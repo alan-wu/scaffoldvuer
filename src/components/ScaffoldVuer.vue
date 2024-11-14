@@ -1604,7 +1604,7 @@ export default {
             if (event.identifiers.length > 0 && event.identifiers[0]) {
               if (event.identifiers[0].coords) {
                 this.tData.active = false;
-                if (!this.viewingMode !== "Annotation" ||  !this.annotationSidebar) {
+                if (this.viewingMode !== "Annotation" ||  !this.annotationSidebar) {
                   this.tData.visible = true;
                 }
                 this.tData.label = id;
