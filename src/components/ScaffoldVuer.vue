@@ -17,7 +17,8 @@
       :annotationDisplay="annotationDisplay"
       @confirm-create="confirmCreate($event)"
       @cancel-create="cancelCreate()"
-      @confirm-delete="confirmDelete($event)"
+      @confirm-delete="confirmDelete()"
+      @tooltip-hide="onTooltipHide()"
     />
     <div
       id="organsDisplayArea"
@@ -382,7 +383,7 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
-import { markRaw, shallowRef } from 'vue';
+import { inject, markRaw, provide, shallowRef } from 'vue';
 import {
   WarningFilled as ElIconWarningFilled,
   ArrowDown as ElIconArrowDown,
@@ -454,10 +455,21 @@ export default {
     ScaffoldTreeControls
   },
   setup(props) {
-    const annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
-    return { annotator };
+    let annotator = inject('$annotator')
+    if (!annotator) {
+      annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
+      provide('$annotator', annotator)
+    }
+    return { annotator }
   },
   props: {
+    /**
+      * The option to show annotation information in sidebar
+      */
+    annotationSidebar: {
+      type: Boolean,
+      default: false,
+    },
     /**
      * URL of the zincjs metadata. This value will be ignored if a valid
      * state prop is also provided.
@@ -698,7 +710,6 @@ export default {
     return {
       flatmapAPI: this.flatmapAPI,
       scaffoldUrl: this.url,
-      $annotator: this.annotator,
       boundingDims: this.boundingDims,
     };
   },
@@ -907,6 +918,24 @@ export default {
       }
       this.previousMarkerLabels = markRaw({...labels});
     },
+    annotationDisplay: function(value) {
+      if (this.annotationSidebar) {
+        if (value) {
+          const region = this.tData.region ? this.tData.region +"/" : "";
+          const annotationEntry = {
+            "featureId": region + this.tData.label,
+            "resourceId": this.url,
+            "resource": this.url,
+          };
+          this.$emit('annotation-open', {annotationEntry: annotationEntry,
+            commitCallback: this.commitAnnotationEvent});
+        } else {
+          if (!this.createData.toBeConfirmed || !this.createData.toBeDeleted) {
+            this.$emit("annotation-close");
+          }
+        }
+      }
+    }
   },
   beforeCreate: function () {
     this.$module = new OrgansViewer();
@@ -1176,13 +1205,16 @@ export default {
         this.$module.scene.removeTemporaryPrimitive(this._tempPoint);
         this._tempPoint = undefined;
       }
+      if (this.annotationSidebar){
+        this.$emit("annotation-close");
+      }
     },
     /**
      * Internal only.
      * Confirm delete of user created primitive.
      * This is only called from callback.
      */
-     confirmDelete: function() {
+    confirmDelete: function() {
       if (this._editingZincObject?.isEditable) {
         const regionPath = this._editingZincObject.region.getFullPath() + "/";
         const group = this._editingZincObject.groupName;
@@ -1195,6 +1227,15 @@ export default {
         }
       }
       this.cancelCreate();
+    },
+    /**
+     * Internal only.
+     * This is triggered when tooltip is hidden
+     */
+     onTooltipHide: function() {
+      if (this.createData.toBeConfirmed && !this.annotationSidebar) {
+        this.cancelCreate();
+      }
     },
     formatTooltip(val) {
       if (this.timeMax >= 1000) {
@@ -1291,6 +1332,7 @@ export default {
     toggleDrawing: function (type, icon) {
       this.createData.toBeDeleted = false;
       if (type === 'mode') {
+        this.cancelCreate()
         this.activeDrawMode = icon;
         this.createData.shape = '';
         this.$module.selectObjectOnPick = true;
@@ -1392,21 +1434,21 @@ export default {
       if (this.createData.toBeConfirmed === false) {
         this.createData.points.length = 0;
         this.createData.points.push(coords);
+        this.createData.toBeConfirmed = true;
         this.showRegionTooltipWithAnnotations(data, true, false);
         this.tData.x = 50;
         this.tData.y = 200;
         this._tempPoint = this.$module.scene.addTemporaryPoints([coords], 0xffff00);
-        this.createData.toBeConfirmed = true;
       }
     },
     drawLine: function(coords, data) {
       if (this.createData.toBeConfirmed === false) {
         if (this.createData.points.length === 1) {
           this.createData.points.push(coords);
+          this.createData.toBeConfirmed = true;
           this.showRegionTooltipWithAnnotations(data, true, false);
           this.tData.x = 50;
           this.tData.y = 200;
-          this.createData.toBeConfirmed = true;
         } else {
           this._tempPoint = this.$module.scene.addTemporaryPoints([coords], 0xffff00);
           this.createData.points.push(coords);
@@ -1553,7 +1595,9 @@ export default {
                 : event.identifiers[0].data.group;
               if (event.identifiers[0].coords) {
                 this.tData.active = false;
-                this.tData.visible = true;
+                if (!this.annotationSidebar) {
+                  this.tData.visible = true;
+                }
                 this.tData.label = id;
                 if (event.identifiers[0].data.region) {
                   this.tData.region = event.identifiers[0].data.region;
@@ -1894,13 +1938,30 @@ export default {
       if (this.$module.scene) {
         const result = getObjectsFromAnnotations(this.$module.scene, annotations);
         if (result && result.objects.length > 0) {
-          return this.showRegionTooltipWithObjects(
-            result.label,
-            result.objects,
-            result.regionPath,
-            resetView,
-            liveUpdates
-          );
+          if (!this.annotationSidebar) {
+            return this.showRegionTooltipWithObjects(
+              result.label,
+              result.objects,
+              result.regionPath,
+              resetView,
+              liveUpdates
+            );
+          } else {
+            const region = this.tData.region ? this.tData.region +"/" : "";
+            const annotationEntry = {
+              "featureId": region + this.tData.label,
+              "resourceId": this.url,
+              "resource": this.url,
+            };
+            this.$emit('annotation-open', {
+              annotationEntry: annotationEntry,
+              createData: this.createData,
+              confirmCreate: this.confirmCreate,
+              cancelCreate: this.cancelCreate,
+              confirmDelete: this.confirmDelete,
+            });
+            return;
+          }
         }
       }
       this.hideRegionTooltip();
