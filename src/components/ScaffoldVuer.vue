@@ -1338,7 +1338,7 @@ export default {
         this.$module.selectObjectOnPick = true;
       } else if (type === 'tool') {
         this.activeDrawTool = icon;
-        this.createData.shape = this.activeDrawTool;
+        this.createData.shape = this.activeDrawTool ? this.activeDrawTool : '';
         this.$module.selectObjectOnPick = false;
       }
     },
@@ -1544,6 +1544,16 @@ export default {
           });
           zincObjects = event.zincObjects;
         }
+        let id = undefined;
+        let regionPath = undefined;
+        if (event.identifiers.length > 0 && event.identifiers[0]) {
+          id = event.identifiers[0].data.id
+                ? event.identifiers[0].data.id
+                : event.identifiers[0].data.group;
+          if (event.identifiers[0].data.region) {
+            regionPath = event.identifiers[0].data.region;
+          }
+        }
         /*
         * Event Type 1: Selected
         * Event Type 2: Highlighted
@@ -1551,6 +1561,8 @@ export default {
         */
         if (event.eventType == 1) {
           if (this.viewingMode === 'Annotation') {
+            this.tData.label = id;
+            this.tData.region = regionPath;
             this.activateAnnotationMode(names, event);
           } else {
             if (this.$refs.scaffoldTreeControls) {
@@ -1566,7 +1578,7 @@ export default {
             //identifiers.
             if (event.identifiers.length === 1) {
               this.lastSelected.isSearch = false;
-              this.lastSelected.region = event.identifiers[0].data.region;
+              this.lastSelected.region = regionPath;
               this.lastSelected.group = event.identifiers[0].data.group;
             } else if (event.identifiers.length === 0) {
               this.lastSelected.isSearch = false;
@@ -1590,21 +1602,13 @@ export default {
               }
             }
             if (event.identifiers.length > 0 && event.identifiers[0]) {
-              let id = event.identifiers[0].data.id
-                ? event.identifiers[0].data.id
-                : event.identifiers[0].data.group;
               if (event.identifiers[0].coords) {
                 this.tData.active = false;
-                if (!this.annotationSidebar) {
+                if (!this.viewingMode !== "Annotation" ||  !this.annotationSidebar) {
                   this.tData.visible = true;
                 }
                 this.tData.label = id;
-                if (event.identifiers[0].data.region) {
-                  this.tData.region = event.identifiers[0].data.region;
-                }
-                else {
-                  this.tData.region = undefined;
-                }
+                this.tData.region = regionPath;
                 this.tData.x = event.identifiers[0].coords.x;
                 this.tData.y = event.identifiers[0].coords.y;
                 this.createEditTemporaryLines(event.identifiers);
