@@ -29,6 +29,7 @@
         :marker-labels="markerLabels"
         :enableLocalAnnotations="false"
         @open-map="openMap"
+        @on-error="onError"
         @on-ready="onReady"
         @scaffold-selected="onSelected"
         @scaffold-navigated="onNavigated"
@@ -639,6 +640,17 @@ export default {
           zincObject._lod._material.wireframe = value;
         }
       });
+    },
+    onError: function(payload) {
+      if (payload?.type === "download-error") {
+        const dropZone = this.$refs.dropzone;
+        if (dropZone) {
+          const realFilename = dropZone.findRealFilename(payload.xhr.responseURL);
+          if (realFilename) {
+            console.error(`External Resource ${realFilename}`);
+          }
+        }
+      }
     },
     onReady: function () {
       if (this.consoleOn) console.log(this.$refs.scaffold)

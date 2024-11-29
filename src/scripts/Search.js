@@ -150,7 +150,6 @@ export class SearchIndex
       let results = undefined;
       if (text.length > 2 && ["'", '"'].includes(text.slice(0, 1))) {
           text = text.replaceAll(text.slice(0, 1), '')
-          console.log(text)
           results = this._searchEngine.search(text, {prefix: true, combineWith: 'AND'})
       } else if (text.length > 1) {
           results = this._searchEngine.search(text, {prefix: true})
