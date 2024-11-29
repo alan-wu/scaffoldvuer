@@ -40,6 +40,7 @@ const OrgansSceneData = function() {
   const organPartAddedCallbacks = new Array();
 	const organPartRemovedCallbacks = new Array();
   let finishDownloadCallback = undefined;
+	let downloadErrorCallback = undefined;
 	const modelsLoader = ModelsLoaderIn;
   this.NDCCameraControl = undefined;
 	_this.typeName = "Organ Viewer";
@@ -185,6 +186,16 @@ const OrgansSceneData = function() {
 
   this.unsetFinishDownloadCallback = function() {
     finishDownloadCallback = undefined;
+  }
+
+
+  this.setDownloadErrorCallback = function(callback) {
+    if (typeof(callback === "function"))
+      downloadErrorCallback = callback;
+  }
+
+  this.unsetDownloadErrorCallback = function() {
+    downloadErrorCallback = undefined;
   }
 
   this.getNamedObjectsToScreenCoordinates = function(name, camera) {
@@ -435,11 +446,22 @@ const OrgansSceneData = function() {
           finishDownloadCallback();
 		  }
 	  }
-	  
-	  const singleItemDownloadCompletedCallback = function(systemName, partName, useDefautColour) {
-      return function(geometry) {
-        addOrganPart(systemName, partName, useDefautColour, geometry);
-        _this.settingsChanged();
+
+		//The payload can either be a zinc object when the loading is successful or
+		//an object containg the details of error message on failure.
+		//We only use it to handle an error 
+	  const singleItemFinishCallback = function() {
+      return function(payload) {
+
+				if (payload?.type === "Error") {
+					if (downloadErrorCallback) {
+						const error = {
+							xhr: payload.xhr,
+							type: "download-error",
+						};
+						downloadErrorCallback(error);
+					}
+				}
       }
 	  }
 	  
@@ -549,7 +571,7 @@ const OrgansSceneData = function() {
 			      _this.sceneData.metaURL = url;
 						organScene.addZincObjectAddedCallbacks(_addOrganPartCallback(systemName, partName, false));
 			      organScene.addZincObjectRemovedCallbacks(_removeOrganPartCallback(undefined, partName, false));
-						organScene.loadMetadataURL(url, undefined, downloadCompletedCallback());	      
+						organScene.loadMetadataURL(url, singleItemFinishCallback(), downloadCompletedCallback());
 			      _this.scene = organScene;
 			      _this.zincRenderer.setCurrentScene(organScene);
 			      _this.graphicsHighlight.reset();

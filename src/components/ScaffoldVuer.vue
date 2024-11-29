@@ -2209,6 +2209,11 @@ export default {
         }
       }
     },
+    downloadErrorCallback: function() {
+      return (error) => {
+        this.$emit('on-error', error);
+      }
+    },
     setURLFinishCallback: function (options) {
       return () => {
         this.localAnnotationsList.length = 0;
@@ -2368,6 +2373,9 @@ export default {
         this.isReady = false;
         this.$_searchIndex.removeAll();
         this.hideRegionTooltip();
+        this.$module.setDownloadErrorCallback(
+          this.downloadErrorCallback()
+        );
         this.$module.setFinishDownloadCallback(
           this.setURLFinishCallback({
             background: state?.background,

@@ -13,6 +13,7 @@
 
 <script>
 /* eslint-disable no-alert, no-console */
+import { markRaw } from 'vue';
 import { SimpleDropzone } from "simple-dropzone";
 import path from "path";
 
@@ -26,7 +27,8 @@ export default {
   name: "DropZone",
   data: function () {
     return {
-      objectURLs: [],
+      objectURLs: markRaw([]),
+      filesMapping: markRaw({}),
     };
   },
   mounted: function () {
@@ -39,6 +41,9 @@ export default {
     });
   },
   methods: {
+    findRealFilename: function(objectURL) {
+      return this.filesMapping[objectURL]
+    },
     processTextureFile: function(textureData, flatarray) {
       if (textureData && textureData.images && textureData.images.source) {
         const images = textureData.images.source;
@@ -50,6 +55,7 @@ export default {
             const objectURL = URL.createObjectURL(flatarray[index][1]);
             this.objectURLs.push(objectURL);
             textureData.images.source[i] = objectURL;
+            this.filesMapping[objectURL] = images[i];
           }
         }
         const content = JSON.stringify(textureData);
@@ -65,6 +71,7 @@ export default {
           const re = new RegExp(key, "g");
           content = content.replace(re, objectURL);
           this.objectURLs.push(objectURL);
+          this.filesMapping[objectURL] = key;
         }
       }
       const data = JSON.parse(content);
@@ -93,7 +100,8 @@ export default {
     },
     revokeURLs: function () {
       this.objectURLs.forEach(objectURL => URL.revokeObjectURL(objectURL));
-      this.objectURLs = [];    
+      this.objectURLs.length = 0;
+      this.filesMapping = markRaw({});
     },
     localDrop: function (fileMap) {
       this.revokeURLs();
