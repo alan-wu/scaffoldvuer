@@ -185,6 +185,9 @@
           <el-col :span="auto">
             <el-switch v-model="renderInfoOn" active-text="Renderer Info" active-color="#8300bf" />
           </el-col>
+          <el-button size="small" @click="PrintViewport()">
+              Print Viewport
+            </el-button>
         </el-row>
 
         <template v-if="renderInfoOn && rendererInfo">
@@ -597,6 +600,10 @@ export default {
       this.selectedCoordinates =
         this.$refs.scaffold.getDynamicSelectedCoordinates();
       this.rendererInfo = this.$refs.scaffold.getRendererInfo();
+    },
+    PrintViewport: function() {
+      const scene = this.$refs.scaffold.$module.scene;
+      console.log(scene.getZincCameraControls().getCurrentViewport());
     },
     fetchSuggestions: function (term, cb) {
       if (term === "" || !this.$refs.scaffold) {
