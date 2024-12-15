@@ -1,11 +1,19 @@
-import Vue from 'vue'
-import vueCustomElement from 'vue-custom-element';
+import { defineCustomElementSFC } from 'vue-web-component-wrapper';
+import { createPinia, setActivePinia } from "pinia";
+import { useMainStore } from '@/store/index'
 
-Vue.use(vueCustomElement);
+import ScaffoldVuerComponent from "./components/ScaffoldVuer.vue";
 
-import ScaffoldVuer from "./components/ScaffoldVuer.vue";
+setActivePinia(createPinia());
+const mainStore = useMainStore();
+const token = document.cookie.split("; ").find((row) => row.startsWith("user-token"));
+if (mainStore && token) {
+  mainStore.setUserToken(token.split("=")[1]);
+}
 
-Vue.customElement("scaffoldvuer-wc", ScaffoldVuer);
+const ScaffoldVuer = defineCustomElementSFC(ScaffoldVuerComponent, { shadowRoot: false });
+
+customElements.define("scaffoldvuer-wc", ScaffoldVuer);
 
 /*
 const wrappedElement = wrap(Vue, ScaffoldVuer);
