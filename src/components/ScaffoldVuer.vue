@@ -308,7 +308,7 @@
               </template>
             </div>
             <el-row class="viewing-mode-description">
-              {{ viewingModes[viewingMode] }}
+              {{ modeDescription }}
             </el-row>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -805,7 +805,7 @@ export default {
       viewingMode: "Exploration",
       viewingModes: {
         "Exploration": "View and explore detailed visualization of 3D scaffolds",
-        "Annotation": "View internal identifiers of features",
+        "Annotation": ['View feature annotations', 'Add, comment on and view feature annotations'],
       },
       openMapRef: undefined,
       backgroundIconRef: undefined,
@@ -918,24 +918,6 @@ export default {
       }
       this.previousMarkerLabels = markRaw({...labels});
     },
-    annotationDisplay: function(value) {
-      if (this.annotationSidebar) {
-        if (value) {
-          const region = this.tData.region ? this.tData.region +"/" : "";
-          const annotationEntry = {
-            "featureId": region + this.tData.label,
-            "resourceId": this.url,
-            "resource": this.url,
-          };
-          this.$emit('annotation-open', {annotationEntry: annotationEntry,
-            commitCallback: this.commitAnnotationEvent});
-        } else {
-          if (!this.createData.toBeConfirmed || !this.createData.toBeDeleted) {
-            this.$emit("annotation-close");
-          }
-        }
-      }
-    }
   },
   beforeCreate: function () {
     this.$module = new OrgansViewer();
@@ -977,7 +959,17 @@ export default {
     annotationDisplay: function() {
       return this.viewingMode === 'Annotation' && this.tData.active === true &&
         (this.activeDrawMode !== "Point" && this.activeDrawMode !== 'LineString');
-    }
+    },
+    modeDescription: function () {
+      let description = this.viewingModes[this.viewingMode];
+      if (this.viewingMode === 'Annotation') {
+        if (this.userInformation) {
+          return description[1]
+        }
+        return description[0]
+      };
+      return description;
+    },
   },
   methods: {
     /**
@@ -1337,6 +1329,7 @@ export default {
         this.createData.shape = '';
         this.$module.selectObjectOnPick = true;
       } else if (type === 'tool') {
+        if (this.annotationDisplay) return;
         this.activeDrawTool = icon;
         this.createData.shape = this.activeDrawTool ? this.activeDrawTool : '';
         this.$module.selectObjectOnPick = false;
