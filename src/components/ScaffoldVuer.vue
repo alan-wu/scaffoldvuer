@@ -2913,6 +2913,10 @@ export default {
 </style>
 
 <style lang="scss">
+canvas:focus {
+  outline: none !important;
+}
+
 .scaffold-container {
   --el-color-primary: #8300BF;
   --el-color-primary-light-5: #cd99e5;
