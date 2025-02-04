@@ -174,7 +174,11 @@ export default {
           this.x = morph.position.x;
           this.y = morph.position.y;
           this.z = morph.position.z;
-          this.scale = morph.scale.x;
+          if (this.zincObject.isGlyphset) {
+            this.scale = this.zincObject.globalScale;
+          } else {
+            this.scale = morph.scale.x;
+          }
         }
       } else {
         this.zincObject = undefined;
