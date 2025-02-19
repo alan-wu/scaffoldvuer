@@ -132,9 +132,7 @@ export default {
           this.$refs.linesControls.setObject(object);
           this.activeName = "lControls";
         }
-        if (!object.isTextureSlides) {
-          this.$refs.transformationControls.setObject(object);
-        }
+        this.$refs.transformationControls.setObject(object);
       }
       if (object && object.getMorph()) {
         this.material = object.getMorph().material;
