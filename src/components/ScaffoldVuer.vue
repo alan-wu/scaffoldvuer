@@ -972,6 +972,16 @@ export default {
     },
   },
   methods: {
+    enableCoordSystem: function (type, fit) {
+      if (this.$module.scene) {
+        this.$module.scene.enableCoordSystem(type, fit)
+      }
+    },
+    disableCoordSystem: function () {
+      if (this.$module.scene) {
+        this.$module.scene.disableCoordSystem()
+      }
+    },
     /**
      * @public
      * Call this to manually add a zinc object into the current scene.
