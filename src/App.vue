@@ -157,6 +157,29 @@
           </el-col>
         </el-row>
 
+        <el-row :gutter="20" justify="center" align="middle">
+          <el-col :span="auto">
+            <el-button size="small" @click="() => fitBoundingBox=!fitBoundingBox">
+              {{ fitBoundingBox ? 'Unfit' : 'Fit' }} BoundingBox
+            </el-button>
+          </el-col>
+          <el-col :span="auto">
+            <el-button size="small" @click="enableCoordSystem('axes')">
+              Enable Axes CoordSystem
+            </el-button>
+          </el-col>
+          <el-col :span="auto">
+            <el-button size="small" @click="enableCoordSystem('arrow')">
+              Enable Arrow CoordSystem
+            </el-button>
+          </el-col>
+          <el-col :span="auto">
+            <el-button size="small" @click="disableCoordSystem()">
+              Disable CoordSystem
+            </el-button>
+          </el-col>
+        </el-row>
+
         <el-row justify="center" align="middle">
           <el-col>
             <el-row :gutter="20" justify="center" align="middle">
@@ -418,6 +441,7 @@ export default {
       ElIconFolderOpened: shallowRef(ElIconFolderOpened),
       auto: NaN,
       annotator: markRaw(new AnnotationService(`https://mapcore-demo.org/devel/flatmap/v4/annotator`)),
+      fitBoundingBox: false
     };
   },
   watch: {
@@ -473,6 +497,13 @@ export default {
     this.$refs.dropzone.revokeURLs();
   },
   methods: {
+    enableCoordSystem: function (type) {
+      this.$refs.scaffold.disableCoordSystem();
+      this.$refs.scaffold.enableCoordSystem(type, this.fitBoundingBox);
+    },
+    disableCoordSystem: function () {
+      this.$refs.scaffold.disableCoordSystem();
+    },
     exportGLTF: function () {
       this.$refs.scaffold.exportGLTF(false).then((data) => {
         const filename = 'export' + JSON.stringify(new Date()) + '.gltf';
