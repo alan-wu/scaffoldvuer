@@ -164,18 +164,33 @@
             </el-button>
           </el-col>
           <el-col :span="auto">
-            <el-button size="small" @click="enableCoordSystem('axes')">
-              Enable Axes CoordSystem
+            <el-button size="small" @click="createCoordSystem('axes')">
+              Create Axes CoordSystem
             </el-button>
           </el-col>
           <el-col :span="auto">
-            <el-button size="small" @click="enableCoordSystem('arrow')">
-              Enable Arrow CoordSystem
+            <el-button size="small" @click="createCoordSystem('arrow')">
+              Create Arrow CoordSystem
             </el-button>
           </el-col>
           <el-col :span="auto">
-            <el-button size="small" @click="disableCoordSystem()">
+            <el-button size="small" @click="enableCoordSystem('main')">
+              Enable CoordSystem
+            </el-button>
+          </el-col>
+          <el-col :span="auto">
+            <el-button size="small" @click="disableCoordSystem('main')">
               Disable CoordSystem
+            </el-button>
+          </el-col>
+          <el-col :span="auto">
+            <el-button size="small" @click="enableCoordSystem('miniaxes')">
+              Enable MiniAxes CoordSystem
+            </el-button>
+          </el-col>
+          <el-col :span="auto">
+            <el-button size="small" @click="disableCoordSystem('miniaxes')">
+              Disable MiniAxes CoordSystem
             </el-button>
           </el-col>
         </el-row>
@@ -413,7 +428,7 @@ export default {
         y_offset: 50,
         width: 128,
         height: 128,
-        align: "top-right",
+        align: "top-left",
       },
       markerLabels: { },
       render: true,
@@ -497,12 +512,15 @@ export default {
     this.$refs.dropzone.revokeURLs();
   },
   methods: {
-    enableCoordSystem: function (type) {
-      this.$refs.scaffold.disableCoordSystem();
-      this.$refs.scaffold.enableCoordSystem(type, this.fitBoundingBox);
+    createCoordSystem: function (type) {
+      this.$refs.scaffold.destroyCoordSystem();
+      this.$refs.scaffold.createCoordSystem(type, this.fitBoundingBox);
     },
-    disableCoordSystem: function () {
-      this.$refs.scaffold.disableCoordSystem();
+    enableCoordSystem: function (minimap) {
+      this.$refs.scaffold.enableCoordSystem(minimap);
+    },
+    disableCoordSystem: function (minimap) {
+      this.$refs.scaffold.disableCoordSystem(minimap);
     },
     exportGLTF: function () {
       this.$refs.scaffold.exportGLTF(false).then((data) => {

@@ -972,14 +972,24 @@ export default {
     },
   },
   methods: {
-    enableCoordSystem: function (type, fit) {
+    disableCoordSystem: function (minimap) {
       if (this.$module.scene) {
-        this.$module.scene.enableCoordSystem(type, fit)
+        this.$module.scene.disableCoordSystem(minimap)
       }
     },
-    disableCoordSystem: function () {
+    enableCoordSystem: function (minimap) {
       if (this.$module.scene) {
-        this.$module.scene.disableCoordSystem()
+        this.$module.scene.enableCoordSystem(minimap)
+      }
+    },
+    destroyCoordSystem: function () {
+      if (this.$module.scene) {
+        this.$module.scene.destroyCoordSystem()
+      }
+    },
+    createCoordSystem: function (type, fit) {
+      if (this.$module.scene) {
+        this.$module.scene.createCoordSystem(type, fit)
       }
     },
     /**
