@@ -164,34 +164,34 @@
             </el-button>
           </el-col>
           <el-col :span="auto">
-            <el-button size="small" @click="createCoordSystem('axes')">
-              Create Axes CoordSystem
-            </el-button>
+            <el-button-group>
+              <el-button size="small" @click="createCoordSystem('axes', fitBoundingBox)">
+                Create Axes CoordSystem
+              </el-button>
+              <el-button size="small" @click="createCoordSystem('arrow', fitBoundingBox)">
+                Create Arrow CoordSystem
+              </el-button>
+            </el-button-group>
           </el-col>
           <el-col :span="auto">
-            <el-button size="small" @click="createCoordSystem('arrow')">
-              Create Arrow CoordSystem
-            </el-button>
+            <el-button-group>
+              <el-button size="small" @click="enableCoordSystem(false)">
+                Enable CoordSystem
+              </el-button>
+              <el-button size="small" @click="disableCoordSystem(false)">
+                Disable CoordSystem
+              </el-button>
+            </el-button-group>
           </el-col>
           <el-col :span="auto">
-            <el-button size="small" @click="enableCoordSystem('main')">
-              Enable CoordSystem
-            </el-button>
-          </el-col>
-          <el-col :span="auto">
-            <el-button size="small" @click="disableCoordSystem('main')">
-              Disable CoordSystem
-            </el-button>
-          </el-col>
-          <el-col :span="auto">
-            <el-button size="small" @click="enableCoordSystem('miniaxes')">
-              Enable MiniAxes CoordSystem
-            </el-button>
-          </el-col>
-          <el-col :span="auto">
-            <el-button size="small" @click="disableCoordSystem('miniaxes')">
-              Disable MiniAxes CoordSystem
-            </el-button>
+            <el-button-group>
+              <el-button size="small" @click="enableCoordSystem(true)">
+                Enable MiniAxes CoordSystem
+              </el-button>
+              <el-button size="small" @click="disableCoordSystem(true)">
+                Disable MiniAxes CoordSystem
+              </el-button>
+            </el-button-group>
           </el-col>
         </el-row>
 
@@ -512,15 +512,16 @@ export default {
     this.$refs.dropzone.revokeURLs();
   },
   methods: {
-    createCoordSystem: function (type) {
+    disableCoordSystem: function (miniaxes) {
+      this.$refs.scaffold.disableCoordSystem(miniaxes);
+    },
+    enableCoordSystem: function (miniaxes) {
+      this.$refs.scaffold.disableCoordSystem(!miniaxes);
+      this.$refs.scaffold.enableCoordSystem(miniaxes);
+    },
+    createCoordSystem: function (type, fitBoundingBox) {
       this.$refs.scaffold.destroyCoordSystem();
-      this.$refs.scaffold.createCoordSystem(type, this.fitBoundingBox);
-    },
-    enableCoordSystem: function (minimap) {
-      this.$refs.scaffold.enableCoordSystem(minimap);
-    },
-    disableCoordSystem: function (minimap) {
-      this.$refs.scaffold.disableCoordSystem(minimap);
+      this.$refs.scaffold.createCoordSystem(type, fitBoundingBox);
     },
     exportGLTF: function () {
       this.$refs.scaffold.exportGLTF(false).then((data) => {

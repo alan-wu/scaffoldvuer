@@ -972,14 +972,14 @@ export default {
     },
   },
   methods: {
-    disableCoordSystem: function (minimap) {
+    disableCoordSystem: function (miniaxes) {
       if (this.$module.scene) {
-        this.$module.scene.disableCoordSystem(minimap)
+        this.$module.scene.disableCoordSystem(miniaxes)
       }
     },
-    enableCoordSystem: function (minimap) {
+    enableCoordSystem: function (miniaxes) {
       if (this.$module.scene) {
-        this.$module.scene.enableCoordSystem(minimap)
+        this.$module.scene.enableCoordSystem(miniaxes)
       }
     },
     destroyCoordSystem: function () {
