@@ -972,19 +972,9 @@ export default {
     },
   },
   methods: {
-    disableCoordSystem: function (miniaxes) {
+    enableCoordSystem: function (enable, options) {
       if (this.$module.scene) {
-        this.$module.scene.disableCoordSystem(miniaxes)
-      }
-    },
-    enableCoordSystem: function (miniaxes) {
-      if (this.$module.scene) {
-        this.$module.scene.enableCoordSystem(miniaxes)
-      }
-    },
-    destroyCoordSystem: function () {
-      if (this.$module.scene) {
-        this.$module.scene.destroyCoordSystem()
+        this.$module.scene.enableCoordSystem(enable, options)
       }
     },
     createCoordSystem: function (type, fit) {

@@ -175,23 +175,18 @@
           </el-col>
           <el-col :span="auto">
             <el-button-group>
-              <el-button size="small" @click="enableCoordSystem(false)">
+              <el-button size="small" @click="enableCoordSystem(true)">
                 Enable CoordSystem
               </el-button>
-              <el-button size="small" @click="disableCoordSystem(false)">
-                Disable CoordSystem
+              <el-button size="small" @click="enableCoordSystem(true, { miniaxes: true })">
+                Enable MiniAxes CoordSystem
               </el-button>
             </el-button-group>
           </el-col>
           <el-col :span="auto">
-            <el-button-group>
-              <el-button size="small" @click="enableCoordSystem(true)">
-                Enable MiniAxes CoordSystem
+              <el-button size="small" @click="enableCoordSystem(false)">
+                Disable CoordSystem
               </el-button>
-              <el-button size="small" @click="disableCoordSystem(true)">
-                Disable MiniAxes CoordSystem
-              </el-button>
-            </el-button-group>
           </el-col>
         </el-row>
 
@@ -512,15 +507,11 @@ export default {
     this.$refs.dropzone.revokeURLs();
   },
   methods: {
-    disableCoordSystem: function (miniaxes) {
-      this.$refs.scaffold.disableCoordSystem(miniaxes);
-    },
-    enableCoordSystem: function (miniaxes) {
-      this.$refs.scaffold.disableCoordSystem(!miniaxes);
-      this.$refs.scaffold.enableCoordSystem(miniaxes);
+    enableCoordSystem: function (enable, options) {
+      this.$refs.scaffold.enableCoordSystem(enable, options);
     },
     createCoordSystem: function (type, fitBoundingBox) {
-      this.$refs.scaffold.destroyCoordSystem();
+      this.$refs.scaffold.enableCoordSystem(false, { erase: true });
       this.$refs.scaffold.createCoordSystem(type, fitBoundingBox);
     },
     exportGLTF: function () {
