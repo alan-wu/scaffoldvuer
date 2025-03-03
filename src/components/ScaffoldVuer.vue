@@ -29,7 +29,7 @@
     />
     <div v-show="displayUI && !isTransitioning">
       <DrawToolbar
-        v-if="viewingMode === 'Annotation' && (authorisedUser || enableLocalAnnotations)"
+        v-if="viewingMode === 'Annotation' && (authorisedUser || offlineAnnotate)"
         :toolbarOptions="toolbarOptions"
         :activeDrawTool="activeDrawTool"
         :activeDrawMode="activeDrawMode"
@@ -698,13 +698,6 @@ export default {
       type: String,
       default: "https://mapcore-demo.org/current/flatmap/v3/"
     },
-    /**
-     * Enable local annotations
-     */
-     enableLocalAnnotations: {
-      type: Boolean,
-      default: false
-    },
   },
   provide() {
     return {
@@ -809,6 +802,8 @@ export default {
       },
       openMapRef: undefined,
       backgroundIconRef: undefined,
+      offlineAnnotate: false,
+      offlineAnnotation: markRaw([]),
       authorisedUser: undefined,
       toolbarOptions: [
         "Delete",
@@ -818,7 +813,6 @@ export default {
       ],
       activeDrawTool: undefined,
       activeDrawMode: undefined,
-      localAnnotationsList: markRaw([]),
       boundingDims: {
         centre: [0, 0, 0],
         size:[1, 1, 1],
@@ -1005,12 +999,12 @@ export default {
      * Remove an entry matching region and group from
      * local annotation list.
      */
-    removeFromLocalAnnotationList: function(regionPath, groupName) {
-      for (let i = 0; i < this.localAnnotationsList.length; i++) {
-        const annotation = this.localAnnotationsList[i];
+    removeFromOfflineAnnotation: function(regionPath, groupName) {
+      for (let i = 0; i < this.offlineAnnotation.length; i++) {
+        const annotation = this.offlineAnnotation[i];
         if (annotation.region === regionPath &&
           annotation.group === groupName) {
-          this.localAnnotationsList.splice(i, 1);
+          this.offlineAnnotation.splice(i, 1);
           return;
         }
       }
@@ -1109,7 +1103,7 @@ export default {
     addAndEditAnnotations: function (region, group, zincObject, comment) {
       const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken, zincObject,
         region, group, this.url, comment);
-      if (this.enableLocalAnnotations) {
+      if (this.offlineAnnotate) {
         annotation.group = group;
         let regionPath = region;
         if (regionPath.slice(-1) === "/") {
@@ -1475,7 +1469,7 @@ export default {
       }
     },
     activateAnnotationMode: function(names, event) {
-      if (this.authorisedUser || this.enableLocalAnnotations) {
+      if (this.authorisedUser || this.offlineAnnotate) {
         this.createData.toBeDeleted = false;
         if ((this.createData.shape !== "") || (this.createData.editingIndex > -1)) {
           // Create new shape bsaed on current settings
@@ -2209,7 +2203,7 @@ export default {
     },
     setURLFinishCallback: function (options) {
       return () => {
-        this.localAnnotationsList.length = 0;
+        this.offlineAnnotation.length = 0;
         this.updateSettingsfromScene();
         this.$module.updateTime(0.01);
         this.$module.updateTime(0);
@@ -2309,23 +2303,23 @@ export default {
     /**
      * Return a copy of the local annotations list.
      * This list is used for storing user created annotation
-     * when enableLocalAnnotations is set to true.
+     * when offlineAnnotate is set to true.
      *
      * @public
      */
-     getLocalAnnotations: function () {
-      return [...this.localAnnotationsList];
+    getOfflineAnnotations: function () {
+      return [...this.offlineAnnotation];
     },
     /**
      * Import local annotations. The annotations will only
-     * be imported when enableLocalAnnotations is set to
+     * be imported when offlineAnnotate is set to
      * true;
      *
      * @public
      * @arg {Array} `annotationsList`
      */
-     importLocalAnnotations: function (annotationsList) {
-      if (this.enableLocalAnnotations) {
+    importOfflineAnnotations: function (annotationsList) {
+      if (this.offlineAnnotate) {
         //Make sure the annotations are encoded correctly
         annotationsList.forEach(annotation => {
           const group = annotation.group;
@@ -2342,7 +2336,7 @@ export default {
         annotationFeaturesToPrimitives(this.$module.scene, featuresList);
         //Make a local non-reactive copy.
         annotationsList.forEach((annotation) => {
-          this.localAnnotationsList.push({...annotation});
+          this.offlineAnnotation.push({...annotation});
         });
       }
     },
