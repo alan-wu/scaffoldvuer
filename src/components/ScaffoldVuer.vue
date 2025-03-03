@@ -310,6 +310,9 @@
             <el-row class="viewing-mode-description">
               {{ modeDescription }}
             </el-row>
+            <el-row v-if="viewingMode === 'Annotation' && offlineAnnotate" class="viewing-mode-description">
+              (Offline annotate)
+            </el-row>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText"> Change background </el-row>
@@ -1022,7 +1025,10 @@ export default {
         //Remove relevant objects from the rest of the app.
         if (objects.length === 0) {
           this.$_searchIndex.removeZincObject(zincObject, zincObject.uuid);
-          this.removeFromLocalAnnotationList(regionPath, groupName);
+          if (this.offlineAnnotate) {
+            this.removeFromOfflineAnnotation(regionPath, groupName);
+            localStorage.setItem('scaffold-offline-annotation', JSON.stringify(this.offlineAnnotation))
+          }
         }
       }
     },
@@ -1111,8 +1117,9 @@ export default {
         }
         annotation.region = regionPath;
         //Remove previous entry if there is matching region and group
-        this.removeFromLocalAnnotationList(regionPath, group);
-        this.localAnnotationsList.push(annotation);
+        this.removeFromOfflineAnnotation(regionPath, group);
+        this.offlineAnnotation.push(annotation);
+        localStorage.setItem('scaffold-offline-annotation', JSON.stringify(this.offlineAnnotation))
       }
       this.$emit('userPrimitivesUpdated', {region, group, zincObject});
     },
@@ -1200,7 +1207,7 @@ export default {
      * Confirm delete of user created primitive.
      * This is only called from callback.
      */
-    confirmDelete: function() {
+    confirmDelete: function () {
       if (this._editingZincObject?.isEditable) {
         const regionPath = this._editingZincObject.region.getFullPath() + "/";
         const group = this._editingZincObject.groupName;
@@ -1323,7 +1330,6 @@ export default {
         this.createData.shape = '';
         this.$module.selectObjectOnPick = true;
       } else if (type === 'tool') {
-        if (this.annotationDisplay) return;
         this.activeDrawTool = icon;
         this.createData.shape = this.activeDrawTool ? this.activeDrawTool : '';
         this.$module.selectObjectOnPick = false;
@@ -1958,6 +1964,25 @@ export default {
       this.hideRegionTooltip();
       return false;
     },
+    addAnnotationFeature: async function () {
+      let drawnFeatures;
+      if (this.offlineAnnotate) {
+        this.offlineAnnotation = JSON.parse(localStorage.getItem('scaffold-offline-annotation')) || [];
+        drawnFeatures = this.offlineAnnotation.filter((offline) => offline.resource === this.url).map(offline => offline.feature);
+        annotationFeaturesToPrimitives(this.$module.scene, drawnFeatures);
+      } else {
+        drawnFeatures = [];
+        const drawn = await getDrawnAnnotations(this.annotator, this.userToken, this.url);
+        if (drawn && drawn.features) {
+          drawnFeatures = [...drawn.features];
+        }
+        const drawnEncode = await getDrawnAnnotations(this.annotator, this.userToken, encodeURIComponent(this.url));
+        if (drawnEncode && drawnEncode.features) {
+          drawnFeatures = [...drawnFeatures, ...drawnEncode.features];
+        }
+      }
+      annotationFeaturesToPrimitives(this.$module.scene, drawnFeatures);
+    },
     /**
      * Callback on viewing mode change
      * Optional, can be used to update the view mode.
@@ -1968,29 +1993,23 @@ export default {
           this.viewingMode = modeName;
         }
         if (this.viewingMode === "Annotation") {
+          this.offlineAnnotate = false;
           let authenticated = false;
           if (this.authorisedUser) {
             authenticated = true;
           }
-          this.authorisedUser = undefined;
+          this.loading = true && !authenticated;
           this.annotator.authenticate(this.userToken).then((userData) => {
             if (userData.name && userData.email && userData.canUpdate) {
               this.authorisedUser = userData;
-              //Only draw annotations stored in the server on initial authentication
-              if (!authenticated) {
-                getDrawnAnnotations(this.annotator, this.userToken, this.url).then((payload) => {
-                  if (payload && payload.features) {
-                    annotationFeaturesToPrimitives(this.$module.scene, payload.features);
-                  }
-                });
-                //Support previously supported encoded resource
-                getDrawnAnnotations(this.annotator, this.userToken, encodeURIComponent(this.url)).then((payload) => {
-                  if (payload && payload.features) {
-                    annotationFeaturesToPrimitives(this.$module.scene, payload.features);
-                  }
-                });
-              }
+            } else {
+              this.authorisedUser = undefined;
+              this.offlineAnnotate = true;
             }
+            if (!authenticated) {
+              this.addAnnotationFeature();
+            }
+            this.loading = false;
           });
         } else if (this.viewingMode === "Exploration") {
           this.activeDrawTool = undefined;
@@ -2338,6 +2357,7 @@ export default {
         annotationsList.forEach((annotation) => {
           this.offlineAnnotation.push({...annotation});
         });
+        localStorage.setItem('scaffold-offline-annotation', JSON.stringify(this.offlineAnnotation))
       }
     },
 
