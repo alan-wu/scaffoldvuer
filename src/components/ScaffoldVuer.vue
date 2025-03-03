@@ -29,7 +29,7 @@
     />
     <div v-show="displayUI && !isTransitioning">
       <DrawToolbar
-        v-if="viewingMode === 'Annotation' && (userInformation || enableLocalAnnotations)"
+        v-if="viewingMode === 'Annotation' && (authorisedUser || enableLocalAnnotations)"
         :toolbarOptions="toolbarOptions"
         :activeDrawTool="activeDrawTool"
         :activeDrawMode="activeDrawMode"
@@ -809,7 +809,7 @@ export default {
       },
       openMapRef: undefined,
       backgroundIconRef: undefined,
-      userInformation: undefined,
+      authorisedUser: undefined,
       toolbarOptions: [
         "Delete",
         "Edit",
@@ -963,7 +963,7 @@ export default {
     modeDescription: function () {
       let description = this.viewingModes[this.viewingMode];
       if (this.viewingMode === 'Annotation') {
-        if (this.userInformation) {
+        if (this.authorisedUser) {
           return description[1]
         }
         return description[0]
@@ -1475,7 +1475,7 @@ export default {
       }
     },
     activateAnnotationMode: function(names, event) {
-      if (this.userInformation || this.enableLocalAnnotations) {
+      if (this.authorisedUser || this.enableLocalAnnotations) {
         this.createData.toBeDeleted = false;
         if ((this.createData.shape !== "") || (this.createData.editingIndex > -1)) {
           // Create new shape bsaed on current settings
@@ -1975,13 +1975,13 @@ export default {
         }
         if (this.viewingMode === "Annotation") {
           let authenticated = false;
-          if (this.userInformation) {
+          if (this.authorisedUser) {
             authenticated = true;
           }
-          this.userInformation = undefined;
+          this.authorisedUser = undefined;
           this.annotator.authenticate(this.userToken).then((userData) => {
             if (userData.name && userData.email && userData.canUpdate) {
-              this.userInformation = userData;
+              this.authorisedUser = userData;
               //Only draw annotations stored in the server on initial authentication
               if (!authenticated) {
                 getDrawnAnnotations(this.annotator, this.userToken, this.url).then((payload) => {
