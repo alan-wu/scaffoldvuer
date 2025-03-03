@@ -1027,7 +1027,6 @@ export default {
           this.$_searchIndex.removeZincObject(zincObject, zincObject.uuid);
           if (this.offlineAnnotate) {
             this.removeFromOfflineAnnotation(regionPath, groupName);
-            localStorage.setItem('scaffold-offline-annotation', JSON.stringify(this.offlineAnnotation))
           }
         }
       }
@@ -1214,9 +1213,11 @@ export default {
         const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken,
           this._editingZincObject, regionPath, group, this.url, "Deleted");
         if (annotation) {
-          const childRegion = this.$module.scene.getRootRegion().
-            findChildFromPath(regionPath);
+          const childRegion = this.$module.scene.getRootRegion().findChildFromPath(regionPath);
           childRegion.removeZincObject(this._editingZincObject);
+          if (this.offlineAnnotate) {
+            localStorage.setItem('scaffold-offline-annotation', JSON.stringify(this.offlineAnnotation))
+          }
         }
       }
       this.cancelCreate();
@@ -1964,6 +1965,17 @@ export default {
       this.hideRegionTooltip();
       return false;
     },
+    clearAnnotationFeature: function () {
+      const groups = this.offlineAnnotation.map(offline => offline.group);
+      groups.forEach((name) => {
+        const zincObject = this.$module.scene.findObjectsWithGroupName(name, false);
+        if (zincObject && zincObject.length) {
+          const regionPath = zincObject[0].region.getFullPath() + "/";
+          const childRegion = this.$module.scene.getRootRegion().findChildFromPath(regionPath);
+          childRegion.removeZincObject(zincObject[0]);
+        }
+      })
+    },
     addAnnotationFeature: async function () {
       let drawnFeatures;
       if (this.offlineAnnotate) {
@@ -1994,11 +2006,7 @@ export default {
         }
         if (this.viewingMode === "Annotation") {
           this.offlineAnnotate = false;
-          let authenticated = false;
-          if (this.authorisedUser) {
-            authenticated = true;
-          }
-          this.loading = true && !authenticated;
+          this.loading = true;
           this.annotator.authenticate(this.userToken).then((userData) => {
             if (userData.name && userData.email && userData.canUpdate) {
               this.authorisedUser = userData;
@@ -2006,15 +2014,16 @@ export default {
               this.authorisedUser = undefined;
               this.offlineAnnotate = true;
             }
-            if (!authenticated) {
-              this.addAnnotationFeature();
-            }
+            this.addAnnotationFeature();
             this.loading = false;
           });
-        } else if (this.viewingMode === "Exploration") {
-          this.activeDrawTool = undefined;
-          this.activeDrawMode = undefined;
-          this.createData.shape = "";
+        } else {
+          this.clearAnnotationFeature()
+          if (this.viewingMode === "Exploration") {
+            this.activeDrawTool = undefined;
+            this.activeDrawMode = undefined;
+            this.createData.shape = "";
+          }
         }
         if ((this.viewingMode === "Exploration") ||
           (this.viewingMode === "Annotation") &&
