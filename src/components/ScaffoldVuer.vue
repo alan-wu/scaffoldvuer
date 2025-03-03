@@ -2211,6 +2211,9 @@ export default {
         if (options.background) {
           this.backgroundChangeCallback(options.background);
         }
+        if (options.offlineAnnotation) {
+          localStorage.setItem('scaffold-offline-annotation', options.offlineAnnotation)
+        }
         if (options.viewingMode) {
           this.changeViewingMode(options.viewingMode);
         }
@@ -2280,6 +2283,9 @@ export default {
       if (this.lastSelected && this.lastSelected.group) {
         state.search = {...this.lastSelected};
       }
+      if (this.offlineAnnotate) {
+        state.offlineAnnotation = JSON.stringify(this.offlineAnnotation)
+      }
       return state;
     },
     /**
@@ -2299,6 +2305,7 @@ export default {
             background: state.background,
             viewingMode: this.viewingMode,
             search: state.search,
+            offlineAnnotation: state.offlineAnnotation,
           });
         } else {
           if (state.background || state.search || state.viewport || state.viewingMode || state.visibility) {
@@ -2312,6 +2319,7 @@ export default {
                   viewport: state.viewport,
                   visibility: state.visibility,
                   search: state.search,
+                  offlineAnnotation: state.offlineAnnotation,
                 })
               );
             }
@@ -2401,6 +2409,7 @@ export default {
             viewURL: this.viewURL,
             viewport: state?.viewport,
             visibility: state?.visibility,
+            offlineAnnotation: state?.offlineAnnotation,
           })
         );
         if (this.fileFormat === "gltf") {
