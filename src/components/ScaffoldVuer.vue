@@ -814,6 +814,7 @@ export default {
         "Point",
         "LineString",
       ],
+      existDrawnFeatures: [], // Store all exist drawn features
       activeDrawTool: undefined,
       activeDrawMode: undefined,
       boundingDims: {
@@ -1966,8 +1967,7 @@ export default {
       return false;
     },
     clearAnnotationFeature: function () {
-      const groups = this.offlineAnnotation.map(offline => offline.group);
-      groups.forEach((name) => {
+      this.existDrawnFeatures.forEach((name) => {
         const zincObject = this.$module.scene.findObjectsWithGroupName(name, false);
         if (zincObject && zincObject.length) {
           const regionPath = zincObject[0].region.getFullPath() + "/";
@@ -1975,13 +1975,13 @@ export default {
           childRegion.removeZincObject(zincObject[0]);
         }
       })
+      this.$refs.scaffoldTreeControls.removeRegion('__annotation');
     },
     addAnnotationFeature: async function () {
       let drawnFeatures;
       if (this.offlineAnnotate) {
         this.offlineAnnotation = JSON.parse(localStorage.getItem('scaffold-offline-annotation')) || [];
         drawnFeatures = this.offlineAnnotation.filter((offline) => offline.resource === this.url).map(offline => offline.feature);
-        annotationFeaturesToPrimitives(this.$module.scene, drawnFeatures);
       } else {
         drawnFeatures = [];
         const drawn = await getDrawnAnnotations(this.annotator, this.userToken, this.url);
@@ -1993,6 +1993,7 @@ export default {
           drawnFeatures = [...drawnFeatures, ...drawnEncode.features];
         }
       }
+      this.existDrawnFeatures = drawnFeatures.map(feature => decodeURIComponent(feature.id).split("/").filter(e => e).pop())
       annotationFeaturesToPrimitives(this.$module.scene, drawnFeatures);
     },
     /**
