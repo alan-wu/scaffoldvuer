@@ -814,7 +814,7 @@ export default {
         "Point",
         "LineString",
       ],
-      existDrawnFeatures: [], // Store all exist drawn features
+      existDrawnFeatures: markRaw([]), // Store all exist drawn features
       activeDrawTool: undefined,
       activeDrawMode: undefined,
       boundingDims: {
@@ -1109,6 +1109,8 @@ export default {
     addAndEditAnnotations: function (region, group, zincObject, comment) {
       const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken, zincObject,
         region, group, this.url, comment);
+      this.existDrawnFeatures = markRaw(this.existDrawnFeatures.filter(feature => feature.id !== annotation.item.id));
+      this.existDrawnFeatures.push(annotation.feature);
       if (this.offlineAnnotate) {
         annotation.group = group;
         let regionPath = region;
@@ -1214,6 +1216,7 @@ export default {
         const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken,
           this._editingZincObject, regionPath, group, this.url, "Deleted");
         if (annotation) {
+          this.existDrawnFeatures = markRaw(this.existDrawnFeatures.filter(feature => feature.id !== annotation.item.id));
           const childRegion = this.$module.scene.getRootRegion().findChildFromPath(regionPath);
           childRegion.removeZincObject(this._editingZincObject);
           if (this.offlineAnnotate) {
@@ -1967,7 +1970,8 @@ export default {
       return false;
     },
     clearAnnotationFeature: function () {
-      this.existDrawnFeatures.forEach((name) => {
+      const featureGroups = this.existDrawnFeatures.map(feature => decodeURIComponent(feature.id).split("/").pop());
+      featureGroups.forEach((name) => {
         const zincObject = this.$module.scene.findObjectsWithGroupName(name, false);
         if (zincObject && zincObject.length) {
           const regionPath = zincObject[0].region.getFullPath() + "/";
@@ -1993,7 +1997,7 @@ export default {
           drawnFeatures = [...drawnFeatures, ...drawnEncode.features];
         }
       }
-      this.existDrawnFeatures = drawnFeatures.map(feature => decodeURIComponent(feature.id).split("/").filter(e => e).pop())
+      this.existDrawnFeatures = markRaw(drawnFeatures)
       annotationFeaturesToPrimitives(this.$module.scene, drawnFeatures);
     },
     /**
