@@ -1997,7 +1997,7 @@ export default {
           drawnFeatures = [...drawnFeatures, ...drawnEncode.features];
         }
       }
-      this.existDrawnFeatures = markRaw(drawnFeatures)
+      this.existDrawnFeatures = markRaw(drawnFeatures);
       annotationFeaturesToPrimitives(this.$module.scene, drawnFeatures);
     },
     /**
@@ -2009,12 +2009,13 @@ export default {
         if (modeName) {
           this.viewingMode = modeName;
         }
+        this.clearAnnotationFeature();
         if (this.viewingMode === "Annotation") {
-          this.offlineAnnotate = false;
           this.loading = true;
           this.annotator.authenticate(this.userToken).then((userData) => {
             if (userData.name && userData.email && userData.canUpdate) {
               this.authorisedUser = userData;
+              this.offlineAnnotate = false;
             } else {
               this.authorisedUser = undefined;
               this.offlineAnnotate = true;
@@ -2023,7 +2024,6 @@ export default {
             this.loading = false;
           });
         } else {
-          this.clearAnnotationFeature()
           if (this.viewingMode === "Exploration") {
             this.activeDrawTool = undefined;
             this.activeDrawMode = undefined;
@@ -2217,7 +2217,10 @@ export default {
           this.backgroundChangeCallback(options.background);
         }
         if (options.offlineAnnotation) {
-          localStorage.setItem('scaffold-offline-annotation', options.offlineAnnotation)
+          localStorage.removeItem('scaffold-offline-annotation');
+          if (options.offlineAnnotation.expire > new Date().getTime()) {
+            localStorage.setItem('scaffold-offline-annotation', options.offlineAnnotation.value);
+          }
         }
         if (options.viewingMode) {
           this.changeViewingMode(options.viewingMode);
@@ -2289,7 +2292,10 @@ export default {
         state.search = {...this.lastSelected};
       }
       if (this.offlineAnnotate) {
-        state.offlineAnnotation = JSON.stringify(this.offlineAnnotation)
+        state.offlineAnnotation = {
+          expire: new Date().getTime() + 24 * 60 * 60 * 1000,
+          value: JSON.stringify(this.offlineAnnotation),
+        };
       }
       return state;
     },
