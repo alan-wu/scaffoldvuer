@@ -1970,6 +1970,7 @@ export default {
       return false;
     },
     clearAnnotationFeature: function () {
+      const annotations = this.getOfflineAnnotations();
       const featureGroups = this.existDrawnFeatures.map(feature => decodeURIComponent(feature.id).split("/").pop());
       featureGroups.forEach((name) => {
         const zincObject = this.$module.scene.findObjectsWithGroupName(name, false);
@@ -1980,6 +1981,9 @@ export default {
         }
       })
       this.$refs.scaffoldTreeControls.removeRegion('__annotation');
+      // Offline annotations are removed when switch viewing mode
+      // Restore data in case need to save settings, doesn't affect anything
+      this.offlineAnnotation = annotations;
     },
     addAnnotationFeature: async function () {
       let drawnFeatures;
