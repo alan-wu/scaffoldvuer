@@ -1121,7 +1121,7 @@ export default {
         //Remove previous entry if there is matching region and group
         this.removeFromOfflineAnnotation(regionPath, group);
         this.offlineAnnotation.push(annotation);
-        localStorage.setItem('scaffold-offline-annotation', JSON.stringify(this.offlineAnnotation))
+        sessionStorage.setItem('scaffold-offline-annotation', JSON.stringify(this.offlineAnnotation));
       }
       this.$emit('userPrimitivesUpdated', {region, group, zincObject});
     },
@@ -1220,7 +1220,7 @@ export default {
           const childRegion = this.$module.scene.getRootRegion().findChildFromPath(regionPath);
           childRegion.removeZincObject(this._editingZincObject);
           if (this.offlineAnnotate) {
-            localStorage.setItem('scaffold-offline-annotation', JSON.stringify(this.offlineAnnotation))
+            sessionStorage.setItem('scaffold-offline-annotation', JSON.stringify(this.offlineAnnotation));
           }
         }
       }
@@ -1988,7 +1988,7 @@ export default {
     addAnnotationFeature: async function () {
       let drawnFeatures;
       if (this.offlineAnnotate) {
-        this.offlineAnnotation = JSON.parse(localStorage.getItem('scaffold-offline-annotation')) || [];
+        this.offlineAnnotation = JSON.parse(sessionStorage.getItem('scaffold-offline-annotation')) || [];
         drawnFeatures = this.offlineAnnotation.filter((offline) => offline.resource === this.url).map(offline => offline.feature);
       } else {
         drawnFeatures = [];
@@ -2221,9 +2221,9 @@ export default {
           this.backgroundChangeCallback(options.background);
         }
         if (options.offlineAnnotation) {
-          localStorage.removeItem('scaffold-offline-annotation');
+          sessionStorage.removeItem('scaffold-offline-annotation');
           if (options.offlineAnnotation.expire > new Date().getTime()) {
-            localStorage.setItem('scaffold-offline-annotation', options.offlineAnnotation.value);
+            sessionStorage.setItem('scaffold-offline-annotation', options.offlineAnnotation.value);
           }
         }
         if (options.viewingMode) {
@@ -2389,7 +2389,7 @@ export default {
         annotationsList.forEach((annotation) => {
           this.offlineAnnotation.push({...annotation});
         });
-        localStorage.setItem('scaffold-offline-annotation', JSON.stringify(this.offlineAnnotation))
+        sessionStorage.setItem('scaffold-offline-annotation', JSON.stringify(this.offlineAnnotation));
       }
     },
 
