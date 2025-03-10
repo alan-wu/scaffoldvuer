@@ -2296,8 +2296,8 @@ export default {
       }
       if (this.offlineAnnotate) {
         state.offlineAnnotation = {
-          expire: new Date().getTime() + 24 * 60 * 60 * 1000,
-          value: JSON.stringify(this.offlineAnnotation),
+          expiry: new Date().getTime() + 24 * 60 * 60 * 1000,
+          value: sessionStorage.getItem('offline-annotation'),
         };
       }
       return state;
