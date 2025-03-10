@@ -1118,6 +1118,7 @@ export default {
           regionPath = regionPath.slice(0, -1);
         }
         annotation.region = regionPath;
+        this.offlineAnnotation = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
         //Remove previous entry if there is matching region and group
         this.removeFromOfflineAnnotation(regionPath, group);
         this.offlineAnnotation.push(annotation);
