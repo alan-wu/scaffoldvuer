@@ -51,14 +51,23 @@ RendererModule.prototype.getIntersectedObject = function(intersects) {
           return 1;
         } else if (intersect.object.name && 
           intersect.object.userData.isZincObject) {
-          return 2;
+          if (intersect.object.name === "_Unnamed") {
+            return 3;
+          } else {
+            return 2;
+          }
         }
       }
       return 0;
     });
     //prioritise markers
     let i = typeMap.indexOf(1);
-    i = (i > -1) ? i : typeMap.indexOf(2);
+    if (i > -1) {
+      return intersects[i];
+    }
+    //Proritise objects that is not called _Unnamed
+    i = typeMap.indexOf(2);
+    i = (i > -1) ? i : typeMap.indexOf(3);
     return intersects[i];
 	}
 	return undefined;

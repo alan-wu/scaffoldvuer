@@ -79,7 +79,7 @@
           />
         </el-col>
       </el-row>
-      <el-row class="tool-row">
+      <el-row class="tool-row" v-if="enableScaling">
         <el-col :offset="0" :span="6">
           Scale:
         </el-col>
@@ -143,6 +143,7 @@ export default {
       min: [0, 0, 0],
       max: [1, 1, 1],
       zincObject: undefined,
+      enableScaling: true
     };
   },
   watch: {
@@ -174,7 +175,12 @@ export default {
           this.x = morph.position.x;
           this.y = morph.position.y;
           this.z = morph.position.z;
-          this.scale = morph.scale.x;
+          if (this.zincObject.isGlyphset) {
+            this.scale = this.zincObject.globalScale;
+          } else {
+            this.scale = morph.scale.x;
+          }
+          this.enableScaling = this.zincObject.isTextureSlides ? false : true;
         }
       } else {
         this.zincObject = undefined;
