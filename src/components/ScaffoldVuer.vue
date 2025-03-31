@@ -2296,10 +2296,8 @@ export default {
         state.search = {...this.lastSelected};
       }
       if (this.offlineAnnotate) {
-        if (!sessionStorage.getItem('offline-annotation-expiry')) {
-          const expiry = new Date().getTime() + 24 * 60 * 60 * 1000;
-          sessionStorage.setItem('offline-annotation-expiry', expiry);
-        }
+        const expiry = new Date().getTime() + 24 * 60 * 60 * 1000;
+        sessionStorage.setItem('offline-annotation-expiry', expiry);
         state.offlineAnnotation = {
           expiry: sessionStorage.getItem('offline-annotation-expiry'),
           value: sessionStorage.getItem('offline-annotation'),
