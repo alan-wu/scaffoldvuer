@@ -2222,9 +2222,7 @@ export default {
           this.backgroundChangeCallback(options.background);
         }
         if (options.offlineAnnotations) {
-          if (options.offlineAnnotations.expiry > new Date().getTime()) {
-            sessionStorage.setItem('offline-annotation', options.offlineAnnotations.value);
-          }
+          sessionStorage.setItem('offline-annotation', options.offlineAnnotations);
         }
         if (options.viewingMode) {
           this.changeViewingMode(options.viewingMode);
@@ -2296,12 +2294,7 @@ export default {
         state.search = {...this.lastSelected};
       }
       if (this.offlineAnnotationEnabled) {
-        const expiry = new Date().getTime() + 24 * 60 * 60 * 1000;
-        sessionStorage.setItem('offline-annotation-expiry', expiry);
-        state.offlineAnnotations = {
-          expiry: sessionStorage.getItem('offline-annotation-expiry'),
-          value: sessionStorage.getItem('offline-annotation'),
-        };
+        state.offlineAnnotations = sessionStorage.getItem('offline-annotation');
       }
       return state;
     },
