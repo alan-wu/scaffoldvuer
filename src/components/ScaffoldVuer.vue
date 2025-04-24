@@ -1951,11 +1951,11 @@ export default {
             );
           } else {
             const region = this.tData.region ? this.tData.region +"/" : "";
-            const annotationEntry = {
+            const annotationEntry = [{
               "featureId": region + this.tData.label,
               "resourceId": this.url,
               "resource": this.url,
-            };
+            }];
             this.$emit('annotation-open', {
               annotationEntry: annotationEntry,
               createData: this.createData,
