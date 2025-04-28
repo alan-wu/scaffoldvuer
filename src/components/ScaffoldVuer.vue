@@ -29,7 +29,7 @@
     />
     <div v-show="displayUI && !isTransitioning">
       <DrawToolbar
-        v-if="viewingMode === 'Annotation' && (userInformation || enableLocalAnnotations)"
+        v-if="viewingMode === 'Annotation' && (authorisedUser || offlineAnnotationEnabled)"
         :toolbarOptions="toolbarOptions"
         :activeDrawTool="activeDrawTool"
         :activeDrawMode="activeDrawMode"
@@ -309,6 +309,9 @@
             </div>
             <el-row class="viewing-mode-description">
               {{ modeDescription }}
+            </el-row>
+            <el-row v-if="viewingMode === 'Annotation' && offlineAnnotationEnabled" class="viewing-mode-description">
+              (Offline annotate)
             </el-row>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -698,13 +701,6 @@ export default {
       type: String,
       default: "https://mapcore-demo.org/current/flatmap/v3/"
     },
-    /**
-     * Enable local annotations
-     */
-     enableLocalAnnotations: {
-      type: Boolean,
-      default: false
-    },
   },
   provide() {
     return {
@@ -809,16 +805,18 @@ export default {
       },
       openMapRef: undefined,
       backgroundIconRef: undefined,
-      userInformation: undefined,
+      offlineAnnotationEnabled: false,
+      offlineAnnotations: markRaw([]),
+      authorisedUser: undefined,
       toolbarOptions: [
         "Delete",
         "Edit",
         "Point",
         "LineString",
       ],
+      existDrawnFeatures: markRaw([]), // Store all exist drawn features
       activeDrawTool: undefined,
       activeDrawMode: undefined,
-      localAnnotationsList: markRaw([]),
       boundingDims: {
         centre: [0, 0, 0],
         size:[1, 1, 1],
@@ -963,7 +961,7 @@ export default {
     modeDescription: function () {
       let description = this.viewingModes[this.viewingMode];
       if (this.viewingMode === 'Annotation') {
-        if (this.userInformation) {
+        if (this.authorisedUser) {
           return description[1]
         }
         return description[0]
@@ -1005,12 +1003,12 @@ export default {
      * Remove an entry matching region and group from
      * local annotation list.
      */
-    removeFromLocalAnnotationList: function(regionPath, groupName) {
-      for (let i = 0; i < this.localAnnotationsList.length; i++) {
-        const annotation = this.localAnnotationsList[i];
+    removeFromOfflineAnnotation: function(regionPath, groupName) {
+      for (let i = 0; i < this.offlineAnnotations.length; i++) {
+        const annotation = this.offlineAnnotations[i];
         if (annotation.region === regionPath &&
           annotation.group === groupName) {
-          this.localAnnotationsList.splice(i, 1);
+          this.offlineAnnotations.splice(i, 1);
           return;
         }
       }
@@ -1028,7 +1026,9 @@ export default {
         //Remove relevant objects from the rest of the app.
         if (objects.length === 0) {
           this.$_searchIndex.removeZincObject(zincObject, zincObject.uuid);
-          this.removeFromLocalAnnotationList(regionPath, groupName);
+          if (this.offlineAnnotationEnabled) {
+            this.removeFromOfflineAnnotation(regionPath, groupName);
+          }
         }
       }
     },
@@ -1109,16 +1109,20 @@ export default {
     addAndEditAnnotations: function (region, group, zincObject, comment) {
       const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken, zincObject,
         region, group, this.url, comment);
-      if (this.enableLocalAnnotations) {
+      this.existDrawnFeatures = markRaw(this.existDrawnFeatures.filter(feature => feature.id !== annotation.item.id));
+      this.existDrawnFeatures.push(annotation.feature);
+      if (this.offlineAnnotationEnabled) {
         annotation.group = group;
         let regionPath = region;
         if (regionPath.slice(-1) === "/") {
           regionPath = regionPath.slice(0, -1);
         }
         annotation.region = regionPath;
+        this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
         //Remove previous entry if there is matching region and group
-        this.removeFromLocalAnnotationList(regionPath, group);
-        this.localAnnotationsList.push(annotation);
+        this.removeFromOfflineAnnotation(regionPath, group);
+        this.offlineAnnotations.push(annotation);
+        sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
       }
       this.$emit('userPrimitivesUpdated', {region, group, zincObject});
     },
@@ -1206,16 +1210,19 @@ export default {
      * Confirm delete of user created primitive.
      * This is only called from callback.
      */
-    confirmDelete: function() {
+    confirmDelete: function () {
       if (this._editingZincObject?.isEditable) {
         const regionPath = this._editingZincObject.region.getFullPath() + "/";
         const group = this._editingZincObject.groupName;
         const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken,
           this._editingZincObject, regionPath, group, this.url, "Deleted");
         if (annotation) {
-          const childRegion = this.$module.scene.getRootRegion().
-            findChildFromPath(regionPath);
+          this.existDrawnFeatures = markRaw(this.existDrawnFeatures.filter(feature => feature.id !== annotation.item.id));
+          const childRegion = this.$module.scene.getRootRegion().findChildFromPath(regionPath);
           childRegion.removeZincObject(this._editingZincObject);
+          if (this.offlineAnnotationEnabled) {
+            sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
+          }
         }
       }
       this.cancelCreate();
@@ -1329,7 +1336,6 @@ export default {
         this.createData.shape = '';
         this.$module.selectObjectOnPick = true;
       } else if (type === 'tool') {
-        if (this.annotationDisplay) return;
         this.activeDrawTool = icon;
         this.createData.shape = this.activeDrawTool ? this.activeDrawTool : '';
         this.$module.selectObjectOnPick = false;
@@ -1475,7 +1481,7 @@ export default {
       }
     },
     activateAnnotationMode: function(names, event) {
-      if (this.userInformation || this.enableLocalAnnotations) {
+      if (this.authorisedUser || this.offlineAnnotationEnabled) {
         this.createData.toBeDeleted = false;
         if ((this.createData.shape !== "") || (this.createData.editingIndex > -1)) {
           // Create new shape bsaed on current settings
@@ -1964,6 +1970,41 @@ export default {
       this.hideRegionTooltip();
       return false;
     },
+    clearAnnotationFeature: function () {
+      const annotations = this.getOfflineAnnotations();
+      const featureGroups = this.existDrawnFeatures.map(feature => decodeURIComponent(feature.id).split("/").pop());
+      featureGroups.forEach((name) => {
+        const zincObject = this.$module.scene.findObjectsWithGroupName(name, false);
+        if (zincObject && zincObject.length) {
+          const regionPath = zincObject[0].region.getFullPath() + "/";
+          const childRegion = this.$module.scene.getRootRegion().findChildFromPath(regionPath);
+          childRegion.removeZincObject(zincObject[0]);
+        }
+      })
+      this.$refs.scaffoldTreeControls.removeRegion('__annotation');
+      // Offline annotations are removed when switch viewing mode
+      // Restore data in case need to save settings, doesn't affect anything
+      this.offlineAnnotations = annotations;
+    },
+    addAnnotationFeature: async function () {
+      let drawnFeatures;
+      if (this.offlineAnnotationEnabled) {
+        this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
+        drawnFeatures = this.offlineAnnotations.filter((offline) => offline.resource === this.url).map(offline => offline.feature);
+      } else {
+        drawnFeatures = [];
+        const drawn = await getDrawnAnnotations(this.annotator, this.userToken, this.url);
+        if (drawn && drawn.features) {
+          drawnFeatures = [...drawn.features];
+        }
+        const drawnEncode = await getDrawnAnnotations(this.annotator, this.userToken, encodeURIComponent(this.url));
+        if (drawnEncode && drawnEncode.features) {
+          drawnFeatures = [...drawnFeatures, ...drawnEncode.features];
+        }
+      }
+      this.existDrawnFeatures = markRaw(drawnFeatures);
+      annotationFeaturesToPrimitives(this.$module.scene, drawnFeatures);
+    },
     /**
      * Callback on viewing mode change
      * Optional, can be used to update the view mode.
@@ -1973,35 +2014,26 @@ export default {
         if (modeName) {
           this.viewingMode = modeName;
         }
+        this.clearAnnotationFeature();
         if (this.viewingMode === "Annotation") {
-          let authenticated = false;
-          if (this.userInformation) {
-            authenticated = true;
-          }
-          this.userInformation = undefined;
+          this.loading = true;
           this.annotator.authenticate(this.userToken).then((userData) => {
             if (userData.name && userData.email && userData.canUpdate) {
-              this.userInformation = userData;
-              //Only draw annotations stored in the server on initial authentication
-              if (!authenticated) {
-                getDrawnAnnotations(this.annotator, this.userToken, this.url).then((payload) => {
-                  if (payload && payload.features) {
-                    annotationFeaturesToPrimitives(this.$module.scene, payload.features);
-                  }
-                });
-                //Support previously supported encoded resource
-                getDrawnAnnotations(this.annotator, this.userToken, encodeURIComponent(this.url)).then((payload) => {
-                  if (payload && payload.features) {
-                    annotationFeaturesToPrimitives(this.$module.scene, payload.features);
-                  }
-                });
-              }
+              this.authorisedUser = userData;
+              this.offlineAnnotationEnabled = false;
+            } else {
+              this.authorisedUser = undefined;
+              this.offlineAnnotationEnabled = true;
             }
+            this.addAnnotationFeature();
+            this.loading = false;
           });
-        } else if (this.viewingMode === "Exploration") {
-          this.activeDrawTool = undefined;
-          this.activeDrawMode = undefined;
-          this.createData.shape = "";
+        } else {
+          if (this.viewingMode === "Exploration") {
+            this.activeDrawTool = undefined;
+            this.activeDrawMode = undefined;
+            this.createData.shape = "";
+          }
         }
         if ((this.viewingMode === "Exploration") ||
           (this.viewingMode === "Annotation") &&
@@ -2189,6 +2221,9 @@ export default {
         if (options.background) {
           this.backgroundChangeCallback(options.background);
         }
+        if (options.offlineAnnotations) {
+          sessionStorage.setItem('offline-annotation', options.offlineAnnotations);
+        }
         if (options.viewingMode) {
           this.changeViewingMode(options.viewingMode);
         }
@@ -2209,7 +2244,7 @@ export default {
     },
     setURLFinishCallback: function (options) {
       return () => {
-        this.localAnnotationsList.length = 0;
+        this.offlineAnnotations.length = 0;
         this.updateSettingsfromScene();
         this.$module.updateTime(0.01);
         this.$module.updateTime(0);
@@ -2258,6 +2293,9 @@ export default {
       if (this.lastSelected && this.lastSelected.group) {
         state.search = {...this.lastSelected};
       }
+      if (this.offlineAnnotationEnabled) {
+        state.offlineAnnotations = sessionStorage.getItem('offline-annotation');
+      }
       return state;
     },
     /**
@@ -2277,6 +2315,7 @@ export default {
             background: state.background,
             viewingMode: this.viewingMode,
             search: state.search,
+            offlineAnnotations: state.offlineAnnotations,
           });
         } else {
           if (state.background || state.search || state.viewport || state.viewingMode || state.visibility) {
@@ -2290,6 +2329,7 @@ export default {
                   viewport: state.viewport,
                   visibility: state.visibility,
                   search: state.search,
+                  offlineAnnotations: state.offlineAnnotations,
                 })
               );
             }
@@ -2309,23 +2349,23 @@ export default {
     /**
      * Return a copy of the local annotations list.
      * This list is used for storing user created annotation
-     * when enableLocalAnnotations is set to true.
+     * when offlineAnnotationEnabled is set to true.
      *
      * @public
      */
-     getLocalAnnotations: function () {
-      return [...this.localAnnotationsList];
+    getOfflineAnnotations: function () {
+      return [...this.offlineAnnotations];
     },
     /**
      * Import local annotations. The annotations will only
-     * be imported when enableLocalAnnotations is set to
+     * be imported when offlineAnnotationEnabled is set to
      * true;
      *
      * @public
      * @arg {Array} `annotationsList`
      */
-     importLocalAnnotations: function (annotationsList) {
-      if (this.enableLocalAnnotations) {
+    importOfflineAnnotations: function (annotationsList) {
+      if (this.offlineAnnotationEnabled) {
         //Make sure the annotations are encoded correctly
         annotationsList.forEach(annotation => {
           const group = annotation.group;
@@ -2342,8 +2382,9 @@ export default {
         annotationFeaturesToPrimitives(this.$module.scene, featuresList);
         //Make a local non-reactive copy.
         annotationsList.forEach((annotation) => {
-          this.localAnnotationsList.push({...annotation});
+          this.offlineAnnotations.push({...annotation});
         });
+        sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
       }
     },
 
@@ -2378,6 +2419,7 @@ export default {
             viewURL: this.viewURL,
             viewport: state?.viewport,
             visibility: state?.visibility,
+            offlineAnnotations: state?.offlineAnnotations,
           })
         );
         if (this.fileFormat === "gltf") {
