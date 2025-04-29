@@ -1241,6 +1241,8 @@ export default {
           const childRegion = this.$module.scene.getRootRegion().findChildFromPath(regionPath);
           childRegion.removeZincObject(this._editingZincObject);
           if (this.offlineAnnotationEnabled) {
+            this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
+            this.offlineAnnotations = this.offlineAnnotations.filter(offline => offline.item.id !== annotation.item.id);
             sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
           }
         }
