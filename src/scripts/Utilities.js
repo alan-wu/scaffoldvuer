@@ -47,7 +47,7 @@ export const getEditableLines = (event) => {
   return undefined;
 }
 
-export const getDeletableObjects = (event) => {
+export const getEditableObjects = (event) => {
   const zincObjects = event.zincObjects;
   if (zincObjects.length > 0 && zincObjects[0]) {
     const zincObject = zincObjects[0];

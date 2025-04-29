@@ -15,8 +15,10 @@
       :x="tData.x"
       :y="tData.y"
       :annotationDisplay="annotationDisplay"
+      :offlineAnnotationEnabled="offlineAnnotationEnabled"
       @confirm-create="confirmCreate($event)"
       @cancel-create="cancelCreate()"
+      @confirm-comment="confirmComment($event)"
       @confirm-delete="confirmDelete()"
       @tooltip-hide="onTooltipHide()"
     />
@@ -401,7 +403,7 @@ import '@abi-software/map-utilities/dist/style.css'
 import {
   addUserAnnotationWithFeature,
   annotationFeaturesToPrimitives,
-  getDeletableObjects,
+  getEditableObjects,
   getDrawnAnnotations,
   getEditableLines,
   getObjectsFromAnnotations,
@@ -1210,6 +1212,30 @@ export default {
      * Confirm delete of user created primitive.
      * This is only called from callback.
      */
+    confirmComment: function (payload) {
+      if (this._editingZincObject?.isEditable) {
+        const regionPath = this._editingZincObject.region.getFullPath() + "/";
+        const group = this._editingZincObject.groupName;
+        const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken,
+          this._editingZincObject, regionPath, group, this.url, payload.body.comment);
+        if (annotation) {
+          this.existDrawnFeatures = markRaw(this.existDrawnFeatures.filter(feature => feature.id !== annotation.item.id));
+          this.existDrawnFeatures.push(annotation.feature);
+          if (this.offlineAnnotationEnabled) {
+            annotation.group = group;
+            annotation.region = regionPath.slice(0, -1);
+            this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
+            this.offlineAnnotations.push(annotation);
+            sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
+          }
+        }
+      }
+    },
+    /**
+     * Internal only.
+     * Confirm delete of user created primitive.
+     * This is only called from callback.
+     */
     confirmDelete: function () {
       if (this._editingZincObject?.isEditable) {
         const regionPath = this._editingZincObject.region.getFullPath() + "/";
@@ -1493,6 +1519,8 @@ export default {
             }
           }
         } else {
+          const zincObject = getEditableObjects(event);
+          this._editingZincObject = zincObject;
           //Make sure the tooltip is displayed with annotaion mode
           if (this.activeDrawMode === "Edit") {
             const editing = getEditableLines(event);
@@ -1501,10 +1529,8 @@ export default {
                 editing.vertexIndex, editing.point);
             }
           } else if (this.activeDrawMode === "Delete") {
-            const zincObject = getDeletableObjects(event);
             if (zincObject) {
               this.createData.toBeDeleted = true;
-              this._editingZincObject = zincObject;
             }
           }
           if (this.activeDrawMode !== "Point" && this.activeDrawMode !== "LineString") {
