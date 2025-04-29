@@ -164,26 +164,23 @@
           </el-col>
           <el-col :span="auto">
             <el-button-group>
-              <el-button size="small" @click="createCoordSystem('axes', fitBoundingBox)">
+              <el-button size="small" @click="createAxisDisplay('axes', fitBoundingBox)">
                 Create Axes CoordSystem
-              </el-button>
-              <el-button size="small" @click="createCoordSystem('arrow', fitBoundingBox)">
-                Create Arrow CoordSystem
               </el-button>
             </el-button-group>
           </el-col>
           <el-col :span="auto">
             <el-button-group>
-              <el-button size="small" @click="enableCoordSystem(true)">
+              <el-button size="small" @click="enableAxisDisplay(true, false)">
                 Enable CoordSystem
               </el-button>
-              <el-button size="small" @click="enableCoordSystem(true, { miniaxes: true })">
+              <el-button size="small" @click="enableAxisDisplay(true, true )">
                 Enable MiniAxes CoordSystem
               </el-button>
             </el-button-group>
           </el-col>
           <el-col :span="auto">
-              <el-button size="small" @click="enableCoordSystem(false)">
+              <el-button size="small" @click="enableAxisDisplay(false, false)">
                 Disable CoordSystem
               </el-button>
           </el-col>
@@ -422,7 +419,7 @@ export default {
         y_offset: 50,
         width: 128,
         height: 128,
-        align: "top-left",
+        align: "top-right",
       },
       markerLabels: { },
       render: true,
@@ -506,12 +503,11 @@ export default {
     this.$refs.dropzone.revokeURLs();
   },
   methods: {
-    enableCoordSystem: function (enable, options) {
-      this.$refs.scaffold.enableCoordSystem(enable, options);
+    enableAxisDisplay: function (enable, miniaxes) {
+      this.$refs.scaffold.enableAxisDisplay(enable, miniaxes);
     },
-    createCoordSystem: function (type, fitBoundingBox) {
-      this.$refs.scaffold.enableCoordSystem(false, { erase: true });
-      this.$refs.scaffold.createCoordSystem(type, fitBoundingBox);
+    createAxisDisplay: function (type, fitBoundingBox) {
+      this.$refs.scaffold.createAxisDisplay(fitBoundingBox);
     },
     exportGLTF: function () {
       this.$refs.scaffold.exportGLTF(false).then((data) => {

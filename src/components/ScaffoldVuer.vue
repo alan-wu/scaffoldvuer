@@ -970,14 +970,14 @@ export default {
     },
   },
   methods: {
-    enableCoordSystem: function (enable, options) {
+    enableAxisDisplay: function (enable, miniaxes) {
       if (this.$module.scene) {
-        this.$module.scene.enableCoordSystem(enable, options)
+        this.$module.scene.enableAxisDisplay(enable, miniaxes);
       }
     },
-    createCoordSystem: function (type, fit) {
+    createAxisDisplay: function (fit) {
       if (this.$module.scene) {
-        this.$module.scene.createCoordSystem(type, fit)
+        this.$module.scene.createAxisDisplay(fit);
       }
     },
     /**
@@ -2276,6 +2276,8 @@ export default {
         this.boundingDims.centre = centre;
         this.boundingDims.size = size;
         this.$nextTick(() => this.restoreSettings(options) );
+        this.$module.scene.createAxisDisplay(false);
+        this.$module.scene.enableAxisDisplay(true, true);
         this.isReady = true;
       };
     },
