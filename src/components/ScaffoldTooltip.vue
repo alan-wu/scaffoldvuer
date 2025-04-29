@@ -105,6 +105,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    annotationFeature: {
+      type: Object,
+      default: {},
+    },
     offlineAnnotationEnabled: {
       type: Boolean,
       default: false,
@@ -160,6 +164,7 @@ export default {
             "featureId": region + this.label,
             "resourceId": this.scaffoldUrl,
             "resource": this.scaffoldUrl,
+            "feature": this.annotationFeature,
             "offline": this.offlineAnnotationEnabled,
           };
         }

@@ -15,6 +15,7 @@
       :x="tData.x"
       :y="tData.y"
       :annotationDisplay="annotationDisplay"
+      :annotationFeature="annotationFeature"
       :offlineAnnotationEnabled="offlineAnnotationEnabled"
       @confirm-create="confirmCreate($event)"
       @cancel-create="cancelCreate()"
@@ -401,6 +402,7 @@ import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
 import { DrawToolbar } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 import {
+  createNewAnnotationsWithFeatures,
   addUserAnnotationWithFeature,
   annotationFeaturesToPrimitives,
   getEditableObjects,
@@ -807,6 +809,7 @@ export default {
       },
       openMapRef: undefined,
       backgroundIconRef: undefined,
+      annotationFeature: {},
       offlineAnnotationEnabled: false,
       offlineAnnotations: markRaw([]),
       authorisedUser: undefined,
@@ -1208,20 +1211,15 @@ export default {
      */
     confirmComment: function (payload) {
       if (this._editingZincObject?.isEditable) {
-        const regionPath = this._editingZincObject.region.getFullPath() + "/";
-        const group = this._editingZincObject.groupName;
-        const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken,
-          this._editingZincObject, regionPath, group, this.url, payload.body.comment);
-        if (annotation) {
-          this.existDrawnFeatures = markRaw(this.existDrawnFeatures.filter(feature => feature.id !== annotation.item.id));
-          this.existDrawnFeatures.push(annotation.feature);
-          if (this.offlineAnnotationEnabled) {
-            annotation.group = group;
-            annotation.region = regionPath.slice(0, -1);
-            this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
-            this.offlineAnnotations.push(annotation);
-            sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
-          }
+        let annotation = payload
+        this.existDrawnFeatures = markRaw(this.existDrawnFeatures.filter(feature => feature.id !== annotation.item.id));
+        this.existDrawnFeatures.push(payload.feature);
+        if (this.offlineAnnotationEnabled) {
+          annotation.group = this._editingZincObject.groupName;;
+          annotation.region = this._editingZincObject.region.getFullPath();
+          this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
+          this.offlineAnnotations.push(annotation);
+          sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
         }
       }
     },
@@ -1517,6 +1515,12 @@ export default {
         } else {
           const zincObject = getEditableObjects(event);
           this._editingZincObject = zincObject;
+          if (zincObject) {
+            const regionPath = this._editingZincObject.region.getFullPath() + "/";
+            const group = this._editingZincObject.groupName;
+            this.annotationFeature = createNewAnnotationsWithFeatures(this._editingZincObject, 
+              regionPath, group, this.url, '').feature;
+          }
           //Make sure the tooltip is displayed with annotaion mode
           if (this.activeDrawMode === "Edit") {
             const editing = getEditableLines(event);
@@ -1977,6 +1981,8 @@ export default {
               "featureId": region + this.tData.label,
               "resourceId": this.url,
               "resource": this.url,
+              "feature": this.annotationFeature,
+              "offline": this.offlineAnnotationEnabled,
             };
             this.$emit('annotation-open', {
               annotationEntry: annotationEntry,
@@ -1984,6 +1990,7 @@ export default {
               confirmCreate: this.confirmCreate,
               cancelCreate: this.cancelCreate,
               confirmDelete: this.confirmDelete,
+              confirmComment: this.confirmComment
             });
             return;
           }

@@ -289,7 +289,7 @@ const getCoordinatesForAnnotationFeature = (zincObject) => {
   return coords;
 }
 
-const createNewAnnotationsWithFeatures = (zincObject, region, group, scaffoldUrl, comment) => {
+export const createNewAnnotationsWithFeatures = (zincObject, region, group, scaffoldUrl, comment) => {
   let type = undefined;
   if (zincObject.isPointset) {
     type = "MultiPoint";
