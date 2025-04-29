@@ -1022,15 +1022,11 @@ export default {
     zincObjectRemoved: function (zincObject) {
       if (this.$module.scene) {
         // zincObjectAdded will be alled in sequential callback
-        const regionPath = zincObject.region.getFullPath();
         const groupName = zincObject.groupName;
         const objects = zincObject.region.findObjectsWithGroupName(groupName, false);
         //Remove relevant objects from the rest of the app.
         if (objects.length === 0) {
           this.$_searchIndex.removeZincObject(zincObject, zincObject.uuid);
-          if (this.offlineAnnotationEnabled) {
-            this.removeFromOfflineAnnotation(regionPath, groupName);
-          }
         }
       }
     },
@@ -1121,8 +1117,6 @@ export default {
         }
         annotation.region = regionPath;
         this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
-        //Remove previous entry if there is matching region and group
-        this.removeFromOfflineAnnotation(regionPath, group);
         this.offlineAnnotations.push(annotation);
         sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
       }
