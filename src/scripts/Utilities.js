@@ -47,7 +47,16 @@ export const getEditableLines = (event) => {
   return undefined;
 }
 
-export const getEditableObjects = (event) => {
+export const getClickedObjects = (event) => {
+  const zincObjects = event.zincObjects;
+  if (zincObjects.length > 0 && zincObjects[0]) {
+    const zincObject = zincObjects[0];
+    return zincObject;
+  }
+  return undefined;
+}
+
+export const getDeletableObjects = (event) => {
   const zincObjects = event.zincObjects;
   if (zincObjects.length > 0 && zincObjects[0]) {
     const zincObject = zincObjects[0];
@@ -295,7 +304,11 @@ export const createNewAnnotationsWithFeatures = (zincObject, region, group, scaf
     type = "MultiPoint";
   } else if (zincObject.isLines2) {
     type = "MultiLineString";
+  } else {
+    type = "Feature";
   }
+  const drawn = type === "Feature" ? false : true;
+  const label = type === "Feature" ? "Feature annotation" : "Drawn annotation";
   if (type) {
     const coords = getCoordinatesForAnnotationFeature(zincObject);
     //Check if region ends with a slash
@@ -314,8 +327,8 @@ export const createNewAnnotationsWithFeatures = (zincObject, region, group, scaf
       feature: {
         "id": featureID,
         "properties": {
-            "drawn": true,
-            "label": "Drawn annotation"
+            "drawn": drawn,
+            "label": label
         },
         "geometry": {
             "coordinates": coords,

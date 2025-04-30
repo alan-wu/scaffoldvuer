@@ -405,7 +405,8 @@ import {
   createNewAnnotationsWithFeatures,
   addUserAnnotationWithFeature,
   annotationFeaturesToPrimitives,
-  getEditableObjects,
+  getClickedObjects,
+  getDeletableObjects,
   getDrawnAnnotations,
   getEditableLines,
   getObjectsFromAnnotations,
@@ -1210,10 +1211,12 @@ export default {
      * This is only called from callback.
      */
     confirmComment: function (payload) {
-      if (this._editingZincObject?.isEditable) {
+      if (this._editingZincObject) {
         let annotation = payload
-        this.existDrawnFeatures = markRaw(this.existDrawnFeatures.filter(feature => feature.id !== annotation.item.id));
-        this.existDrawnFeatures.push(payload.feature);
+        if (this._editingZincObject.isEditable) {
+          this.existDrawnFeatures = markRaw(this.existDrawnFeatures.filter(feature => feature.id !== annotation.item.id));
+          this.existDrawnFeatures.push(payload.feature);
+        }
         if (this.offlineAnnotationEnabled) {
           annotation.group = this._editingZincObject.groupName;;
           annotation.region = this._editingZincObject.region.getFullPath();
@@ -1513,14 +1516,6 @@ export default {
             }
           }
         } else {
-          const zincObject = getEditableObjects(event);
-          this._editingZincObject = zincObject;
-          if (zincObject) {
-            const regionPath = this._editingZincObject.region.getFullPath() + "/";
-            const group = this._editingZincObject.groupName;
-            this.annotationFeature = createNewAnnotationsWithFeatures(this._editingZincObject, 
-              regionPath, group, this.url, '').feature;
-          }
           //Make sure the tooltip is displayed with annotaion mode
           if (this.activeDrawMode === "Edit") {
             const editing = getEditableLines(event);
@@ -1529,8 +1524,10 @@ export default {
                 editing.vertexIndex, editing.point);
             }
           } else if (this.activeDrawMode === "Delete") {
+            const zincObject = getDeletableObjects(event);
             if (zincObject) {
               this.createData.toBeDeleted = true;
+              this._editingZincObject = zincObject;
             }
           }
           if (this.activeDrawMode !== "Point" && this.activeDrawMode !== "LineString") {
@@ -1588,6 +1585,14 @@ export default {
           if (this.viewingMode === 'Annotation') {
             this.tData.label = id;
             this.tData.region = regionPath;
+            const zincObject = getClickedObjects(event);
+            this._editingZincObject = zincObject;
+            if (zincObject) {
+              const regionPath = this._editingZincObject.region.getFullPath() + "/";
+              const group = this._editingZincObject.groupName;
+              this.annotationFeature = createNewAnnotationsWithFeatures(this._editingZincObject,
+                regionPath, group, this.url, '').feature;
+            }
             this.activateAnnotationMode(names, event);
           } else {
             if (this.$refs.scaffoldTreeControls) {
@@ -2019,7 +2024,9 @@ export default {
       let drawnFeatures;
       if (this.offlineAnnotationEnabled) {
         this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
-        drawnFeatures = this.offlineAnnotations.filter((offline) => offline.resource === this.url).map(offline => offline.feature);
+        drawnFeatures = this.offlineAnnotations.filter((offline) => {
+          return offline.resource === this.url && offline.feature.properties.drawn;
+        }).map(offline => offline.feature);
       } else {
         drawnFeatures = [];
         const drawn = await getDrawnAnnotations(this.annotator, this.userToken, this.url);
