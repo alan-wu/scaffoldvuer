@@ -15,8 +15,11 @@
       :x="tData.x"
       :y="tData.y"
       :annotationDisplay="annotationDisplay"
+      :annotationFeature="annotationFeature"
+      :offlineAnnotationEnabled="offlineAnnotationEnabled"
       @confirm-create="confirmCreate($event)"
       @cancel-create="cancelCreate()"
+      @confirm-comment="confirmComment($event)"
       @confirm-delete="confirmDelete()"
       @tooltip-hide="onTooltipHide()"
     />
@@ -399,8 +402,10 @@ import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
 import { DrawToolbar } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 import {
+  createNewAnnotationsWithFeatures,
   addUserAnnotationWithFeature,
   annotationFeaturesToPrimitives,
+  getClickedObjects,
   getDeletableObjects,
   getDrawnAnnotations,
   getEditableLines,
@@ -805,6 +810,7 @@ export default {
       },
       openMapRef: undefined,
       backgroundIconRef: undefined,
+      annotationFeature: {},
       offlineAnnotationEnabled: false,
       offlineAnnotations: markRaw([]),
       authorisedUser: undefined,
@@ -1030,15 +1036,11 @@ export default {
     zincObjectRemoved: function (zincObject) {
       if (this.$module.scene) {
         // zincObjectAdded will be alled in sequential callback
-        const regionPath = zincObject.region.getFullPath();
         const groupName = zincObject.groupName;
         const objects = zincObject.region.findObjectsWithGroupName(groupName, false);
         //Remove relevant objects from the rest of the app.
         if (objects.length === 0) {
           this.$_searchIndex.removeZincObject(zincObject, zincObject.uuid);
-          if (this.offlineAnnotationEnabled) {
-            this.removeFromOfflineAnnotation(regionPath, groupName);
-          }
         }
       }
     },
@@ -1129,8 +1131,6 @@ export default {
         }
         annotation.region = regionPath;
         this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
-        //Remove previous entry if there is matching region and group
-        this.removeFromOfflineAnnotation(regionPath, group);
         this.offlineAnnotations.push(annotation);
         sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
       }
@@ -1220,6 +1220,27 @@ export default {
      * Confirm delete of user created primitive.
      * This is only called from callback.
      */
+    confirmComment: function (payload) {
+      if (this._editingZincObject) {
+        let annotation = payload
+        if (this._editingZincObject.isEditable) {
+          this.existDrawnFeatures = markRaw(this.existDrawnFeatures.filter(feature => feature.id !== annotation.item.id));
+          this.existDrawnFeatures.push(payload.feature);
+        }
+        if (this.offlineAnnotationEnabled) {
+          annotation.group = this._editingZincObject.groupName;;
+          annotation.region = this._editingZincObject.region.getFullPath();
+          this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
+          this.offlineAnnotations.push(annotation);
+          sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
+        }
+      }
+    },
+    /**
+     * Internal only.
+     * Confirm delete of user created primitive.
+     * This is only called from callback.
+     */
     confirmDelete: function () {
       if (this._editingZincObject?.isEditable) {
         const regionPath = this._editingZincObject.region.getFullPath() + "/";
@@ -1231,6 +1252,8 @@ export default {
           const childRegion = this.$module.scene.getRootRegion().findChildFromPath(regionPath);
           childRegion.removeZincObject(this._editingZincObject);
           if (this.offlineAnnotationEnabled) {
+            this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
+            this.offlineAnnotations = this.offlineAnnotations.filter(offline => offline.item.id !== annotation.item.id);
             sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
           }
         }
@@ -1572,6 +1595,14 @@ export default {
           if (this.viewingMode === 'Annotation') {
             this.tData.label = id;
             this.tData.region = regionPath;
+            const zincObject = getClickedObjects(event);
+            this._editingZincObject = zincObject;
+            if (zincObject) {
+              const regionPath = this._editingZincObject.region.getFullPath() + "/";
+              const group = this._editingZincObject.groupName;
+              this.annotationFeature = createNewAnnotationsWithFeatures(this._editingZincObject,
+                regionPath, group, this.url, '').feature;
+            }
             this.activateAnnotationMode(names, event);
           } else {
             if (this.$refs.scaffoldTreeControls) {
@@ -1965,6 +1996,8 @@ export default {
               "featureId": region + this.tData.label,
               "resourceId": this.url,
               "resource": this.url,
+              "feature": this.annotationFeature,
+              "offline": this.offlineAnnotationEnabled,
             };
             this.$emit('annotation-open', {
               annotationEntry: annotationEntry,
@@ -1972,6 +2005,7 @@ export default {
               confirmCreate: this.confirmCreate,
               cancelCreate: this.cancelCreate,
               confirmDelete: this.confirmDelete,
+              confirmComment: this.confirmComment
             });
             return;
           }
@@ -2000,7 +2034,9 @@ export default {
       let drawnFeatures;
       if (this.offlineAnnotationEnabled) {
         this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
-        drawnFeatures = this.offlineAnnotations.filter((offline) => offline.resource === this.url).map(offline => offline.feature);
+        drawnFeatures = this.offlineAnnotations.filter((offline) => {
+          return offline.resource === this.url && offline.feature.properties.drawn;
+        }).map(offline => offline.feature);
       } else {
         drawnFeatures = [];
         const drawn = await getDrawnAnnotations(this.annotator, this.userToken, this.url);

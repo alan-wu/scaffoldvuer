@@ -26,6 +26,7 @@
           ref="annotationTooltip"
           :annotationDisplay="true"
           :annotationEntry="annotationEntry"
+          @annotation="$emit('confirm-comment', $event)"
         />
         <div v-if="createData.toBeDeleted" class="delete-container">
           <el-row>
@@ -104,6 +105,14 @@ export default {
       type: Boolean,
       default: false,
     },
+    annotationFeature: {
+      type: Object,
+      default: {},
+    },
+    offlineAnnotationEnabled: {
+      type: Boolean,
+      default: false,
+    },
     region: {
       type: String,
       default: "",
@@ -155,6 +164,8 @@ export default {
             "featureId": region + this.label,
             "resourceId": this.scaffoldUrl,
             "resource": this.scaffoldUrl,
+            "feature": this.annotationFeature,
+            "offline": this.offlineAnnotationEnabled,
           };
         }
       }
