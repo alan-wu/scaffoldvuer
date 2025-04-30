@@ -970,6 +970,16 @@ export default {
     },
   },
   methods: {
+    enableAxisDisplay: function (enable, miniaxes) {
+      if (this.$module.scene) {
+        this.$module.scene.enableAxisDisplay(enable, miniaxes);
+      }
+    },
+    createAxisDisplay: function (fit) {
+      if (this.$module.scene) {
+        this.$module.scene.createAxisDisplay(fit);
+      }
+    },
     /**
      * @public
      * Call this to manually add a zinc object into the current scene.
@@ -2266,6 +2276,8 @@ export default {
         this.boundingDims.centre = centre;
         this.boundingDims.size = size;
         this.$nextTick(() => this.restoreSettings(options) );
+        this.$module.scene.createAxisDisplay(false);
+        this.$module.scene.enableAxisDisplay(true, true);
         this.isReady = true;
       };
     },
