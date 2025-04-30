@@ -27,7 +27,6 @@
         :view-u-r-l="viewURL"
         :format="format"
         :marker-labels="markerLabels"
-        :enableLocalAnnotations="false"
         @open-map="openMap"
         @on-error="onError"
         @on-ready="onReady"
@@ -140,7 +139,7 @@
 
         <el-row :gutter="20" justify="center" align="middle">
           <el-col :span="auto">
-            <el-button size="small" @click="exportLocalAnnotations()">
+            <el-button size="small" @click="exportOfflineAnnotations()">
               Export Annotations
             </el-button>
           </el-col>
@@ -151,7 +150,7 @@
                   id="annotations-upload"
                   type="file"
                   accept="application/json"
-                  @change="importLocalAnnotations" 
+                  @change="importOfflineAnnotations" 
                 />
               </el-button>
           </el-col>
@@ -532,16 +531,16 @@ export default {
         hrefElement.remove();
       });
     },
-    exportLocalAnnotations: function() {
-      const annotations = this.$refs.scaffold.getLocalAnnotations();
+    exportOfflineAnnotations: function() {
+      const annotations = this.$refs.scaffold.getOfflineAnnotations();
       const filename = 'scaffoldAnnotations' + JSON.stringify(new Date()) + '.json';
       writeTextFile(filename, annotations);
     },
     onReaderLoad: function(event) {
       const annotationsList = JSON.parse(event.target.result);
-      this.$refs.scaffold.importLocalAnnotations(annotationsList);
+      this.$refs.scaffold.importOfflineAnnotations(annotationsList);
     },
-    importLocalAnnotations: function() {
+    importOfflineAnnotations: function() {
       const selectedFile = document.getElementById("annotations-upload").files[0];
       const reader = new FileReader();
       reader.onload = this.onReaderLoad;
