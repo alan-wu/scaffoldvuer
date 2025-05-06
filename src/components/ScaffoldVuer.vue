@@ -314,7 +314,7 @@
               {{ modeDescription }}
             </el-row>
             <el-row v-if="viewingMode === 'Annotation' && offlineAnnotationEnabled" class="viewing-mode-description">
-              (Offline annotate)
+              (Anonymous annotate)
             </el-row>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -1130,9 +1130,9 @@ export default {
           regionPath = regionPath.slice(0, -1);
         }
         annotation.region = regionPath;
-        this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
+        this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
         this.offlineAnnotations.push(annotation);
-        sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
+        sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
       }
       this.$emit('userPrimitivesUpdated', {region, group, zincObject});
     },
@@ -1230,9 +1230,9 @@ export default {
         if (this.offlineAnnotationEnabled) {
           annotation.group = this._editingZincObject.groupName;;
           annotation.region = this._editingZincObject.region.getFullPath();
-          this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
+          this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
           this.offlineAnnotations.push(annotation);
-          sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
+          sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
         }
       }
     },
@@ -1252,9 +1252,9 @@ export default {
           const childRegion = this.$module.scene.getRootRegion().findChildFromPath(regionPath);
           childRegion.removeZincObject(this._editingZincObject);
           if (this.offlineAnnotationEnabled) {
-            this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
+            this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
             this.offlineAnnotations = this.offlineAnnotations.filter(offline => offline.item.id !== annotation.item.id);
-            sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
+            sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
           }
         }
       }
@@ -2033,7 +2033,7 @@ export default {
     addAnnotationFeature: async function () {
       let drawnFeatures;
       if (this.offlineAnnotationEnabled) {
-        this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
+        this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
         drawnFeatures = this.offlineAnnotations.filter((offline) => {
           return offline.resource === this.url && offline.feature.properties.drawn;
         }).map(offline => offline.feature);
@@ -2268,7 +2268,7 @@ export default {
           this.backgroundChangeCallback(options.background);
         }
         if (options.offlineAnnotations) {
-          sessionStorage.setItem('offline-annotation', options.offlineAnnotations);
+          sessionStorage.setItem('anonymous-annotation', options.offlineAnnotations);
         }
         if (options.viewingMode) {
           this.changeViewingMode(options.viewingMode);
@@ -2342,7 +2342,7 @@ export default {
         state.search = {...this.lastSelected};
       }
       if (this.offlineAnnotationEnabled) {
-        state.offlineAnnotations = sessionStorage.getItem('offline-annotation');
+        state.offlineAnnotations = sessionStorage.getItem('anonymous-annotation');
       }
       return state;
     },
@@ -2432,7 +2432,7 @@ export default {
         annotationsList.forEach((annotation) => {
           this.offlineAnnotations.push({...annotation});
         });
-        sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
+        sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
       }
     },
 
