@@ -2312,8 +2312,8 @@ export default {
         this.boundingDims.centre = centre;
         this.boundingDims.size = size;
         this.$nextTick(() => this.restoreSettings(options) );
-        this.$module.scene.createAxisDisplay(false);
-        this.$module.scene.enableAxisDisplay(true, true);
+        //this.$module.scene.createAxisDisplay(false);
+        //this.$module.scene.enableAxisDisplay(true, true);
         this.isReady = true;
       };
     },
@@ -2361,7 +2361,7 @@ export default {
             viewport: state.viewport,
             visibility: state.visibility,
             background: state.background,
-            viewingMode: this.viewingMode,
+            viewingMode: state.viewingMode,
             search: state.search,
             offlineAnnotations: state.offlineAnnotations,
           });
