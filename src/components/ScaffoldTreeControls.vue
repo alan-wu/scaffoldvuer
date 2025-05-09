@@ -155,6 +155,17 @@ export default {
         return data;
       }
     },
+    removeRegion: function (label) {
+      if (this.treeData[0].children) {
+        for (let i = 0; i < this.treeData[0].children.length; i++) {
+          if (this.treeData[0].children[i].label === label) {
+            this.treeData[0].children.splice(i, 1);
+            this.nodeNumbers--;
+            return;
+          }
+        }
+      }
+    },
     /**
      * This is called when a new zinc object is read into the scene.
      */
