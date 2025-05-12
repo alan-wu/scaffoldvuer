@@ -160,13 +160,13 @@ export default {
         this.display = true;
         if (this.annotationDisplay) {
           const region = this.region ? this.region +"/" : "";
-          this.annotationEntry.push({
+          this.annotationEntry = [{
             "featureId": region + this.label,
             "resourceId": this.scaffoldUrl,
             "resource": this.scaffoldUrl,
             "feature": this.annotationFeature,
             "offline": this.offlineAnnotationEnabled,
-          });
+          }];
         }
       }
       else {
