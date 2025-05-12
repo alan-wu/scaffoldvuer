@@ -15,8 +15,11 @@
       :x="tData.x"
       :y="tData.y"
       :annotationDisplay="annotationDisplay"
+      :annotationFeature="annotationFeature"
+      :offlineAnnotationEnabled="offlineAnnotationEnabled"
       @confirm-create="confirmCreate($event)"
       @cancel-create="cancelCreate()"
+      @confirm-comment="confirmComment($event)"
       @confirm-delete="confirmDelete()"
       @tooltip-hide="onTooltipHide()"
     />
@@ -311,7 +314,7 @@
               {{ modeDescription }}
             </el-row>
             <el-row v-if="viewingMode === 'Annotation' && offlineAnnotationEnabled" class="viewing-mode-description">
-              (Offline annotate)
+              (Anonymous annotate)
             </el-row>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
@@ -399,8 +402,10 @@ import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
 import { DrawToolbar } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
 import {
+  createNewAnnotationsWithFeatures,
   addUserAnnotationWithFeature,
   annotationFeaturesToPrimitives,
+  getClickedObjects,
   getDeletableObjects,
   getDrawnAnnotations,
   getEditableLines,
@@ -805,6 +810,7 @@ export default {
       },
       openMapRef: undefined,
       backgroundIconRef: undefined,
+      annotationFeature: {},
       offlineAnnotationEnabled: false,
       offlineAnnotations: markRaw([]),
       authorisedUser: undefined,
@@ -970,6 +976,16 @@ export default {
     },
   },
   methods: {
+    enableAxisDisplay: function (enable, miniaxes) {
+      if (this.$module.scene) {
+        this.$module.scene.enableAxisDisplay(enable, miniaxes);
+      }
+    },
+    createAxisDisplay: function (fit) {
+      if (this.$module.scene) {
+        this.$module.scene.createAxisDisplay(fit);
+      }
+    },
     /**
      * @public
      * Call this to manually add a zinc object into the current scene.
@@ -1020,15 +1036,11 @@ export default {
     zincObjectRemoved: function (zincObject) {
       if (this.$module.scene) {
         // zincObjectAdded will be alled in sequential callback
-        const regionPath = zincObject.region.getFullPath();
         const groupName = zincObject.groupName;
         const objects = zincObject.region.findObjectsWithGroupName(groupName, false);
         //Remove relevant objects from the rest of the app.
         if (objects.length === 0) {
           this.$_searchIndex.removeZincObject(zincObject, zincObject.uuid);
-          if (this.offlineAnnotationEnabled) {
-            this.removeFromOfflineAnnotation(regionPath, groupName);
-          }
         }
       }
     },
@@ -1118,11 +1130,9 @@ export default {
           regionPath = regionPath.slice(0, -1);
         }
         annotation.region = regionPath;
-        this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
-        //Remove previous entry if there is matching region and group
-        this.removeFromOfflineAnnotation(regionPath, group);
+        this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
         this.offlineAnnotations.push(annotation);
-        sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
+        sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
       }
       this.$emit('userPrimitivesUpdated', {region, group, zincObject});
     },
@@ -1210,6 +1220,27 @@ export default {
      * Confirm delete of user created primitive.
      * This is only called from callback.
      */
+    confirmComment: function (payload) {
+      if (this._editingZincObject) {
+        let annotation = payload
+        if (this._editingZincObject.isEditable) {
+          this.existDrawnFeatures = markRaw(this.existDrawnFeatures.filter(feature => feature.id !== annotation.item.id));
+          this.existDrawnFeatures.push(payload.feature);
+        }
+        if (this.offlineAnnotationEnabled) {
+          annotation.group = this._editingZincObject.groupName;;
+          annotation.region = this._editingZincObject.region.getFullPath();
+          this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
+          this.offlineAnnotations.push(annotation);
+          sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
+        }
+      }
+    },
+    /**
+     * Internal only.
+     * Confirm delete of user created primitive.
+     * This is only called from callback.
+     */
     confirmDelete: function () {
       if (this._editingZincObject?.isEditable) {
         const regionPath = this._editingZincObject.region.getFullPath() + "/";
@@ -1221,7 +1252,9 @@ export default {
           const childRegion = this.$module.scene.getRootRegion().findChildFromPath(regionPath);
           childRegion.removeZincObject(this._editingZincObject);
           if (this.offlineAnnotationEnabled) {
-            sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
+            this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
+            this.offlineAnnotations = this.offlineAnnotations.filter(offline => offline.item.id !== annotation.item.id);
+            sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
           }
         }
       }
@@ -1562,6 +1595,14 @@ export default {
           if (this.viewingMode === 'Annotation') {
             this.tData.label = id;
             this.tData.region = regionPath;
+            const zincObject = getClickedObjects(event);
+            this._editingZincObject = zincObject;
+            if (zincObject) {
+              const regionPath = this._editingZincObject.region.getFullPath() + "/";
+              const group = this._editingZincObject.groupName;
+              this.annotationFeature = createNewAnnotationsWithFeatures(this._editingZincObject,
+                regionPath, group, this.url, '').feature;
+            }
             this.activateAnnotationMode(names, event);
           } else {
             if (this.$refs.scaffoldTreeControls) {
@@ -1955,6 +1996,8 @@ export default {
               "featureId": region + this.tData.label,
               "resourceId": this.url,
               "resource": this.url,
+              "feature": this.annotationFeature,
+              "offline": this.offlineAnnotationEnabled,
             }];
             this.$emit('annotation-open', {
               annotationEntry: annotationEntry,
@@ -1962,6 +2005,7 @@ export default {
               confirmCreate: this.confirmCreate,
               cancelCreate: this.cancelCreate,
               confirmDelete: this.confirmDelete,
+              confirmComment: this.confirmComment
             });
             return;
           }
@@ -1989,8 +2033,10 @@ export default {
     addAnnotationFeature: async function () {
       let drawnFeatures;
       if (this.offlineAnnotationEnabled) {
-        this.offlineAnnotations = JSON.parse(sessionStorage.getItem('offline-annotation')) || [];
-        drawnFeatures = this.offlineAnnotations.filter((offline) => offline.resource === this.url).map(offline => offline.feature);
+        this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
+        drawnFeatures = this.offlineAnnotations.filter((offline) => {
+          return offline.resource === this.url && offline.feature.properties.drawn;
+        }).map(offline => offline.feature);
       } else {
         drawnFeatures = [];
         const drawn = await getDrawnAnnotations(this.annotator, this.userToken, this.url);
@@ -2222,7 +2268,7 @@ export default {
           this.backgroundChangeCallback(options.background);
         }
         if (options.offlineAnnotations) {
-          sessionStorage.setItem('offline-annotation', options.offlineAnnotations);
+          sessionStorage.setItem('anonymous-annotation', options.offlineAnnotations);
         }
         if (options.viewingMode) {
           this.changeViewingMode(options.viewingMode);
@@ -2266,6 +2312,8 @@ export default {
         this.boundingDims.centre = centre;
         this.boundingDims.size = size;
         this.$nextTick(() => this.restoreSettings(options) );
+        //this.$module.scene.createAxisDisplay(false);
+        //this.$module.scene.enableAxisDisplay(true, true);
         this.isReady = true;
       };
     },
@@ -2294,7 +2342,7 @@ export default {
         state.search = {...this.lastSelected};
       }
       if (this.offlineAnnotationEnabled) {
-        state.offlineAnnotations = sessionStorage.getItem('offline-annotation');
+        state.offlineAnnotations = sessionStorage.getItem('anonymous-annotation');
       }
       return state;
     },
@@ -2313,7 +2361,7 @@ export default {
             viewport: state.viewport,
             visibility: state.visibility,
             background: state.background,
-            viewingMode: this.viewingMode,
+            viewingMode: state.viewingMode,
             search: state.search,
             offlineAnnotations: state.offlineAnnotations,
           });
@@ -2384,7 +2432,7 @@ export default {
         annotationsList.forEach((annotation) => {
           this.offlineAnnotations.push({...annotation});
         });
-        sessionStorage.setItem('offline-annotation', JSON.stringify(this.offlineAnnotations));
+        sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
       }
     },
 
