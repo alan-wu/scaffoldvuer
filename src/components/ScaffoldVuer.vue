@@ -337,7 +337,7 @@
         class="settings-group"
         :class="{ open: drawerOpen, close: !drawerOpen }"
       >
-        <el-row>
+        <el-row v-if="showOpenMapButton">
           <el-popover
             :visible="hoverVisibilities[3].value"
             content="Open new map"
@@ -711,6 +711,13 @@ export default {
      * (background colour, viewing mode, etc.)
      */
     showLocalSettings: {
+      type: Boolean,
+      default: true,
+    },
+    /**
+     * The option to show open new map button
+     */
+    showOpenMapButton: {
       type: Boolean,
       default: true,
     },
