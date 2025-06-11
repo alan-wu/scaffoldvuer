@@ -337,7 +337,7 @@
         class="settings-group"
         :class="{ open: drawerOpen, close: !drawerOpen }"
       >
-        <el-row>
+        <el-row v-if="showOpenMapButton">
           <el-popover
             :visible="hoverVisibilities[3].value"
             content="Open new map"
@@ -360,7 +360,7 @@
             </template>
           </el-popover>
         </el-row>
-        <el-row>
+        <el-row v-if="showLocalSettings">
           <el-popover
             :visible="hoverVisibilities[4].value"
             content="Change background color"
@@ -705,6 +705,21 @@ export default {
     flatmapAPI: {
       type: String,
       default: "https://mapcore-demo.org/current/flatmap/v3/"
+    },
+    /**
+     * The option to show local settings UI
+     * (background colour, viewing mode, etc.)
+     */
+    showLocalSettings: {
+      type: Boolean,
+      default: true,
+    },
+    /**
+     * The option to show open new map button
+     */
+    showOpenMapButton: {
+      type: Boolean,
+      default: true,
     },
   },
   provide() {
@@ -2071,6 +2086,7 @@ export default {
               this.authorisedUser = undefined;
               this.offlineAnnotationEnabled = true;
             }
+            this.emitOfflineAnnotationUpdate();
             this.addAnnotationFeature();
             this.loading = false;
           });
@@ -2090,6 +2106,12 @@ export default {
         }
         this.cancelCreate();
       }
+    },
+    /**
+     * Function to emit offline annotation enabled status
+     */
+    emitOfflineAnnotationUpdate: function () {
+      this.$emit('update-offline-annotation-enabled', this.offlineAnnotationEnabled);
     },
     /**
      * @public
