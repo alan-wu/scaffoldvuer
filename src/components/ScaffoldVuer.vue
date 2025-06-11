@@ -2086,6 +2086,7 @@ export default {
               this.authorisedUser = undefined;
               this.offlineAnnotationEnabled = true;
             }
+            this.emitOfflineAnnotationUpdate();
             this.addAnnotationFeature();
             this.loading = false;
           });
@@ -2105,6 +2106,12 @@ export default {
         }
         this.cancelCreate();
       }
+    },
+    /**
+     * Function to emit offline annotation enabled status
+     */
+    emitOfflineAnnotationUpdate: function () {
+      this.$emit('update-offline-annotation-enabled', this.offlineAnnotationEnabled);
     },
     /**
      * @public
