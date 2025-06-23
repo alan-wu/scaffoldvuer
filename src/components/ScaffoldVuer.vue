@@ -1010,7 +1010,6 @@ export default {
         (this.activeDrawMode !== "Point" && this.activeDrawMode !== 'LineString');
     },
     enableColourPicker: function() {
-      console.log(this.showColourPicker && this.colourRadio);
       return this.showColourPicker && this.colourRadio;
     },
     modeDescription: function () {
@@ -2176,6 +2175,7 @@ export default {
         objects.forEach((zincObject) => {
           zincObject.setGreyScale(!flag);
         });
+        this.$refs.scaffoldTreeControls.updateAllNodeColours();
       }
     }, 
     /**
@@ -2187,14 +2187,6 @@ export default {
      setOutlines: function (flag) {
       this.outlinesRadio = flag;
       this.$refs.scaffoldTreeControls.setOutlines(flag);
-      /*
-      if (this.$module.scene) {
-        this.$module.scene.forEachLine(
-          (zincObject) => zincObject.setVisibility(flag),
-          true
-        );
-      }
-      */
     },
     /**
      * Set the marker modes for objects with the provided name, mode can

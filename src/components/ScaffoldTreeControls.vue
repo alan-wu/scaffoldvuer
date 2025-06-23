@@ -414,6 +414,21 @@ export default {
         });
       }
     },
+    updateAllNodeColours: function() {
+      const checkedList =
+        this.$refs.treeControls.$refs.regionTree.getCheckedKeys();
+      this.forEachChildInNode(
+        this.treeData[0],
+        checkedList,
+        "",
+        true,
+        (node, regionPath, parentsAreVisible) => {
+          if (node.isPrimitives) {
+            node.activeColour = this.getColour(node);
+          }
+        }
+      );
+    },
     setOutlines: function(flag) {
       const checkedList =
         this.$refs.treeControls.$refs.regionTree.getCheckedKeys();
