@@ -672,6 +672,15 @@ export default {
       default: false,
     },
     /**
+     * Define what is considered as nerves.
+     */
+    isNerves: {
+      type: Object,
+      default: {
+        regions: ["nerves"]
+      },
+    },
+    /**
      * This array populate the the openMapOptions popup.
      * Each entry contains a pair of display and key.
      */
@@ -1055,6 +1064,18 @@ export default {
       this.$_searchIndex.addZincObject(zincObject, zincObject.uuid);
       if (this.timeVarying === false && zincObject.isTimeVarying()) {
         this.timeVarying = true;
+      }
+      //Temporary way to mark an object as nerves
+      const regions = this.isNerves?.regions;
+      if (regions) {
+        const regionPath = zincObject.getRegion().getFullPath().toLowerCase();
+        for (let i = 0; i < regions.length; i++) {
+          if (regionPath.includes(regions[i].toLowerCase())) {
+            zincObject.userData.isNerves = true;
+          } else {
+            zincObject.userData.isNerves = false;
+          }
+        }
       }
       /**
        * Emit when a new object is added to the scene
@@ -2169,13 +2190,19 @@ export default {
      * @arg {Boolean} `flag`
      */
      setColour: function (flag) {
-      this.colourRadio = flag;
-      if (this.$module.scene) {
-        const objects = this.$module.scene.getRootRegion().getAllObjects(true);
-        objects.forEach((zincObject) => {
-          zincObject.setGreyScale(!flag);
-        });
-        this.$refs.scaffoldTreeControls.updateAllNodeColours();
+      if (this.isReady && this.$module.scene) {
+        this.loading = true;
+        //This can take sometime to finish , nextTick does not bring out
+        //the loading screen so I opt for timeout loop here.
+        setTimeout(() => {
+          const objects = this.$module.scene.getRootRegion().getAllObjects(true);
+          objects.forEach((zincObject) => {
+            if (!zincObject.userData.isNerves) zincObject.setGreyScale(!flag);
+          });
+          this.$refs.scaffoldTreeControls.updateAllNodeColours();
+          this.loading = false;
+          this.colourRadio = flag;
+        }, 100);
       }
     }, 
     /**
@@ -2185,8 +2212,10 @@ export default {
      * @arg {Boolean} `flag`
      */
      setOutlines: function (flag) {
-      this.outlinesRadio = flag;
-      this.$refs.scaffoldTreeControls.setOutlines(flag);
+      if (this.isReady && this.$module.scene) {
+        this.outlinesRadio = flag;
+        this.$refs.scaffoldTreeControls.setOutlines(flag);
+      }
     },
     /**
      * Set the marker modes for objects with the provided name, mode can
