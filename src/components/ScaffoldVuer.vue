@@ -2190,7 +2190,8 @@ export default {
      * @arg {Boolean} `flag`
      */
      setColour: function (flag) {
-      if (this.isReady && this.$module.scene && typeof flag === "boolean") {
+      if (this.isReady && this.$module.scene &&
+      typeof flag === "boolean" && flag !== this.colourRadio) {
         this.loading = true;
         //This can take sometime to finish , nextTick does not bring out
         //the loading screen so I opt for timeout loop here.
@@ -2212,7 +2213,8 @@ export default {
      * @arg {Boolean} `flag`
      */
      setOutlines: function (flag) {
-      if (this.isReady && this.$module.scene && typeof flag === "boolean") {
+      if (this.isReady && this.$module.scene &&
+      typeof flag === "boolean" && flag !== this.outlinesRadio) {
         this.outlinesRadio = flag;
         this.$nextTick(() => this.$refs.scaffoldTreeControls.setOutlines(flag));
       }
@@ -2415,7 +2417,6 @@ export default {
         /**
          * Emit when all objects have been loaded
          */
-        this.$emit("on-ready");
         this.setMarkers();
         //Create a bounding box.
         this._boundingBoxGeo = this.$module.scene.addBoundingBoxPrimitive(
@@ -2427,10 +2428,13 @@ export default {
         const {centre, size} = this.$module.getCentreAndSize();
         this.boundingDims.centre = centre;
         this.boundingDims.size = size;
-        this.$nextTick(() => this.restoreSettings(options) );
         //this.$module.scene.createAxisDisplay(false);
         //this.$module.scene.enableAxisDisplay(true, true);
         this.isReady = true;
+        this.$nextTick(() => {
+          this.restoreSettings(options);
+          this.$emit("on-ready");
+        });
       };
     },
     /**
