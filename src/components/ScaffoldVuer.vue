@@ -100,7 +100,7 @@
           <ScaffoldTreeControls
             ref="scaffoldTreeControls"
             :isReady="isReady"
-            :show-colour-picker="showColourPicker"
+            :show-colour-picker="enableColourPicker"
             @object-selected="objectSelected"
             @object-hovered="objectHovered"
             @drawer-toggled="drawerToggled"
@@ -318,6 +318,30 @@
             </el-row>
           </el-row>
           <el-row class="backgroundSpacer"></el-row>
+          <el-row class="backgroundText">Organs display</el-row>
+          <el-row class="backgroundControl">
+            <el-radio-group
+              v-model="colourRadio"
+              class="scaffold-radio"
+              @change="setColour"
+            >
+              <el-radio :value="true">Colour</el-radio>
+              <el-radio :value="false">Greyscale</el-radio>
+            </el-radio-group>
+          </el-row>
+          <el-row class="backgroundSpacer"></el-row>
+          <el-row class="backgroundText">Outlines display</el-row>
+          <el-row class="backgroundControl">
+            <el-radio-group
+              v-model="outlinesRadio"
+              class="scaffold-radio"
+              @change="setOutlines"
+            >
+              <el-radio :value="true">Show</el-radio>
+              <el-radio :value="false">Hide</el-radio>
+            </el-radio-group>
+          </el-row>
+          <el-row class="backgroundSpacer"></el-row>
           <el-row class="backgroundText"> Change background </el-row>
           <el-row class="backgroundChooser">
             <div
@@ -418,6 +442,8 @@ import {
   ElButton as Button,
   ElCol as Col,
   ElLoading as Loading,
+  ElRadio as Radio,
+  ElRadioGroup as RadioGroup,
   ElOption as Option,
   ElPopover as Popover,
   ElRow as Row,
@@ -447,6 +473,8 @@ export default {
     Loading,
     Option,
     Popover,
+    Radio,
+    RadioGroup,
     Row,
     Select,
     Slider,
@@ -644,6 +672,15 @@ export default {
       default: false,
     },
     /**
+     * Define what is considered as nerves.
+     */
+    isNerves: {
+      type: Object,
+      default: {
+        regions: ["nerves"]
+      },
+    },
+    /**
      * This array populate the the openMapOptions popup.
      * Each entry contains a pair of display and key.
      */
@@ -732,6 +769,7 @@ export default {
   data: function () {
     return {
       annotator: undefined,
+      colourRadio: true,
       createData: {
         drawingBox: false,
         toBeConfirmed: false,
@@ -808,6 +846,7 @@ export default {
       currentSpeed: 1,
       timeStamps: {},
       defaultCheckedKeys: [],
+      outlinesRadio: true,
       tData: {
         label: "",
         region: "",
@@ -979,6 +1018,9 @@ export default {
       return this.viewingMode === 'Annotation' && this.tData.active === true &&
         (this.activeDrawMode !== "Point" && this.activeDrawMode !== 'LineString');
     },
+    enableColourPicker: function() {
+      return this.showColourPicker && this.colourRadio;
+    },
     modeDescription: function () {
       let description = this.viewingModes[this.viewingMode];
       if (this.viewingMode === 'Annotation') {
@@ -1022,6 +1064,18 @@ export default {
       this.$_searchIndex.addZincObject(zincObject, zincObject.uuid);
       if (this.timeVarying === false && zincObject.isTimeVarying()) {
         this.timeVarying = true;
+      }
+      //Temporary way to mark an object as nerves
+      const regions = this.isNerves?.regions;
+      if (regions) {
+        const regionPath = zincObject.getRegion().getFullPath().toLowerCase();
+        for (let i = 0; i < regions.length; i++) {
+          if (regionPath.includes(regions[i].toLowerCase())) {
+            zincObject.userData.isNerves = true;
+          } else {
+            zincObject.userData.isNerves = false;
+          }
+        }
       }
       /**
        * Emit when a new object is added to the scene
@@ -2130,6 +2184,42 @@ export default {
       this.tData.region = undefined;
     },
     /**
+     * @public
+     * Function to toggle colour/greyscale of primitives.
+     * The parameter ``flag`` is a boolean, ``true`` (colour) and ``false`` (greyscale).
+     * @arg {Boolean} `flag`
+     */
+     setColour: function (flag) {
+      if (this.isReady && this.$module.scene &&
+      typeof flag === "boolean" && flag !== this.colourRadio) {
+        this.loading = true;
+        //This can take sometime to finish , nextTick does not bring out
+        //the loading screen so I opt for timeout loop here.
+        setTimeout(() => {
+          const objects = this.$module.scene.getRootRegion().getAllObjects(true);
+          objects.forEach((zincObject) => {
+            if (!zincObject.userData.isNerves) zincObject.setGreyScale(!flag);
+          });
+          this.$refs.scaffoldTreeControls.updateAllNodeColours();
+          this.loading = false;
+          this.colourRadio = flag;
+        }, 100);
+      }
+    }, 
+    /**
+     * @public
+     * Function to toggle lines graphics.
+     * The parameter ``flag`` is a boolean, ``true`` to show lines, ``false`` to hide them.
+     * @arg {Boolean} `flag`
+     */
+     setOutlines: function (flag) {
+      if (this.isReady && this.$module.scene &&
+      typeof flag === "boolean" && flag !== this.outlinesRadio) {
+        this.outlinesRadio = flag;
+        this.$nextTick(() => this.$refs.scaffoldTreeControls.setOutlines(flag));
+      }
+    },
+    /**
      * Set the marker modes for objects with the provided name, mode can
      * be "on", "off" or "inherited".
      * Value can either be number or an object containing number and
@@ -2289,8 +2379,14 @@ export default {
         if (options.background) {
           this.backgroundChangeCallback(options.background);
         }
+        if ("colour" in options) {
+          this.setColour(options.colour);
+        }
         if (options.offlineAnnotations) {
           sessionStorage.setItem('anonymous-annotation', options.offlineAnnotations);
+        }
+        if ("outlines" in options) { 
+          this.setOutlines(options.outlines);
         }
         if (options.viewingMode) {
           this.changeViewingMode(options.viewingMode);
@@ -2321,7 +2417,6 @@ export default {
         /**
          * Emit when all objects have been loaded
          */
-        this.$emit("on-ready");
         this.setMarkers();
         //Create a bounding box.
         this._boundingBoxGeo = this.$module.scene.addBoundingBoxPrimitive(
@@ -2333,10 +2428,13 @@ export default {
         const {centre, size} = this.$module.getCentreAndSize();
         this.boundingDims.centre = centre;
         this.boundingDims.size = size;
-        this.$nextTick(() => this.restoreSettings(options) );
         //this.$module.scene.createAxisDisplay(false);
         //this.$module.scene.enableAxisDisplay(true, true);
         this.isReady = true;
+        this.$nextTick(() => {
+          this.restoreSettings(options);
+          this.$emit("on-ready");
+        });
       };
     },
     /**
@@ -2352,6 +2450,8 @@ export default {
         viewport: undefined,
         visibility: undefined,
         background: this.currentBackground,
+        colour: this.colourRadio,
+        outlines: this.outlinesRadio,
         viewingMode: this.viewingMode,
       };
       if (this.$refs.scaffoldTreeControls)
@@ -2383,23 +2483,28 @@ export default {
             viewport: state.viewport,
             visibility: state.visibility,
             background: state.background,
+            colour: state.colour,
+            outlines: state.outlines,
             viewingMode: state.viewingMode,
             search: state.search,
             offlineAnnotations: state.offlineAnnotations,
           });
         } else {
-          if (state.background || state.search || state.viewport || state.viewingMode || state.visibility) {
+          if (state.background || state.colour || state.search || state.outlines ||
+          state.viewport || state.viewingMode || state.visibility) {
             if (this.isReady && this.$module.scene) {
               this.restoreSettings(state);
             } else {
               this.$module.setFinishDownloadCallback(
                 this.setURLFinishCallback({
                   background: state.background,
+                  colour: state.colour,
+                  search: state.search,
+                  offlineAnnotations: state.offlineAnnotations,
+                  outlines: state.outlines,
                   viewingMode: state.viewingMode,
                   viewport: state.viewport,
                   visibility: state.visibility,
-                  search: state.search,
-                  offlineAnnotations: state.offlineAnnotations,
                 })
               );
             }
@@ -2483,6 +2588,8 @@ export default {
         this.$module.setFinishDownloadCallback(
           this.setURLFinishCallback({
             background: state?.background,
+            colour: state?.colour,
+            outlines: state?.outlines,
             region: this.region,
             search: state?.search,
             viewingMode: state?.viewingMode,
@@ -2918,6 +3025,30 @@ export default {
     }
   }
 }
+
+.scaffold-radio {
+  :deep(label) {
+    margin-right: 20px;
+    &:last-child {
+      margin-right: 0px;
+    }
+  }
+  :deep(.el-radio__input) {
+    &.is-checked {
+      & + .el-radio__label {
+        color: $app-primary-color;
+      }
+      .el-radio__inner {
+        border-color: $app-primary-color;
+        background: $app-primary-color;
+      }
+    }
+    .el-radio__inner:hover {
+      border-color: $app-primary-color;
+    }
+  }
+}
+
 
 :deep(.scaffold-popper.el-popper.el-popper) {
   padding: 6px 4px;

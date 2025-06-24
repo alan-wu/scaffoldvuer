@@ -184,6 +184,7 @@ export default {
               regionData.children = [];
             }
             const child = {
+              disabled: false,
               label: zincObject.groupName,
               id: region.uuid + "/" + zincObject.uuid,
               isPrimitives: true,
@@ -225,7 +226,8 @@ export default {
       if (isPrimitives) {
         const primitives = region.findObjectsWithGroupName(node.label);
         primitives.forEach((primitive) => {
-          primitive.setVisibility(isChecked);
+          const visibility = isChecked && !node.disabled;
+          primitive.setVisibility(visibility);
         });
       }
     },
@@ -322,6 +324,19 @@ export default {
       this.treeData[0].id = undefined;
       this.$emit("object-selected", []);
     },
+    forEachChildInNode: function(node, checkedList, regionPath, parentsAreVisible, callback) {
+      if (node.isRegion) {
+        if (node.children) {
+          const isVisible = regionPath === '' || checkedList.includes(node.id);
+          node.children.forEach(
+            child => this.forEachChildInNode(
+              child, checkedList, node.regionPath, parentsAreVisible && isVisible, callback)
+          );
+        }
+      } else if (node.isPrimitives) {
+        callback(node, regionPath, parentsAreVisible);
+      }
+    },
     getColour: function (nodeData) {
       //Do not need to check for primitives as this is checked on the template
       if (nodeData) {
@@ -400,6 +415,56 @@ export default {
           this.setColourField(this.treeData[0].children, nodeData);
         });
       }
+    },
+    updateAllNodeColours: function() {
+      const checkedList =
+        this.$refs.treeControls.$refs.regionTree.getCheckedKeys();
+      this.forEachChildInNode(
+        this.treeData[0],
+        checkedList,
+        "",
+        true,
+        (node, regionPath, parentsAreVisible) => {
+          if (node.isPrimitives) {
+            node.activeColour = this.getColour(node);
+          }
+        }
+      );
+    },
+    setOutlines: function(flag) {
+      const checkedList =
+        this.$refs.treeControls.$refs.regionTree.getCheckedKeys();
+      this.forEachChildInNode(
+        this.treeData[0],
+        checkedList,
+        "",
+        true,
+        (node, regionPath, parentsAreVisible) => {
+          const region = this.module.scene
+              .getRootRegion()
+              .findChildFromPath(regionPath);
+          const primitives = region.findObjectsWithGroupName(node.label);
+          if (flag) {
+            primitives.forEach((primitive) => {
+              if (primitive.isLines) {
+                if (checkedList.includes(node.id) && parentsAreVisible) {
+                  primitive.setVisibility(true);
+                }
+                node.disabled = false;
+              }
+            });
+          } else {
+            if (node.isPrimitives) {
+              primitives.forEach((primitive) => {
+                if (primitive.isLines) {
+                  primitive.setVisibility(false);
+                  node.disabled = true;
+                }
+              });
+            }
+          }
+        }
+      );
     },
     visibilityToggle: function (item, event) {
       this.module.changeOrganPartsVisibility(item, event);
