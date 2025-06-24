@@ -184,6 +184,7 @@ export default {
               regionData.children = [];
             }
             const child = {
+              disabled: false,
               label: zincObject.groupName,
               id: region.uuid + "/" + zincObject.uuid,
               isPrimitives: true,
@@ -225,7 +226,8 @@ export default {
       if (isPrimitives) {
         const primitives = region.findObjectsWithGroupName(node.label);
         primitives.forEach((primitive) => {
-          primitive.setVisibility(isChecked);
+          const visibility = isChecked && !node.disabled;
+          primitive.setVisibility(visibility);
         });
       }
     },

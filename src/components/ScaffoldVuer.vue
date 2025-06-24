@@ -846,7 +846,7 @@ export default {
       currentSpeed: 1,
       timeStamps: {},
       defaultCheckedKeys: [],
-      outlinesRadio: false,
+      outlinesRadio: true,
       tData: {
         label: "",
         region: "",
@@ -2190,7 +2190,7 @@ export default {
      * @arg {Boolean} `flag`
      */
      setColour: function (flag) {
-      if (this.isReady && this.$module.scene) {
+      if (this.isReady && this.$module.scene && typeof flag === "boolean") {
         this.loading = true;
         //This can take sometime to finish , nextTick does not bring out
         //the loading screen so I opt for timeout loop here.
@@ -2212,9 +2212,9 @@ export default {
      * @arg {Boolean} `flag`
      */
      setOutlines: function (flag) {
-      if (this.isReady && this.$module.scene) {
+      if (this.isReady && this.$module.scene && typeof flag === "boolean") {
         this.outlinesRadio = flag;
-        this.$refs.scaffoldTreeControls.setOutlines(flag);
+        this.$nextTick(() => this.$refs.scaffoldTreeControls.setOutlines(flag));
       }
     },
     /**
@@ -2377,8 +2377,14 @@ export default {
         if (options.background) {
           this.backgroundChangeCallback(options.background);
         }
+        if ("colour" in options) {
+          this.setColour(options.colour);
+        }
         if (options.offlineAnnotations) {
           sessionStorage.setItem('anonymous-annotation', options.offlineAnnotations);
+        }
+        if ("outlines" in options) { 
+          this.setOutlines(options.outlines);
         }
         if (options.viewingMode) {
           this.changeViewingMode(options.viewingMode);
@@ -2440,6 +2446,8 @@ export default {
         viewport: undefined,
         visibility: undefined,
         background: this.currentBackground,
+        colour: this.colourRadio,
+        outlines: this.outlinesRadio,
         viewingMode: this.viewingMode,
       };
       if (this.$refs.scaffoldTreeControls)
@@ -2471,23 +2479,28 @@ export default {
             viewport: state.viewport,
             visibility: state.visibility,
             background: state.background,
+            colour: state.colour,
+            outlines: state.outlines,
             viewingMode: state.viewingMode,
             search: state.search,
             offlineAnnotations: state.offlineAnnotations,
           });
         } else {
-          if (state.background || state.search || state.viewport || state.viewingMode || state.visibility) {
+          if (state.background || state.colour || state.search || state.outlines ||
+          state.viewport || state.viewingMode || state.visibility) {
             if (this.isReady && this.$module.scene) {
               this.restoreSettings(state);
             } else {
               this.$module.setFinishDownloadCallback(
                 this.setURLFinishCallback({
                   background: state.background,
+                  colour: state.colour,
+                  search: state.search,
+                  offlineAnnotations: state.offlineAnnotations,
+                  outlines: state.outlines,
                   viewingMode: state.viewingMode,
                   viewport: state.viewport,
                   visibility: state.visibility,
-                  search: state.search,
-                  offlineAnnotations: state.offlineAnnotations,
                 })
               );
             }
@@ -2571,6 +2584,8 @@ export default {
         this.$module.setFinishDownloadCallback(
           this.setURLFinishCallback({
             background: state?.background,
+            colour: state?.colour,
+            outlines: state?.outlines,
             region: this.region,
             search: state?.search,
             viewingMode: state?.viewingMode,
@@ -2593,8 +2608,6 @@ export default {
           );
         }
         if (this.$module && this.$module.scene) {
-          this.colourRadio = true;
-          this.outlinesRadio = true;
           this.$module.scene.displayMarkers = this.displayMarkers;
           this.$module.scene.forcePickableObjectsUpdate = true;
           this.$module.scene.displayMinimap = this.displayMinimap;
