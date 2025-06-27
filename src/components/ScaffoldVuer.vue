@@ -437,7 +437,6 @@ import {
   findObjectsWithNames,
   updateBoundingBox,
 } from "../scripts/Utilities.js";
-
 import {
   ElButton as Button,
   ElCol as Col,
@@ -458,6 +457,9 @@ import { OrgansViewer } from "../scripts/OrgansRenderer.js";
 import { SearchIndex } from "../scripts/Search.js";
 import { mapState } from 'pinia';
 import { useMainStore } from "@/store/index";
+import { getNerveMaps } from "../scripts/MappedNerves.js";
+const nervesMap = getNerveMaps();
+let totalNerves = 0, foundNerves = 0;
 
 /**
  * A vue component of the scaffold viewer.
@@ -1071,7 +1073,13 @@ export default {
         const regionPath = zincObject.getRegion().getFullPath().toLowerCase();
         for (let i = 0; i < regions.length; i++) {
           if (regionPath.includes(regions[i].toLowerCase())) {
+            totalNerves++;
             zincObject.userData.isNerves = true;
+            const groupName = zincObject.groupName.toLowerCase();
+            if (groupName in nervesMap) {
+              foundNerves++;
+              zincObject.anatomicalId = nervesMap[groupName];
+            }
           } else {
             zincObject.userData.isNerves = false;
           }
@@ -2431,6 +2439,7 @@ export default {
         //this.$module.scene.createAxisDisplay(false);
         //this.$module.scene.enableAxisDisplay(true, true);
         this.isReady = true;
+        console.log(`Total ${totalNerves}, found ${foundNerves}`);
         this.$nextTick(() => {
           this.restoreSettings(options);
           this.$emit("on-ready");
