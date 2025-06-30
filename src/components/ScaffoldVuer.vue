@@ -1078,12 +1078,14 @@ export default {
             const groupName = zincObject.groupName.toLowerCase();
             if (groupName in nervesMap) {
               foundNerves++;
-              zincObject.anatomicalId = nervesMap[groupName];
+              zincObject.setAnatomicalId(nervesMap[groupName]);
+              console.log(groupName, zincObject.anatomicalId, zincObject.uuid)
             }
           } else {
             zincObject.userData.isNerves = false;
           }
         }
+
       }
       /**
        * Emit when a new object is added to the scene
