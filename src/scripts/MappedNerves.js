@@ -826,6 +826,24 @@ const getNerveMaps = () => {
   return curatedMap;
 }
 
+const getTermNerveMaps = () => {
+  const curatedMap = {};
+  mappedNerves.forEach((item) => {
+    if (item["nerve_id"] && item["label"] !== "nerve") {
+      if (!item["subclass labels"].length) {
+        return;
+      }
+      if (!(item["nerve_id"] in curatedMap)) {
+        curatedMap[item["nerve_id"]] = [];
+      }
+      const labels = item["subclass labels"].map((label) => label.toLowerCase())
+      curatedMap[item["nerve_id"]].push(...labels);
+    }
+  });
+  return curatedMap;
+};
+
 export {
   getNerveMaps,
+  getTermNerveMaps
 };
