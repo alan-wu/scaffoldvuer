@@ -99,6 +99,8 @@ RendererModule.prototype.getAnnotationsFromObjects = function(objects) {
         }
       }
       if (annotation) {
+        annotation.data.anatomicalId = zincObject.anatomicalId;
+        annotation.data.isNerves = zincObject.userData.isNerves;
         annotation.data.zincObject = zincObject;
       }
     }
