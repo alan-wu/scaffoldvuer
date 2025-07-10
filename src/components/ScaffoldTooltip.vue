@@ -87,6 +87,10 @@ export default {
     Tooltip,
   },
   props: {
+    clientHeight: {
+      type: Number,
+      default: 200,
+    },
     createData: {
       type: Object,
       default: {
@@ -146,12 +150,14 @@ export default {
   computed: {
     ...mapState(useMainStore,  ['userToken']),
     position: function () {
-      let yOffset = 40;
+      let yOffset = 20;
       if (this.region) {
-        yOffset = 55;
+        yOffset = 35;
       }
-      const x = this.x - 40;
-      return { left: x + "px", top: this.y - yOffset + "px" };
+      const x = this.x - 100;
+      const bottom = this.clientHeight - (this.y - yOffset);
+      return { left: x + "px", bottom: (bottom >= 0) ? `${bottom}px` : '0px'
+      };
     },
   },
   methods: {
@@ -216,9 +222,8 @@ export default {
     background-color: #fff;
     border: 1px solid $app-primary-color;
     border-radius: 4px;
-    white-space: nowrap;
-    min-width: unset!important;
-    max-width:330px;
+    min-width: 250px!important;
+    max-width:500px;
     width:unset!important;
     pointer-events: none;
     top: -15px !important;
@@ -230,8 +235,12 @@ export default {
   }
 
   .tooltip-text {
+    word-wrap: normal;
     text-align: center;
     color: $app-primary-color;
+  }
+  .tooltip-text + .tooltip-text {
+    border-top: 1px solid $app-primary-color;
   }
 
   :deep(.non-selectable) {

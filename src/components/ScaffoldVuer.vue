@@ -8,6 +8,7 @@
   >
     <map-svg-sprite-color />
     <scaffold-tooltip
+      :clientHeight="clientHeight"
       :createData="createData"
       :label="tData.label"
       :region="tData.region"
@@ -769,6 +770,7 @@ export default {
   data: function () {
     return {
       annotator: undefined,
+      clientHeight: 200,
       colourRadio: true,
       createData: {
         drawingBox: false,
@@ -2645,6 +2647,7 @@ export default {
     adjustLayout: function () {
       if (this.$refs.scaffoldContainer) {
         let width = this.$refs.scaffoldContainer.clientWidth;
+        this.clientHeight = this.$refs.scaffoldContainer.clientHeight;
         this.minimisedSlider = width < 812;
         if (this.minimisedSlider) {
           this.sliderPosition = this.drawerOpen ? "right" : "left";
