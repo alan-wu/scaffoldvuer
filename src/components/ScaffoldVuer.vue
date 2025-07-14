@@ -1080,6 +1080,8 @@ export default {
               foundNerves++;
               zincObject.setAnatomicalId(nervesMap[groupName]);
               console.log(groupName, zincObject.anatomicalId, zincObject.uuid)
+            } else {
+              zincObject.setGreyScale(true);
             }
           } else {
             zincObject.userData.isNerves = false;
@@ -2199,8 +2201,7 @@ export default {
      * The parameter ``flag`` is a boolean, ``true`` (colour) and ``false`` (greyscale).
      * @arg {Boolean} `flag`
      */
-     setColour: function (flag, forced = false) {
-      console.log(flag, this.colourRadio)
+    setColour: function (flag, forced = false) {
       if (this.isReady && this.$module.scene &&
         typeof flag === "boolean" && 
         (forced || flag !== this.colourRadio)) {
