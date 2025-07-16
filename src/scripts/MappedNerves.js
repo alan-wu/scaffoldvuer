@@ -837,7 +837,7 @@ const getTermNerveMaps = () => {
         curatedMap[item["nerve_id"]] = [];
       }
       const labels = item["subclass labels"].map((label) => label.toLowerCase())
-      curatedMap[item["nerve_id"]].push(...labels);
+      curatedMap[item["nerve_id"]].push(item["label"].toLowerCase(), ...labels);
     }
   });
   return curatedMap;
@@ -852,6 +852,9 @@ const getFilterOptions = () => {
   };
   let children1 = [];
   for (const nerve of mappedNerves) {
+    if (nerve.label === "nerve") {
+      continue;
+    }
     let sub = {
       facetPropPath: "scaffold.connectivity.nerve",
       label: "",
