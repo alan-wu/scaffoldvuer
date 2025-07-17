@@ -1035,6 +1035,37 @@ export default {
     },
   },
   methods: {
+    zoomToNerves: function (nerves) {
+      if (this.$module.scene) {
+        const nerveLabels = nerves.join(",");
+        const regions = this.$module.scene.getRootRegion().getChildRegions();
+        regions.forEach((region) => {
+          if (!['Nerves', '_helper'].includes(region.getName())) {
+            if (nerveLabels) {
+              region.hideAllPrimitives() 
+            } else {
+              region.showAllPrimitives();
+            }
+          }
+        })
+        const objects = this.$module.scene.getRootRegion().getAllObjects(true);
+        objects.forEach((zincObject) => {
+          if (zincObject.userData.isNerves) {
+            if (nerveLabels) {              
+              zincObject.setAlpha(0.01)
+              if (zincObject.anatomicalId) {
+                zincObject.setAlpha(0.1)
+                if (nerveLabels.includes(zincObject.groupName.toLowerCase())) {
+                  zincObject.setAlpha(1)
+                }
+              }
+            } else {
+              zincObject.setAlpha(1)
+            }
+          }
+        });
+      }
+    },
     enableAxisDisplay: function (enable, miniaxes) {
       if (this.$module.scene) {
         this.$module.scene.enableAxisDisplay(enable, miniaxes);
@@ -1080,6 +1111,8 @@ export default {
               foundNerves++;
               zincObject.setAnatomicalId(nervesMap[groupName]);
               console.log(groupName, zincObject.anatomicalId, zincObject.uuid)
+            } else {
+              zincObject.setGreyScale(true);
             }
           } else {
             zincObject.userData.isNerves = false;
@@ -2199,8 +2232,7 @@ export default {
      * The parameter ``flag`` is a boolean, ``true`` (colour) and ``false`` (greyscale).
      * @arg {Boolean} `flag`
      */
-     setColour: function (flag, forced = false) {
-      console.log(flag, this.colourRadio)
+    setColour: function (flag, forced = false) {
       if (this.isReady && this.$module.scene &&
         typeof flag === "boolean" && 
         (forced || flag !== this.colourRadio)) {

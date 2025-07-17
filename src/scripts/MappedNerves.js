@@ -826,6 +826,76 @@ const getNerveMaps = () => {
   return curatedMap;
 }
 
+const getTermNerveMaps = () => {
+  const curatedMap = {};
+  mappedNerves.forEach((item) => {
+    const nerve_id = item["nerve_id"];
+    const label = item["label"].toLowerCase();
+    const subclassLabels = item["subclass labels"];
+    if (nerve_id && label !== "nerve") {
+      if (!subclassLabels.length) {
+        return;
+      }
+      if (!(nerve_id in curatedMap)) {
+        curatedMap[nerve_id] = {};
+      }
+      const subLabels = subclassLabels
+        .map((label) => label.toLowerCase())
+        .sort();
+      curatedMap[nerve_id] = {
+        nerve: label,
+        subNerves: subLabels,
+      };
+    }
+  });
+  return curatedMap;
+};
+
+const getFilterOptions = () => {
+  let filterOptions = [];
+  let main = {
+    key: "scaffold.connectivity.nerve",
+    label: "Nerves",
+    children: [],
+  };
+  let children1 = [];
+  for (const nerve of mappedNerves) {
+    if (nerve.label === "nerve") {
+      continue;
+    }
+    let sub = {
+      facetPropPath: "scaffold.connectivity.nerve",
+      label: "",
+      children: [],
+    };
+    let children2 = [];
+    for (const [key, value] of Object.entries(nerve)) {
+      if (key === "label") {
+        sub.label = value;
+      }
+      if (key === "subclass labels") {
+        for (const subnerve of value) {
+          children2.push({
+            facetPropPath: "scaffold.connectivity.subnerve",
+            label: subnerve,
+          });
+        }
+      }
+    }
+    if (children2.length) {
+      sub.children = children2.sort((a, b) => a.label.localeCompare(b.label));
+      children1.push(sub);
+    }
+  }
+  if (children1.length) {
+    main.children = children1.sort((a, b) => a.label.localeCompare(b.label));
+    filterOptions.push(main);
+  }
+  return filterOptions;
+};
+
 export {
   getNerveMaps,
+  getTermNerveMaps,
+  getFilterOptions
 };
