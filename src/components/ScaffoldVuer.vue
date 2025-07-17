@@ -323,7 +323,7 @@
             <el-radio-group
               v-model="colourRadio"
               class="scaffold-radio"
-              @change="setColour"
+              @change="setColour(colourRadio, true)"
             >
               <el-radio :value="true">Colour</el-radio>
               <el-radio :value="false">Greyscale</el-radio>
@@ -335,7 +335,7 @@
             <el-radio-group
               v-model="outlinesRadio"
               class="scaffold-radio"
-              @change="setOutlines"
+              @change="setOutlines(outlinesRadio, true)"
             >
               <el-radio :value="true">Show</el-radio>
               <el-radio :value="false">Hide</el-radio>
@@ -2199,9 +2199,11 @@ export default {
      * The parameter ``flag`` is a boolean, ``true`` (colour) and ``false`` (greyscale).
      * @arg {Boolean} `flag`
      */
-     setColour: function (flag) {
+     setColour: function (flag, forced = false) {
+      console.log(flag, this.colourRadio)
       if (this.isReady && this.$module.scene &&
-      typeof flag === "boolean" && flag !== this.colourRadio) {
+        typeof flag === "boolean" && 
+        (forced || flag !== this.colourRadio)) {
         this.loading = true;
         //This can take sometime to finish , nextTick does not bring out
         //the loading screen so I opt for timeout loop here.
@@ -2222,9 +2224,10 @@ export default {
      * The parameter ``flag`` is a boolean, ``true`` to show lines, ``false`` to hide them.
      * @arg {Boolean} `flag`
      */
-     setOutlines: function (flag) {
+     setOutlines: function (flag, forced = false) {
       if (this.isReady && this.$module.scene &&
-      typeof flag === "boolean" && flag !== this.outlinesRadio) {
+        typeof flag === "boolean" && 
+        (forced || flag !== this.outlinesRadio)) {
         this.outlinesRadio = flag;
         this.$nextTick(() => this.$refs.scaffoldTreeControls.setOutlines(flag));
       }
