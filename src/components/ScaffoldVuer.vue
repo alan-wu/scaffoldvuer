@@ -1037,8 +1037,18 @@ export default {
   methods: {
     zoomToNerves: function (nerves) {
       if (this.$module.scene) {
-        const objects = this.$module.scene.getRootRegion().getAllObjects(true);
         const nerveLabels = nerves.join(",");
+        const regions = this.$module.scene.getRootRegion().getChildRegions();
+        regions.forEach((region) => {
+          if (!['Nerves', '_helper'].includes(region.getName())) {
+            if (nerveLabels) {
+              region.hideAllPrimitives() 
+            } else {
+              region.showAllPrimitives();
+            }
+          }
+        })
+        const objects = this.$module.scene.getRootRegion().getAllObjects(true);
         objects.forEach((zincObject) => {
           if (zincObject.userData.isNerves) {
             if (nerveLabels) {              
