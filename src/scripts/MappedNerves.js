@@ -829,15 +829,23 @@ const getNerveMaps = () => {
 const getTermNerveMaps = () => {
   const curatedMap = {};
   mappedNerves.forEach((item) => {
-    if (item["nerve_id"] && item["label"] !== "nerve") {
-      if (!item["subclass labels"].length) {
+    const nerve_id = item["nerve_id"];
+    const label = item["label"].toLowerCase();
+    const subclassLabels = item["subclass labels"];
+    if (nerve_id && label !== "nerve") {
+      if (!subclassLabels.length) {
         return;
       }
-      if (!(item["nerve_id"] in curatedMap)) {
-        curatedMap[item["nerve_id"]] = [];
+      if (!(nerve_id in curatedMap)) {
+        curatedMap[nerve_id] = {};
       }
-      const labels = item["subclass labels"].map((label) => label.toLowerCase())
-      curatedMap[item["nerve_id"]].push(item["label"].toLowerCase(), ...labels);
+      const subLabels = subclassLabels
+        .map((label) => label.toLowerCase())
+        .sort();
+      curatedMap[nerve_id] = {
+        nerve: label,
+        subNerves: subLabels,
+      };
     }
   });
   return curatedMap;
