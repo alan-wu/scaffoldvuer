@@ -1035,6 +1035,28 @@ export default {
     },
   },
   methods: {
+    zoomToNerves: function (nerves) {
+      if (this.$module.scene) {
+        const objects = this.$module.scene.getRootRegion().getAllObjects(true);
+        const nerveLabels = nerves.join(",");
+        objects.forEach((zincObject) => {
+          if (nerves.length) {       
+            zincObject.setAlpha(0);     
+            if (zincObject.userData.isNerves) {
+              zincObject.setAlpha(0.01)
+              if (zincObject.anatomicalId) {
+                zincObject.setAlpha(0.1)
+                if (nerveLabels.includes(zincObject.groupName.toLowerCase())) {
+                  zincObject.setAlpha(1)
+                }
+              }
+            }
+          } else {
+            zincObject.setAlpha(1);
+          }
+        });
+      }
+    },
     enableAxisDisplay: function (enable, miniaxes) {
       if (this.$module.scene) {
         this.$module.scene.enableAxisDisplay(enable, miniaxes);
