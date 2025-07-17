@@ -1040,7 +1040,7 @@ export default {
         const objects = this.$module.scene.getRootRegion().getAllObjects(true);
         const nerveLabels = nerves.join(",");
         objects.forEach((zincObject) => {
-          if (nerves.length) {       
+          if (nerveLabels) {       
             zincObject.setAlpha(0);     
             if (zincObject.userData.isNerves) {
               zincObject.setAlpha(0.01)
@@ -1052,7 +1052,9 @@ export default {
               }
             }
           } else {
-            zincObject.setAlpha(1);
+            if (zincObject._lod._material.opacity !== 1) {
+              zincObject.setAlpha(1);
+            }
           }
         });
       }
