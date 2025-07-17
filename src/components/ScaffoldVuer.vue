@@ -1035,32 +1035,38 @@ export default {
     },
   },
   methods: {
-    zoomToNerves: function (nerves) {
+    /**
+     * 
+     * @param nerves array of nerve names
+     * @param processed support visibility change based on sidebar search
+     */
+    zoomToNerves: function (nerves, processed = false) {
       if (this.$module.scene) {
-        const nerveLabels = nerves.join(",");
+        // This is used to show/hide all non-nerve objects
         const regions = this.$module.scene.getRootRegion().getChildRegions();
         regions.forEach((region) => {
           if (!['Nerves', '_helper'].includes(region.getName())) {
-            if (nerveLabels) {
-              region.hideAllPrimitives() 
+            if (processed) {
+              region.hideAllPrimitives();
             } else {
               region.showAllPrimitives();
             }
           }
         })
+        // This is to update the nerve opacity based on the nerves
         const objects = this.$module.scene.getRootRegion().getAllObjects(true);
         objects.forEach((zincObject) => {
           if (zincObject.userData.isNerves) {
-            if (nerveLabels) {              
-              zincObject.setAlpha(0.01)
-              if (zincObject.anatomicalId) {
-                zincObject.setAlpha(0.1)
-                if (nerveLabels.includes(zincObject.groupName.toLowerCase())) {
-                  zincObject.setAlpha(1)
-                }
+            zincObject.setAlpha(0.025);
+            if (zincObject.anatomicalId) {
+              zincObject.setAlpha(0.05);
+              const nerveLabels = nerves.join(",");
+              if (nerveLabels.includes(zincObject.groupName.toLowerCase())) {
+                zincObject.setAlpha(1);
               }
-            } else {
-              zincObject.setAlpha(1)
+            }
+            if (!processed) {
+              zincObject.setAlpha(1);
             }
           }
         });
