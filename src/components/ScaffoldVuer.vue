@@ -104,6 +104,7 @@
             @object-selected="objectSelected"
             @object-hovered="objectHovered"
             @drawer-toggled="drawerToggled"
+            @checked-regions="setCheckedRegions"
           />
         </template>
       </el-popover>
@@ -887,7 +888,8 @@ export default {
         region: "",
         group: "",
         isSearch: false,
-      })
+      }),
+      checkedRegions: []
     };
   },
   watch: {
@@ -1035,6 +1037,9 @@ export default {
     },
   },
   methods: {
+    setCheckedRegions: function (data) {
+      this.checkedRegions = data;
+    },
     zoomToNerves: function (nerves, processed = false) {
       if (this.$module.scene) {
         if (processed) {
@@ -1046,7 +1051,20 @@ export default {
           }, []);
           this.$refs.scaffoldTreeControls.setCheckedKeys(nerves, idsList);
         } else {
-          this.$refs.scaffoldTreeControls.checkAllKeys(['_helper']);
+          const regions = this.$module.scene.getRootRegion().getChildRegions();
+          const idsList = []
+          regions.forEach((region) => {
+            // if the checkbox is checked before, restore
+            const isChecked = this.checkedRegions.find(item => item.label === region.getName());
+            if (isChecked) {    
+              region.showAllPrimitives();
+              const zincObjects = region.getAllObjects();
+              const ids = zincObjects.map((object) => `${object.region.uuid}/${object.uuid}`);    
+              idsList.push(...ids);   
+            }
+          });
+          this.$refs.scaffoldTreeControls.setCheckedKeys(nerves, idsList, true);
+        }
       }
     },
     enableAxisDisplay: function (enable, miniaxes) {

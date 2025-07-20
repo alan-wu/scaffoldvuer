@@ -77,6 +77,7 @@ export default {
       drawerOpen: true,
       nodeNumbers: 0,
       module: undefined,
+      checkedRegions: [],
     };
   },
   computed: {
@@ -91,6 +92,16 @@ export default {
         if (this.isReady) {
           // Updated colour when scaffold is ready
           this.setColourField(data);
+          // _helper is unchecked by default
+          this.checkedRegions = data.filter(region => region.label !== '_helper');
+        }
+      },
+    },
+    checkedRegions: {
+      deep: true,
+      handler: function (data) {
+        if (this.isReady) {
+          this.$emit('checked-regions', data)
         }
       },
     },
@@ -221,7 +232,13 @@ export default {
         .getRootRegion()
         .findChildFromPath(node.regionPath);
       if (isRegion) {
-        isChecked ? region.showAllPrimitives() : region.hideAllPrimitives();
+        if (isChecked) {
+          region.showAllPrimitives();
+          this.checkedRegions.push(node);
+        } else {
+          region.hideAllPrimitives();
+          this.checkedRegions = this.checkedRegions.filter(region => region.label !== node.label);
+        }
       }
       if (isPrimitives) {
         const primitives = region.findObjectsWithGroupName(node.label);
@@ -514,18 +531,20 @@ export default {
         });
       }
     },
-    setCheckedKeys: function (labels, ids) {
-      this.$refs.treeControls.$refs.regionTree.setCheckedKeys([]); // Clear previous checked keys
-      const regions = this.module.scene.getRootRegion().getChildRegions();
-      regions.forEach((region) => {
-        region.hideAllPrimitives()
-        if (region.getName() === 'Nerves') {          
-          labels.forEach((label) => {
-            const primitives = region.findObjectsWithGroupName(label);
-            primitives.forEach((primitive) => primitive.setVisibility(true));
-          });
-        }
-      });
+    setCheckedKeys: function (labels, ids, restore = false) {
+      if (!restore) {        
+        this.$refs.treeControls.$refs.regionTree.setCheckedKeys([]); // Clear previous checked keys
+        const regions = this.module.scene.getRootRegion().getChildRegions();
+        regions.forEach((region) => {
+          region.hideAllPrimitives();
+          if (region.getName() === 'Nerves') {
+            labels.forEach((label) => {
+              const primitives = region.findObjectsWithGroupName(label);
+              primitives.forEach((primitive) => primitive.setVisibility(true));
+            });
+          }
+        });
+      }
       this.$refs.treeControls.$refs.regionTree.setCheckedKeys(ids); // Set new checked keys
     },
     checkAllKeys: function (ignore = []) {
