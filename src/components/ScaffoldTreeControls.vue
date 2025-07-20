@@ -514,13 +514,30 @@ export default {
         });
       }
     },
-    checkAllKeys: function () {
+    setCheckedKeys: function (labels, ids) {
+      this.$refs.treeControls.$refs.regionTree.setCheckedKeys([]); // Clear previous checked keys
+      const regions = this.module.scene.getRootRegion().getChildRegions();
+      regions.forEach((region) => {
+        region.hideAllPrimitives()
+        if (region.getName() === 'Nerves') {          
+          labels.forEach((label) => {
+            const primitives = region.findObjectsWithGroupName(label);
+            primitives.forEach((primitive) => primitive.setVisibility(true));
+          });
+        }
+      });
+      this.$refs.treeControls.$refs.regionTree.setCheckedKeys(ids); // Set new checked keys
+    },
+    checkAllKeys: function (ignore = []) {
       const keysList = [];
       const ids = [];
       extractAllFullPaths(this.treeData[0], keysList);
+      const modifiedKeysList = keysList.filter((key) => {
+        return !ignore.some(item => key.includes(item));
+      });
       this.setTreeVisibilityWithFullPaths(
         this.treeData[0],
-        keysList,
+        modifiedKeysList,
         ids,
         true
       );
