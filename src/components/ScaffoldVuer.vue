@@ -1042,29 +1042,36 @@ export default {
     },
     zoomToNerves: function (nerves, processed = false) {
       if (this.$module.scene) {
-        if (processed) {
-          const idsList = nerves.reduce((acc, nerve) => {
-            const zincObject = this.findObjectsWithGroupName(nerve)
-            const ids = zincObject.map((object) => `${object.region.uuid}/${object.uuid}`);
-            acc.push(...ids);
-            return acc;
-          }, []);
-          this.$refs.scaffoldTreeControls.setCheckedKeys(nerves, idsList);
-        } else {
-          const regions = this.$module.scene.getRootRegion().getChildRegions();
-          const idsList = []
-          regions.forEach((region) => {
-            // if the checkbox is checked before, restore
-            const isChecked = this.checkedRegions.find(item => item.label === region.getName());
+        const idsList = [];
+        const regions = this.$module.scene.getRootRegion().getChildRegions();
+        regions.forEach((region) => {
+          const regionName = region.getName();
+          if (processed) {
+            region.hideAllPrimitives();
+            if (regionName === 'Nerves') {
+              const ids = nerves.reduce((acc, nerve) => {
+                const primitive = this.findObjectsWithGroupName(nerve)
+                const ids = primitive.map((object) => {
+                  object.setVisibility(true);
+                  return `${object.region.uuid}/${object.uuid}`;
+                });
+                acc.push(...ids);
+                return acc;
+              }, []);
+              idsList.push(...ids)
+            }
+          } else {
+            // if the checkboxes are checked previously, restore them
+            const isChecked = this.checkedRegions.find(item => item.label === regionName);
             if (isChecked) {    
               region.showAllPrimitives();
               const zincObjects = region.getAllObjects();
               const ids = zincObjects.map((object) => `${object.region.uuid}/${object.uuid}`);    
               idsList.push(...ids);   
             }
-          });
-          this.$refs.scaffoldTreeControls.setCheckedKeys(nerves, idsList, true);
-        }
+          }
+        });
+        this.$refs.scaffoldTreeControls.setCheckedKeys(idsList, processed);
       }
     },
     enableAxisDisplay: function (enable, miniaxes) {

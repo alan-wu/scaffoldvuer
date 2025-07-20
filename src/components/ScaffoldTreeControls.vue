@@ -531,19 +531,9 @@ export default {
         });
       }
     },
-    setCheckedKeys: function (labels, ids, restore = false) {
-      if (!restore) {        
+    setCheckedKeys: function (ids, clear) {
+      if (clear) {        
         this.$refs.treeControls.$refs.regionTree.setCheckedKeys([]); // Clear previous checked keys
-        const regions = this.module.scene.getRootRegion().getChildRegions();
-        regions.forEach((region) => {
-          region.hideAllPrimitives();
-          if (region.getName() === 'Nerves') {
-            labels.forEach((label) => {
-              const primitives = region.findObjectsWithGroupName(label);
-              primitives.forEach((primitive) => primitive.setVisibility(true));
-            });
-          }
-        });
       }
       this.$refs.treeControls.$refs.regionTree.setCheckedKeys(ids); // Set new checked keys
     },
