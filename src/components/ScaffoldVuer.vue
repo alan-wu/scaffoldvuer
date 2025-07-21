@@ -1120,8 +1120,6 @@ export default {
               foundNerves++;
               zincObject.setAnatomicalId(nervesMap[groupName]);
               console.log(groupName, zincObject.anatomicalId, zincObject.uuid)
-            } else {
-              zincObject.setGreyScale(true);
             }
           } else {
             zincObject.userData.isNerves = false;
@@ -2238,6 +2236,25 @@ export default {
       this.tData.region = undefined;
     },
     /**
+     * 
+     * @param flag boolean
+     * @param nerves array of nerve names
+     */
+    setGreyScale: function (flag, nerves = []) {
+      const objects = this.$module.scene.getRootRegion().getAllObjects(true);
+      objects.forEach((zincObject) => {
+        if (nerves.length) {
+          const groupName = zincObject.groupName.toLowerCase();
+          if (zincObject.userData.isNerves) {
+            if (!nerves.includes(groupName)) zincObject.setGreyScale(flag);
+          }
+        } else {
+          if (!zincObject.userData.isNerves) zincObject.setGreyScale(flag);
+        }
+      });
+      this.$refs.scaffoldTreeControls.updateAllNodeColours();
+    },
+    /**
      * @public
      * Function to toggle colour/greyscale of primitives.
      * The parameter ``flag`` is a boolean, ``true`` (colour) and ``false`` (greyscale).
@@ -2251,11 +2268,7 @@ export default {
         //This can take sometime to finish , nextTick does not bring out
         //the loading screen so I opt for timeout loop here.
         setTimeout(() => {
-          const objects = this.$module.scene.getRootRegion().getAllObjects(true);
-          objects.forEach((zincObject) => {
-            if (!zincObject.userData.isNerves) zincObject.setGreyScale(!flag);
-          });
-          this.$refs.scaffoldTreeControls.updateAllNodeColours();
+          this.setGreyScale(!flag)
           this.loading = false;
           this.colourRadio = flag;
         }, 100);
