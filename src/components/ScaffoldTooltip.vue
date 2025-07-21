@@ -218,7 +218,7 @@ export default {
     border-radius: 4px;
     white-space: nowrap;
     min-width: unset!important;
-    max-width:330px;
+    max-width:fit-content;
     width:unset!important;
     pointer-events: none;
     top: -15px !important;
