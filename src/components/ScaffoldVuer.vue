@@ -1063,15 +1063,15 @@ export default {
           } else {
             // if the checkboxes are checked previously, restore them
             const isChecked = this.checkedRegions.find(item => item.label === regionName);
-            if (isChecked) {    
+            if (isChecked) {
               region.showAllPrimitives();
               const zincObjects = region.getAllObjects();
-              const ids = zincObjects.map(object => `${object.region.uuid}/${object.uuid}`);    
-              idsList.push(...ids);   
+              const ids = zincObjects.map(object => object.region.uuid);
+              idsList.push(...ids);
             }
           }
         });
-        this.$refs.scaffoldTreeControls.setCheckedKeys(idsList, processed);
+        this.$refs.scaffoldTreeControls.setCheckedKeys([...new Set(idsList)], processed);
       }
     },
     enableAxisDisplay: function (enable, miniaxes) {

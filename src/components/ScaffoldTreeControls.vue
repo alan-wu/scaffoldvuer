@@ -533,10 +533,14 @@ export default {
     },
     setCheckedKeys: function (ids, clear) {
       this.$nextTick(() => {
-        if (clear) {        
+        if (clear) {
           this.$refs.treeControls.$refs.regionTree.setCheckedKeys([]); // Clear previous checked keys
         }
-        this.$refs.treeControls.$refs.regionTree.setCheckedKeys(ids); // Set new checked keys
+        // this will be faster as it only requires region node ids only
+        // the number will be much less than all node ids
+        ids.forEach((id) => {
+          this.$refs.treeControls.$refs.regionTree.setChecked(id, true, true); // Set new checked keys
+        })
       });
     },
     checkAllKeys: function (ignore = []) {
