@@ -104,11 +104,13 @@
             @object-selected="objectSelected"
             @object-hovered="objectHovered"
             @drawer-toggled="drawerToggled"
+            @checked-regions="setCheckedRegions"
           />
         </template>
       </el-popover>
       <div class="primitive-controls-box">
         <primitive-controls
+          v-if="viewingMode === 'Exploration'"
           ref="primitiveControls"
           :createData="createData"
           @primitivesUpdated="primitivesUpdated"
@@ -887,7 +889,8 @@ export default {
         region: "",
         group: "",
         isSearch: false,
-      })
+      }),
+      checkedRegions: []
     };
   },
   watch: {
@@ -1035,35 +1038,41 @@ export default {
     },
   },
   methods: {
-    zoomToNerves: function (nerves) {
+    setCheckedRegions: function (data) {
+      this.checkedRegions = data;
+    },
+    zoomToNerves: function (nerves, processed = false) {
       if (this.$module.scene) {
-        const nerveLabels = nerves.join(",");
+        const idsList = [];
         const regions = this.$module.scene.getRootRegion().getChildRegions();
         regions.forEach((region) => {
-          if (!['Nerves', '_helper'].includes(region.getName())) {
-            if (nerveLabels) {
-              region.hideAllPrimitives() 
-            } else {
-              region.showAllPrimitives();
+          const regionName = region.getName();
+          if (processed) {
+            region.hideAllPrimitives();
+            if (regionName === 'Nerves') {
+              const ids = nerves.reduce((acc, nerve) => {
+                const primitive = this.findObjectsWithGroupName(nerve)
+                const ids = primitive.map((object) => {
+                  object.setVisibility(true);
+                  return `${object.region.uuid}/${object.uuid}`;
+                });
+                acc.push(...ids);
+                return acc;
+              }, []);
+              idsList.push(...ids)
             }
-          }
-        })
-        const objects = this.$module.scene.getRootRegion().getAllObjects(true);
-        objects.forEach((zincObject) => {
-          if (zincObject.userData.isNerves) {
-            if (nerveLabels) {              
-              zincObject.setAlpha(0.01)
-              if (zincObject.anatomicalId) {
-                zincObject.setAlpha(0.1)
-                if (nerveLabels.includes(zincObject.groupName.toLowerCase())) {
-                  zincObject.setAlpha(1)
-                }
-              }
-            } else {
-              zincObject.setAlpha(1)
+          } else {
+            // if the checkboxes are checked previously, restore them
+            const isChecked = this.checkedRegions.find(item => item.label === regionName);
+            if (isChecked) {
+              region.showAllPrimitives();
+              const zincObjects = region.getAllObjects();
+              const ids = zincObjects.map(object => object.region.uuid);
+              idsList.push(...ids);
             }
           }
         });
+        this.$refs.scaffoldTreeControls.setCheckedKeys([...new Set(idsList)], processed);
       }
     },
     enableAxisDisplay: function (enable, miniaxes) {
@@ -1822,11 +1831,13 @@ export default {
      * @arg objects objects to be set for the selected
      */
     updatePrimitiveControls: function (objects) {
-      this.selectedObjects = objects;
-      if (this.selectedObjects && this.selectedObjects.length > 0) {
-        this.$refs.primitiveControls.setObject(this.selectedObjects[0]);
-      } else {
-        this.$refs.primitiveControls.setObject(undefined);
+      if (this.viewingMode === 'Exploration') {
+        this.selectedObjects = objects;
+        if (this.selectedObjects && this.selectedObjects.length > 0) {
+          this.$refs.primitiveControls.setObject(this.selectedObjects[0]);
+        } else {
+          this.$refs.primitiveControls.setObject(undefined);
+        }
       }
     },
     /**

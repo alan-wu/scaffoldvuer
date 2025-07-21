@@ -77,6 +77,7 @@ export default {
       drawerOpen: true,
       nodeNumbers: 0,
       module: undefined,
+      checkedRegions: [],
     };
   },
   computed: {
@@ -91,6 +92,16 @@ export default {
         if (this.isReady) {
           // Updated colour when scaffold is ready
           this.setColourField(data);
+          // _helper is unchecked by default
+          this.checkedRegions = data.filter(region => region.label !== '_helper');
+        }
+      },
+    },
+    checkedRegions: {
+      deep: true,
+      handler: function (data) {
+        if (this.isReady) {
+          this.$emit('checked-regions', data)
         }
       },
     },
@@ -221,7 +232,13 @@ export default {
         .getRootRegion()
         .findChildFromPath(node.regionPath);
       if (isRegion) {
-        isChecked ? region.showAllPrimitives() : region.hideAllPrimitives();
+        if (isChecked) {
+          region.showAllPrimitives();
+          this.checkedRegions.push(node);
+        } else {
+          region.hideAllPrimitives();
+          this.checkedRegions = this.checkedRegions.filter(region => region.label !== node.label);
+        }
       }
       if (isPrimitives) {
         const primitives = region.findObjectsWithGroupName(node.label);
@@ -514,13 +531,28 @@ export default {
         });
       }
     },
-    checkAllKeys: function () {
+    setCheckedKeys: function (ids, clear) {
+      this.$nextTick(() => {
+        if (clear) {
+          this.$refs.treeControls.$refs.regionTree.setCheckedKeys([]); // Clear previous checked keys
+        }
+        // this will be faster as it only requires region node ids only
+        // the number will be much less than all node ids
+        ids.forEach((id) => {
+          this.$refs.treeControls.$refs.regionTree.setChecked(id, true, true); // Set new checked keys
+        })
+      });
+    },
+    checkAllKeys: function (ignore = []) {
       const keysList = [];
       const ids = [];
       extractAllFullPaths(this.treeData[0], keysList);
+      const modifiedKeysList = keysList.filter((key) => {
+        return !ignore.some(item => key.includes(item));
+      });
       this.setTreeVisibilityWithFullPaths(
         this.treeData[0],
-        keysList,
+        modifiedKeysList,
         ids,
         true
       );
