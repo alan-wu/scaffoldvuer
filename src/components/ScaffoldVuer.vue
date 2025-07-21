@@ -110,6 +110,7 @@
       </el-popover>
       <div class="primitive-controls-box">
         <primitive-controls
+          v-if="viewingMode === 'Exploration'"
           ref="primitiveControls"
           :createData="createData"
           @primitivesUpdated="primitivesUpdated"
@@ -1830,11 +1831,13 @@ export default {
      * @arg objects objects to be set for the selected
      */
     updatePrimitiveControls: function (objects) {
-      this.selectedObjects = objects;
-      if (this.selectedObjects && this.selectedObjects.length > 0) {
-        this.$refs.primitiveControls.setObject(this.selectedObjects[0]);
-      } else {
-        this.$refs.primitiveControls.setObject(undefined);
+      if (this.viewingMode === 'Exploration') {
+        this.selectedObjects = objects;
+        if (this.selectedObjects && this.selectedObjects.length > 0) {
+          this.$refs.primitiveControls.setObject(this.selectedObjects[0]);
+        } else {
+          this.$refs.primitiveControls.setObject(undefined);
+        }
       }
     },
     /**
