@@ -532,10 +532,12 @@ export default {
       }
     },
     setCheckedKeys: function (ids, clear) {
-      if (clear) {        
-        this.$refs.treeControls.$refs.regionTree.setCheckedKeys([]); // Clear previous checked keys
-      }
-      this.$refs.treeControls.$refs.regionTree.setCheckedKeys(ids); // Set new checked keys
+      this.$nextTick(() => {
+        if (clear) {        
+          this.$refs.treeControls.$refs.regionTree.setCheckedKeys([]); // Clear previous checked keys
+        }
+        this.$refs.treeControls.$refs.regionTree.setCheckedKeys(ids); // Set new checked keys
+      });
     },
     checkAllKeys: function (ignore = []) {
       const keysList = [];

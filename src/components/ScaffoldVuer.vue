@@ -1066,7 +1066,7 @@ export default {
             if (isChecked) {    
               region.showAllPrimitives();
               const zincObjects = region.getAllObjects();
-              const ids = zincObjects.map((object) => `${object.region.uuid}/${object.uuid}`);    
+              const ids = zincObjects.map(object => `${object.region.uuid}/${object.uuid}`);    
               idsList.push(...ids);   
             }
           }
