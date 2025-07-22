@@ -1072,6 +1072,7 @@ export default {
             }
           }
         });
+        this.fitWindow();
         this.$refs.scaffoldTreeControls.setCheckedKeys([...new Set(idsList)], processed);
       }
     },
