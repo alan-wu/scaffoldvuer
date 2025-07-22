@@ -1041,6 +1041,11 @@ export default {
     setCheckedRegions: function (data) {
       this.checkedRegions = data;
     },
+    /**
+     * 
+     * @param nerves array of nerve names, show all nerves if empty
+     * @param processed boolean, whether unselect all checkboxes
+     */
     zoomToNerves: function (nerves, processed = false) {
       if (this.$module.scene) {
         const idsList = [];
@@ -1050,30 +1055,34 @@ export default {
           if (processed) {
             region.hideAllPrimitives();
             if (regionName === 'Nerves') {
-              const ids = nerves.reduce((acc, nerve) => {
-                const primitive = this.findObjectsWithGroupName(nerve)
-                const ids = primitive.map((object) => {
-                  object.setVisibility(true);
-                  return `${object.region.uuid}/${object.uuid}`;
-                });
-                acc.push(...ids);
-                return acc;
-              }, []);
-              idsList.push(...ids)
+              if (nerves.length) {
+                const ids = nerves.reduce((acc, nerve) => {
+                  const primitive = this.findObjectsWithGroupName(nerve)
+                  const ids = primitive.map((object) => {
+                    object.setVisibility(true);
+                    return `${object.region.uuid}/${object.uuid}`;
+                  });
+                  acc.push(...ids);
+                  return acc;
+                }, []);
+                idsList.push(...ids)
+              } else {
+                idsList.push(region.id)
+              }
             }
           } else {
             // if the checkboxes are checked previously, restore them
             const isChecked = this.checkedRegions.find(item => item.label === regionName);
             if (isChecked) {
               region.showAllPrimitives();
-              const zincObjects = region.getAllObjects();
-              const ids = zincObjects.map(object => object.region.uuid);
-              idsList.push(...ids);
+              idsList.push(region.id);
             }
           }
         });
-        this.fitWindow();
-        this.$refs.scaffoldTreeControls.setCheckedKeys([...new Set(idsList)], processed);
+        if (nerves.length) {
+          this.fitWindow();
+        }
+        this.$refs.scaffoldTreeControls.setCheckedKeys(idsList, processed);
       }
     },
     enableAxisDisplay: function (enable, miniaxes) {
