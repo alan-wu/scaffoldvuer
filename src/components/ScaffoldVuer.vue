@@ -1068,7 +1068,8 @@ export default {
                 }, []);
                 idsList.push(...ids)
               } else {
-                idsList.push(region.id)
+                region.showAllPrimitives();
+                idsList.push(region.uuid)
               }
             }
           } else {
@@ -1076,7 +1077,7 @@ export default {
             const isChecked = this.checkedRegions.find(item => item.label === regionName);
             if (isChecked) {
               region.showAllPrimitives();
-              idsList.push(region.id);
+              idsList.push(region.uuid);
             }
           }
         });
