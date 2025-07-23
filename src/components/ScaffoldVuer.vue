@@ -290,7 +290,7 @@
         ref="backgroundPopover"
         :virtual-ref="backgroundIconRef"
         placement="top-start"
-        width="128"
+        width="320"
         :teleported="false"
         trigger="click"
         popper-class="background-popper non-selectable h-auto"
@@ -864,6 +864,7 @@ export default {
       viewingMode: "Exploration",
       viewingModes: {
         "Exploration": "View and explore detailed visualization of 3D scaffolds",
+        "Neuron Connection": "Discover nerve connections by selecting a nerve and viewing its associated connections",
         "Annotation": ['View feature annotations', 'Add, comment on and view feature annotations'],
       },
       openMapRef: undefined,
@@ -2190,6 +2191,7 @@ export default {
       if (this.$module) {
         if (modeName) {
           this.viewingMode = modeName;
+          this.setIsPickable(true);
         }
         this.clearAnnotationFeature();
         if (this.viewingMode === "Annotation") {
@@ -2206,12 +2208,12 @@ export default {
             this.addAnnotationFeature();
             this.loading = false;
           });
-        } else {
-          if (this.viewingMode === "Exploration") {
-            this.activeDrawTool = undefined;
-            this.activeDrawMode = undefined;
-            this.createData.shape = "";
-          }
+        } else if (this.viewingMode === "Exploration") {
+          this.activeDrawTool = undefined;
+          this.activeDrawMode = undefined;
+          this.createData.shape = "";
+        } else if (this.viewingMode === "Neuron Connection") {
+          this.setIsPickable(false);
         }
         if ((this.viewingMode === "Exploration") ||
           (this.viewingMode === "Annotation") &&
@@ -2244,6 +2246,16 @@ export default {
       this.tData.active = false;
       this.tData.visible = false;
       this.tData.region = undefined;
+    },
+    /**
+     * Currently will only apply to non-nerve object
+     * @param flag boolean to control whether objects pickable
+     */
+    setIsPickable: function (flag) {
+      const objects = this.$module.scene.getRootRegion().getAllObjects(true);
+      objects.forEach((zincObject) => {
+        if (!zincObject.userData.isNerves) zincObject.setIsPickable(flag);
+      });
     },
     /**
      * 
