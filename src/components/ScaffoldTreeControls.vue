@@ -77,7 +77,7 @@ export default {
       drawerOpen: true,
       nodeNumbers: 0,
       module: undefined,
-      checkedRegions: [],
+      //checkedRegions: [],
     };
   },
   computed: {
@@ -93,18 +93,20 @@ export default {
           // Updated colour when scaffold is ready
           this.setColourField(data);
           // _helper is unchecked by default
-          this.checkedRegions = data.filter(region => region.label !== '_helper');
+          //this.checkedRegions = data.filter(region => region.label !== '_helper');
         }
       },
     },
+    /*
     checkedRegions: {
       deep: true,
       handler: function (data) {
         if (this.isReady) {
-          this.$emit('checked-regions', data)
+          this.$emit('checked-regions', data);
         }
       },
     },
+    */
   },
   methods: {
     addTreeItem: function (parentContainer, item, object) {
@@ -234,10 +236,10 @@ export default {
       if (isRegion) {
         if (isChecked) {
           region.showAllPrimitives();
-          this.checkedRegions.push(node);
+          //this.checkedRegions.push(node);
         } else {
           region.hideAllPrimitives();
-          this.checkedRegions = this.checkedRegions.filter(region => region.label !== node.label);
+          //this.checkedRegions = this.checkedRegions.filter(region => region.label !== node.label);
         }
       }
       if (isPrimitives) {
