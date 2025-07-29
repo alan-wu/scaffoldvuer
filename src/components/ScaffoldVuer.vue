@@ -109,6 +109,7 @@
       </el-popover>
       <div class="primitive-controls-box">
         <primitive-controls
+          v-show="viewingMode === 'Exploration' || viewingMode === 'Annotation'"
           ref="primitiveControls"
           :createData="createData"
           @primitivesUpdated="primitivesUpdated"
@@ -288,7 +289,7 @@
         ref="backgroundPopover"
         :virtual-ref="backgroundIconRef"
         placement="top-start"
-        width="128"
+        width="320"
         :teleported="false"
         trigger="click"
         popper-class="background-popper non-selectable h-auto"
@@ -437,7 +438,6 @@ import {
   findObjectsWithNames,
   updateBoundingBox,
 } from "../scripts/Utilities.js";
-
 import {
   ElButton as Button,
   ElCol as Col,
@@ -458,6 +458,9 @@ import { OrgansViewer } from "../scripts/OrgansRenderer.js";
 import { SearchIndex } from "../scripts/Search.js";
 import { mapState } from 'pinia';
 import { useMainStore } from "@/store/index";
+import { getNerveMaps } from "../scripts/MappedNerves.js";
+const nervesMap = getNerveMaps();
+let totalNerves = 0, foundNerves = 0;
 
 /**
  * A vue component of the scaffold viewer.
@@ -860,6 +863,7 @@ export default {
       viewingMode: "Exploration",
       viewingModes: {
         "Exploration": "View and explore detailed visualization of 3D scaffolds",
+        "Neuron Connection": "Discover nerve connections by selecting a nerve and viewing its associated connections",
         "Annotation": ['View feature annotations', 'Add, comment on and view feature annotations'],
       },
       openMapRef: undefined,
@@ -885,7 +889,8 @@ export default {
         region: "",
         group: "",
         isSearch: false,
-      })
+      }),
+      //checkedRegions: []
     };
   },
   watch: {
@@ -1033,6 +1038,91 @@ export default {
     },
   },
   methods: {
+    /*
+    setCheckedRegions: function (data) {
+      this.checkedRegions = data;
+    },
+    */
+    /**
+     * 
+     * @param nerves array of nerve names, show all nerves if empty
+     * @param processed boolean, whether unselect all checkboxes
+     */
+    zoomToNerves: function (nerves, processed = false) {
+      if (this.$module.scene) {
+        const nervesList = [];
+        let nervesUUID = undefined;
+        const regions = this.$module.scene.getRootRegion().getChildRegions();
+        regions.forEach((region) => {
+          const regionName = region.getName();
+          if (processed) {
+            if (regionName === 'Nerves') {
+              if (nerves.length) {
+                const ids = nerves.forEach((nerve) => {
+                  const primitives = this.findObjectsWithGroupName(nerve)
+                  nervesList.push(...primitives);
+                  primitives.forEach((primitive) => {
+                    primitive.setVisibility(true);
+                    nervesList.push(primitive);
+                    if (!nervesUUID) nervesUUID = primitive.region.uuid;
+                  });
+                });
+              }
+            }
+          }
+        });
+        if (nervesList.length) {
+          let box = this.$module.scene.getBoundingBoxOfZincObjects(nervesList);
+          if (box) this.$module.scene.viewAllWithBoundingBox(box);
+        }
+        if (nervesUUID) {
+          this.$refs.scaffoldTreeControls.setCheckedKeys([nervesUUID], false);
+        }
+      }
+
+      //The following hide all the other primitives
+      /*
+      if (this.$module.scene) {
+        const idsList = [];
+        const regions = this.$module.scene.getRootRegion().getChildRegions();
+        regions.forEach((region) => {
+          const regionName = region.getName();
+          if (processed) {
+            region.hideAllPrimitives();
+            if (regionName === 'Nerves') {
+              if (nerves.length) {
+                const ids = nerves.reduce((acc, nerve) => {
+                  const primitives = this.findObjectsWithGroupName(nerve)
+                  const ids = primitives.map((object) => {
+                    object.setVisibility(true);
+                    return `${object.region.uuid}/${object.uuid}`;
+                  });
+                  acc.push(...ids);
+                  return acc;
+                }, []);
+                idsList.push(...ids)
+              } else {
+                region.showAllPrimitives();
+                idsList.push(region.uuid)
+              }
+            }
+          } else {
+            // if the checkboxes are checked previously, restore them
+            const isChecked = this.checkedRegions.find(item => item.label === regionName);
+            if (isChecked) {
+              region.showAllPrimitives();
+              idsList.push(region.uuid);
+            }
+          }
+          
+        });
+        if (nerves.length) {
+          this.fitWindow();
+        }
+        this.$refs.scaffoldTreeControls.setCheckedKeys(idsList, processed);
+      }
+      */
+    },
     enableAxisDisplay: function (enable, miniaxes) {
       if (this.$module.scene) {
         this.$module.scene.enableAxisDisplay(enable, miniaxes);
@@ -1072,10 +1162,17 @@ export default {
         for (let i = 0; i < regions.length; i++) {
           if (regionPath.includes(regions[i].toLowerCase())) {
             zincObject.userData.isNerves = true;
+            const groupName = zincObject.groupName.toLowerCase();
+            if (groupName in nervesMap) {
+              foundNerves++;
+              zincObject.setAnatomicalId(nervesMap[groupName]);
+              //console.log(groupName, zincObject.anatomicalId, zincObject.uuid)
+            }
           } else {
             zincObject.userData.isNerves = false;
           }
         }
+
       }
       /**
        * Emit when a new object is added to the scene
@@ -1779,11 +1876,13 @@ export default {
      * @arg objects objects to be set for the selected
      */
     updatePrimitiveControls: function (objects) {
-      this.selectedObjects = objects;
-      if (this.selectedObjects && this.selectedObjects.length > 0) {
-        this.$refs.primitiveControls.setObject(this.selectedObjects[0]);
-      } else {
-        this.$refs.primitiveControls.setObject(undefined);
+      if (this.viewingMode === 'Exploration' || this.viewingMode === 'Annotation') {
+        this.selectedObjects = objects;
+        if (this.selectedObjects && this.selectedObjects.length > 0) {
+          this.$refs.primitiveControls.setObject(this.selectedObjects[0]);
+        } else {
+          this.$refs.primitiveControls.setObject(undefined);
+        }
       }
     },
     /**
@@ -2125,6 +2224,7 @@ export default {
      * Optional, can be used to update the view mode.
      */
     changeViewingMode: function (modeName) {
+      let nonNervesIsPickable = true;
       if (this.$module) {
         if (modeName) {
           this.viewingMode = modeName;
@@ -2144,12 +2244,12 @@ export default {
             this.addAnnotationFeature();
             this.loading = false;
           });
-        } else {
-          if (this.viewingMode === "Exploration") {
-            this.activeDrawTool = undefined;
-            this.activeDrawMode = undefined;
-            this.createData.shape = "";
-          }
+        } else if (this.viewingMode === "Exploration") {
+          this.activeDrawTool = undefined;
+          this.activeDrawMode = undefined;
+          this.createData.shape = "";
+        } else if (this.viewingMode === "Neuron Connection") {
+          nonNervesIsPickable = false;
         }
         if ((this.viewingMode === "Exploration") ||
           (this.viewingMode === "Annotation") &&
@@ -2159,6 +2259,9 @@ export default {
           this.$module.selectObjectOnPick = false;
         }
         this.cancelCreate();
+        if (modeName) {
+          this.setNonNervesIsPickable(nonNervesIsPickable);
+        }
       }
     },
     /**
@@ -2184,13 +2287,41 @@ export default {
       this.tData.region = undefined;
     },
     /**
+     * Currently will only apply to non-nerve object
+     * @param flag boolean to control whether objects pickable
+     */
+    setNonNervesIsPickable: function (flag) {
+      const objects = this.$module.scene.getRootRegion().getAllObjects(true);
+      objects.forEach((zincObject) => {
+        if (!zincObject.userData.isNerves) zincObject.setIsPickable(flag);
+      });
+    },
+    /**
+     * 
+     * @param flag boolean
+     * @param nerves array of nerve names
+     */
+    setGreyScale: function (flag, nerves = []) {
+      const objects = this.$module.scene.getRootRegion().getAllObjects(true);
+      objects.forEach((zincObject) => {
+        if (nerves.length) {
+          const groupName = zincObject.groupName.toLowerCase();
+          if (zincObject.userData.isNerves) {
+            if (!nerves.includes(groupName)) zincObject.setGreyScale(flag);
+          }
+        } else {
+          if (!zincObject.userData.isNerves) zincObject.setGreyScale(flag);
+        }
+      });
+      this.$refs.scaffoldTreeControls.updateAllNodeColours();
+    },
+    /**
      * @public
      * Function to toggle colour/greyscale of primitives.
      * The parameter ``flag`` is a boolean, ``true`` (colour) and ``false`` (greyscale).
      * @arg {Boolean} `flag`
      */
-     setColour: function (flag, forced = false) {
-      console.log(flag, this.colourRadio)
+    setColour: function (flag, forced = false) {
       if (this.isReady && this.$module.scene &&
         typeof flag === "boolean" && 
         (forced || flag !== this.colourRadio)) {
@@ -2198,11 +2329,7 @@ export default {
         //This can take sometime to finish , nextTick does not bring out
         //the loading screen so I opt for timeout loop here.
         setTimeout(() => {
-          const objects = this.$module.scene.getRootRegion().getAllObjects(true);
-          objects.forEach((zincObject) => {
-            if (!zincObject.userData.isNerves) zincObject.setGreyScale(!flag);
-          });
-          this.$refs.scaffoldTreeControls.updateAllNodeColours();
+          this.setGreyScale(!flag)
           this.loading = false;
           this.colourRadio = flag;
         }, 100);
@@ -2434,6 +2561,7 @@ export default {
         //this.$module.scene.createAxisDisplay(false);
         //this.$module.scene.enableAxisDisplay(true, true);
         this.isReady = true;
+        //console.log(`Total ${totalNerves}, found ${foundNerves}`);
         this.$nextTick(() => {
           this.restoreSettings(options);
           this.$emit("on-ready");
