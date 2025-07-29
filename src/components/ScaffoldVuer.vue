@@ -109,9 +109,9 @@
       </el-popover>
       <div class="primitive-controls-box">
         <primitive-controls
-          v-show="viewingMode === 'Exploration' || viewingMode === 'Annotation'"
           ref="primitiveControls"
           :createData="createData"
+          :viewingMode="viewingMode"
           @primitivesUpdated="primitivesUpdated"
         />
       </div>
