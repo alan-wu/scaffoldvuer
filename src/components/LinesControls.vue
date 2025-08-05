@@ -1,32 +1,114 @@
 <template>
   <el-container class="lines-container">
     <el-main class="slides-block">
-      <el-row>
-        <el-col :offset="0" :span="6">
-          Width:
-        </el-col>
-        <el-col :offset="0" :span="12">
-          <el-slider
-            v-model="width"
-            class="my-slider"
-            :step="1"
-            :min="1"
-            :max="100"
-            :show-tooltip="false"
-            @input="modifyWidth"
-          />
-        </el-col>
-        <el-col :offset="0" :span="4">
-          <el-input-number
-            v-model="width"
-            :step="1"
-            :min="1"
-            :max="100"
-            :controls="false"
-            class="input-box number-input"
-          />
-        </el-col>
-      </el-row>
+      <template v-if="tubeLines">
+        <el-row>
+          <el-col :offset="0" :span="6">
+            Segments:
+          </el-col>
+          <el-col :offset="0" :span="12">
+            <el-slider
+              v-model="segments"
+              class="my-slider"
+              :step="1"
+              :min="1"
+              :max="100"
+              :show-tooltip="false"
+              @input="modifySegments"
+            />
+          </el-col>
+          <el-col :offset="0" :span="4">
+            <el-input-number
+              v-model="segments"
+              :step="1"
+              :min="1"
+              :max="100"
+              :controls="false"
+              class="input-box number-input"
+            />
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :offset="0" :span="6">
+            Radius:
+          </el-col>
+          <el-col :offset="0" :span="12">
+            <el-slider
+              v-model="radius"
+              class="my-slider"
+              :step="0.01"
+              :min="0.01"
+              :max="1"
+              :show-tooltip="false"
+              @input="modifyRadius"
+            />
+          </el-col>
+          <el-col :offset="0" :span="4">
+            <el-input-number
+              v-model="radius"
+              :step="0.01"
+              :min="0.01"
+              :max="1"
+              :controls="false"
+              class="input-box number-input"
+            />
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :offset="0" :span="6">
+            Radius Segments:
+          </el-col>
+          <el-col :offset="0" :span="12">
+            <el-slider
+              v-model="radiusSegments"
+              class="my-slider"
+              :step="1"
+              :min="1"
+              :max="20"
+              :show-tooltip="false"
+              @input="modifyRadiusSegments"
+            />
+          </el-col>
+          <el-col :offset="0" :span="4">
+            <el-input-number
+              v-model="radiusSegments"
+              :step="1"
+              :min="1"
+              :max="20"
+              :controls="false"
+              class="input-box number-input"
+            />
+          </el-col>
+        </el-row>
+      </template>
+      <template v-else>
+        <el-row>
+          <el-col :offset="0" :span="6">
+            Width:
+          </el-col>
+          <el-col :offset="0" :span="12">
+            <el-slider
+              v-model="width"
+              class="my-slider"
+              :step="1"
+              :min="1"
+              :max="100"
+              :show-tooltip="false"
+              @input="modifyWidth"
+            />
+          </el-col>
+          <el-col :offset="0" :span="4">
+            <el-input-number
+              v-model="width"
+              :step="1"
+              :min="1"
+              :max="100"
+              :controls="false"
+              class="input-box number-input"
+            />
+          </el-col>
+        </el-row>
+      </template>
       <template v-if="currentIndex > -1 && distance > 0">
         <el-row>
           <el-col :offset="0" :span="4">
@@ -142,11 +224,15 @@ export default {
       distance: 0,
       newDistance: 0, 
       width: 1,
+      segments: 100,
+      radius: 1,
+      radiusSegments: 20,
       currentIndex: 0,
       ElIconArrowLeft: shallowRef(ElIconArrowLeft),
       ElIconArrowRight: shallowRef(ElIconArrowRight),
       edited: false,
       zincObject: undefined,
+      tubeLines: false
     };
   },
   watch: {
@@ -207,12 +293,15 @@ export default {
     setObject: function (object) {
       this.currentIndex = -1;
       this.distance = 0;
-      if (object.isLines2) {
+      this.tubeLines = false;
+      if (object.isLines2 || object.isTubeLines) {
         this.zincObject = markRaw(object);
         this.width = this.zincObject.getMorph().material.linewidth;
         if (object.isEditable) {
           this.currentIndex = 0;
           this.distance = getLineDistance(object, this.currentIndex);
+        } else if (object.isTubeLines) {
+          this.tubeLines = true;
         }
       } else {
         this.zincObject = undefined;
@@ -221,6 +310,15 @@ export default {
     },
     modifyWidth: function () {
       this.zincObject.setWidth(this.width);
+    },
+    modifySegments: function () {
+      this.zincObject.updateTube(this.segments, this.radius/100, this.radiusSegments);
+    },
+    modifyRadius: function () {
+      this.zincObject.updateTube(this.segments, this.radius/100, this.radiusSegments);
+    },
+    modifyRadiusSegments: function () {
+      this.zincObject.updateTube(this.segments, this.radius/100, this.radiusSegments);
     },
   },
 };
