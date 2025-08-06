@@ -320,13 +320,13 @@ export default {
       this.zincObject.setWidth(this.width);
     },
     modifySegments: function () {
-      this.zincObject.updateTube(this.segments, this.radius/100, this.radiusSegments);
+      this.zincObject.setTubeLines(this.segments, this.radius/100, this.radiusSegments);
     },
     modifyRadius: function () {
-      this.zincObject.updateTube(this.segments, this.radius/100, this.radiusSegments);
+      this.zincObject.setTubeLines(this.segments, this.radius/100, this.radiusSegments);
     },
     modifyRadiusSegments: function () {
-      this.zincObject.updateTube(this.segments, this.radius/100, this.radiusSegments);
+      this.zincObject.setTubeLines(this.segments, this.radius/100, this.radiusSegments);
     },
     SwitchLineType: function () {
       this.linesType = this.linesType === "lines" ? "tubelines" : "lines";
