@@ -127,7 +127,7 @@ export default {
           this.isPointset = true;
           this.$refs.pointsetControls.setObject(object);
           this.activeName = "pControls";
-        } else if (object.isLines2 || object.isTubeLines) {
+        } else if (object.isLines2 || object.isOptionalLines) {
           this.isLines = true;
           this.$refs.linesControls.setObject(object);
           this.activeName = "lControls";
