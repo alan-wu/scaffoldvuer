@@ -25,6 +25,7 @@
                 :min="1"
                 :max="100"
                 :controls="false"
+                @change="modifySegments"
                 class="input-box number-input"
               />
             </el-col>
@@ -51,6 +52,7 @@
                 :min="1"
                 :max="100"
                 :controls="false"
+                @change="modifyRadius"
                 class="input-box number-input"
               />
             </el-col>
@@ -77,14 +79,18 @@
                 :min="1"
                 :max="100"
                 :controls="false"
+                @change="modifyRadiusSegments"
                 class="input-box number-input"
               />
             </el-col>
           </el-row>
         </template>
         <el-row>
-          <el-col>
-            <el-button @click="SwitchLineType">Switch</el-button>
+          <el-col :offset="0" :span="18">
+            Lines type: {{ linesType }}
+          </el-col>
+          <el-col :offset="0" :span="4">
+            <el-button size="small" @click="SwitchLineType">Switch</el-button>
           </el-col>
         </el-row>
       </template>
