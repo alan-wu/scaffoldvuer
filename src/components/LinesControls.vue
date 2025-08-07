@@ -5,27 +5,27 @@
         <template v-if="linesType === 'tubelines'">
           <el-row>
             <el-col :offset="0" :span="6">
-              Segments:
+              Tubular Segments:
             </el-col>
             <el-col :offset="0" :span="12">
               <el-slider
-                v-model="segments"
+                v-model="tubularSegments"
                 class="my-slider"
                 :step="1"
                 :min="1"
                 :max="100"
                 :show-tooltip="false"
-                @input="modifySegments"
+                @input="modifyTubularSegments"
               />
             </el-col>
             <el-col :offset="0" :span="4">
               <el-input-number
-                v-model="segments"
+                v-model="tubularSegments"
                 :step="1"
                 :min="1"
                 :max="100"
                 :controls="false"
-                @change="modifySegments"
+                @change="modifyTubularSegments"
                 class="input-box number-input"
               />
             </el-col>
@@ -59,27 +59,27 @@
           </el-row>
           <el-row>
             <el-col :offset="0" :span="6">
-              Radius Segments:
+              Radial Segments:
             </el-col>
             <el-col :offset="0" :span="12">
               <el-slider
-                v-model="radiusSegments"
+                v-model="radialSegments"
                 class="my-slider"
                 :step="1"
                 :min="1"
                 :max="100"
                 :show-tooltip="false"
-                @input="modifyRadiusSegments"
+                @input="modifyRadialSegments"
               />
             </el-col>
             <el-col :offset="0" :span="4">
               <el-input-number
-                v-model="radiusSegments"
+                v-model="radialSegments"
                 :step="1"
                 :min="1"
                 :max="100"
                 :controls="false"
-                @change="modifyRadiusSegments"
+                @change="modifyRadialSegments"
                 class="input-box number-input"
               />
             </el-col>
@@ -237,9 +237,9 @@ export default {
       distance: 0,
       newDistance: 0, 
       width: 1,
-      segments: 100,
+      tubularSegments: 100,
       radius: 1,
-      radiusSegments: 1,
+      radialSegments: 1,
       currentIndex: 0,
       ElIconArrowLeft: shallowRef(ElIconArrowLeft),
       ElIconArrowRight: shallowRef(ElIconArrowRight),
@@ -311,8 +311,7 @@ export default {
         this.zincObject = markRaw(object);
         this.width = this.zincObject.getMorph().material.linewidth;
         this.optionalLines = object.isOptionalLines;
-        this.linesType = object.isLines ? "lines" : 
-          object.isTubeLines ? "tubelines" : ""
+        this.linesType = object.isLines ? "lines" : object.isTubeLines ? "tubelines" : ""
         if (object.isEditable) {
           this.currentIndex = 0;
           this.distance = getLineDistance(object, this.currentIndex);
@@ -325,21 +324,21 @@ export default {
     modifyWidth: function () {
       this.zincObject.setWidth(this.width);
     },
-    modifySegments: function () {
-      this.zincObject.setTubeLines(this.segments, this.radius/100, this.radiusSegments);
+    modifyTubularSegments: function () {
+      this.zincObject.setTubeLines(this.tubularSegments, this.radius/100, this.radialSegments);
     },
     modifyRadius: function () {
-      this.zincObject.setTubeLines(this.segments, this.radius/100, this.radiusSegments);
+      this.zincObject.setTubeLines(this.tubularSegments, this.radius/100, this.radialSegments);
     },
-    modifyRadiusSegments: function () {
-      this.zincObject.setTubeLines(this.segments, this.radius/100, this.radiusSegments);
+    modifyRadialSegments: function () {
+      this.zincObject.setTubeLines(this.tubularSegments, this.radius/100, this.radialSegments);
     },
     SwitchLineType: function () {
       this.linesType = this.linesType === "lines" ? "tubelines" : "lines";
       if (this.linesType === "lines") { 
         this.zincObject.useLines();
       } else if (this.linesType === "tubelines") {
-        this.zincObject.useTubeLines(this.segments, this.radius/100, this.radiusSegments);
+        this.zincObject.useTubeLines(this.tubularSegments, this.radius/100, this.radialSegments);
       }
     },
   },
