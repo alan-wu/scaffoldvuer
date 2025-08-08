@@ -5,33 +5,6 @@
         <template v-if="linesType === 'tubelines'">
           <el-row>
             <el-col :offset="0" :span="6">
-              Tubular Segments:
-            </el-col>
-            <el-col :offset="0" :span="12">
-              <el-slider
-                v-model="tubularSegments"
-                class="my-slider"
-                :step="1"
-                :min="1"
-                :max="100"
-                :show-tooltip="false"
-                @input="modifyTubularSegments"
-              />
-            </el-col>
-            <el-col :offset="0" :span="4">
-              <el-input-number
-                v-model="tubularSegments"
-                :step="1"
-                :min="1"
-                :max="100"
-                :controls="false"
-                @change="modifyTubularSegments"
-                class="input-box number-input"
-              />
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :offset="0" :span="6">
               Radius:
             </el-col>
             <el-col :offset="0" :span="12">
@@ -237,7 +210,6 @@ export default {
       distance: 0,
       newDistance: 0, 
       width: 1,
-      tubularSegments: 100,
       radius: 1,
       radialSegments: 1,
       currentIndex: 0,
@@ -324,21 +296,18 @@ export default {
     modifyWidth: function () {
       this.zincObject.setWidth(this.width);
     },
-    modifyTubularSegments: function () {
-      this.zincObject.setTubeLines(this.tubularSegments, this.radius/100, this.radialSegments);
-    },
     modifyRadius: function () {
-      this.zincObject.setTubeLines(this.tubularSegments, this.radius/100, this.radialSegments);
+      this.zincObject.setTubeLines(this.radius/100, this.radialSegments);
     },
     modifyRadialSegments: function () {
-      this.zincObject.setTubeLines(this.tubularSegments, this.radius/100, this.radialSegments);
+      this.zincObject.setTubeLines(this.radius/100, this.radialSegments);
     },
     SwitchLineType: function () {
       this.linesType = this.linesType === "lines" ? "tubelines" : "lines";
       if (this.linesType === "lines") { 
         this.zincObject.useLines();
       } else if (this.linesType === "tubelines") {
-        this.zincObject.useTubeLines(this.tubularSegments, this.radius/100, this.radialSegments);
+        this.zincObject.useTubeLines(this.radius/100, this.radialSegments);
       }
     },
   },
