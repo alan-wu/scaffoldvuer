@@ -15,7 +15,7 @@
                 :min="1"
                 :max="100"
                 :show-tooltip="false"
-                @input="modifyRadius"
+                @input="modifyTubeLines"
               />
             </el-col>
             <el-col :offset="0" :span="4">
@@ -25,7 +25,7 @@
                 :min="1"
                 :max="100"
                 :controls="false"
-                @change="modifyRadius"
+                @change="modifyTubeLines"
                 class="input-box number-input"
               />
             </el-col>
@@ -42,7 +42,7 @@
                 :min="8"
                 :max="32"
                 :show-tooltip="false"
-                @input="modifyRadialSegments"
+                @input="modifyTubeLines"
               />
             </el-col>
             <el-col :offset="0" :span="4">
@@ -52,7 +52,7 @@
                 :min="8"
                 :max="32"
                 :controls="false"
-                @change="modifyRadialSegments"
+                @change="modifyTubeLines"
                 class="input-box number-input"
               />
             </el-col>
@@ -299,18 +299,19 @@ export default {
     modifyWidth: function () {
       this.zincObject.setWidth(this.width);
     },
-    modifyRadius: function () {
-      this.zincObject.setTubeLines(this.radius/(this.isNerves ? 1 : 100), this.radius*this.radialSegments, this.isNerves);
-    },
-    modifyRadialSegments: function () {
-      this.zincObject.setTubeLines(this.radius/(this.isNerves ? 1 : 100), this.radius*this.radialSegments, this.isNerves);
+    modifyTubeLines: function () {
+      const r = this.radius / (this.isNerves ? 1 : 100);
+      const rs = this.radius * this.radialSegments;
+      this.zincObject.setTubeLines(r, rs, this.isNerves);
     },
     SwitchLineType: function () {
       this.linesType = this.linesType === "lines" ? "tubelines" : "lines";
-      if (this.linesType === "lines") { 
+      if (this.linesType === "lines") {
         this.zincObject.useLines();
       } else if (this.linesType === "tubelines") {
-        this.zincObject.useTubeLines(this.radius/(this.isNerves ? 1 : 100), this.radius*this.radialSegments, this.isNerves);
+        const r = this.radius / (this.isNerves ? 1 : 100);
+        const rs = this.radius * this.radialSegments;
+        this.zincObject.useTubeLines(r, rs, this.isNerves);
       }
     },
   },
