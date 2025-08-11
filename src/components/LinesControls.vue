@@ -39,8 +39,8 @@
                 v-model="radialSegments"
                 class="my-slider"
                 :step="1"
-                :min="1"
-                :max="100"
+                :min="8"
+                :max="32"
                 :show-tooltip="false"
                 @input="modifyRadialSegments"
               />
@@ -49,8 +49,8 @@
               <el-input-number
                 v-model="radialSegments"
                 :step="1"
-                :min="1"
-                :max="100"
+                :min="8"
+                :max="32"
                 :controls="false"
                 @change="modifyRadialSegments"
                 class="input-box number-input"
@@ -211,14 +211,15 @@ export default {
       newDistance: 0, 
       width: 1,
       radius: 1,
-      radialSegments: 1,
+      radialSegments: 8,
       currentIndex: 0,
       ElIconArrowLeft: shallowRef(ElIconArrowLeft),
       ElIconArrowRight: shallowRef(ElIconArrowRight),
       edited: false,
       zincObject: undefined,
       optionalLines: false,
-      linesType: ""
+      linesType: "",
+      isNerves: false,
     };
   },
   watch: {
@@ -279,11 +280,13 @@ export default {
     setObject: function (object) {
       this.currentIndex = -1;
       this.distance = 0;
+      this.isNerves = false
       if (object.isLines2 || object.isOptionalLines) {
         this.zincObject = markRaw(object);
         this.width = this.zincObject.getMorph().material.linewidth;
         this.optionalLines = object.isOptionalLines;
         this.linesType = object.isLines ? "lines" : object.isTubeLines ? "tubelines" : ""
+        this.isNerves = this.zincObject.userData.isNerves;
         if (object.isEditable) {
           this.currentIndex = 0;
           this.distance = getLineDistance(object, this.currentIndex);
@@ -297,17 +300,17 @@ export default {
       this.zincObject.setWidth(this.width);
     },
     modifyRadius: function () {
-      this.zincObject.setTubeLines(this.radius/100, this.radialSegments);
+      this.zincObject.setTubeLines(this.radius/(this.isNerves ? 1 : 100), this.radius*this.radialSegments, this.isNerves);
     },
     modifyRadialSegments: function () {
-      this.zincObject.setTubeLines(this.radius/100, this.radialSegments);
+      this.zincObject.setTubeLines(this.radius/(this.isNerves ? 1 : 100), this.radius*this.radialSegments, this.isNerves);
     },
     SwitchLineType: function () {
       this.linesType = this.linesType === "lines" ? "tubelines" : "lines";
       if (this.linesType === "lines") { 
         this.zincObject.useLines();
       } else if (this.linesType === "tubelines") {
-        this.zincObject.useTubeLines(this.radius/100, this.radialSegments);
+        this.zincObject.useTubeLines(this.radius/(this.isNerves ? 1 : 100), this.radius*this.radialSegments, this.isNerves);
       }
     },
   },
