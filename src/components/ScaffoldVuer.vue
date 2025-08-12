@@ -462,11 +462,18 @@ import { getNerveMaps } from "../scripts/MappedNerves.js";
 const nervesMap = getNerveMaps();
 let totalNerves = 0, foundNerves = 0;
 
+// This will be the config for selected nerves
 const NERVE_CONFIG = {
   COLOUR: '#FE0000',
-  RADIUS: 1,
-  ZOOM_RADIUS: 8,
-  RADIAL_SEGMENTS: 8,
+  RADIUS: 8,
+  RADIAL_SEGMENTS: 32,
+}
+
+const haveSameElements = (arr1, arr2) => {
+  if (arr1.length !== arr2.length) return false;
+  return arr1.sort().every((value, index) => {
+    return value === arr2.sort()[index]
+  });
 }
 
 /**
@@ -991,6 +998,9 @@ export default {
     },
     previousNerves: {
       handler: function (newVal, oldVal) {
+        const pre = oldVal.map((nerve) => nerve.groupName);
+        const cur = newVal.map((nerve) => nerve.groupName);
+        if (haveSameElements(pre, cur)) return;
         this.handleNervesDisplay(newVal, NERVE_CONFIG.COLOUR)
         this.handleNervesDisplay(oldVal)
       },
@@ -1063,10 +1073,20 @@ export default {
           const regionName = nerve.region.getName();
           const groupName = nerve.groupName;
           const nodeData = this.$refs.scaffoldTreeControls.getNodeDataByRegionAndGroup(regionName, groupName)
-          this.$refs.scaffoldTreeControls.setColour(nodeData, colour)
-          const radius = colour ? NERVE_CONFIG.ZOOM_RADIUS : NERVE_CONFIG.RADIUS;
+          const activeColour = nodeData.activeColour.toLowerCase();
+          const defaultColour = nodeData.defaultColour.toLowerCase();
+          const configColour = NERVE_CONFIG.COLOUR.toLowerCase();
+          // if the active colour is the default or config colour
+          // use the provided colour or default depends on whether the colour is provided
+          // otherwise, use the active colour
+          const usedColour =
+            activeColour === defaultColour || activeColour === configColour
+              ? colour || defaultColour
+              : activeColour;
+          this.$refs.scaffoldTreeControls.setColour(nodeData, usedColour)
+          const radius = colour ? NERVE_CONFIG.RADIUS : 1;
           const radialSegments = NERVE_CONFIG.RADIAL_SEGMENTS;
-          nerve.setTubeLines(radius, radius * radialSegments);
+          nerve.setTubeLines(radius, radialSegments);
         }
       })
     },
