@@ -885,11 +885,11 @@ export default {
         centre: [0, 0, 0],
         size:[1, 1, 1],
       },
-      lastSelected: markRaw({
+      lastSelected: {
         region: "",
         group: "",
         isSearch: false,
-      }),
+      },
       //checkedRegions: []
     };
   },
@@ -980,6 +980,30 @@ export default {
         this.setMarkerModeForObjectsWithName(key, value, "on");
       }
       this.previousMarkerLabels = markRaw({...labels});
+    },
+    lastSelected: {
+      handler: function (newVal, oldVal) {
+        if (newVal.region === "Nerves") {
+          const curPrimitives = this.findObjectsWithGroupName(newVal.group)
+          curPrimitives.forEach((primitive) => {
+            if (primitive.isTubeLines) {
+              primitive.setTubeLines(8, 64, true);
+              // 0x0043EE
+              primitive.setColourHex(0xFE0000);
+            }
+          });
+        }
+        if (oldVal.region === "Nerves") {
+          const prePrimitives = this.findObjectsWithGroupName(oldVal.group)
+          prePrimitives.forEach((primitive) => {
+            if (primitive.isTubeLines) {
+              primitive.setTubeLines(1, 8, true);
+              primitive.setColourHex(0xFFBC11);
+            }
+          });
+        }
+      },
+      deep: true,
     },
   },
   beforeCreate: function () {
@@ -1783,13 +1807,17 @@ export default {
             //Store the following for state saving. Search will handle the case with more than 1
             //identifiers.
             if (event.identifiers.length === 1) {
-              this.lastSelected.isSearch = false;
-              this.lastSelected.region = regionPath;
-              this.lastSelected.group = event.identifiers[0].data.group;
+              this.lastSelected = {
+                isSearch: false,
+                region: regionPath,
+                group: event.identifiers[0].data.group,
+              }
             } else if (event.identifiers.length === 0) {
-              this.lastSelected.isSearch = false;
-              this.lastSelected.region = "";
-              this.lastSelected.group = "";
+              this.lastSelected = {
+                isSearch: false,
+                region: "",
+                group: "",
+              }
             }
             /**
              * Emit when an object is selected
@@ -2420,15 +2448,19 @@ export default {
         if (text === undefined || text === "" ||
           ((Array.isArray(text) && text.length === 0))
         ) {
-          this.lastSelected.region = "";
-          this.lastSelected.group = "";
-          this.lastSelected.isSearch = true;
+          this.lastSelected = {
+            region: "",
+            group: "",
+            isSearch: true,
+          }
           this.objectSelected([], true);
           return false;
         } else {
-          this.lastSelected.region = "";
-          this.lastSelected.group = text;
-          this.lastSelected.isSearch = true;
+          this.lastSelected = {
+            region: "",
+            group: text,
+            isSearch: true,
+          }
           const result = this.$_searchIndex.searchAndProcessResult(text);
           const zincObjects = result.zincObjects;
           if (zincObjects.length > 0) {
