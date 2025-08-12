@@ -1,7 +1,7 @@
 <template>
   <el-container class="lines-container">
     <el-main class="slides-block">
-      <template v-if="tubeLines">
+      <template v-if="isTubeLines">
           <el-row>
             <el-col :offset="0" :span="6">
               Radius:
@@ -175,9 +175,8 @@ import{
 
 const NERVE_CONFIG = {
   COLOUR: '#FE0000',
-  RADIUS: 1,
-  ZOOM_RADIUS: 8,
-  RADIAL_SEGMENTS: 8,
+  RADIUS: 8,
+  RADIAL_SEGMENTS: 32,
 }
 
 /**
@@ -208,14 +207,14 @@ export default {
       distance: 0,
       newDistance: 0, 
       width: 1,
-      radius: NERVE_CONFIG.ZOOM_RADIUS,
-      radialSegments: 8,
+      radius: NERVE_CONFIG.RADIUS,
+      radialSegments: NERVE_CONFIG.RADIAL_SEGMENTS,
       currentIndex: 0,
       ElIconArrowLeft: shallowRef(ElIconArrowLeft),
       ElIconArrowRight: shallowRef(ElIconArrowRight),
       edited: false,
       zincObject: undefined,
-      tubeLines: false,
+      isTubeLines: false,
     };
   },
   watch: {
@@ -276,11 +275,11 @@ export default {
     setObject: function (object) {
       this.currentIndex = -1;
       this.distance = 0;
-      this.radius = NERVE_CONFIG.ZOOM_RADIUS;
+      this.radius = NERVE_CONFIG.RADIUS;
       if (object.isLines2 || object.isTubeLines) {
         this.zincObject = markRaw(object);
         this.width = this.zincObject.getMorph().material.linewidth;
-        this.tubeLines = object.isTubeLines;
+        this.isTubeLines = object.isTubeLines;
         if (object.isEditable) {
           this.currentIndex = 0;
           this.distance = getLineDistance(object, this.currentIndex);
