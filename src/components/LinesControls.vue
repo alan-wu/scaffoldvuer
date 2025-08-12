@@ -2,7 +2,6 @@
   <el-container class="lines-container">
     <el-main class="slides-block">
       <template v-if="optionalLines">
-        <template v-if="linesType === 'tubelines'">
           <el-row>
             <el-col :offset="0" :span="6">
               Radius:
@@ -13,7 +12,7 @@
                 class="my-slider"
                 :step="1"
                 :min="1"
-                :max="100"
+                :max="32"
                 :show-tooltip="false"
                 @input="modifyTubeLines"
               />
@@ -23,7 +22,7 @@
                 v-model="radius"
                 :step="1"
                 :min="1"
-                :max="100"
+                :max="32"
                 :controls="false"
                 @change="modifyTubeLines"
                 class="input-box number-input"
@@ -57,15 +56,6 @@
               />
             </el-col>
           </el-row>
-        </template>
-        <el-row>
-          <el-col :offset="0" :span="18">
-            Lines type: {{ linesType }}
-          </el-col>
-          <el-col :offset="0" :span="4">
-            <el-button size="small" @click="SwitchLineType">Switch</el-button>
-          </el-col>
-        </el-row>
       </template>
       <template v-else>
         <el-row>
@@ -281,11 +271,10 @@ export default {
       this.currentIndex = -1;
       this.distance = 0;
       this.isNerves = false
-      if (object.isLines2 || object.isOptionalLines) {
+      if (object.isLines2 || object.isTubeLines) {
         this.zincObject = markRaw(object);
         this.width = this.zincObject.getMorph().material.linewidth;
-        this.optionalLines = object.isOptionalLines;
-        this.linesType = object.isLines ? "lines" : object.isTubeLines ? "tubelines" : ""
+        this.optionalLines = object.isTubeLines;
         this.isNerves = this.zincObject.userData.isNerves;
         if (object.isEditable) {
           this.currentIndex = 0;
@@ -300,19 +289,9 @@ export default {
       this.zincObject.setWidth(this.width);
     },
     modifyTubeLines: function () {
-      const r = this.radius / (this.isNerves ? 1 : 100);
+      const r = this.radius;
       const rs = this.radius * this.radialSegments;
       this.zincObject.setTubeLines(r, rs, this.isNerves);
-    },
-    SwitchLineType: function () {
-      this.linesType = this.linesType === "lines" ? "tubelines" : "lines";
-      if (this.linesType === "lines") {
-        this.zincObject.useLines();
-      } else if (this.linesType === "tubelines") {
-        const r = this.radius / (this.isNerves ? 1 : 100);
-        const rs = this.radius * this.radialSegments;
-        this.zincObject.useTubeLines(r, rs, this.isNerves);
-      }
     },
   },
 };
