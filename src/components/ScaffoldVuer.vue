@@ -462,6 +462,20 @@ import { getNerveMaps } from "../scripts/MappedNerves.js";
 const nervesMap = getNerveMaps();
 let totalNerves = 0, foundNerves = 0;
 
+// This will be the config for selected nerves
+const NERVE_CONFIG = {
+  COLOUR: '#FE0000',
+  RADIUS: 8,
+  RADIAL_SEGMENTS: 32,
+}
+
+const haveSameElements = (arr1, arr2) => {
+  if (arr1.length !== arr2.length) return false;
+  return arr1.sort().every((value, index) => {
+    return value === arr2.sort()[index]
+  });
+}
+
 /**
  * A vue component of the scaffold viewer.
  *
@@ -891,6 +905,7 @@ export default {
         isSearch: false,
       },
       //checkedRegions: []
+      previousNerves: [],
     };
   },
   watch: {
@@ -981,29 +996,14 @@ export default {
       }
       this.previousMarkerLabels = markRaw({...labels});
     },
-    lastSelected: {
+    previousNerves: {
       handler: function (newVal, oldVal) {
-        if (newVal.region === "Nerves") {
-          const curPrimitives = this.findObjectsWithGroupName(newVal.group)
-          curPrimitives.forEach((primitive) => {
-            if (primitive.isTubeLines) {
-              primitive.setTubeLines(8, 64, true);
-              // 0x0043EE
-              primitive.setColourHex(0xFE0000);
-            }
-          });
-        }
-        if (oldVal.region === "Nerves") {
-          const prePrimitives = this.findObjectsWithGroupName(oldVal.group)
-          prePrimitives.forEach((primitive) => {
-            if (primitive.isTubeLines) {
-              primitive.setTubeLines(1, 8, true);
-              primitive.setColourHex(0xFFBC11);
-            }
-          });
-        }
+        const pre = oldVal.map((nerve) => nerve.groupName);
+        const cur = newVal.map((nerve) => nerve.groupName);
+        if (haveSameElements(pre, cur)) return;
+        this.handleNervesDisplay(newVal, NERVE_CONFIG.COLOUR)
+        this.handleNervesDisplay(oldVal)
       },
-      deep: true,
     },
   },
   beforeCreate: function () {
@@ -1062,6 +1062,34 @@ export default {
     },
   },
   methods: {
+    /**
+     * 
+     * @param nerves list of nerves to be selected
+     * @param colour with colour to modify the nerves display, if not provided, reset to default
+     */
+    handleNervesDisplay: function (nerves, colour) {
+      nerves.forEach((nerve) => {
+        if (nerve.isTubeLines) {
+          const regionName = nerve.region.getName();
+          const groupName = nerve.groupName;
+          const nodeData = this.$refs.scaffoldTreeControls.getNodeDataByRegionAndGroup(regionName, groupName)
+          const activeColour = nodeData.activeColour.toLowerCase();
+          const defaultColour = nodeData.defaultColour.toLowerCase();
+          const configColour = NERVE_CONFIG.COLOUR.toLowerCase();
+          // if the active colour is the default or config colour
+          // use the provided colour or default depends on whether the colour is provided
+          // otherwise, use the active colour
+          const usedColour =
+            activeColour === defaultColour || activeColour === configColour
+              ? colour || defaultColour
+              : activeColour;
+          this.$refs.scaffoldTreeControls.setColour(nodeData, usedColour)
+          const radius = colour ? NERVE_CONFIG.RADIUS : 1;
+          const radialSegments = NERVE_CONFIG.RADIAL_SEGMENTS;
+          nerve.setTubeLines(radius, radialSegments);
+        }
+      })
+    },
     /*
     setCheckedRegions: function (data) {
       this.checkedRegions = data;
@@ -1804,6 +1832,7 @@ export default {
                 this.$refs.scaffoldTreeControls.removeActive(false);
               }
             }
+            this.previousNerves = zincObjects;
             //Store the following for state saving. Search will handle the case with more than 1
             //identifiers.
             if (event.identifiers.length === 1) {
@@ -1921,6 +1950,7 @@ export default {
      * is made
      */
     objectSelected: function (objects, propagate) {
+      this.previousNerves = objects;
       this.updatePrimitiveControls(objects);
       this.$module.setSelectedByZincObjects(objects, undefined, {}, propagate);
     },

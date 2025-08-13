@@ -1,7 +1,7 @@
 <template>
   <el-container class="lines-container">
     <el-main class="slides-block">
-      <template v-if="optionalLines">
+      <template v-if="isTubeLines">
           <el-row>
             <el-col :offset="0" :span="6">
               Radius:
@@ -172,6 +172,13 @@ import{
   ArrowLeft as ElIconArrowLeft,
   ArrowRight as ElIconArrowRight,
 } from '@element-plus/icons-vue';
+
+const NERVE_CONFIG = {
+  COLOUR: '#FE0000',
+  RADIUS: 8,
+  RADIAL_SEGMENTS: 32,
+}
+
 /**
  * A component to control the opacity of the target object.
  */
@@ -200,16 +207,14 @@ export default {
       distance: 0,
       newDistance: 0, 
       width: 1,
-      radius: 1,
-      radialSegments: 8,
+      radius: NERVE_CONFIG.RADIUS,
+      radialSegments: NERVE_CONFIG.RADIAL_SEGMENTS,
       currentIndex: 0,
       ElIconArrowLeft: shallowRef(ElIconArrowLeft),
       ElIconArrowRight: shallowRef(ElIconArrowRight),
       edited: false,
       zincObject: undefined,
-      optionalLines: false,
-      linesType: "",
-      isNerves: false,
+      isTubeLines: false,
     };
   },
   watch: {
@@ -270,12 +275,11 @@ export default {
     setObject: function (object) {
       this.currentIndex = -1;
       this.distance = 0;
-      this.isNerves = false
+      this.radius = NERVE_CONFIG.RADIUS;
       if (object.isLines2 || object.isTubeLines) {
         this.zincObject = markRaw(object);
         this.width = this.zincObject.getMorph().material.linewidth;
-        this.optionalLines = object.isTubeLines;
-        this.isNerves = this.zincObject.userData.isNerves;
+        this.isTubeLines = object.isTubeLines;
         if (object.isEditable) {
           this.currentIndex = 0;
           this.distance = getLineDistance(object, this.currentIndex);
@@ -289,9 +293,7 @@ export default {
       this.zincObject.setWidth(this.width);
     },
     modifyTubeLines: function () {
-      const r = this.radius;
-      const rs = this.radius * this.radialSegments;
-      this.zincObject.setTubeLines(r, rs, this.isNerves);
+      this.zincObject.setTubeLines(this.radius, this.radius * this.radialSegments);
     },
   },
 };
