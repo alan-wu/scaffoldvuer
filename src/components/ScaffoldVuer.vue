@@ -1044,7 +1044,7 @@ export default {
     },
     */
     /**
-     * 
+     *
      * @param nerves array of nerve names, show all nerves if empty
      * @param processed boolean, whether unselect all checkboxes
      */
@@ -1114,7 +1114,7 @@ export default {
               idsList.push(region.uuid);
             }
           }
-          
+
         });
         if (nerves.length) {
           this.fitWindow();
@@ -2249,7 +2249,9 @@ export default {
           this.activeDrawMode = undefined;
           this.createData.shape = "";
         } else if (this.viewingMode === "Neuron Connection") {
-          nonNervesIsPickable = false;
+          // TODO: to review
+          // enable to make organs and nerves clickable and searchable for neuron connection mode
+          // nonNervesIsPickable = false;
         }
         if ((this.viewingMode === "Exploration") ||
           (this.viewingMode === "Annotation") &&
@@ -2297,7 +2299,7 @@ export default {
       });
     },
     /**
-     * 
+     *
      * @param flag boolean
      * @param nerves array of nerve names
      */
@@ -2323,7 +2325,7 @@ export default {
      */
     setColour: function (flag, forced = false) {
       if (this.isReady && this.$module.scene &&
-        typeof flag === "boolean" && 
+        typeof flag === "boolean" &&
         (forced || flag !== this.colourRadio)) {
         this.loading = true;
         //This can take sometime to finish , nextTick does not bring out
@@ -2334,7 +2336,7 @@ export default {
           this.colourRadio = flag;
         }, 100);
       }
-    }, 
+    },
     /**
      * @public
      * Function to toggle lines graphics.
@@ -2343,7 +2345,7 @@ export default {
      */
      setOutlines: function (flag, forced = false) {
       if (this.isReady && this.$module.scene &&
-        typeof flag === "boolean" && 
+        typeof flag === "boolean" &&
         (forced || flag !== this.outlinesRadio)) {
         this.outlinesRadio = flag;
         this.$nextTick(() => this.$refs.scaffoldTreeControls.setOutlines(flag));
@@ -2515,7 +2517,7 @@ export default {
         if (options.offlineAnnotations) {
           sessionStorage.setItem('anonymous-annotation', options.offlineAnnotations);
         }
-        if ("outlines" in options) { 
+        if ("outlines" in options) {
           this.setOutlines(options.outlines);
         }
         if (options.viewingMode) {
