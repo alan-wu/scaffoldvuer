@@ -119,7 +119,7 @@ const GraphicsHighlight = function() {
 
   this.setHighlighted = function(objects) {
     const previousHighlightedObjects = [...currentHighlightedObjects];
-    this.setNervesRadius(previousHighlightedObjects, 1, 4);
+    this.setNervesRadius(previousHighlightedObjects, 1, 8);
     _this.resetHighlighted();
     // Selected object cannot be highlighted
     const array = getUnmatchingObjects(objects, currentSelectedObjects);
