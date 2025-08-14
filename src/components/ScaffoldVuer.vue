@@ -1003,8 +1003,8 @@ export default {
           const pre = oldVal.map((nerve) => nerve.groupName);
           const cur = newVal.map((nerve) => nerve.groupName);
           if (haveSameElements(pre, cur)) return;
-          this.handleNervesDisplay(oldVal)
-          this.handleNervesDisplay(newVal, NERVE_CONFIG.COLOUR)
+          // this.handleNervesDisplay(oldVal)
+          // this.handleNervesDisplay(newVal, NERVE_CONFIG.COLOUR)
         }
       },
     },
@@ -1087,8 +1087,8 @@ export default {
               ? colour || defaultColour
               : activeColour;
           this.$refs.scaffoldTreeControls.setColour(nodeData, usedColour)
-          const radius = colour ? NERVE_CONFIG.RADIUS : 1;
-          const radialSegments = NERVE_CONFIG.RADIAL_SEGMENTS;
+          const radius = colour ? NERVE_CONFIG.DEFAULT_RADIUS : 1;
+          const radialSegments = NERVE_CONFIG.DEFAULT_RADIAL_SEGMENTS;
           nerve.setTubeLines(radius, radialSegments);
         }
       })
@@ -1122,8 +1122,8 @@ export default {
         const box = nervesList.length ? 
           this.$module.scene.getBoundingBoxOfZincObjects(nervesList) : 
           this.$module.scene.getBoundingBox();
-        this.handleNervesDisplay(this.previousNerves);
-        this.handleNervesDisplay(nervesList, NERVE_CONFIG.COLOUR);
+        // this.handleNervesDisplay(this.previousNerves);
+        // this.handleNervesDisplay(nervesList, NERVE_CONFIG.COLOUR);
         this.previousNerves = nervesList;
         if (box) {
           this.$module.scene.viewAllWithBoundingBox(box);

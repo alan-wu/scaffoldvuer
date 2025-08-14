@@ -1,5 +1,5 @@
 import { THREE } from 'zincjs';
-import { objectsToZincObjects } from "./Utilities";
+import { objectsToZincObjects, NERVE_CONFIG } from "./Utilities";
 
 const setEmissiveColour = (fullList, colour, setDepthFunc) => {
   for (let i = 0; i < fullList.length; i++) {
@@ -119,27 +119,45 @@ const GraphicsHighlight = function() {
 
   this.setHighlighted = function(objects) {
     const previousHighlightedObjects = [...currentHighlightedObjects];
-    this.setNervesRadius(previousHighlightedObjects, 1, 8);
+    this.setNervesRadius(
+      previousHighlightedObjects,
+      NERVE_CONFIG.DEFAULT_RADIUS,
+      NERVE_CONFIG.DEFAULT_RADIAL_SEGMENTS
+    );
     _this.resetHighlighted();
     // Selected object cannot be highlighted
     const array = getUnmatchingObjects(objects, currentSelectedObjects);
     const fullList = getFullListOfObjects(array);
-    this.setNervesRadius(array, 6, 24);
+    this.setNervesRadius(
+      fullList,
+      NERVE_CONFIG.ZOOM_RADIUS,
+      NERVE_CONFIG.ZOOM_RADIAL_SEGMENTS
+    );
     setEmissiveColour(fullList, _this.highlightColour, false);
-    currentHighlightedObjects = array;
+    currentHighlightedObjects = fullList;
     return isDifferent(currentHighlightedObjects, previousHighlightedObjects);
   }
 
   this.setSelected = function(objects) {
     // first find highlighted object that are not selected
-    const previousHSelectedObjects = [...currentSelectedObjects];
+    const previousSelectedObjects = [...currentSelectedObjects];
+    this.setNervesRadius(
+      previousSelectedObjects,
+      NERVE_CONFIG.DEFAULT_RADIUS,
+      NERVE_CONFIG.DEFAULT_RADIAL_SEGMENTS
+    );
     //const array = getUnmatchingObjects(currentHighlightedObjects, objects);
     _this.resetHighlighted();
     _this.resetSelected();
     const fullList = getFullListOfObjects(objects);
+    this.setNervesRadius(
+      fullList,
+      NERVE_CONFIG.ZOOM_RADIUS,
+      NERVE_CONFIG.ZOOM_RADIAL_SEGMENTS
+    );
     setEmissiveColour(fullList, _this.selectColour, false);
     currentSelectedObjects = objects;
-    return isDifferent(currentSelectedObjects, previousHSelectedObjects);
+    return isDifferent(currentSelectedObjects, previousSelectedObjects);
   }
 
   const getFullListOfObjects = function(objects) {
@@ -155,7 +173,6 @@ const GraphicsHighlight = function() {
     const currentObjects = objectsToZincObjects(target);
     if (currentObjects && currentObjects.length) {
       currentObjects.forEach((currentObject) => {
-        console.log(currentObject)
         if (currentObject.isTubeLines && currentObject.userData?.isNerves) {
           currentObject.setTubeLines(radius, radialSegments);
         } 
@@ -165,13 +182,22 @@ const GraphicsHighlight = function() {
   
   this.resetHighlighted = function() {
     const fullList = getFullListOfObjects(currentHighlightedObjects);
+    this.setNervesRadius(
+      fullList,
+      NERVE_CONFIG.DEFAULT_RADIUS,
+      NERVE_CONFIG.DEFAULT_RADIAL_SEGMENTS
+    );
     setEmissiveColour(fullList, _this.originalColour, true);
-    this.setNervesRadius(currentHighlightedObjects, 1, 4);
     currentHighlightedObjects = [];
   }
   
   this.resetSelected = function() {
     const fullList = getFullListOfObjects(currentSelectedObjects);
+    this.setNervesRadius(
+      fullList,
+      NERVE_CONFIG.DEFAULT_RADIUS,
+      NERVE_CONFIG.DEFAULT_RADIAL_SEGMENTS
+    );
     setEmissiveColour(fullList, _this.originalColour, true);
     currentSelectedObjects = [];
   }

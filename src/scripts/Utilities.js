@@ -1,5 +1,13 @@
 import { Label, THREE } from 'zincjs';
 
+  // This will be the config for selected nerves
+  export const NERVE_CONFIG = {
+    DEFAULT_RADIUS: 1,
+    DEFAULT_RADIAL_SEGMENTS: 8,
+    ZOOM_RADIUS: 6,
+    ZOOM_RADIAL_SEGMENTS: 24,
+  }
+
 export const createListFromPrimitives = (primitives, list) => {
   if (primitives) {
     let id = "";
