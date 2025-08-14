@@ -2,60 +2,60 @@
   <el-container class="lines-container">
     <el-main class="slides-block">
       <template v-if="isTubeLines">
-          <el-row>
-            <el-col :offset="0" :span="6">
-              Radius:
-            </el-col>
-            <el-col :offset="0" :span="12">
-              <el-slider
-                v-model="radius"
-                class="my-slider"
-                :step="1"
-                :min="1"
-                :max="32"
-                :show-tooltip="false"
-                @input="modifyTubeLines"
-              />
-            </el-col>
-            <el-col :offset="0" :span="4">
-              <el-input-number
-                v-model="radius"
-                :step="1"
-                :min="1"
-                :max="32"
-                :controls="false"
-                @change="modifyTubeLines"
-                class="input-box number-input"
-              />
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :offset="0" :span="6">
-              Radial Segments:
-            </el-col>
-            <el-col :offset="0" :span="12">
-              <el-slider
-                v-model="radialSegments"
-                class="my-slider"
-                :step="1"
-                :min="8"
-                :max="32"
-                :show-tooltip="false"
-                @input="modifyTubeLines"
-              />
-            </el-col>
-            <el-col :offset="0" :span="4">
-              <el-input-number
-                v-model="radialSegments"
-                :step="1"
-                :min="8"
-                :max="32"
-                :controls="false"
-                @change="modifyTubeLines"
-                class="input-box number-input"
-              />
-            </el-col>
-          </el-row>
+        <el-row>
+          <el-col :offset="0" :span="6">
+            Radius:
+          </el-col>
+          <el-col :offset="0" :span="12">
+            <el-slider
+              v-model="radius"
+              class="my-slider"
+              :step="1"
+              :min="1"
+              :max="32"
+              :show-tooltip="false"
+              @input="modifyTubeLines"
+            />
+          </el-col>
+          <el-col :offset="0" :span="4">
+            <el-input-number
+              v-model="radius"
+              :step="1"
+              :min="1"
+              :max="32"
+              :controls="false"
+              @change="modifyTubeLines"
+              class="input-box number-input"
+            />
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :offset="0" :span="6">
+            Radial Segments:
+          </el-col>
+          <el-col :offset="0" :span="12">
+            <el-slider
+              v-model="radialSegments"
+              class="my-slider"
+              :step="1"
+              :min="8"
+              :max="32"
+              :show-tooltip="false"
+              @input="modifyTubeLines"
+            />
+          </el-col>
+          <el-col :offset="0" :span="4">
+            <el-input-number
+              v-model="radialSegments"
+              :step="1"
+              :min="8"
+              :max="32"
+              :controls="false"
+              @change="modifyTubeLines"
+              class="input-box number-input"
+            />
+          </el-col>
+        </el-row>
       </template>
       <template v-else>
         <el-row>

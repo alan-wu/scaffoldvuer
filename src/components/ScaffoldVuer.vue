@@ -906,6 +906,7 @@ export default {
       }),
       //checkedRegions: []
       previousNerves: [],
+      sidebarSearch: false
     };
   },
   watch: {
@@ -998,11 +999,13 @@ export default {
     },
     previousNerves: {
       handler: function (newVal, oldVal) {
-        const pre = oldVal.map((nerve) => nerve.groupName);
-        const cur = newVal.map((nerve) => nerve.groupName);
-        if (haveSameElements(pre, cur)) return;
-        this.handleNervesDisplay(newVal, NERVE_CONFIG.COLOUR)
-        this.handleNervesDisplay(oldVal)
+        if (!this.sidebarSearch) {
+          const pre = oldVal.map((nerve) => nerve.groupName);
+          const cur = newVal.map((nerve) => nerve.groupName);
+          if (haveSameElements(pre, cur)) return;
+          this.handleNervesDisplay(oldVal)
+          this.handleNervesDisplay(newVal, NERVE_CONFIG.COLOUR)
+        }
       },
     },
   },
@@ -1102,33 +1105,28 @@ export default {
      */
     zoomToNerves: function (nerves, processed = false) {
       if (this.$module.scene) {
+        this.sidebarSearch = processed;
         const nervesList = [];
-        let nervesUUID = undefined;
         const regions = this.$module.scene.getRootRegion().getChildRegions();
         regions.forEach((region) => {
           const regionName = region.getName();
-          if (processed) {
-            if (regionName === 'Nerves') {
-              if (nerves.length) {
-                const ids = nerves.forEach((nerve) => {
-                  const primitives = this.findObjectsWithGroupName(nerve)
-                  nervesList.push(...primitives);
-                  primitives.forEach((primitive) => {
-                    primitive.setVisibility(true);
-                    nervesList.push(primitive);
-                    if (!nervesUUID) nervesUUID = primitive.region.uuid;
-                  });
-                });
-              }
+          if (regionName === 'Nerves') {
+            if (processed) {
+              nerves.forEach((nerve) => {
+                const primitives = this.findObjectsWithGroupName(nerve);
+                nervesList.push(...primitives);
+              });
             }
           }
         });
-        if (nervesList.length) {
-          let box = this.$module.scene.getBoundingBoxOfZincObjects(nervesList);
-          if (box) this.$module.scene.viewAllWithBoundingBox(box);
-        }
-        if (nervesUUID) {
-          this.$refs.scaffoldTreeControls.setCheckedKeys([nervesUUID], false);
+        const box = nervesList.length ? 
+          this.$module.scene.getBoundingBoxOfZincObjects(nervesList) : 
+          this.$module.scene.getBoundingBox();
+        this.handleNervesDisplay(this.previousNerves);
+        this.handleNervesDisplay(nervesList, NERVE_CONFIG.COLOUR);
+        this.previousNerves = nervesList;
+        if (box) {
+          this.$module.scene.viewAllWithBoundingBox(box);
         }
       }
 
@@ -1832,7 +1830,9 @@ export default {
                 this.$refs.scaffoldTreeControls.removeActive(false);
               }
             }
-            this.previousNerves = zincObjects;
+            if (!this.sidebarSearch) {
+              this.previousNerves = zincObjects;
+            }
             //Store the following for state saving. Search will handle the case with more than 1
             //identifiers.
             if (event.identifiers.length === 1) {
@@ -1950,7 +1950,9 @@ export default {
      * is made
      */
     objectSelected: function (objects, propagate) {
-      this.previousNerves = objects;
+      if (!this.sidebarSearch) {
+        this.previousNerves = objects;
+      }
       this.updatePrimitiveControls(objects);
       this.$module.setSelectedByZincObjects(objects, undefined, {}, propagate);
     },
