@@ -899,11 +899,11 @@ export default {
         centre: [0, 0, 0],
         size:[1, 1, 1],
       },
-      lastSelected: {
+      lastSelected: markRaw({
         region: "",
         group: "",
         isSearch: false,
-      },
+      }),
       //checkedRegions: []
       previousNerves: [],
     };
