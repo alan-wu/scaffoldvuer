@@ -462,13 +462,6 @@ import { getNerveMaps } from "../scripts/MappedNerves.js";
 const nervesMap = getNerveMaps();
 let totalNerves = 0, foundNerves = 0;
 
-// This will be the config for selected nerves
-const NERVE_CONFIG = {
-  COLOUR: '#FE0000',
-  RADIUS: 8,
-  RADIAL_SEGMENTS: 32,
-}
-
 const haveSameElements = (arr1, arr2) => {
   if (arr1.length !== arr2.length) return false;
   return arr1.sort().every((value, index) => {
