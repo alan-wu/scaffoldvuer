@@ -112,7 +112,6 @@
           ref="primitiveControls"
           :createData="createData"
           :viewingMode="viewingMode"
-          :usageConfig="usageConfig"
           @primitivesUpdated="primitivesUpdated"
         />
       </div>
@@ -774,6 +773,7 @@ export default {
      */
     usageConfig: {
       type: Object,
+      default: {},
     },
   },
   provide() {

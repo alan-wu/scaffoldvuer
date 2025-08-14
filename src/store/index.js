@@ -23,8 +23,10 @@ export const useMainStore = defineStore('main', {
     setUserToken(value) {
       this.userProfile.token = value
     },
-    setUsageConfig(value) {
-      this.usageConfig = value;
+    setUsageConfig(config) {
+      for (const [key, value] of Object.entries(config)) {
+        this.usageConfig[key] = value;
+      }
     },
   }
 })
