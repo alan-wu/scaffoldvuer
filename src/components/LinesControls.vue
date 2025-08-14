@@ -1,7 +1,7 @@
 <template>
   <el-container class="lines-container">
     <el-main class="slides-block">
-      <template v-if="isTubeLines">
+      <template v-if="isTubeLines && showTubeLinesControls">
         <el-row>
           <el-col :offset="0" :span="6">
             Radius:
@@ -173,6 +173,8 @@ import{
   ArrowLeft as ElIconArrowLeft,
   ArrowRight as ElIconArrowRight,
 } from '@element-plus/icons-vue';
+import { mapStores } from 'pinia';
+import { useMainStore } from '../store/index.js';
 
 /**
  * A component to control the opacity of the target object.
@@ -211,6 +213,12 @@ export default {
       zincObject: undefined,
       isTubeLines: false,
     };
+  },
+  computed: {
+    ...mapStores(useMainStore),
+    showTubeLinesControls() {
+      return this.mainStore.usageConfig.showTubeLinesControls;
+    },
   },
   watch: {
     "createData.faceIndex": {

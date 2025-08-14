@@ -112,6 +112,7 @@
           ref="primitiveControls"
           :createData="createData"
           :viewingMode="viewingMode"
+          :usageConfig="usageConfig"
           @primitivesUpdated="primitivesUpdated"
         />
       </div>
@@ -456,7 +457,7 @@ import { AnnotationService } from '@abi-software/sparc-annotation';
 import { EventNotifier } from "../scripts/EventNotifier.js";
 import { OrgansViewer } from "../scripts/OrgansRenderer.js";
 import { SearchIndex } from "../scripts/Search.js";
-import { mapState } from 'pinia';
+import { mapState, mapStores } from 'pinia';
 import { useMainStore } from "@/store/index";
 import { getNerveMaps } from "../scripts/MappedNerves.js";
 const nervesMap = getNerveMaps();
@@ -768,6 +769,12 @@ export default {
       type: Boolean,
       default: true,
     },
+    /**
+     * Manage the settings when used in standalone or as child component.
+     */
+    usageConfig: {
+      type: Object,
+    },
   },
   provide() {
     return {
@@ -1001,6 +1008,13 @@ export default {
         }
       },
     },
+    usageConfig: {
+      handler: function (newVal) {
+        this.mainStore.setUsageConfig(newVal);
+      },
+      immediate: true,
+      deep: true,
+    },
   },
   beforeCreate: function () {
     this.$module = new OrgansViewer();
@@ -1038,6 +1052,7 @@ export default {
     this.$module = undefined;
   },
   computed: {
+    ...mapStores(useMainStore),
     ...mapState(useMainStore,  ['userToken']),
     annotationDisplay: function() {
       return this.viewingMode === 'Annotation' && this.tData.active === true &&
