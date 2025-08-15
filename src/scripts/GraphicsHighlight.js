@@ -129,13 +129,13 @@ const GraphicsHighlight = function() {
     const array = getUnmatchingObjects(objects, currentSelectedObjects);
     const fullList = getFullListOfObjects(array);
     this.setNervesStyle(
-      fullList,
+      array,
       NERVE_CONFIG.ZOOM_RADIUS,
       NERVE_CONFIG.ZOOM_RADIAL_SEGMENTS,
       NERVE_CONFIG.HIGHLIGHTED_COLOUR
     );
     setEmissiveColour(fullList, _this.highlightColour, false);
-    currentHighlightedObjects = fullList;
+    currentHighlightedObjects = array;
     return isDifferent(currentHighlightedObjects, previousHighlightedObjects);
   }
 
@@ -152,7 +152,7 @@ const GraphicsHighlight = function() {
     _this.resetSelected();
     const fullList = getFullListOfObjects(objects);
     this.setNervesStyle(
-      fullList,
+      objects,
       NERVE_CONFIG.ZOOM_RADIUS,
       NERVE_CONFIG.ZOOM_RADIAL_SEGMENTS,
       NERVE_CONFIG.SELECTED_COLOUR
@@ -188,7 +188,7 @@ const GraphicsHighlight = function() {
   this.resetHighlighted = function() {
     const fullList = getFullListOfObjects(currentHighlightedObjects);
     this.setNervesStyle(
-      fullList,
+      currentHighlightedObjects,
       NERVE_CONFIG.DEFAULT_RADIUS,
       NERVE_CONFIG.DEFAULT_RADIAL_SEGMENTS
     );
@@ -199,7 +199,7 @@ const GraphicsHighlight = function() {
   this.resetSelected = function() {
     const fullList = getFullListOfObjects(currentSelectedObjects);
     this.setNervesStyle(
-      fullList,
+      currentHighlightedObjects,
       NERVE_CONFIG.DEFAULT_RADIUS,
       NERVE_CONFIG.DEFAULT_RADIAL_SEGMENTS
     );
