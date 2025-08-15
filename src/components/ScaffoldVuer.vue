@@ -112,6 +112,7 @@
           ref="primitiveControls"
           :createData="createData"
           :viewingMode="viewingMode"
+          :usageConfig="usageConfig"
           @primitivesUpdated="primitivesUpdated"
         />
       </div>
@@ -773,7 +774,9 @@ export default {
      */
     usageConfig: {
       type: Object,
-      default: {},
+      default: {
+        showTubeLinesControls: true
+      },
     },
   },
   provide() {
@@ -994,13 +997,6 @@ export default {
         this.setMarkerModeForObjectsWithName(key, value, "on");
       }
       this.previousMarkerLabels = markRaw({...labels});
-    },
-    usageConfig: {
-      handler: function (newVal) {
-        this.mainStore.setUsageConfig(newVal);
-      },
-      immediate: true,
-      deep: true,
     },
   },
   beforeCreate: function () {

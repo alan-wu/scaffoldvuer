@@ -10,9 +10,6 @@ export const useMainStore = defineStore('main', {
     userProfile: {
       token: ''
     },
-    usageConfig: {
-      showTubeLinesControls: true
-    }
   }),
   getters: {
     userToken(state) {
@@ -22,11 +19,6 @@ export const useMainStore = defineStore('main', {
   actions: {
     setUserToken(value) {
       this.userProfile.token = value
-    },
-    setUsageConfig(config) {
-      for (const [key, value] of Object.entries(config)) {
-        this.usageConfig[key] = value;
-      }
     },
   }
 })

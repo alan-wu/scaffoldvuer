@@ -173,8 +173,6 @@ import{
   ArrowLeft as ElIconArrowLeft,
   ArrowRight as ElIconArrowRight,
 } from '@element-plus/icons-vue';
-import { mapStores } from 'pinia';
-import { useMainStore } from '../store/index.js';
 
 /**
  * A component to control the opacity of the target object.
@@ -193,6 +191,9 @@ export default {
   },
   props: {
     createData: {
+      type: Object,
+    },
+    usageConfig: {
       type: Object,
     },
   },
@@ -215,9 +216,8 @@ export default {
     };
   },
   computed: {
-    ...mapStores(useMainStore),
     showTubeLinesControls() {
-      return this.mainStore.usageConfig.showTubeLinesControls;
+      return this.usageConfig.showTubeLinesControls;
     },
   },
   watch: {
