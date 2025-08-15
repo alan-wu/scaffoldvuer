@@ -119,7 +119,7 @@ const GraphicsHighlight = function() {
 
   this.setHighlighted = function(objects) {
     const previousHighlightedObjects = [...currentHighlightedObjects];
-    this.setNervesRadius(
+    this.setNervesStyle(
       previousHighlightedObjects,
       NERVE_CONFIG.DEFAULT_RADIUS,
       NERVE_CONFIG.DEFAULT_RADIAL_SEGMENTS
@@ -128,10 +128,11 @@ const GraphicsHighlight = function() {
     // Selected object cannot be highlighted
     const array = getUnmatchingObjects(objects, currentSelectedObjects);
     const fullList = getFullListOfObjects(array);
-    this.setNervesRadius(
+    this.setNervesStyle(
       fullList,
       NERVE_CONFIG.ZOOM_RADIUS,
-      NERVE_CONFIG.ZOOM_RADIAL_SEGMENTS
+      NERVE_CONFIG.ZOOM_RADIAL_SEGMENTS,
+      NERVE_CONFIG.HIGHLIGHTED_COLOUR
     );
     setEmissiveColour(fullList, _this.highlightColour, false);
     currentHighlightedObjects = fullList;
@@ -141,7 +142,7 @@ const GraphicsHighlight = function() {
   this.setSelected = function(objects) {
     // first find highlighted object that are not selected
     const previousSelectedObjects = [...currentSelectedObjects];
-    this.setNervesRadius(
+    this.setNervesStyle(
       previousSelectedObjects,
       NERVE_CONFIG.DEFAULT_RADIUS,
       NERVE_CONFIG.DEFAULT_RADIAL_SEGMENTS
@@ -150,10 +151,11 @@ const GraphicsHighlight = function() {
     _this.resetHighlighted();
     _this.resetSelected();
     const fullList = getFullListOfObjects(objects);
-    this.setNervesRadius(
+    this.setNervesStyle(
       fullList,
       NERVE_CONFIG.ZOOM_RADIUS,
-      NERVE_CONFIG.ZOOM_RADIAL_SEGMENTS
+      NERVE_CONFIG.ZOOM_RADIAL_SEGMENTS,
+      NERVE_CONFIG.SELECTED_COLOUR
     );
     setEmissiveColour(fullList, _this.selectColour, false);
     currentSelectedObjects = objects;
@@ -169,12 +171,15 @@ const GraphicsHighlight = function() {
     return _temp2;
   }
 
-  this.setNervesRadius = function(target, radius, radialSegments) {
+  this.setNervesStyle = function(target, radius, radialSegments, colour) {
     const currentObjects = objectsToZincObjects(target);
     if (currentObjects && currentObjects.length) {
       currentObjects.forEach((currentObject) => {
         if (currentObject.isTubeLines && currentObject.userData?.isNerves) {
           currentObject.setTubeLines(radius, radialSegments);
+          let hexString = colour ? colour : currentObject.userData?.defaultColour;
+          hexString = hexString.replace("#", "0x");
+          currentObject.setColourHex(hexString);
         } 
       });
     }
@@ -182,7 +187,7 @@ const GraphicsHighlight = function() {
   
   this.resetHighlighted = function() {
     const fullList = getFullListOfObjects(currentHighlightedObjects);
-    this.setNervesRadius(
+    this.setNervesStyle(
       fullList,
       NERVE_CONFIG.DEFAULT_RADIUS,
       NERVE_CONFIG.DEFAULT_RADIAL_SEGMENTS
@@ -193,7 +198,7 @@ const GraphicsHighlight = function() {
   
   this.resetSelected = function() {
     const fullList = getFullListOfObjects(currentSelectedObjects);
-    this.setNervesRadius(
+    this.setNervesStyle(
       fullList,
       NERVE_CONFIG.DEFAULT_RADIUS,
       NERVE_CONFIG.DEFAULT_RADIAL_SEGMENTS

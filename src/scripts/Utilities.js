@@ -1,7 +1,9 @@
 import { Label, THREE } from 'zincjs';
 
-  // This will be the config for selected nerves
+  // This will be the config for nerves selection and highlight
   export const NERVE_CONFIG = {
+    SELECTED_COLOUR: '#00ff00',
+    HIGHLIGHTED_COLOUR: '#ff0000',
     DEFAULT_RADIUS: 1,
     DEFAULT_RADIAL_SEGMENTS: 8,
     ZOOM_RADIUS: 6,

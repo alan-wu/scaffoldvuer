@@ -14,6 +14,7 @@
         @changeActive="changeActiveByNode"
         @changeHover="changeHoverByNode"
         ref="treeControls"
+        @mouseout="removeHover(true)"
       />
     </div>
     <div

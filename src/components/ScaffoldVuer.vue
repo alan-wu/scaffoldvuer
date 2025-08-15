@@ -1176,6 +1176,7 @@ export default {
         for (let i = 0; i < regions.length; i++) {
           if (regionPath.includes(regions[i].toLowerCase())) {
             zincObject.userData.isNerves = true;
+            zincObject.userData.defaultColour = `#${zincObject.getColourHex()}`;
             const groupName = zincObject.groupName.toLowerCase();
             if (groupName in nervesMap) {
               foundNerves++;
