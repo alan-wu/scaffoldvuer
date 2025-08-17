@@ -1068,7 +1068,7 @@ export default {
      */
     zoomToNerves: function (nerves, processed = false) {
       if (this.$module.scene) {
-        this.sidebarSearch = processed;
+        this.$module.setSidebarSearch(processed);
         const nervesList = [];
         const regions = this.$module.scene.getRootRegion().getChildRegions();
         regions.forEach((region) => {
@@ -1082,6 +1082,7 @@ export default {
             }
           }
         });
+        this.objectSelected(nervesList, true);
         const box = nervesList.length ? 
           this.$module.scene.getBoundingBoxOfZincObjects(nervesList) : 
           this.$module.scene.getBoundingBox();
@@ -1739,6 +1740,7 @@ export default {
      *
      */
     eventNotifierCallback: function (event) {
+      if (this.$module.isSidebarSearch()) return;
       if (!(this.createData.toBeConfirmed || this.createData.toBeDeleted)) {
         const names = [];
         let zincObjects = [];

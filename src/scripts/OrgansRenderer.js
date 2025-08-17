@@ -44,6 +44,15 @@ const OrgansSceneData = function() {
 	const modelsLoader = ModelsLoaderIn;
   this.NDCCameraControl = undefined;
 	_this.typeName = "Organ Viewer";
+	let sidebarSearch = false;
+
+	this.isSidebarSearch = function() {
+    	return sidebarSearch;
+	}
+	
+	this.setSidebarSearch = function(value) {
+		sidebarSearch = value;
+	}
 
 	this.getSceneData = function() {
 	  return _this.sceneData;
@@ -248,6 +257,7 @@ const OrgansSceneData = function() {
 	 */
    const _pickingCallback = function() {
 		return function(intersects, window_x, window_y) {
+      if (sidebarSearch) return;
       const intersected = _this.getIntersectedObject(intersects);
       const idObject = getIdObjectFromIntersect(intersected);
 			const extraData = {
