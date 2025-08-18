@@ -775,7 +775,8 @@ export default {
     usageConfig: {
       type: Object,
       default: {
-        showTubeLinesControls: true
+        showTubeLinesControls: true,
+        tubeLines: false,
       },
     },
   },
@@ -1068,7 +1069,7 @@ export default {
      */
     zoomToNerves: function (nerves, processed = false) {
       if (this.$module.scene) {
-        this.$module.setSidebarSearch(processed);
+        this.$module.setIgnorePicking(processed);
         const nervesList = [];
         const regions = this.$module.scene.getRootRegion().getChildRegions();
         regions.forEach((region) => {
@@ -2605,6 +2606,7 @@ export default {
         colour: this.colourRadio,
         outlines: this.outlinesRadio,
         viewingMode: this.viewingMode,
+        usageConfig: this.usageConfig,
       };
       if (this.$refs.scaffoldTreeControls)
         state.visibility = this.$refs.scaffoldTreeControls.getState();
@@ -2726,6 +2728,7 @@ export default {
      */
     setURLAndState: function (newValue, state) {
       if (newValue != this._currentURL) {
+        const options = {};
         if (state?.format) this.fileFormat = state.format;
         this._currentURL = newValue;
         if (this.$refs.scaffoldTreeControls) this.$refs.scaffoldTreeControls.clear();
@@ -2754,13 +2757,18 @@ export default {
         if (this.fileFormat === "gltf") {
           this.$module.loadGLTFFromURL(newValue, "scene", true);
         } else {
+          if (this?.usageConfig?.tubeLines || state?.usageConfig?.tubeLines){
+            options.tubeLines = true;
+          }
+          options.tubeLines = true;
           this.$module.loadOrgansFromURL(
             newValue,
             undefined,
             undefined,
             "scene",
             undefined,
-            true
+            true,
+            options
           );
         }
         if (this.$module && this.$module.scene) {
