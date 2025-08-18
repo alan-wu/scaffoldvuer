@@ -2265,7 +2265,6 @@ export default {
           this.activeDrawMode = undefined;
           this.createData.shape = "";
         } else if (this.viewingMode === "Neuron Connection") {
-          // TODO: to review
           // enable to make organs and nerves clickable and searchable for neuron connection mode
           // nonNervesIsPickable = false;
         }
@@ -2278,7 +2277,7 @@ export default {
         }
         this.cancelCreate();
         if (modeName) {
-          this.setNonNervesIsPickable(nonNervesIsPickable);
+          this.setOnlyGraphicsWithAnatomicalIDIsPickable(nonNervesIsPickable);
         }
       }
     },
@@ -2308,7 +2307,7 @@ export default {
      * Currently will only apply to non-nerve object
      * @param flag boolean to control whether objects pickable
      */
-    setNonNervesIsPickable: function (flag) {
+    setOnlyGraphicsWithAnatomicalIDIsPickable: function (flag) {
       const objects = this.$module.scene.getRootRegion().getAllObjects(true);
       objects.forEach((zincObject) => {
         if (!zincObject.userData.isNerves) zincObject.setIsPickable(flag);
