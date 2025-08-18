@@ -57,7 +57,7 @@
           </el-col>
         </el-row>
       </template>
-      <template v-else>
+      <template v-else-if="!isTubeLines">
         <el-row>
           <el-col :offset="0" :span="6">
             Width:

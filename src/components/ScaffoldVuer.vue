@@ -1741,7 +1741,7 @@ export default {
      *
      */
     eventNotifierCallback: function (event) {
-      if (this.$module.isSidebarSearch()) return;
+      if (this.$module.isIgnorePicking()) return;
       if (!(this.createData.toBeConfirmed || this.createData.toBeDeleted)) {
         const names = [];
         let zincObjects = [];
@@ -2760,7 +2760,6 @@ export default {
           if (this?.usageConfig?.tubeLines || state?.usageConfig?.tubeLines){
             options.tubeLines = true;
           }
-          options.tubeLines = true;
           this.$module.loadOrgansFromURL(
             newValue,
             undefined,
