@@ -167,7 +167,11 @@ const GraphicsHighlight = function() {
       const radialSegments = colour ? 
         NERVE_CONFIG.ZOOM_RADIAL_SEGMENTS : NERVE_CONFIG.DEFAULT_RADIAL_SEGMENTS;
       currentObjects.forEach((currentObject) => {
-        if (currentObject.isTubeLines && currentObject.userData?.isNerves) {
+        if (
+          currentObject.isTubeLines &&
+          currentObject.userData?.isNerves &&
+          !currentObject.userData?.isGreyScale
+        ) {
           currentObject.setTubeLines(radius, radialSegments);
           let hexString = colour ? colour : currentObject.userData?.defaultColour;
           hexString = hexString.replace("#", "0x");

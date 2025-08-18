@@ -1174,6 +1174,7 @@ export default {
           if (regionPath.includes(regions[i].toLowerCase())) {
             zincObject.userData.isNerves = true;
             zincObject.userData.defaultColour = `#${zincObject.getColourHex()}`;
+            zincObject.userData.isGreyScale = false;
             const groupName = zincObject.groupName.toLowerCase();
             if (groupName in nervesMap) {
               foundNerves++;
@@ -2315,20 +2316,24 @@ export default {
       });
     },
     /**
-     * 
+     * Update objects to greyscale or colour.
+     * This will update all objects except nerves or those with the provided labels.
      * @param flag boolean
-     * @param nerves array of nerve names
+     * @param labels array of names that exclude from greyscale
      */
-    setGreyScale: function (flag, nerves = []) {
+    setGreyScale: function (flag, labels = []) {
       const objects = this.$module.scene.getRootRegion().getAllObjects(true);
       objects.forEach((zincObject) => {
-        if (nerves.length) {
-          const groupName = zincObject.groupName.toLowerCase();
-          if (zincObject.userData.isNerves) {
-            if (!nerves.includes(groupName)) zincObject.setGreyScale(flag);
-          }
-        } else {
-          if (!zincObject.userData.isNerves) zincObject.setGreyScale(flag);
+        const groupName = zincObject.groupName.toLowerCase();
+        const isNerves = zincObject.userData?.isNerves;
+
+        const shouldUpdate =
+          (labels.length > 0 && !labels.includes(groupName)) ||
+          (labels.length === 0 && !isNerves);
+
+        if (shouldUpdate) {
+          zincObject.setGreyScale(flag);
+          zincObject.userData.isGreyScale = flag;
         }
       });
       this.$refs.scaffoldTreeControls.updateAllNodeColours();
