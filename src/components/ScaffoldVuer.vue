@@ -1737,7 +1737,6 @@ export default {
      *
      */
     eventNotifierCallback: function (event) {
-      if (this.$module.isIgnorePicking()) return;
       if (!(this.createData.toBeConfirmed || this.createData.toBeDeleted)) {
         const names = [];
         let zincObjects = [];
