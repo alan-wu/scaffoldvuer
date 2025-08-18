@@ -459,6 +459,7 @@ import { SearchIndex } from "../scripts/Search.js";
 import { mapState } from 'pinia';
 import { useMainStore } from "@/store/index";
 import { getNerveMaps } from "../scripts/MappedNerves.js";
+import { organsWithAnatomicalIds } from '../scripts/MappedOrgans.js';
 const nervesMap = getNerveMaps();
 let totalNerves = 0, foundNerves = 0;
 
@@ -1780,6 +1781,21 @@ export default {
                 this.$refs.scaffoldTreeControls.removeActive(false);
               }
             }
+
+            // Add anatomicalId
+            event.identifiers.forEach((identifier) => {
+              if (identifier && identifier.data) {
+                const { isNerves, id } = identifier.data;
+                const hasAnatomicalId = identifier.data.hasOwnProperty('anatomicalId');
+                if (isNerves === false && hasAnatomicalId) {
+                  const foundOrgan = organsWithAnatomicalIds.find((organ) => organ.label === id);
+                  if (foundOrgan) {
+                    identifier.data.anatomicalId = foundOrgan.anatomicalId;
+                  }
+                }
+              }
+            });
+
             //Store the following for state saving. Search will handle the case with more than 1
             //identifiers.
             if (event.identifiers.length === 1) {
