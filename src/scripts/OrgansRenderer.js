@@ -44,6 +44,15 @@ const OrgansSceneData = function() {
 	const modelsLoader = ModelsLoaderIn;
   this.NDCCameraControl = undefined;
 	_this.typeName = "Organ Viewer";
+	let ignorePicking = false;
+
+	this.isIgnorePicking = function() {
+    	return ignorePicking;
+	}
+	
+	this.setIgnorePicking = function(value) {
+		ignorePicking = value;
+	}
 
 	this.getSceneData = function() {
 	  return _this.sceneData;
@@ -248,6 +257,7 @@ const OrgansSceneData = function() {
 	 */
    const _pickingCallback = function() {
 		return function(intersects, window_x, window_y) {
+      if (ignorePicking) return;
       const intersected = _this.getIntersectedObject(intersects);
       const idObject = getIdObjectFromIntersect(intersected);
 			const extraData = {
@@ -546,7 +556,7 @@ const OrgansSceneData = function() {
       _this.sceneData.currentName = name;
 	  }
 
-	  this.loadOrgansFromURL = function(url, speciesName, systemName, partName, viewURL, clearFirst) {
+	  this.loadOrgansFromURL = function(url, speciesName, systemName, partName, viewURL, clearFirst, options) {
 		  if (_this.zincRenderer) {
 			  if (partName && (_this.sceneData.metaURL !== url)) {
 			      setSceneData(speciesName, systemName, partName, undefined);
@@ -571,7 +581,7 @@ const OrgansSceneData = function() {
 			      _this.sceneData.metaURL = url;
 						organScene.addZincObjectAddedCallbacks(_addOrganPartCallback(systemName, partName, false));
 			      organScene.addZincObjectRemovedCallbacks(_removeOrganPartCallback(undefined, partName, false));
-						organScene.loadMetadataURL(url, singleItemFinishCallback(), downloadCompletedCallback());
+						organScene.loadMetadataURL(url, singleItemFinishCallback(), downloadCompletedCallback(), options);
 			      _this.scene = organScene;
 			      _this.zincRenderer.setCurrentScene(organScene);
 			      _this.graphicsHighlight.reset();
