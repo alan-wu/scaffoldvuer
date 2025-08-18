@@ -1,7 +1,7 @@
 <template>
   <el-container class="lines-container">
     <el-main class="slides-block">
-      <template v-if="isTubeLines">
+      <template v-if="isTubeLines && showTubeLinesControls">
         <el-row>
           <el-col :offset="0" :span="6">
             Radius:
@@ -159,6 +159,7 @@ import { markRaw, shallowRef } from 'vue';
 import {
   getLineDistance,
   moveAndExtendLine,
+  NERVE_CONFIG
 } from "../scripts/Utilities.js";
 import {
   ElButton as Button,
@@ -172,12 +173,6 @@ import{
   ArrowLeft as ElIconArrowLeft,
   ArrowRight as ElIconArrowRight,
 } from '@element-plus/icons-vue';
-
-const NERVE_CONFIG = {
-  COLOUR: '#FE0000',
-  RADIUS: 8,
-  RADIAL_SEGMENTS: 32,
-}
 
 /**
  * A component to control the opacity of the target object.
@@ -198,6 +193,9 @@ export default {
     createData: {
       type: Object,
     },
+    usageConfig: {
+      type: Object,
+    },
   },
   data: function () {
     return {
@@ -207,8 +205,8 @@ export default {
       distance: 0,
       newDistance: 0, 
       width: 1,
-      radius: NERVE_CONFIG.RADIUS,
-      radialSegments: NERVE_CONFIG.RADIAL_SEGMENTS,
+      radius: NERVE_CONFIG.DEFAULT_RADIUS,
+      radialSegments: NERVE_CONFIG.DEFAULT_RADIAL_SEGMENTS,
       currentIndex: 0,
       ElIconArrowLeft: shallowRef(ElIconArrowLeft),
       ElIconArrowRight: shallowRef(ElIconArrowRight),
@@ -216,6 +214,11 @@ export default {
       zincObject: undefined,
       isTubeLines: false,
     };
+  },
+  computed: {
+    showTubeLinesControls() {
+      return this.usageConfig.showTubeLinesControls;
+    },
   },
   watch: {
     "createData.faceIndex": {
@@ -275,7 +278,6 @@ export default {
     setObject: function (object) {
       this.currentIndex = -1;
       this.distance = 0;
-      this.radius = NERVE_CONFIG.RADIUS;
       if (object.isLines2 || object.isTubeLines) {
         this.zincObject = markRaw(object);
         this.width = this.zincObject.getMorph().material.linewidth;
@@ -283,6 +285,9 @@ export default {
         if (object.isEditable) {
           this.currentIndex = 0;
           this.distance = getLineDistance(object, this.currentIndex);
+        } else if (object.userData?.isNerves) {
+          this.radius = NERVE_CONFIG.ZOOM_RADIUS;
+          this.radialSegments = NERVE_CONFIG.ZOOM_RADIAL_SEGMENTS;
         }
       } else {
         this.zincObject = undefined;

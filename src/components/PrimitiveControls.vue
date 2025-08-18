@@ -34,6 +34,7 @@
             class="lines-controls"
             ref="linesControls"
             :createData="createData"
+            :usageConfig="usageConfig"
             @primitivesUpdated="$emit('primitivesUpdated', $event)"
           />
         </el-collapse-item>
@@ -88,6 +89,9 @@ export default {
     viewingMode: {
       type: String,
       default: "Exploration",
+    },
+    usageConfig: {
+      type: Object,
     }
   },
   data: function() {
