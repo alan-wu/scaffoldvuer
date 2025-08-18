@@ -1,6 +1,6 @@
 <template>
   <div
-    v-show="material || isTextureSlides"
+    v-show="hasValidPrimitive"
     class="primitive-controls"
     :class="{ open: drawerOpen, close: !drawerOpen }"
   >
@@ -34,6 +34,7 @@
             class="lines-controls"
             ref="linesControls"
             :createData="createData"
+            :usageConfig="usageConfig"
             @primitivesUpdated="$emit('primitivesUpdated', $event)"
           />
         </el-collapse-item>
@@ -85,6 +86,13 @@ export default {
     createData: {
       type: Object,
     },
+    viewingMode: {
+      type: String,
+      default: "Exploration",
+    },
+    usageConfig: {
+      type: Object,
+    }
   },
   data: function() {
     return {
@@ -98,6 +106,14 @@ export default {
       isEditable: false,
       displayString: "100%"
     };
+  },
+  computed: {
+    hasValidPrimitive: function () {
+      if (this.viewingMode === 'Exploration' || this.viewingMode === 'Annotation') {
+        return (this.material !== undefined || this.isTextureSlides === true);
+      }
+      return false;
+    }
   },
   methods: {
     formatTooltip: function(val) {

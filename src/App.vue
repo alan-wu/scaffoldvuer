@@ -36,6 +36,7 @@
         @timeChanged="updateCurrentTime"
         @zinc-object-added="objectAdded"
         @vue:mounted="viewerMounted"
+        :usageConfig="usageConfig"
       />
     </drop-zone>
 
@@ -447,7 +448,10 @@ export default {
       ElIconFolderOpened: shallowRef(ElIconFolderOpened),
       auto: NaN,
       annotator: markRaw(new AnnotationService(`https://mapcore-demo.org/devel/flatmap/v4/annotator`)),
-      fitBoundingBox: false
+      fitBoundingBox: false,
+      usageConfig: {
+        showTubeLinesControls: true
+      },
     };
   },
   watch: {

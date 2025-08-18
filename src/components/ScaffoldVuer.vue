@@ -109,9 +109,10 @@
       </el-popover>
       <div class="primitive-controls-box">
         <primitive-controls
-          v-show="viewingMode === 'Exploration' || viewingMode === 'Annotation'"
           ref="primitiveControls"
           :createData="createData"
+          :viewingMode="viewingMode"
+          :usageConfig="usageConfig"
           @primitivesUpdated="primitivesUpdated"
         />
       </div>
@@ -456,18 +457,11 @@ import { AnnotationService } from '@abi-software/sparc-annotation';
 import { EventNotifier } from "../scripts/EventNotifier.js";
 import { OrgansViewer } from "../scripts/OrgansRenderer.js";
 import { SearchIndex } from "../scripts/Search.js";
-import { mapState } from 'pinia';
+import { mapState, mapStores } from 'pinia';
 import { useMainStore } from "@/store/index";
 import { getNerveMaps } from "../scripts/MappedNerves.js";
 const nervesMap = getNerveMaps();
 let totalNerves = 0, foundNerves = 0;
-
-// This will be the config for selected nerves
-const NERVE_CONFIG = {
-  COLOUR: '#FE0000',
-  RADIUS: 8,
-  RADIAL_SEGMENTS: 32,
-}
 
 const haveSameElements = (arr1, arr2) => {
   if (arr1.length !== arr2.length) return false;
@@ -775,6 +769,15 @@ export default {
       type: Boolean,
       default: true,
     },
+    /**
+     * Manage the settings when used in standalone or as child component.
+     */
+    usageConfig: {
+      type: Object,
+      default: {
+        showTubeLinesControls: true
+      },
+    },
   },
   provide() {
     return {
@@ -899,14 +902,12 @@ export default {
         centre: [0, 0, 0],
         size:[1, 1, 1],
       },
-      lastSelected: {
+      lastSelected: markRaw({
         region: "",
         group: "",
         isSearch: false,
-      },
+      }),
       //checkedRegions: []
-      previousNerves: [],
-      sidebarSearch: false
     };
   },
   watch: {
@@ -997,17 +998,6 @@ export default {
       }
       this.previousMarkerLabels = markRaw({...labels});
     },
-    previousNerves: {
-      handler: function (newVal, oldVal) {
-        if (!this.sidebarSearch) {
-          const pre = oldVal.map((nerve) => nerve.groupName);
-          const cur = newVal.map((nerve) => nerve.groupName);
-          if (haveSameElements(pre, cur)) return;
-          this.handleNervesDisplay(oldVal)
-          this.handleNervesDisplay(newVal, NERVE_CONFIG.COLOUR)
-        }
-      },
-    },
   },
   beforeCreate: function () {
     this.$module = new OrgansViewer();
@@ -1045,6 +1035,7 @@ export default {
     this.$module = undefined;
   },
   computed: {
+    ...mapStores(useMainStore),
     ...mapState(useMainStore,  ['userToken']),
     annotationDisplay: function() {
       return this.viewingMode === 'Annotation' && this.tData.active === true &&
@@ -1065,34 +1056,6 @@ export default {
     },
   },
   methods: {
-    /**
-     * 
-     * @param nerves list of nerves to be selected
-     * @param colour with colour to modify the nerves display, if not provided, reset to default
-     */
-    handleNervesDisplay: function (nerves, colour) {
-      nerves.forEach((nerve) => {
-        if (nerve.isTubeLines) {
-          const regionName = nerve.region.getName();
-          const groupName = nerve.groupName;
-          const nodeData = this.$refs.scaffoldTreeControls.getNodeDataByRegionAndGroup(regionName, groupName)
-          const activeColour = nodeData.activeColour.toLowerCase();
-          const defaultColour = nodeData.defaultColour.toLowerCase();
-          const configColour = NERVE_CONFIG.COLOUR.toLowerCase();
-          // if the active colour is the default or config colour
-          // use the provided colour or default depends on whether the colour is provided
-          // otherwise, use the active colour
-          const usedColour =
-            activeColour === defaultColour || activeColour === configColour
-              ? colour || defaultColour
-              : activeColour;
-          this.$refs.scaffoldTreeControls.setColour(nodeData, usedColour)
-          const radius = colour ? NERVE_CONFIG.RADIUS : 1;
-          const radialSegments = NERVE_CONFIG.RADIAL_SEGMENTS;
-          nerve.setTubeLines(radius, radialSegments);
-        }
-      })
-    },
     /*
     setCheckedRegions: function (data) {
       this.checkedRegions = data;
@@ -1105,7 +1068,7 @@ export default {
      */
     zoomToNerves: function (nerves, processed = false) {
       if (this.$module.scene) {
-        this.sidebarSearch = processed;
+        this.$module.setSidebarSearch(processed);
         const nervesList = [];
         const regions = this.$module.scene.getRootRegion().getChildRegions();
         regions.forEach((region) => {
@@ -1119,12 +1082,10 @@ export default {
             }
           }
         });
+        this.objectSelected(nervesList, true);
         const box = nervesList.length ? 
           this.$module.scene.getBoundingBoxOfZincObjects(nervesList) : 
           this.$module.scene.getBoundingBox();
-        this.handleNervesDisplay(this.previousNerves);
-        this.handleNervesDisplay(nervesList, NERVE_CONFIG.COLOUR);
-        this.previousNerves = nervesList;
         if (box) {
           this.$module.scene.viewAllWithBoundingBox(box);
         }
@@ -1212,6 +1173,7 @@ export default {
         for (let i = 0; i < regions.length; i++) {
           if (regionPath.includes(regions[i].toLowerCase())) {
             zincObject.userData.isNerves = true;
+            zincObject.userData.defaultColour = `#${zincObject.getColourHex()}`;
             const groupName = zincObject.groupName.toLowerCase();
             if (groupName in nervesMap) {
               foundNerves++;
@@ -1778,6 +1740,7 @@ export default {
      *
      */
     eventNotifierCallback: function (event) {
+      if (this.$module.isSidebarSearch()) return;
       if (!(this.createData.toBeConfirmed || this.createData.toBeDeleted)) {
         const names = [];
         let zincObjects = [];
@@ -1829,9 +1792,6 @@ export default {
                 this.hideRegionTooltip();
                 this.$refs.scaffoldTreeControls.removeActive(false);
               }
-            }
-            if (!this.sidebarSearch) {
-              this.previousNerves = zincObjects;
             }
             //Store the following for state saving. Search will handle the case with more than 1
             //identifiers.
@@ -1950,9 +1910,6 @@ export default {
      * is made
      */
     objectSelected: function (objects, propagate) {
-      if (!this.sidebarSearch) {
-        this.previousNerves = objects;
-      }
       this.updatePrimitiveControls(objects);
       this.$module.setSelectedByZincObjects(objects, undefined, {}, propagate);
     },

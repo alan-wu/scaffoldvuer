@@ -1,5 +1,15 @@
 import { Label, THREE } from 'zincjs';
 
+  // This will be the config for nerves selection and highlight
+  export const NERVE_CONFIG = {
+    SELECTED_COLOUR: '#00ff00',
+    HIGHLIGHTED_COLOUR: '#ff0000',
+    DEFAULT_RADIUS: 1,
+    DEFAULT_RADIAL_SEGMENTS: 8,
+    ZOOM_RADIUS: 6,
+    ZOOM_RADIAL_SEGMENTS: 24,
+  }
+
 export const createListFromPrimitives = (primitives, list) => {
   if (primitives) {
     let id = "";
@@ -409,3 +419,20 @@ export const annotationFeaturesToPrimitives = (scene, features)  => {
   }
 }
 
+export const objectsToZincObjects = function(objects) {
+  const zincObjects = [];
+  for (let i = 0; i < objects.length; i++) {
+    let zincObject = objects[i].userData;
+    if (zincObject) {
+      if (zincObject.isGlyph || zincObject.isGlyphset) {
+        let glyphset = zincObject;
+        if (zincObject.isGlyph)
+          glyphset = zincObject.getGlyphset();
+        zincObjects.push(glyphset);
+      } else {
+        zincObjects.push(zincObject);
+      }
+    }
+  }
+  return zincObjects;
+}
