@@ -1084,12 +1084,7 @@ export default {
           }
         });
         this.objectSelected(nervesList, true);
-        const box = nervesList.length ? 
-          this.$module.scene.getBoundingBoxOfZincObjects(nervesList) : 
-          this.$module.scene.getBoundingBox();
-        if (box) {
-          this.$module.scene.viewAllWithBoundingBox(box);
-        }
+        this.$module.scene.viewAll();
       }
 
       //The following hide all the other primitives
