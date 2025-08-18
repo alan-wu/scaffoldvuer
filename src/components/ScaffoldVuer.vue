@@ -2269,6 +2269,7 @@ export default {
           nonNervesIsPickable = false;
         }
         if ((this.viewingMode === "Exploration") ||
+          (this.viewingMode === "Neuron Connection") ||
           (this.viewingMode === "Annotation") &&
           (this.createData.shape === "")) {
             this.$module.selectObjectOnPick = true;
