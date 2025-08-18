@@ -2317,9 +2317,9 @@ export default {
     },
     /**
      * Update objects to greyscale or colour.
-     * This will update all objects except nerves or those with the provided labels.
+     * This will update all objects except those with the provided nerves labels.
      * @param flag boolean
-     * @param labels array of names that exclude from greyscale
+     * @param labels array of nerve names that exclude from greyscale
      */
     setGreyScale: function (flag, labels = []) {
       const objects = this.$module.scene.getRootRegion().getAllObjects(true);
@@ -2328,7 +2328,7 @@ export default {
         const isNerves = zincObject.userData?.isNerves;
 
         const shouldUpdate =
-          (labels.length > 0 && !labels.includes(groupName)) ||
+          (labels.length > 0 && isNerves && !labels.includes(groupName)) ||
           (labels.length === 0 && !isNerves);
 
         if (shouldUpdate) {
