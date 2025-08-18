@@ -1083,52 +1083,9 @@ export default {
             }
           }
         });
-        this.objectSelected(nervesList, true);
+        this.$module.setSelectedByZincObjects(nervesList, undefined, {}, true);
         this.$module.scene.viewAll();
       }
-
-      //The following hide all the other primitives
-      /*
-      if (this.$module.scene) {
-        const idsList = [];
-        const regions = this.$module.scene.getRootRegion().getChildRegions();
-        regions.forEach((region) => {
-          const regionName = region.getName();
-          if (processed) {
-            region.hideAllPrimitives();
-            if (regionName === 'Nerves') {
-              if (nerves.length) {
-                const ids = nerves.reduce((acc, nerve) => {
-                  const primitives = this.findObjectsWithGroupName(nerve)
-                  const ids = primitives.map((object) => {
-                    object.setVisibility(true);
-                    return `${object.region.uuid}/${object.uuid}`;
-                  });
-                  acc.push(...ids);
-                  return acc;
-                }, []);
-                idsList.push(...ids)
-              } else {
-                region.showAllPrimitives();
-                idsList.push(region.uuid)
-              }
-            }
-          } else {
-            // if the checkboxes are checked previously, restore them
-            const isChecked = this.checkedRegions.find(item => item.label === regionName);
-            if (isChecked) {
-              region.showAllPrimitives();
-              idsList.push(region.uuid);
-            }
-          }
-          
-        });
-        if (nerves.length) {
-          this.fitWindow();
-        }
-        this.$refs.scaffoldTreeControls.setCheckedKeys(idsList, processed);
-      }
-      */
     },
     enableAxisDisplay: function (enable, miniaxes) {
       if (this.$module.scene) {
@@ -1906,6 +1863,7 @@ export default {
      * is made
      */
     objectSelected: function (objects, propagate) {
+      if (this.$module.isIgnorePicking()) return;
       this.updatePrimitiveControls(objects);
       this.$module.setSelectedByZincObjects(objects, undefined, {}, propagate);
     },
