@@ -6,8 +6,8 @@ import { Label, THREE } from 'zincjs';
     HIGHLIGHTED_COLOUR: '#ff0000',
     DEFAULT_RADIUS: 1,
     DEFAULT_RADIAL_SEGMENTS: 8,
-    ZOOM_RADIUS: 6,
-    ZOOM_RADIAL_SEGMENTS: 24,
+    ZOOM_RADIUS: 5,
+    ZOOM_RADIAL_SEGMENTS: 12,
   }
 
 export const createListFromPrimitives = (primitives, list) => {
