@@ -257,7 +257,6 @@ const OrgansSceneData = function() {
 	 */
    const _pickingCallback = function() {
 		return function(intersects, window_x, window_y) {
-      if (ignorePicking) return;
       const intersected = _this.getIntersectedObject(intersects);
       const idObject = getIdObjectFromIntersect(intersected);
 			const extraData = {
@@ -285,6 +284,7 @@ const OrgansSceneData = function() {
         }
         return;
       } else {
+		if (ignorePicking) return;
 				_this.setSelectedByObjects([], coords, extraData, true);
 			}
 		}
