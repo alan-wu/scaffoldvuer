@@ -34,6 +34,7 @@
             class="lines-controls"
             ref="linesControls"
             :createData="createData"
+            :usageConfig="usageConfig"
             @primitivesUpdated="$emit('primitivesUpdated', $event)"
           />
         </el-collapse-item>
@@ -88,6 +89,9 @@ export default {
     viewingMode: {
       type: String,
       default: "Exploration",
+    },
+    usageConfig: {
+      type: Object,
     }
   },
   data: function() {
@@ -139,7 +143,8 @@ export default {
           this.isPointset = true;
           this.$refs.pointsetControls.setObject(object);
           this.activeName = "pControls";
-        } else if (object.isLines2) {
+        } else if (object.isLines2 || (object.isTubeLines && 
+          this.usageConfig?.showTubeLinesControls)) {
           this.isLines = true;
           this.$refs.linesControls.setObject(object);
           this.activeName = "lControls";

@@ -112,6 +112,7 @@
           ref="primitiveControls"
           :createData="createData"
           :viewingMode="viewingMode"
+          :usageConfig="usageConfig"
           @primitivesUpdated="primitivesUpdated"
         />
       </div>
@@ -456,12 +457,19 @@ import { AnnotationService } from '@abi-software/sparc-annotation';
 import { EventNotifier } from "../scripts/EventNotifier.js";
 import { OrgansViewer } from "../scripts/OrgansRenderer.js";
 import { SearchIndex } from "../scripts/Search.js";
-import { mapState } from 'pinia';
+import { mapState, mapStores } from 'pinia';
 import { useMainStore } from "@/store/index";
 import { getNerveMaps } from "../scripts/MappedNerves.js";
 import { organsWithAnatomicalIds } from '../scripts/MappedOrgans.js';
 const nervesMap = getNerveMaps();
 let totalNerves = 0, foundNerves = 0;
+
+const haveSameElements = (arr1, arr2) => {
+  if (arr1.length !== arr2.length) return false;
+  return arr1.sort().every((value, index) => {
+    return value === arr2.sort()[index]
+  });
+}
 
 /**
  * A vue component of the scaffold viewer.
@@ -762,6 +770,16 @@ export default {
       type: Boolean,
       default: true,
     },
+    /**
+     * Manage the settings when used in standalone or as child component.
+     */
+    usageConfig: {
+      type: Object,
+      default: {
+        showTubeLinesControls: true,
+        tubeLines: false,
+      },
+    },
   },
   provide() {
     return {
@@ -1019,6 +1037,7 @@ export default {
     this.$module = undefined;
   },
   computed: {
+    ...mapStores(useMainStore),
     ...mapState(useMainStore,  ['userToken']),
     annotationDisplay: function() {
       return this.viewingMode === 'Annotation' && this.tData.active === true &&
@@ -1051,78 +1070,23 @@ export default {
      */
     zoomToNerves: function (nerves, processed = false) {
       if (this.$module.scene) {
+        this.$module.setIgnorePicking(processed);
         const nervesList = [];
-        let nervesUUID = undefined;
         const regions = this.$module.scene.getRootRegion().getChildRegions();
         regions.forEach((region) => {
           const regionName = region.getName();
-          if (processed) {
-            if (regionName === 'Nerves') {
-              if (nerves.length) {
-                const ids = nerves.forEach((nerve) => {
-                  const primitives = this.findObjectsWithGroupName(nerve)
-                  nervesList.push(...primitives);
-                  primitives.forEach((primitive) => {
-                    primitive.setVisibility(true);
-                    nervesList.push(primitive);
-                    if (!nervesUUID) nervesUUID = primitive.region.uuid;
-                  });
-                });
-              }
+          if (regionName === 'Nerves') {
+            if (processed) {
+              nerves.forEach((nerve) => {
+                const primitives = this.findObjectsWithGroupName(nerve);
+                nervesList.push(...primitives);
+              });
             }
           }
         });
-        if (nervesList.length) {
-          let box = this.$module.scene.getBoundingBoxOfZincObjects(nervesList);
-          if (box) this.$module.scene.viewAllWithBoundingBox(box);
-        }
-        if (nervesUUID) {
-          this.$refs.scaffoldTreeControls.setCheckedKeys([nervesUUID], false);
-        }
+        this.$module.setSelectedByZincObjects(nervesList, undefined, {}, true);
+        this.$module.scene.viewAll();
       }
-
-      //The following hide all the other primitives
-      /*
-      if (this.$module.scene) {
-        const idsList = [];
-        const regions = this.$module.scene.getRootRegion().getChildRegions();
-        regions.forEach((region) => {
-          const regionName = region.getName();
-          if (processed) {
-            region.hideAllPrimitives();
-            if (regionName === 'Nerves') {
-              if (nerves.length) {
-                const ids = nerves.reduce((acc, nerve) => {
-                  const primitives = this.findObjectsWithGroupName(nerve)
-                  const ids = primitives.map((object) => {
-                    object.setVisibility(true);
-                    return `${object.region.uuid}/${object.uuid}`;
-                  });
-                  acc.push(...ids);
-                  return acc;
-                }, []);
-                idsList.push(...ids)
-              } else {
-                region.showAllPrimitives();
-                idsList.push(region.uuid)
-              }
-            }
-          } else {
-            // if the checkboxes are checked previously, restore them
-            const isChecked = this.checkedRegions.find(item => item.label === regionName);
-            if (isChecked) {
-              region.showAllPrimitives();
-              idsList.push(region.uuid);
-            }
-          }
-
-        });
-        if (nerves.length) {
-          this.fitWindow();
-        }
-        this.$refs.scaffoldTreeControls.setCheckedKeys(idsList, processed);
-      }
-      */
     },
     enableAxisDisplay: function (enable, miniaxes) {
       if (this.$module.scene) {
@@ -1163,6 +1127,8 @@ export default {
         for (let i = 0; i < regions.length; i++) {
           if (regionPath.includes(regions[i].toLowerCase())) {
             zincObject.userData.isNerves = true;
+            zincObject.userData.defaultColour = `#${zincObject.getColourHex()}`;
+            zincObject.userData.isGreyScale = false;
             const groupName = zincObject.groupName.toLowerCase();
             if (groupName in nervesMap) {
               foundNerves++;
@@ -1799,13 +1765,17 @@ export default {
             //Store the following for state saving. Search will handle the case with more than 1
             //identifiers.
             if (event.identifiers.length === 1) {
-              this.lastSelected.isSearch = false;
-              this.lastSelected.region = regionPath;
-              this.lastSelected.group = event.identifiers[0].data.group;
+              this.lastSelected = {
+                isSearch: false,
+                region: regionPath,
+                group: event.identifiers[0].data.group,
+              }
             } else if (event.identifiers.length === 0) {
-              this.lastSelected.isSearch = false;
-              this.lastSelected.region = "";
-              this.lastSelected.group = "";
+              this.lastSelected = {
+                isSearch: false,
+                region: "",
+                group: "",
+              }
             }
             /**
              * Emit when an object is selected
@@ -1909,6 +1879,7 @@ export default {
      * is made
      */
     objectSelected: function (objects, propagate) {
+      if (this.$module.isIgnorePicking()) return;
       this.updatePrimitiveControls(objects);
       this.$module.setSelectedByZincObjects(objects, undefined, {}, propagate);
     },
@@ -2269,6 +2240,7 @@ export default {
           // nonNervesIsPickable = false;
         }
         if ((this.viewingMode === "Exploration") ||
+          (this.viewingMode === "Neuron Connection") ||
           (this.viewingMode === "Annotation") &&
           (this.createData.shape === "")) {
             this.$module.selectObjectOnPick = true;
@@ -2314,20 +2286,24 @@ export default {
       });
     },
     /**
-     *
+     * Update objects to greyscale or colour.
+     * This will update all objects except those with the provided nerves labels.
      * @param flag boolean
-     * @param nerves array of nerve names
+     * @param labels array of nerve names that exclude from greyscale
      */
-    setGreyScale: function (flag, nerves = []) {
+    setGreyScale: function (flag, labels = []) {
       const objects = this.$module.scene.getRootRegion().getAllObjects(true);
       objects.forEach((zincObject) => {
-        if (nerves.length) {
-          const groupName = zincObject.groupName.toLowerCase();
-          if (zincObject.userData.isNerves) {
-            if (!nerves.includes(groupName)) zincObject.setGreyScale(flag);
-          }
-        } else {
-          if (!zincObject.userData.isNerves) zincObject.setGreyScale(flag);
+        const groupName = zincObject.groupName.toLowerCase();
+        const isNerves = zincObject.userData?.isNerves;
+
+        const shouldUpdate =
+          (labels.length > 0 && isNerves && !labels.includes(groupName)) ||
+          (labels.length === 0 && !isNerves);
+
+        if (shouldUpdate) {
+          zincObject.setGreyScale(flag);
+          zincObject.userData.isGreyScale = flag;
         }
       });
       this.$refs.scaffoldTreeControls.updateAllNodeColours();
@@ -2437,15 +2413,19 @@ export default {
         if (text === undefined || text === "" ||
           ((Array.isArray(text) && text.length === 0))
         ) {
-          this.lastSelected.region = "";
-          this.lastSelected.group = "";
-          this.lastSelected.isSearch = true;
+          this.lastSelected = {
+            region: "",
+            group: "",
+            isSearch: true,
+          }
           this.objectSelected([], true);
           return false;
         } else {
-          this.lastSelected.region = "";
-          this.lastSelected.group = text;
-          this.lastSelected.isSearch = true;
+          this.lastSelected = {
+            region: "",
+            group: text,
+            isSearch: true,
+          }
           const result = this.$_searchIndex.searchAndProcessResult(text);
           const zincObjects = result.zincObjects;
           if (zincObjects.length > 0) {
@@ -2601,6 +2581,7 @@ export default {
         colour: this.colourRadio,
         outlines: this.outlinesRadio,
         viewingMode: this.viewingMode,
+        usageConfig: this.usageConfig,
       };
       if (this.$refs.scaffoldTreeControls)
         state.visibility = this.$refs.scaffoldTreeControls.getState();
@@ -2722,6 +2703,7 @@ export default {
      */
     setURLAndState: function (newValue, state) {
       if (newValue != this._currentURL) {
+        const options = {};
         if (state?.format) this.fileFormat = state.format;
         this._currentURL = newValue;
         if (this.$refs.scaffoldTreeControls) this.$refs.scaffoldTreeControls.clear();
@@ -2750,13 +2732,17 @@ export default {
         if (this.fileFormat === "gltf") {
           this.$module.loadGLTFFromURL(newValue, "scene", true);
         } else {
+          if (this?.usageConfig?.tubeLines || state?.usageConfig?.tubeLines){
+            options.tubeLines = true;
+          }
           this.$module.loadOrgansFromURL(
             newValue,
             undefined,
             undefined,
             "scene",
             undefined,
-            true
+            true,
+            options
           );
         }
         if (this.$module && this.$module.scene) {

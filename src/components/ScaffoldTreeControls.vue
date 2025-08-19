@@ -14,6 +14,7 @@
         @changeActive="changeActiveByNode"
         @changeHover="changeHoverByNode"
         ref="treeControls"
+        @mouseleave="removeHover(true)"
       />
     </div>
     <div
@@ -367,6 +368,19 @@ export default {
         }
       }
       return "#FFFFFF";
+    },
+    getNodeDataByRegionAndGroup: function (regin, group) {
+      for (const treeRegion of this.treeDataEntry) {
+        if (treeRegion.isRegion && treeRegion.label === regin) {
+          const treeGroups = treeRegion.children;
+          for (const treeGroup of treeGroups) {
+            if (treeGroup.isPrimitives && treeGroup.label === group) {
+              return treeGroup;
+            }
+          }
+        }
+      }
+      return undefined;
     },
     getZincObjectsFromNode: function (node, transverse) {
       const rootRegion = this.module.scene.getRootRegion();
