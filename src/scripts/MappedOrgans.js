@@ -37,6 +37,14 @@ const organsWithAnatomicalIds = [
   },
 ];
 
-export {
-  organsWithAnatomicalIds
-}
+const getOrganMaps = () => {
+    const curatedMap = {};
+    organsWithAnatomicalIds.forEach((item) => {
+        const label = item.label.toLowerCase();
+        if (!(label in curatedMap))
+            curatedMap[label.toLowerCase()] = item["anatomicalId"];
+    });
+    return curatedMap;
+};
+
+export { getOrganMaps };

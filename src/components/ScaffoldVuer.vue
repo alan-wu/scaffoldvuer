@@ -460,8 +460,9 @@ import { SearchIndex } from "../scripts/Search.js";
 import { mapState, mapStores } from 'pinia';
 import { useMainStore } from "@/store/index";
 import { getNerveMaps } from "../scripts/MappedNerves.js";
-import { organsWithAnatomicalIds } from '../scripts/MappedOrgans.js';
+import { getOrganMaps } from '../scripts/MappedOrgans.js';
 const nervesMap = getNerveMaps();
+const organsMap = getOrganMaps();
 let totalNerves = 0, foundNerves = 0;
 
 const haveSameElements = (arr1, arr2) => {
@@ -1120,6 +1121,10 @@ export default {
       if (this.timeVarying === false && zincObject.isTimeVarying()) {
         this.timeVarying = true;
       }
+      const groupName = zincObject.groupName.toLowerCase();
+      if (groupName in organsMap) {
+        zincObject.setAnatomicalId(organsMap[groupName]);
+      }
       //Temporary way to mark an object as nerves
       const regions = this.isNerves?.regions;
       if (regions) {
@@ -1129,17 +1134,14 @@ export default {
             zincObject.userData.isNerves = true;
             zincObject.userData.defaultColour = `#${zincObject.getColourHex()}`;
             zincObject.userData.isGreyScale = false;
-            const groupName = zincObject.groupName.toLowerCase();
             if (groupName in nervesMap) {
               foundNerves++;
               zincObject.setAnatomicalId(nervesMap[groupName]);
-              //console.log(groupName, zincObject.anatomicalId, zincObject.uuid)
             }
           } else {
             zincObject.userData.isNerves = false;
           }
         }
-
       }
       /**
        * Emit when a new object is added to the scene
@@ -1748,20 +1750,6 @@ export default {
               }
             }
 
-            // Add anatomicalId
-            event.identifiers.forEach((identifier) => {
-              if (identifier && identifier.data) {
-                const { isNerves, id } = identifier.data;
-                const hasAnatomicalId = identifier.data.hasOwnProperty('anatomicalId');
-                if (isNerves === false && hasAnatomicalId) {
-                  const foundOrgan = organsWithAnatomicalIds.find((organ) => organ.label === id);
-                  if (foundOrgan) {
-                    identifier.data.anatomicalId = foundOrgan.anatomicalId;
-                  }
-                }
-              }
-            });
-
             //Store the following for state saving. Search will handle the case with more than 1
             //identifiers.
             if (event.identifiers.length === 1) {
@@ -2211,7 +2199,7 @@ export default {
      * Optional, can be used to update the view mode.
      */
     changeViewingMode: function (modeName) {
-      let nonNervesIsPickable = true;
+      let objectIsPickable = true;
       if (this.$module) {
         if (modeName) {
           this.viewingMode = modeName;
@@ -2237,7 +2225,7 @@ export default {
           this.createData.shape = "";
         } else if (this.viewingMode === "Neuron Connection") {
           // enable to make organs and nerves clickable and searchable for neuron connection mode
-          // nonNervesIsPickable = false;
+          objectIsPickable = false;
         }
         if ((this.viewingMode === "Exploration") ||
           (this.viewingMode === "Neuron Connection") ||
@@ -2249,7 +2237,7 @@ export default {
         }
         this.cancelCreate();
         if (modeName) {
-          this.setOnlyGraphicsWithAnatomicalIDIsPickable(nonNervesIsPickable);
+          this.setObjectIsPickable(objectIsPickable);
         }
       }
     },
@@ -2276,13 +2264,15 @@ export default {
       this.tData.region = undefined;
     },
     /**
-     * Currently will only apply to non-nerve object
+     * Currently will apply to non-nerve object and object without anatomical id
      * @param flag boolean to control whether objects pickable
      */
-    setOnlyGraphicsWithAnatomicalIDIsPickable: function (flag) {
+    setObjectIsPickable: function (flag) {
       const objects = this.$module.scene.getRootRegion().getAllObjects(true);
       objects.forEach((zincObject) => {
-        if (!zincObject.userData.isNerves) zincObject.setIsPickable(flag);
+        if (!zincObject.userData?.isNerves && !zincObject.anatomicalId) {
+          zincObject.setIsPickable(flag);
+        }
       });
     },
     /**
