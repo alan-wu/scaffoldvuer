@@ -460,7 +460,9 @@ import { SearchIndex } from "../scripts/Search.js";
 import { mapState, mapStores } from 'pinia';
 import { useMainStore } from "@/store/index";
 import { getNerveMaps } from "../scripts/MappedNerves.js";
+import { getOrganMaps } from '../scripts/MappedOrgans.js';
 const nervesMap = getNerveMaps();
+const organsMap = getOrganMaps();
 let totalNerves = 0, foundNerves = 0;
 
 const haveSameElements = (arr1, arr2) => {
@@ -1063,7 +1065,7 @@ export default {
     },
     */
     /**
-     * 
+     *
      * @param nerves array of nerve names, show all nerves if empty
      * @param processed boolean, whether unselect all checkboxes
      */
@@ -1119,6 +1121,10 @@ export default {
       if (this.timeVarying === false && zincObject.isTimeVarying()) {
         this.timeVarying = true;
       }
+      const groupName = zincObject.groupName.toLowerCase();
+      if (groupName in organsMap) {
+        zincObject.setAnatomicalId(organsMap[groupName]);
+      }
       //Temporary way to mark an object as nerves
       const regions = this.isNerves?.regions;
       if (regions) {
@@ -1128,17 +1134,14 @@ export default {
             zincObject.userData.isNerves = true;
             zincObject.userData.defaultColour = `#${zincObject.getColourHex()}`;
             zincObject.userData.isGreyScale = false;
-            const groupName = zincObject.groupName.toLowerCase();
             if (groupName in nervesMap) {
               foundNerves++;
               zincObject.setAnatomicalId(nervesMap[groupName]);
-              //console.log(groupName, zincObject.anatomicalId, zincObject.uuid)
             }
           } else {
             zincObject.userData.isNerves = false;
           }
         }
-
       }
       /**
        * Emit when a new object is added to the scene
@@ -1746,6 +1749,7 @@ export default {
                 this.$refs.scaffoldTreeControls.removeActive(false);
               }
             }
+
             //Store the following for state saving. Search will handle the case with more than 1
             //identifiers.
             if (event.identifiers.length === 1) {
@@ -2195,7 +2199,7 @@ export default {
      * Optional, can be used to update the view mode.
      */
     changeViewingMode: function (modeName) {
-      let nonNervesIsPickable = true;
+      let objectIsPickable = true;
       if (this.$module) {
         if (modeName) {
           this.viewingMode = modeName;
@@ -2220,7 +2224,8 @@ export default {
           this.activeDrawMode = undefined;
           this.createData.shape = "";
         } else if (this.viewingMode === "Neuron Connection") {
-          nonNervesIsPickable = false;
+          // enable to make organs and nerves clickable and searchable for neuron connection mode
+          objectIsPickable = false;
         }
         if ((this.viewingMode === "Exploration") ||
           (this.viewingMode === "Neuron Connection") ||
@@ -2232,7 +2237,7 @@ export default {
         }
         this.cancelCreate();
         if (modeName) {
-          this.setNonNervesIsPickable(nonNervesIsPickable);
+          this.setObjectIsPickable(objectIsPickable);
         }
       }
     },
@@ -2259,13 +2264,15 @@ export default {
       this.tData.region = undefined;
     },
     /**
-     * Currently will only apply to non-nerve object
+     * Currently will apply to non-nerve object and object without anatomical id
      * @param flag boolean to control whether objects pickable
      */
-    setNonNervesIsPickable: function (flag) {
+    setObjectIsPickable: function (flag) {
       const objects = this.$module.scene.getRootRegion().getAllObjects(true);
       objects.forEach((zincObject) => {
-        if (!zincObject.userData.isNerves) zincObject.setIsPickable(flag);
+        if (!zincObject.userData?.isNerves && !zincObject.anatomicalId) {
+          zincObject.setIsPickable(flag);
+        }
       });
     },
     /**
@@ -2299,7 +2306,7 @@ export default {
      */
     setColour: function (flag, forced = false) {
       if (this.isReady && this.$module.scene &&
-        typeof flag === "boolean" && 
+        typeof flag === "boolean" &&
         (forced || flag !== this.colourRadio)) {
         this.loading = true;
         //This can take sometime to finish , nextTick does not bring out
@@ -2310,7 +2317,7 @@ export default {
           this.colourRadio = flag;
         }, 100);
       }
-    }, 
+    },
     /**
      * @public
      * Function to toggle lines graphics.
@@ -2319,7 +2326,7 @@ export default {
      */
      setOutlines: function (flag, forced = false) {
       if (this.isReady && this.$module.scene &&
-        typeof flag === "boolean" && 
+        typeof flag === "boolean" &&
         (forced || flag !== this.outlinesRadio)) {
         this.outlinesRadio = flag;
         this.$nextTick(() => this.$refs.scaffoldTreeControls.setOutlines(flag));
@@ -2495,7 +2502,7 @@ export default {
         if (options.offlineAnnotations) {
           sessionStorage.setItem('anonymous-annotation', options.offlineAnnotations);
         }
-        if ("outlines" in options) { 
+        if ("outlines" in options) {
           this.setOutlines(options.outlines);
         }
         if (options.viewingMode) {
