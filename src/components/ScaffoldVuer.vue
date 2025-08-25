@@ -463,7 +463,7 @@ import { getNerveMaps } from "../scripts/MappedNerves.js";
 import { getOrganMaps } from '../scripts/MappedOrgans.js';
 const nervesMap = getNerveMaps();
 const organsMap = getOrganMaps();
-let totalNerves = 0, foundNerves = 0;
+let foundNerves = 0;
 
 const haveSameElements = (arr1, arr2) => {
   if (arr1.length !== arr2.length) return false;
@@ -1124,6 +1124,16 @@ export default {
       const groupName = zincObject.groupName.toLowerCase();
       if (groupName in organsMap) {
         zincObject.setAnatomicalId(organsMap[groupName]);
+      }
+      const morph = zincObject.getGroup();
+      if (morph && morph.position) {
+        zincObject.userData.originalPos = [
+          morph.position.x,
+          morph.position.y,
+          morph.position.z
+        ];
+      } else {
+        zincObject.userData.originalPos = [0, 0, 0];
       }
       //Temporary way to mark an object as nerves
       const regions = this.isNerves?.regions;
@@ -2548,7 +2558,7 @@ export default {
         //this.$module.scene.createAxisDisplay(false);
         //this.$module.scene.enableAxisDisplay(true, true);
         this.isReady = true;
-        //console.log(`Total ${totalNerves}, found ${foundNerves}`);
+        //console.log(`found ${foundNerves}`);
         this.$nextTick(() => {
           this.restoreSettings(options);
           this.$emit("on-ready");
