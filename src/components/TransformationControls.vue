@@ -171,6 +171,7 @@ export default {
       if (object.isZincObject) {
         this.zincObject = markRaw(object);
         const morph = this.zincObject.getGroup();
+        const originalPos = this.zincObject.userData.originalPos;
         if (morph && morph.position) {
           this.x = morph.position.x;
           this.y = morph.position.y;
@@ -181,6 +182,18 @@ export default {
             this.scale = morph.scale.x;
           }
           this.enableScaling = this.zincObject.isTextureSlides ? false : true;
+          if (originalPos && this.boundingDims) {
+            this.min = [
+              originalPos[0] - this.boundingDims.size[0],
+              originalPos[1] - this.boundingDims.size[1],
+              originalPos[2] - this.boundingDims.size[2]
+            ];
+            this.max = [
+              originalPos[0] + this.boundingDims.size[0],
+              originalPos[1] + this.boundingDims.size[1],
+              originalPos[2] + this.boundingDims.size[2]
+            ];
+          }
         }
       } else {
         this.zincObject = undefined;
@@ -191,7 +204,9 @@ export default {
       }
     },
     modifyPosition: function() {
-      this.zincObject.setPosition(this.x, this.y, this.z);
+      if (this.zincObject) {
+        this.zincObject.setPosition(this.x, this.y, this.z);
+      }
     },
     modifyScale: function() {
       this.zincObject.setScaleAll(this.scale);
