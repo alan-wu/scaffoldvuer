@@ -689,8 +689,10 @@ export default {
      */
     isNerves: {
       type: Object,
-      default: {
-        regions: ["nerves"]
+      default: function () {
+        return {
+          regions: ["nerves"]
+        };
       },
     },
     /**
@@ -776,9 +778,11 @@ export default {
      */
     usageConfig: {
       type: Object,
-      default: {
-        showTubeLinesControls: true,
-        tubeLines: false,
+      default: function () {
+        return {
+          showTubeLinesControls: true,
+          tubeLines: false,
+        };
       },
     },
   },
