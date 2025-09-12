@@ -2,6 +2,13 @@
   <div
     ref="overlay"
   >
+    <div class="content-layer" ref="contentLayer"
+      @mouseleave.capture="skipWhenInBound"
+      @mousedown.capture="(event) => contentMouseActive(event, true)"
+      @mouseup.capture="(event) => contentMouseActive(event, false)"
+    >
+      <slot />
+    </div>
     <div v-if="positionalRotation" ref="topLayer"
       @mousemove.capture="forwardEvent"
       @mouseover.capture="forwardEvent"
@@ -32,13 +39,7 @@
         <span>Click and drag here to rotate horizontally</span>
       </div>
     </div>
-    <div class="content-layer" ref="contentLayer"
-      @mouseleave.capture="skipWhenInBound"
-      @mousedown.capture="(event) => contentMouseActive(event, true)"
-      @mouseup.capture="(event) => contentMouseActive(event, false)"
-    >
-      <slot />
-    </div>
+
   </div>
 </template>
 
@@ -113,7 +114,6 @@ export default {
       topLayer.style.pointerEvents = 'none';
       const elementBelow = document.elementFromPoint(event.clientX, event.clientY);
       //const elementBelow = this.$el;
-      topLayer.style.pointerEvents = 'auto';
       topLayer.style.pointerEvents = pointerEvents;
       //const elementBelow = this.$refs.contentLayer;
       // Hide the top layer from pointer events
@@ -132,10 +132,10 @@ export default {
             button: event.button,
           }
         );
-
         elementBelow.dispatchEvent(newEvent);
+        event.stopPropagation();
       }
-      event.stopPropagation();
+
       event.preventDefault();
     }
   }
@@ -144,7 +144,7 @@ export default {
 
 <style scoped lang="scss">
 .rotation-overlay {
-  z-index: 2;
+  z-index: 1;
   background-color: transparent;
   position:absolute;
   opacity: 0;

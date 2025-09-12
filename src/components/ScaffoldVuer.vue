@@ -35,6 +35,7 @@
     <div v-show="displayUI && !isTransitioning">
       <DrawToolbar
         v-if="viewingMode === 'Annotation' && (authorisedUser || offlineAnnotationEnabled)"
+        class="control-layer"
         :toolbarOptions="toolbarOptions"
         :activeDrawTool="activeDrawTool"
         :activeDrawMode="activeDrawMode"
@@ -57,7 +58,7 @@
         <template #reference>
           <div
             v-if="displayWarning"
-            class="message-icon warning-icon"
+            class="message-icon warning-icon control-layer"
             @mouseover="showHelpText(7)"
             @mouseout="hideHelpText(7)"
           >
@@ -79,7 +80,7 @@
         <template #reference>
           <div
             v-if="displayLatestChanges && latestChangesMessage"
-            class="el-icon-warning message-icon latest-changesicon"
+            class="el-icon-warning message-icon latest-changesicon control-layer"
             @mouseover="showHelpText(8)"
             @mouseout="hideHelpText(8)"
           >
@@ -100,6 +101,7 @@
       >
         <template #reference>
           <ScaffoldTreeControls
+            class="control-layer"
             ref="scaffoldTreeControls"
             :isReady="isReady"
             :show-colour-picker="enableColourPicker"
@@ -111,6 +113,7 @@
       </el-popover>
       <div class="primitive-controls-box">
         <primitive-controls
+          class="control-layer"
           ref="primitiveControls"
           :createData="createData"
           :viewingMode="viewingMode"
@@ -132,7 +135,7 @@
         <template #reference>
           <div
             v-if="timeVarying"
-            class="time-slider-container"
+            class="time-slider-container control-layer"
             :class="[minimisedSlider ? 'minimised' : '', sliderPosition]"
           >
             <el-tabs type="card">
@@ -201,7 +204,7 @@
           </div>
         </template>
       </el-popover>
-      <div class="bottom-right-control">
+      <div class="bottom-right-control control-layer">
         <el-popover
           :visible="hoverVisibilities[0].value"
           content="Zoom in"
@@ -298,7 +301,7 @@
         popper-class="background-popper non-selectable h-auto"
         virtual-triggering
       >
-        <div>
+        <div class="control-layer">
           <el-row class="backgroundText">Viewing Mode</el-row>
           <el-row class="backgroundControl">
             <div style="margin-bottom: 2px;">
@@ -362,7 +365,7 @@
         </div>
       </el-popover>
       <div
-        class="settings-group"
+        class="settings-group control-layer"
         :class="{ open: drawerOpen, close: !drawerOpen }"
       >
         <el-row v-if="showOpenMapButton">
@@ -2909,6 +2912,10 @@ export default {
     outline: none !important;
     border: 0px;
   }
+}
+
+.control-layer {
+  z-index: 2;
 }
 
 .time-slider-container {

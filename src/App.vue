@@ -5,7 +5,7 @@
       <ScaffoldVuer
         v-if="url"
         ref="scaffold"
-        class="vuer"
+        class="demo-vuer"
         :flatmapAPI="flatmapAPI"
         :display-u-i="displayUI"
         :url="url"
@@ -49,10 +49,8 @@
       @show-next="onHelpModeShowNext"
       @finish-help-mode="onFinishHelpMode"
     />
-
     <el-popover popper-class="options-container" placement="bottom" trigger="click" width="500" :teleported="false">
       <div>
-
         <el-row :gutter="20">
           <el-col>
             <p>{{ selectedCoordinates }}</p>
@@ -302,12 +300,12 @@
         </Suspense>
       </template>
       <template #reference>
-        <el-button class="models-button" :icon="ElIconFolderOpened">
+        <el-button class="models-button control-layer" :icon="ElIconFolderOpened">
           Models
         </el-button>
       </template>
     </el-popover>
-    <el-autocomplete v-model="searchText" class="search-box" placeholder="Search" :fetch-suggestions="fetchSuggestions"
+    <el-autocomplete v-model="searchText" class="search-box control-layer" placeholder="Search" :fetch-suggestions="fetchSuggestions"
       :teleported="false" popper-class="autocomplete-popper" @keyup.enter="search(searchText)"
       @select="search(searchText)">
       <template #default="{ item }">
@@ -404,7 +402,7 @@ export default {
       tumbleDirection: [1.0, 0.0],
       showColourPicker: true,
       markerCluster: false,
-      positionalRotation: false,
+      positionalRotation: true,
       minimapSettings: {
         x_offset: 16,
         y_offset: 50,
@@ -864,7 +862,7 @@ body {
   }
 }
 
-.vuer {
+.demo-vuer {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -922,6 +920,10 @@ body {
 
 svg.map-icon {
   color: $app-primary-color;
+}
+
+.control-layer {
+  z-index: 2;
 }
 
 input[type="file"] {
