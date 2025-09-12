@@ -1,10 +1,12 @@
 <template>
-  <div
+  <scaffold-overlay
     ref="scaffoldContainer"
     v-loading="loading"
     class="scaffold-container"
     element-loading-text="Loading..."
     element-loading-background="rgba(0, 0, 0, 0.3)"
+    :positionalRotation="positionalRotation"
+    @onRotationModeChange="setRotationMode"
   >
     <map-svg-sprite-color />
     <scaffold-tooltip
@@ -410,7 +412,7 @@
         </el-row>
       </div>
     </div>
-  </div>
+  </scaffold-overlay>
 </template>
 
 <script>
@@ -422,6 +424,7 @@ import {
   ArrowLeft as ElIconArrowLeft,
 } from '@element-plus/icons-vue'
 import PrimitiveControls from "./PrimitiveControls.vue";
+import ScaffoldOverlay from "./ScaffoldOverlay.vue";
 import ScaffoldTooltip from "./ScaffoldTooltip.vue";
 import ScaffoldTreeControls from "./ScaffoldTreeControls.vue";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
@@ -489,6 +492,7 @@ export default {
     Radio,
     RadioGroup,
     Row,
+    ScaffoldOverlay,
     Select,
     Slider,
     TabPane,
@@ -681,6 +685,14 @@ export default {
      * should be shown or not.
      */
     enableOpenMapUI: {
+      type: Boolean,
+      default: false,
+    },
+    /**
+     * Experimental feature to restrict rotation at
+     * one-axis based on position of the initial click
+     */
+    positionalRotation: {
       type: Boolean,
       default: false,
     },
@@ -1027,7 +1039,7 @@ export default {
     this.$module.initialiseRenderer(this.$refs.display);
     this.toggleRendering(this.render);
     this.ro = new ResizeObserver(this.adjustLayout).observe(
-      this.$refs.scaffoldContainer
+      this.$refs.scaffoldContainer.$el
     );
     this.helpTextWait = [];
     this.helpTextWait.length = this.hoverVisibilities.length;
@@ -1567,6 +1579,13 @@ export default {
         }
       }
     },
+    setRotationMode: function(mode) {
+      if (this.$module.scene) {
+        console.log("here", mode)
+        const cameracontrol = this.$module.scene.getZincCameraControls();
+        cameracontrol.setRotationMode(mode);
+      }
+    },
     updateViewURL: function (viewURL) {
       if (viewURL) {
         if (this.isReady) {
@@ -1819,7 +1838,7 @@ export default {
           if (event.identifiers.length > 0 && event.identifiers[0]) {
             if (event.identifiers[0].coords) {
               const offsets =
-                this.$refs.scaffoldContainer.getBoundingClientRect();
+                this.$refs.scaffoldContainer.$el.getBoundingClientRect();
               this.tData.x = event.identifiers[0].coords.x - offsets.left;
               this.tData.y = event.identifiers[0].coords.y - offsets.top;
             }
@@ -2778,8 +2797,8 @@ export default {
      * Callback using ResizeObserver.
      */
     adjustLayout: function () {
-      if (this.$refs.scaffoldContainer) {
-        let width = this.$refs.scaffoldContainer.clientWidth;
+      if (this.$refs.scaffoldContainer?.$el) {
+        let width = this.$refs.scaffoldContainer.$el.clientWidth;
         this.minimisedSlider = width < 812;
         if (this.minimisedSlider) {
           this.sliderPosition = this.drawerOpen ? "right" : "left";

@@ -22,6 +22,7 @@
         :marker-cluster="markerCluster"
         :minimap-settings="minimapSettings"
         :show-colour-picker="showColourPicker"
+        :positionalRotation="positionalRotation"
         :render="render"
         :region="region"
         :view-u-r-l="viewURL"
@@ -191,18 +192,7 @@
           <el-col>
             <el-row :gutter="20" justify="center" align="middle">
               <el-col>
-                <el-switch v-model="syncMode" active-text="Sync Mode" active-color="#8300bf" />
-              </el-col>
-            </el-row>
-            <el-row :gutter="20" justify="center" align="middle" v-if="syncMode">
-              <el-col :span="8">
-                <el-input-number v-model="zoom" :min="1.0" :controls="false" placeholder="Please input" aria-label="zoom" />
-              </el-col>
-              <el-col :span="8">
-                <el-input-number v-model="pos[0]" :min="-1.0" :max="1.0" :controls="false" placeholder="Please input" aria-label="x" />
-              </el-col>
-              <el-col :span="8">
-                <el-input-number v-model="pos[1]" :min="-1.0" :max="1.0" :controls="false" aria-label="y" />
+                <el-switch v-model="positionalRotation" active-text="Rotation Helper" active-color="#8300bf" />
               </el-col>
             </el-row>
           </el-col>
@@ -408,13 +398,13 @@ export default {
       displayMarkers: false,
       onClickMarkers: false,
       wireframe: false,
-      syncMode: false,
       currentTime: 0,
       displayMinimap: false,
       tumbleOn: false,
       tumbleDirection: [1.0, 0.0],
       showColourPicker: true,
       markerCluster: false,
+      positionalRotation: false,
       minimapSettings: {
         x_offset: 16,
         y_offset: 50,
@@ -428,8 +418,6 @@ export default {
       viewURL: "",
       renderInfoOn: false,
       rendererInfo: undefined,
-      zoom: 1,
-      pos: [0, 0],
       format: "metadata",
       sceneSettings: [],
       searchInput: "",
@@ -487,9 +475,6 @@ export default {
       handler: "parseQuery",
       deep: true,
       immediate: true,
-    },
-    syncMode: function (val) {
-      this.$refs.scaffold.toggleSyncControl(val);
     },
     helpMode: function (newVal) {
       if (!newVal) {
