@@ -23,7 +23,7 @@
         @touchstart="(event) => {setRotationMode(event, 'vertical'); forwardTouchEvent(event)}"
         @touchend="forwardTouchEvent"
       >
-        <span>Click and drag here to rotate vertically</span>
+        <span>Click and drag here to rotate on the x-axis</span>
       </div>
       <div class="rotation-overlay bottom"
         @mousedown="(event) => {setRotationMode(event, 'vertical'); forwardEvent(event)}"
@@ -31,7 +31,7 @@
         @touchstart="(event) => {setRotationMode(event, 'vertical'); forwardTouchEvent(event)}"
         @touchend="forwardTouchEvent"
       >
-        <span>Click and drag here to rotate vertically</span>
+        <span>Click and drag here to rotate on the x-axis</span>
       </div>
       <div class="rotation-overlay left"
         @mousedown="(event) => {setRotationMode(event, 'horizontal'); forwardEvent(event)}"
@@ -39,7 +39,7 @@
         @touchstart="(event) => {setRotationMode(event, 'horizontal'); forwardTouchEvent(event)}"
         @touchend="forwardTouchEvent"
       >
-        <span>Click and drag here to rotate horizontally</span>
+        <span>Click and drag here to rotate on the y-axis</span>
       </div>
       <div class="rotation-overlay right"
         @mousedown="(event) => {setRotationMode(event, 'horizontal'); forwardEvent(event)}"
@@ -47,7 +47,7 @@
         @touchstart="(event) => {setRotationMode(event, 'horizontal'); forwardTouchEvent(event)}"
         @touchend="forwardTouchEvent"
       >
-        <span>Click and drag here to rotate horizontally</span>
+        <span>Click and drag here to rotate on the y-axis</span>
       </div>
     </div>
 
