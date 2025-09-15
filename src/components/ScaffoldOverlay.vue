@@ -6,35 +6,46 @@
       @mouseleave.capture="skipWhenInBound"
       @mousedown.capture="(event) => contentMouseActive(event, true)"
       @mouseup.capture="(event) => contentMouseActive(event, false)"
+      @touchstart.capture="(event) => contentMouseActive(event, true)"
+      @touchend.capture="(event) => contentMouseActive(event, false)"
     >
       <slot />
     </div>
     <div v-if="positionalRotation" ref="topLayer"
       @mousemove.capture="forwardEvent"
       @mouseover.capture="forwardEvent"
+      @touchmove.capture="forwardTouchEvent"
       @click.capture="forwardEvent"
     >
       <div class="rotation-overlay top"
         @mousedown="(event) => {setRotationMode(event, 'vertical'); forwardEvent(event)}"
         @mouseup="forwardEvent"
+        @touchstart="(event) => {setRotationMode(event, 'vertical'); forwardTouchEvent(event)}"
+        @touchend="forwardTouchEvent"
       >
         <span>Click and drag here to rotate vertically</span>
       </div>
       <div class="rotation-overlay bottom"
         @mousedown="(event) => {setRotationMode(event, 'vertical'); forwardEvent(event)}"
         @mouseup="forwardEvent"
+        @touchstart="(event) => {setRotationMode(event, 'vertical'); forwardTouchEvent(event)}"
+        @touchend="forwardTouchEvent"
       >
         <span>Click and drag here to rotate vertically</span>
       </div>
       <div class="rotation-overlay left"
         @mousedown="(event) => {setRotationMode(event, 'horizontal'); forwardEvent(event)}"
         @mouseup="forwardEvent"
+        @touchstart="(event) => {setRotationMode(event, 'horizontal'); forwardTouchEvent(event)}"
+        @touchend="forwardTouchEvent"
       >
         <span>Click and drag here to rotate horizontally</span>
       </div>
       <div class="rotation-overlay right"
         @mousedown="(event) => {setRotationMode(event, 'horizontal'); forwardEvent(event)}"
         @mouseup="forwardEvent"
+        @touchstart="(event) => {setRotationMode(event, 'horizontal'); forwardTouchEvent(event)}"
+        @touchend="forwardTouchEvent"
       >
         <span>Click and drag here to rotate horizontally</span>
       </div>
@@ -67,7 +78,6 @@ export default {
     contentMouseActive: function(event, flag) {
       if (this.positionalRotation) {
         const topLayer = this.$refs.topLayer;
-        
         if (topLayer) {
           if (!flag) {
             this.lockRotationMode = false;
@@ -80,7 +90,7 @@ export default {
           }
         }
       }
-      event.preventDefault();
+      //event.preventDefault();
     },
     setRotationMode: function(event, mode) {
       if (!this.lockRotationMode) {
@@ -135,7 +145,49 @@ export default {
         elementBelow.dispatchEvent(newEvent);
         event.stopPropagation();
       }
-
+      event.preventDefault();
+    },
+    forwardTouchEvent: function(event) {
+      const topLayer = this.$refs.topLayer;
+      if (!topLayer) return;
+      // Find the element directly underneath the cursor
+      const pointerEvents = topLayer.style.pointerEvents;
+      topLayer.style.pointerEvents = 'none';
+      const firstTouch = event.changedTouches[0];
+      const clientX = firstTouch.clientX;
+      const clientY = firstTouch.clientY;
+      const elementBelow = document.elementFromPoint(clientX, clientY);
+      topLayer.style.pointerEvents = pointerEvents;
+      if (elementBelow) {
+        const newTouch = new Touch({
+          identifier: firstTouch.identifier,
+          target: elementBelow,
+          clientX: firstTouch.clientX,
+          clientY: firstTouch.clientY,
+          pageX: firstTouch.pageX,
+          pageY: firstTouch.pageY,
+          screenX: firstTouch.screenX,
+          screenY: firstTouch.screenY,
+          radiusX: firstTouch.radiusX,
+          radiusY: firstTouch.radiusY,
+          rotationAngle: firstTouch.rotationAngle,
+          force: firstTouch.force,
+        });
+        const newEvent = new TouchEvent(
+          event.type,
+          {
+            bubbles: event.bubbles,
+            cancelable: event.cancelable,
+            composed: true,
+            view: event.view,
+            touches: [newTouch],
+            targetTouches: [newTouch],
+            changedTouches: [newTouch],
+          }
+        );
+        elementBelow.dispatchEvent(newEvent);
+        event.stopPropagation();
+      }
       event.preventDefault();
     }
   }
