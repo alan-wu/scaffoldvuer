@@ -2,7 +2,8 @@
   <div
     ref="overlay"
   >
-    <div class="content-layer" ref="contentLayer"
+    <div
+      class="content-layer" ref="contentLayer"
       @mouseleave.capture="skipWhenInBound"
       @mousedown.capture="(event) => contentMouseActive(event, true)"
       @mouseup.capture="(event) => contentMouseActive(event, false)"
@@ -17,37 +18,41 @@
       @touchmove.capture="forwardTouchEvent"
       @click.capture="forwardEvent"
     >
-      <div class="rotation-overlay top"
+      <div
+        :class="['rotation-overlay', 'top', touchActive ? 'touch-active' : '']"
         @mousedown="(event) => {setRotationMode(event, 'vertical'); forwardEvent(event)}"
         @mouseup="forwardEvent"
         @touchstart="(event) => {setRotationMode(event, 'vertical'); forwardTouchEvent(event)}"
         @touchend="forwardTouchEvent"
       >
-        <span>Click and drag here to rotate on the x-axis</span>
+        <span>Begin interaction here to rotate on the x-axis</span>
       </div>
-      <div class="rotation-overlay bottom"
+      <div
+        :class="['rotation-overlay', 'bottom', touchActive ? 'touch-active' : '']"
         @mousedown="(event) => {setRotationMode(event, 'vertical'); forwardEvent(event)}"
         @mouseup="forwardEvent"
         @touchstart="(event) => {setRotationMode(event, 'vertical'); forwardTouchEvent(event)}"
         @touchend="forwardTouchEvent"
       >
-        <span>Click and drag here to rotate on the x-axis</span>
+        <span>Begin interaction here to rotate on the x-axis</span>
       </div>
-      <div class="rotation-overlay left"
+      <div
+        :class="['rotation-overlay', 'left', touchActive ? 'touch-active' : '']"
         @mousedown="(event) => {setRotationMode(event, 'horizontal'); forwardEvent(event)}"
         @mouseup="forwardEvent"
         @touchstart="(event) => {setRotationMode(event, 'horizontal'); forwardTouchEvent(event)}"
         @touchend="forwardTouchEvent"
       >
-        <span>Click and drag here to rotate on the y-axis</span>
+        <span>Begin interaction here to rotate on the y-axis</span>
       </div>
-      <div class="rotation-overlay right"
+      <div
+        :class="['rotation-overlay', 'right', touchActive ? 'touch-active' : '']"
         @mousedown="(event) => {setRotationMode(event, 'horizontal'); forwardEvent(event)}"
         @mouseup="forwardEvent"
         @touchstart="(event) => {setRotationMode(event, 'horizontal'); forwardTouchEvent(event)}"
         @touchend="forwardTouchEvent"
       >
-        <span>Click and drag here to rotate on the y-axis</span>
+        <span>Begin interaction here to rotate on the y-axis</span>
       </div>
     </div>
 
@@ -62,6 +67,7 @@ export default {
   data: function () {
     return {
       lockRotationMode: false,
+      touchActive: false,
     }
   },
   props: {
@@ -83,14 +89,19 @@ export default {
             this.lockRotationMode = false;
             this.setRotationMode(undefined, "free");
             topLayer.style.pointerEvents = 'auto';
+            if (event.type === "touchend") {
+              this.touchActive = false;
+            }
           }
           else {
             this.lockRotationMode = true;
             topLayer.style.pointerEvents = 'none';
+            if (event.type === "touchstart") {
+              this.touchActive = true;
+            }
           }
         }
       }
-      //event.preventDefault();
     },
     setRotationMode: function(event, mode) {
       if (!this.lockRotationMode) {
@@ -200,6 +211,10 @@ export default {
   background-color: transparent;
   position:absolute;
   opacity: 0;
+  &.touch-active {
+    opacity: 1;
+    background-color: rgba(173,216,230, 0.1)
+  }
   &:hover {
     opacity: 1;
     background-color: rgba(173,216,230, 0.1)
