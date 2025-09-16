@@ -1584,7 +1584,6 @@ export default {
     },
     setRotationMode: function(mode) {
       if (this.$module.scene) {
-        console.log("here", mode)
         const cameracontrol = this.$module.scene.getZincCameraControls();
         cameracontrol.setRotationMode(mode);
       }
