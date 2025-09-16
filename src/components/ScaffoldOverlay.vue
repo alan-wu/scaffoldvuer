@@ -19,40 +19,15 @@
       @click.capture="forwardEvent"
     >
       <div
-        :class="['rotation-overlay', 'top', touchActive ? 'touch-active' : '']"
-        @mousedown="(event) => {setRotationMode(event, 'vertical'); forwardEvent(event)}"
+        v-for="overlay in rotationOverlays"
+        :key="overlay.position"
+        :class="['rotation-overlay', overlay.position, touchActive ? 'touch-active' : '']"
+        @mousedown="(event) => {setRotationMode(event, overlay.mode); forwardEvent(event)}"
         @mouseup="forwardEvent"
-        @touchstart="(event) => {setRotationMode(event, 'vertical'); forwardTouchEvent(event)}"
+        @touchstart="(event) => {setRotationMode(event, overlay.mode); forwardTouchEvent(event)}"
         @touchend="forwardTouchEvent"
       >
-        <span>Begin interaction here to rotate on the x-axis</span>
-      </div>
-      <div
-        :class="['rotation-overlay', 'bottom', touchActive ? 'touch-active' : '']"
-        @mousedown="(event) => {setRotationMode(event, 'vertical'); forwardEvent(event)}"
-        @mouseup="forwardEvent"
-        @touchstart="(event) => {setRotationMode(event, 'vertical'); forwardTouchEvent(event)}"
-        @touchend="forwardTouchEvent"
-      >
-        <span>Begin interaction here to rotate on the x-axis</span>
-      </div>
-      <div
-        :class="['rotation-overlay', 'left', touchActive ? 'touch-active' : '']"
-        @mousedown="(event) => {setRotationMode(event, 'horizontal'); forwardEvent(event)}"
-        @mouseup="forwardEvent"
-        @touchstart="(event) => {setRotationMode(event, 'horizontal'); forwardTouchEvent(event)}"
-        @touchend="forwardTouchEvent"
-      >
-        <span>Begin interaction here to rotate on the y-axis</span>
-      </div>
-      <div
-        :class="['rotation-overlay', 'right', touchActive ? 'touch-active' : '']"
-        @mousedown="(event) => {setRotationMode(event, 'horizontal'); forwardEvent(event)}"
-        @mouseup="forwardEvent"
-        @touchstart="(event) => {setRotationMode(event, 'horizontal'); forwardTouchEvent(event)}"
-        @touchend="forwardTouchEvent"
-      >
-        <span>Begin interaction here to rotate on the y-axis</span>
+        <span>{{ overlay.text }}</span>
       </div>
     </div>
 
@@ -62,12 +37,20 @@
 <script>
 /* eslint-disable no-alert, no-console */
 
+const rotationOverlays = [
+  { position: 'top', mode: 'vertical', text: 'Begin interaction here to rotate on the x-axis' },
+  { position: 'bottom', mode: 'vertical', text: 'Begin interaction here to rotate on the x-axis' },
+  { position: 'left', mode: 'horizontal', text: 'Begin interaction here to rotate on the y-axis' },
+  { position: 'right', mode: 'horizontal', text: 'Begin interaction here to rotate on the y-axis' },
+];
+
 export default {
   name: "ScaffoldOverlay",
   data: function () {
     return {
       lockRotationMode: false,
       touchActive: false,
+      rotationOverlays: rotationOverlays,
     }
   },
   props: {
