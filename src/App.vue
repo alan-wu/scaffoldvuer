@@ -5,7 +5,7 @@
       <ScaffoldVuer
         v-if="url"
         ref="scaffold"
-        class="vuer"
+        class="demo-vuer"
         :flatmapAPI="flatmapAPI"
         :display-u-i="displayUI"
         :url="url"
@@ -22,6 +22,7 @@
         :marker-cluster="markerCluster"
         :minimap-settings="minimapSettings"
         :show-colour-picker="showColourPicker"
+        :positionalRotation="positionalRotation"
         :render="render"
         :region="region"
         :view-u-r-l="viewURL"
@@ -48,10 +49,8 @@
       @show-next="onHelpModeShowNext"
       @finish-help-mode="onFinishHelpMode"
     />
-
     <el-popover popper-class="options-container" placement="bottom" trigger="click" width="500" :teleported="false">
       <div>
-
         <el-row :gutter="20">
           <el-col>
             <p>{{ selectedCoordinates }}</p>
@@ -191,18 +190,7 @@
           <el-col>
             <el-row :gutter="20" justify="center" align="middle">
               <el-col>
-                <el-switch v-model="syncMode" active-text="Sync Mode" active-color="#8300bf" />
-              </el-col>
-            </el-row>
-            <el-row :gutter="20" justify="center" align="middle" v-if="syncMode">
-              <el-col :span="8">
-                <el-input-number v-model="zoom" :min="1.0" :controls="false" placeholder="Please input" aria-label="zoom" />
-              </el-col>
-              <el-col :span="8">
-                <el-input-number v-model="pos[0]" :min="-1.0" :max="1.0" :controls="false" placeholder="Please input" aria-label="x" />
-              </el-col>
-              <el-col :span="8">
-                <el-input-number v-model="pos[1]" :min="-1.0" :max="1.0" :controls="false" aria-label="y" />
+                <el-switch v-model="positionalRotation" active-text="Rotation Helper" active-color="#8300bf" />
               </el-col>
             </el-row>
           </el-col>
@@ -312,12 +300,12 @@
         </Suspense>
       </template>
       <template #reference>
-        <el-button class="models-button" :icon="ElIconFolderOpened">
+        <el-button class="models-button control-layer" :icon="ElIconFolderOpened">
           Models
         </el-button>
       </template>
     </el-popover>
-    <el-autocomplete v-model="searchText" class="search-box" placeholder="Search" :fetch-suggestions="fetchSuggestions"
+    <el-autocomplete v-model="searchText" class="search-box control-layer" placeholder="Search" :fetch-suggestions="fetchSuggestions"
       :teleported="false" popper-class="autocomplete-popper" @keyup.enter="search(searchText)"
       @select="search(searchText)">
       <template #default="{ item }">
@@ -408,13 +396,13 @@ export default {
       displayMarkers: false,
       onClickMarkers: false,
       wireframe: false,
-      syncMode: false,
       currentTime: 0,
       displayMinimap: false,
       tumbleOn: false,
       tumbleDirection: [1.0, 0.0],
       showColourPicker: true,
       markerCluster: false,
+      positionalRotation: true,
       minimapSettings: {
         x_offset: 16,
         y_offset: 50,
@@ -428,8 +416,6 @@ export default {
       viewURL: "",
       renderInfoOn: false,
       rendererInfo: undefined,
-      zoom: 1,
-      pos: [0, 0],
       format: "metadata",
       sceneSettings: [],
       searchInput: "",
@@ -487,9 +473,6 @@ export default {
       handler: "parseQuery",
       deep: true,
       immediate: true,
-    },
-    syncMode: function (val) {
-      this.$refs.scaffold.toggleSyncControl(val);
     },
     helpMode: function (newVal) {
       if (!newVal) {
@@ -879,7 +862,7 @@ body {
   }
 }
 
-.vuer {
+.demo-vuer {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -937,6 +920,10 @@ body {
 
 svg.map-icon {
   color: $app-primary-color;
+}
+
+.control-layer {
+  z-index: 2;
 }
 
 input[type="file"] {

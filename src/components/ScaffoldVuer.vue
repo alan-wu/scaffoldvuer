@@ -1,10 +1,12 @@
 <template>
-  <div
+  <scaffold-overlay
     ref="scaffoldContainer"
     v-loading="loading"
     class="scaffold-container"
     element-loading-text="Loading..."
     element-loading-background="rgba(0, 0, 0, 0.3)"
+    :positionalRotation="positionalRotation"
+    @onRotationModeChange="setRotationMode"
   >
     <map-svg-sprite-color />
     <scaffold-tooltip
@@ -33,6 +35,7 @@
     <div v-show="displayUI && !isTransitioning">
       <DrawToolbar
         v-if="viewingMode === 'Annotation' && (authorisedUser || offlineAnnotationEnabled)"
+        class="control-layer"
         :toolbarOptions="toolbarOptions"
         :activeDrawTool="activeDrawTool"
         :activeDrawMode="activeDrawMode"
@@ -55,7 +58,7 @@
         <template #reference>
           <div
             v-if="displayWarning"
-            class="message-icon warning-icon"
+            class="message-icon warning-icon control-layer"
             @mouseover="showHelpText(7)"
             @mouseout="hideHelpText(7)"
           >
@@ -77,7 +80,7 @@
         <template #reference>
           <div
             v-if="displayLatestChanges && latestChangesMessage"
-            class="el-icon-warning message-icon latest-changesicon"
+            class="el-icon-warning message-icon latest-changesicon control-layer"
             @mouseover="showHelpText(8)"
             @mouseout="hideHelpText(8)"
           >
@@ -98,6 +101,7 @@
       >
         <template #reference>
           <ScaffoldTreeControls
+            class="control-layer"
             ref="scaffoldTreeControls"
             :isReady="isReady"
             :show-colour-picker="enableColourPicker"
@@ -109,6 +113,7 @@
       </el-popover>
       <div class="primitive-controls-box">
         <primitive-controls
+          class="control-layer"
           ref="primitiveControls"
           :createData="createData"
           :viewingMode="viewingMode"
@@ -130,7 +135,7 @@
         <template #reference>
           <div
             v-if="timeVarying"
-            class="time-slider-container"
+            class="time-slider-container control-layer"
             :class="[minimisedSlider ? 'minimised' : '', sliderPosition]"
           >
             <el-tabs type="card">
@@ -199,7 +204,7 @@
           </div>
         </template>
       </el-popover>
-      <div class="bottom-right-control">
+      <div class="bottom-right-control control-layer">
         <el-popover
           :visible="hoverVisibilities[0].value"
           content="Zoom in"
@@ -296,7 +301,7 @@
         popper-class="background-popper non-selectable h-auto"
         virtual-triggering
       >
-        <div>
+        <div class="control-layer">
           <el-row class="backgroundText">Viewing Mode</el-row>
           <el-row class="backgroundControl">
             <div style="margin-bottom: 2px;">
@@ -360,7 +365,7 @@
         </div>
       </el-popover>
       <div
-        class="settings-group"
+        class="settings-group control-layer"
         :class="{ open: drawerOpen, close: !drawerOpen }"
       >
         <el-row v-if="showOpenMapButton">
@@ -410,7 +415,7 @@
         </el-row>
       </div>
     </div>
-  </div>
+  </scaffold-overlay>
 </template>
 
 <script>
@@ -422,6 +427,7 @@ import {
   ArrowLeft as ElIconArrowLeft,
 } from '@element-plus/icons-vue'
 import PrimitiveControls from "./PrimitiveControls.vue";
+import ScaffoldOverlay from "./ScaffoldOverlay.vue";
 import ScaffoldTooltip from "./ScaffoldTooltip.vue";
 import ScaffoldTreeControls from "./ScaffoldTreeControls.vue";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
@@ -489,6 +495,7 @@ export default {
     Radio,
     RadioGroup,
     Row,
+    ScaffoldOverlay,
     Select,
     Slider,
     TabPane,
@@ -681,6 +688,14 @@ export default {
      * should be shown or not.
      */
     enableOpenMapUI: {
+      type: Boolean,
+      default: false,
+    },
+    /**
+     * Experimental feature to restrict rotation at
+     * one-axis based on position of the initial click
+     */
+    positionalRotation: {
       type: Boolean,
       default: false,
     },
@@ -1027,7 +1042,7 @@ export default {
     this.$module.initialiseRenderer(this.$refs.display);
     this.toggleRendering(this.render);
     this.ro = new ResizeObserver(this.adjustLayout).observe(
-      this.$refs.scaffoldContainer
+      this.$refs.scaffoldContainer.$el
     );
     this.helpTextWait = [];
     this.helpTextWait.length = this.hoverVisibilities.length;
@@ -1567,6 +1582,12 @@ export default {
         }
       }
     },
+    setRotationMode: function(mode) {
+      if (this.$module.scene) {
+        const cameracontrol = this.$module.scene.getZincCameraControls();
+        cameracontrol.setRotationMode(mode);
+      }
+    },
     updateViewURL: function (viewURL) {
       if (viewURL) {
         if (this.isReady) {
@@ -1819,7 +1840,7 @@ export default {
           if (event.identifiers.length > 0 && event.identifiers[0]) {
             if (event.identifiers[0].coords) {
               const offsets =
-                this.$refs.scaffoldContainer.getBoundingClientRect();
+                this.$refs.scaffoldContainer.$el.getBoundingClientRect();
               this.tData.x = event.identifiers[0].coords.x - offsets.left;
               this.tData.y = event.identifiers[0].coords.y - offsets.top;
             }
@@ -2778,8 +2799,8 @@ export default {
      * Callback using ResizeObserver.
      */
     adjustLayout: function () {
-      if (this.$refs.scaffoldContainer) {
-        let width = this.$refs.scaffoldContainer.clientWidth;
+      if (this.$refs.scaffoldContainer?.$el) {
+        let width = this.$refs.scaffoldContainer.$el.clientWidth;
         this.minimisedSlider = width < 812;
         if (this.minimisedSlider) {
           this.sliderPosition = this.drawerOpen ? "right" : "left";
@@ -2890,6 +2911,10 @@ export default {
     outline: none !important;
     border: 0px;
   }
+}
+
+.control-layer {
+  z-index: 2;
 }
 
 .time-slider-container {
