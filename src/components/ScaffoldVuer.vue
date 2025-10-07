@@ -1050,6 +1050,9 @@ export default {
     this.$module.zincRenderer.addPreRenderCallbackFunction(() => {
       this.currentTime = this.$module.getCurrentTime();
     })
+    this.$module.zincRenderer.addContextRestoredCallbackFunction(() => {
+      this.backgroundChangeCallback(this.currentBackground);
+    })
   },
   beforeUnmount: function () {
     if (this.ro) this.ro.disconnect();
@@ -2282,6 +2285,12 @@ export default {
     emitOfflineAnnotationUpdate: function () {
       this.$emit('update-offline-annotation-enabled', this.offlineAnnotationEnabled);
     },
+    forceContextRestore: function() {
+      this.$module.zincRenderer.forceContextRestore();
+    },
+    forceContextLoss: function() {
+      this.$module.zincRenderer.forceContextLoss();
+    },
     /**
      * @public
      * Hide the tooltip
@@ -2812,9 +2821,11 @@ export default {
     toggleRendering: function (flag) {
       if (this.$module.zincRenderer) {
         if (flag) {
+          this.forceContextRestore();
           this.$module.zincRenderer.animate();
         } else {
           this.$module.zincRenderer.stopAnimate();
+          this.forceContextLoss();
         }
       }
     },
