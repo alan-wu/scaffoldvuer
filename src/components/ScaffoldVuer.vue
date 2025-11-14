@@ -1175,6 +1175,14 @@ export default {
           }
         }
       }
+      //Recalculate the following if module is ready
+      if (this.isReady) {
+        const {centre, size} = this.$module.getCentreAndSize();
+        this.boundingDims.centre = centre;
+        this.boundingDims.size = size;
+      }
+
+
       /**
        * Emit when a new object is added to the scene
        * @arg {Object} "The object added to the sceene"

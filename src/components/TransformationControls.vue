@@ -149,24 +149,30 @@ export default {
   watch: {
     boundingDims: {
       handler: function (value) {
-        const centre = value.centre;
-        const size = value.size;
-        this.min = [
-          centre[0] - size[0],
-          centre[1] - size[1],
-          centre[2] - size[2]
-        ];
-        this.max = [
-          centre[0] + size[0],
-          centre[1] + size[1],
-          centre[2] + size[2]
-        ];
+        this.calculateMinAndMax();
       },
       immediate: true,
       deep: true,
     },
   },
   methods: {
+    calculateMinAndMax: function() {
+      if (this.zincObject) {
+        const originalPos = this.zincObject?.userData?.originalPos;
+        if (originalPos && this.boundingDims) {
+          this.min = [
+            originalPos[0] - this.boundingDims.size[0],
+            originalPos[1] - this.boundingDims.size[1],
+            originalPos[2] - this.boundingDims.size[2]
+          ];
+          this.max = [
+            originalPos[0] + this.boundingDims.size[0],
+            originalPos[1] + this.boundingDims.size[1],
+            originalPos[2] + this.boundingDims.size[2]
+          ];
+        }
+      }
+    },
     setObject: function (object) {
       if (object.isZincObject) {
         this.zincObject = markRaw(object);
@@ -182,18 +188,7 @@ export default {
             this.scale = morph.scale.x;
           }
           this.enableScaling = this.zincObject.isTextureSlides ? false : true;
-          if (originalPos && this.boundingDims) {
-            this.min = [
-              originalPos[0] - this.boundingDims.size[0],
-              originalPos[1] - this.boundingDims.size[1],
-              originalPos[2] - this.boundingDims.size[2]
-            ];
-            this.max = [
-              originalPos[0] + this.boundingDims.size[0],
-              originalPos[1] + this.boundingDims.size[1],
-              originalPos[2] + this.boundingDims.size[2]
-            ];
-          }
+          this.calculateMinAndMax();
         }
       } else {
         this.zincObject = undefined;
