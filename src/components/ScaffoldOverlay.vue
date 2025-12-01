@@ -231,6 +231,11 @@ export default {
     color:black;
     opacity:0.5;
     top: 50%;
+    text-shadow:
+      -1px -1px 0 white,
+      1px -1px 0 white,
+      -1px 1px 0 white,
+      1px 1px 0 white; /* White outline */
   }
 }
 
