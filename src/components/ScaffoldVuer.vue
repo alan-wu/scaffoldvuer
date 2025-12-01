@@ -1371,6 +1371,7 @@ export default {
      * Cancel create workflows. Reset all relevant UIs and data.
      */
     cancelCreate: function() {
+      this.changeActiveByName(undefined);
       this.createData.points.length = 0;
       this.createData.toBeConfirmed = false;
       this._editingZincObject = undefined;
@@ -2070,6 +2071,7 @@ export default {
                 this.$module.zincRenderer.removePostRenderCallbackFunction(
                   this.$_regionTooltipCallback
                 );
+                this.$module.$_regionTooltipCallback = undefined;
               }
               this.$_regionTooltipCallback =
                 this.$module.zincRenderer.addPostRenderCallbackFunction(
@@ -2097,6 +2099,7 @@ export default {
               this.$module.zincRenderer.removePostRenderCallbackFunction(
                 this.$_liveCoordinatesUpdated
               );
+              this.$_liveCoordinatesUpdated = undefined;
             }
             if (liveUpdates) {
               this.$module.setupLiveCoordinates(objects);
@@ -2308,6 +2311,7 @@ export default {
         );
         //Unset the tracking
         this.$module.setupLiveCoordinates(undefined);
+        this.$_liveCoordinatesUpdated = undefined;
       }
       this.tData.active = false;
       this.tData.visible = false;
