@@ -1306,7 +1306,17 @@ export default {
         }
         annotation.region = regionPath;
         this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
-        this.offlineAnnotations.push(annotation);
+        const found = this.offlineAnnotations.find((element) => {
+          return element.group === annotation.group &&
+                 element.region === annotation.region &&
+                 element.resource === annotation.resource &&
+                 element.feature.geometry.type === annotation.feature.geometry.type;
+        });
+        if (found) {
+          Object.assign(found, annotation);
+        } else {
+          this.offlineAnnotations.push(annotation);
+        }
         sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
       }
       this.$emit('userPrimitivesUpdated', {region, group, zincObject});
@@ -1609,6 +1619,26 @@ export default {
           this.$module.setFinishDownloadCallback(
             this.setURLFinishCallback({ viewURL: viewURL })
           );
+        }
+      }
+    },
+    createEditTemporaryPoints: function(identifiers) {
+      const worldCoords = identifiers[0].extraData.worldCoords;
+      if (worldCoords) {
+        if (this.createData.shape === "Point" || this.createData.editingIndex > -1) {
+          if (this.createData.points.length === 1)  {
+            this.showRegionTooltipWithAnnotations(identifiers, true, false);
+            this.tData.x = 50;
+            this.tData.y = 200;
+            if (this._tempLine) {
+              const positionAttribute = this._tempLine.geometry.getAttribute( 'position' );
+              positionAttribute.setXYZ(1, worldCoords[0], worldCoords[1], worldCoords[2]);
+              positionAttribute.needsUpdate = true;
+            } else {
+              this._tempLine = this.$module.scene.addTemporaryLines(
+                [this.createData.points[0], worldCoords], 0x00ffff);
+            }
+          }
         }
       }
     },
