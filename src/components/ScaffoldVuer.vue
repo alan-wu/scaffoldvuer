@@ -440,6 +440,7 @@ import {
   getClickedObjects,
   getDeletableObjects,
   getDrawnAnnotations,
+  getEditablePoint,
   getEditableLines,
   getObjectsFromAnnotations,
   findObjectsWithNames,
@@ -1359,7 +1360,15 @@ export default {
           );
         } else if (payload.editingIndex > -1) {
           if (this._editingZincObject) {
-            this._editingZincObject.editVertices([this.createData.points[1]],
+            let editedPoint = undefined;
+            if (payload.editingIndex > -1) {
+              if (payload.faceIndex > -1) {
+                editedPoint = this.createData.points[1];
+              } else {
+                editedPoint = this.createData.points[0];
+              }
+            }
+            this._editingZincObject.editVertices([editedPoint],
               payload.editingIndex);
             const region = this._editingZincObject.region.getFullPath() + "/";
             const group = this._editingZincObject.groupName;
@@ -1622,21 +1631,21 @@ export default {
         }
       }
     },
-    createEditTemporaryPoints: function(identifiers) {
+    createEditTemporaryPoint: function(identifiers) {
       const worldCoords = identifiers[0].extraData.worldCoords;
       if (worldCoords) {
         if (this.createData.shape === "Point" || this.createData.editingIndex > -1) {
-          if (this.createData.points.length === 1)  {
+          if (this.createData.points.length === 0)  {
             this.showRegionTooltipWithAnnotations(identifiers, true, false);
             this.tData.x = 50;
             this.tData.y = 200;
-            if (this._tempLine) {
-              const positionAttribute = this._tempLine.geometry.getAttribute( 'position' );
-              positionAttribute.setXYZ(1, worldCoords[0], worldCoords[1], worldCoords[2]);
+            if (this._tempPoint) {
+              const positionAttribute = this._tempPoint.geometry.getAttribute( 'position' );
+              positionAttribute.setXYZ(0, worldCoords[0], worldCoords[1], worldCoords[2]);
               positionAttribute.needsUpdate = true;
             } else {
-              this._tempLine = this.$module.scene.addTemporaryLines(
-                [this.createData.points[0], worldCoords], 0x00ffff);
+              this._tempPoint = this.$module.scene.addTemporaryPoints(
+                [worldCoords], 0x00ffff);
             }
           }
         }
@@ -1645,7 +1654,8 @@ export default {
     createEditTemporaryLines: function(identifiers) {
       const worldCoords = identifiers[0].extraData.worldCoords;
       if (worldCoords) {
-        if (this.createData.shape === "LineString" || this.createData.editingIndex > -1) {
+        if (this.createData.shape === "LineString" ||
+        (this.createData.editingIndex > -1 && this.createData.faceIndex > -1)) {
           if (this.createData.points.length === 1)  {
             this.showRegionTooltipWithAnnotations(identifiers, true, false);
             this.tData.x = 50;
@@ -1662,14 +1672,26 @@ export default {
         }
       }
     },
+    createEditTemporaryPrimitive: function(identifiers) {
+      if (this.createData.shape === "LineString" ||
+        (this.createData.editingIndex > -1 &&
+        this.createData.faceIndex > -1)) {
+        this.createEditTemporaryLines(identifiers);
+      } else {
+        if (this.createData.shape === "Point" || this.createData.editingIndex > -1) {
+          this.createEditTemporaryPoint(identifiers);
+        }
+      }
+    },
     draw: function(data) {
       if (data && data.length > 0 && data[0].data.group) {
         if (data[0].extraData.worldCoords) {
-          if (this.createData.shape === "Point") {
-            this.drawPoint(data[0].extraData.worldCoords, data);
-          } else if (this.createData.shape === "LineString" ||
-            this.createData.editingIndex > -1) {
+          if (this.createData.shape === "LineString" ||
+            (this.createData.editingIndex > -1 && this.createData.faceIndex > -1)) {
             this.drawLine(data[0].extraData.worldCoords, data);
+          } else if (this.createData.shape === "Point" ||
+            (this.createData.editingIndex > -1 && this.createData.faceIndex === -1)) {
+            this.drawPoint(data[0].extraData.worldCoords, data);
           }
         }
       }
@@ -1682,7 +1704,9 @@ export default {
         this.showRegionTooltipWithAnnotations(data, true, false);
         this.tData.x = 50;
         this.tData.y = 200;
-        this._tempPoint = this.$module.scene.addTemporaryPoints([coords], 0xffff00);
+        if (!this._tempPoint) {
+          this._tempPoint = this.$module.scene.addTemporaryPoints([coords], 0xffff00);
+        }
       }
     },
     drawLine: function(coords, data) {
@@ -1725,6 +1749,19 @@ export default {
         setTimeout(this.stopFreeSpin, 4000);
       }
     },
+    activateEditingMode: function(event) {
+      let editing = getEditablePoint(event);
+      if (editing) {
+        this.activatePointEditingMode(editing.zincObject, editing.index,
+          editing.point);
+      } else {
+        editing = getEditableLines(event);
+        if (editing) {
+          this.activateLineEditingMode(editing.zincObject, editing.faceIndex,
+            editing.vertexIndex, editing.point);
+        }
+      }
+    },
     activateAnnotationMode: function(names, event) {
       if (this.authorisedUser || this.offlineAnnotationEnabled) {
         this.createData.toBeDeleted = false;
@@ -1740,11 +1777,7 @@ export default {
         } else {
           //Make sure the tooltip is displayed with annotaion mode
           if (this.activeDrawMode === "Edit") {
-            const editing = getEditableLines(event);
-            if (editing) {
-              this.activateEditingMode(editing.zincObject, editing.faceIndex,
-                editing.vertexIndex, editing.point);
-            }
+            this.activateEditingMode(event);
           } else if (this.activeDrawMode === "Delete") {
             const zincObject = getDeletableObjects(event);
             if (zincObject) {
@@ -1762,7 +1795,13 @@ export default {
         this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
       }
     },
-    activateEditingMode: function(zincObject, faceIndex, vertexIndex, point) {
+    activatePointEditingMode: function(zincObject, index, point) {
+      this._editingZincObject = zincObject;
+      this.createData.faceIndex = -1;
+      this.createData.editingIndex = index;
+      //this.drawPoint(point, undefined);
+    },
+    activateLineEditingMode: function(zincObject, faceIndex, vertexIndex, point) {
       this._editingZincObject = zincObject;
       this.createData.faceIndex = faceIndex;
       this.createData.editingIndex = vertexIndex;
@@ -1808,7 +1847,9 @@ export default {
             this.tData.label = id;
             this.tData.region = regionPath;
             const zincObject = getClickedObjects(event);
-            this._editingZincObject = zincObject;
+            if (this.createData.editingIndex === -1 ) {
+              this._editingZincObject = zincObject;
+            }
             if (zincObject) {
               const regionPath = this._editingZincObject.region.getFullPath() + "/";
               const group = this._editingZincObject.groupName;
@@ -1867,7 +1908,7 @@ export default {
               this.tData.region = regionPath;
               this.tData.x = event.identifiers[0].coords.x;
               this.tData.y = event.identifiers[0].coords.y;
-              this.createEditTemporaryLines(event.identifiers);
+              this.createEditTemporaryPrimitive(event.identifiers);
             }
           }
           /**
@@ -1884,7 +1925,7 @@ export default {
               this.tData.x = event.identifiers[0].coords.x - offsets.left;
               this.tData.y = event.identifiers[0].coords.y - offsets.top;
             }
-            this.createEditTemporaryLines(event.identifiers);
+            this.createEditTemporaryPrimitive(event.identifiers);
           }
         }
       }

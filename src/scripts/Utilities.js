@@ -33,6 +33,23 @@ const getDistance = (point1, point2) => {
   return Math.sqrt(dist0 * dist0 + dist1 * dist1 + dist2 * dist2);
 }
 
+export const getEditablePoint = (event) => {
+  const zincObjects = event.zincObjects;
+  if (zincObjects.length > 0 && zincObjects[0]) {
+    const zincObject = zincObjects[0];
+    if (zincObject.isEditable && zincObject.isPointset) {
+      const info = event.identifiers[0].extraData.intersected;
+      if (info && info.index > -1) {
+        const v = zincObject.getVerticesByIndex(info.index);
+        if (v) {
+          return { zincObject, index: info.index, point: v};
+        }
+      }
+    }
+  }
+  return undefined;
+}
+
 export const getEditableLines = (event) => {
   const zincObjects = event.zincObjects;
   if (zincObjects.length > 0 && zincObjects[0]) {
@@ -111,7 +128,7 @@ export const getLineDistance = (zincObject, faceIndex) => {
   }
   return 0;
 }
- 
+
 //Move or extend a line
 export const moveAndExtendLine = (zincObject, faceIndex, unit, extendOnly) => {
   if (zincObject && unit !== 0.0) {
@@ -218,7 +235,7 @@ export const convertUUIDsToFullPaths = (rootRegion, IDs) => {
     let region = undefined;
     let primitive = undefined;
     let regionID = undefined;
-    
+
     IDs.forEach(id => {
       const uuids = id.split("/");
       regionID = uuids[0];
