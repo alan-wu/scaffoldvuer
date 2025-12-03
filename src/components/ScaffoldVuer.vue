@@ -1362,7 +1362,7 @@ export default {
           if (this._editingZincObject) {
             let editedPoint = undefined;
             if (payload.editingIndex > -1) {
-              if (payload.faceIndex > -1) {
+              if (this.createData.faceIndex > -1) {
                 editedPoint = this.createData.points[1];
               } else {
                 editedPoint = this.createData.points[0];
@@ -2242,6 +2242,10 @@ export default {
     showRegionTooltipWithAnnotations: function (annotations, resetView, liveUpdates) {
       if (this.$module.scene) {
         const result = getObjectsFromAnnotations(this.$module.scene, annotations);
+        if (this._editingZincObject) {
+          result.regionPath = this._editingZincObject.region.getFullPath() + "/";
+          result.label = this._editingZincObject.groupName;
+        }
         if (result && result.objects.length > 0) {
           if (!this.annotationSidebar) {
             return this.showRegionTooltipWithObjects(
