@@ -23,7 +23,7 @@
           <el-slider
             v-model="slide.value"
             class="my-slider"
-            :step="0.01"
+            :step="0.005"
             :min="0"
             :max="1"
             :show-tooltip="false"

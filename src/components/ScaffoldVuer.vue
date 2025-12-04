@@ -1177,12 +1177,7 @@ export default {
         }
       }
       //Recalculate the following if module is ready
-      if (this.isReady) {
-        const {centre, size} = this.$module.getCentreAndSize();
-        this.boundingDims.centre = centre;
-        this.boundingDims.size = size;
-      }
-
+      this.calculateBoundingBox();
 
       /**
        * Emit when a new object is added to the scene
@@ -1749,13 +1744,13 @@ export default {
         setTimeout(this.stopFreeSpin, 4000);
       }
     },
-    activateEditingMode: function(event) {
-      let editing = getEditablePoint(event);
+    activateEditingMode: function(eventIdentifiers) {
+      let editing = getEditablePoint(eventIdentifiers);
       if (editing) {
         this.activatePointEditingMode(editing.zincObject, editing.index,
           editing.point);
       } else {
-        editing = getEditableLines(event);
+        editing = getEditableLines(eventIdentifiers);
         if (editing) {
           this.activateLineEditingMode(editing.zincObject, editing.faceIndex,
             editing.vertexIndex, editing.point);
@@ -1777,7 +1772,7 @@ export default {
         } else {
           //Make sure the tooltip is displayed with annotaion mode
           if (this.activeDrawMode === "Edit") {
-            this.activateEditingMode(event);
+            this.activateEditingMode(event.identifiers);
           } else if (this.activeDrawMode === "Delete") {
             const zincObject = getDeletableObjects(event);
             if (zincObject) {
@@ -2647,6 +2642,13 @@ export default {
         }
       }
     },
+    calculateBoundingBox: function() {
+      if (this.isReady) {
+        const {centre, size} = this.$module.getCentreAndSize();
+        this.boundingDims.centre = centre;
+        this.boundingDims.size = size;
+      }
+    },
     downloadErrorCallback: function() {
       return (error) => {
         this.$emit('on-error', error);
@@ -2671,9 +2673,7 @@ export default {
         this._slides = this.$module.scene.addSlicesPrimitive(
           "_helper", ["x-plane", "y-plane", "z-plane"], [0xFF5555, 0x55FF55, 0x5555FF],
           0.5);
-        const {centre, size} = this.$module.getCentreAndSize();
-        this.boundingDims.centre = centre;
-        this.boundingDims.size = size;
+        this.calculateBoundingBox();
         //this.$module.scene.createAxisDisplay(false);
         //this.$module.scene.enableAxisDisplay(true, true);
         this.isReady = true;

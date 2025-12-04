@@ -33,12 +33,12 @@ const getDistance = (point1, point2) => {
   return Math.sqrt(dist0 * dist0 + dist1 * dist1 + dist2 * dist2);
 }
 
-export const getEditablePoint = (event) => {
-  const zincObjects = event.zincObjects;
-  if (zincObjects.length > 0 && zincObjects[0]) {
-    const zincObject = zincObjects[0];
+export const getEditablePoint = (eventIdentifiers) => {
+  //const zincObjects = event.zincObjects;
+  const zincObject = eventIdentifiers[0].data?.zincObject;
+  if (zincObject) {
     if (zincObject.isEditable && zincObject.isPointset) {
-      const info = event.identifiers[0].extraData.intersected;
+      const info = eventIdentifiers[0].extraData.intersected;
       if (info && info.index > -1) {
         const v = zincObject.getVerticesByIndex(info.index);
         if (v) {
@@ -50,15 +50,14 @@ export const getEditablePoint = (event) => {
   return undefined;
 }
 
-export const getEditableLines = (event) => {
-  const zincObjects = event.zincObjects;
-  if (zincObjects.length > 0 && zincObjects[0]) {
-    const zincObject = zincObjects[0];
+export const getEditableLines = (eventIdentifiers) => {
+  const zincObject = eventIdentifiers[0].data?.zincObject;
+  if (zincObject) {
     if (zincObject.isEditable && zincObject.isLines2) {
-      const info = event.identifiers[0].extraData.intersected;
+      const info = eventIdentifiers[0].extraData.intersected;
       if (info && info.faceIndex > -1) {
         const v = zincObject.getVerticesByFaceIndex(info.faceIndex);
-        const p = event.identifiers[0].extraData.intersected.pointOnLine;
+        const p = eventIdentifiers[0].extraData.intersected.pointOnLine;
         if (v.length > 1) {
           const dist0 = getDistance(v[0], [p.x, p.y, p.z]);
           const dist1 = getDistance(v[1], [p.x, p.y, p.z]);
