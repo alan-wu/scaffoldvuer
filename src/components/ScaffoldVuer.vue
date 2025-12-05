@@ -817,6 +817,7 @@ export default {
         drawingBox: false,
         toBeConfirmed: false,
         points: [],
+        tempGroupName: "",
         shape: "",
         x: 0,
         y: 0,
@@ -1653,8 +1654,8 @@ export default {
         (this.createData.editingIndex > -1 && this.createData.faceIndex > -1)) {
           if (this.createData.points.length === 1)  {
             this.showRegionTooltipWithAnnotations(identifiers, true, false);
-            this.tData.x = 50;
-            this.tData.y = 200;
+            //this.tData.x = 50;
+            //this.tData.y = 200;
             if (this._tempLine) {
               const positionAttribute = this._tempLine.geometry.getAttribute( 'position' );
               positionAttribute.setXYZ(1, worldCoords[0], worldCoords[1], worldCoords[2]);
@@ -1794,12 +1795,14 @@ export default {
       this._editingZincObject = zincObject;
       this.createData.faceIndex = -1;
       this.createData.editingIndex = index;
+      this.createData.tempGroupName = this._editingZincObject.groupName;
       //this.drawPoint(point, undefined);
     },
     activateLineEditingMode: function(zincObject, faceIndex, vertexIndex, point) {
       this._editingZincObject = zincObject;
       this.createData.faceIndex = faceIndex;
       this.createData.editingIndex = vertexIndex;
+      this.createData.tempGroupName = this._editingZincObject.groupName;
       this.drawLine(point, undefined);
     },
     /**
