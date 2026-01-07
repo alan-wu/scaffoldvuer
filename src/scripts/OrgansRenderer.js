@@ -19,7 +19,7 @@ const OrgansSceneData = function() {
 /**
  * Viewer of 3D-organs models. Users can toggle on/off different views. Data is
  * displayed instead if models are not available.
- * 
+ *
  * @class
  * @param {PJP.ModelsLoader}
  *            ModelsLoaderIn - defined in modelsLoade.js, providing locations of
@@ -49,7 +49,7 @@ const OrgansSceneData = function() {
 	this.isIgnorePicking = function() {
     	return ignorePicking;
 	}
-	
+
 	this.setIgnorePicking = function(value) {
 		ignorePicking = value;
 	}
@@ -74,7 +74,7 @@ const OrgansSceneData = function() {
 		}
 		_this.sceneData.currentTime = value;
 	}
-	
+
 	/**
 	 * Update the time slider and other renderers/scenes when time has changed.
 	 */
@@ -89,7 +89,7 @@ const OrgansSceneData = function() {
 		if (!_this.sceneData.nerveMapIsActive && pickerScene)
 			pickerScene.setMorphsTime(currentTime);
 		if (_this.sceneData.nerveMap && _this.sceneData.nerveMap.additionalReader)
-      _this.sceneData.nerveMap.additionalReader.setTime(currentTime / 
+      _this.sceneData.nerveMap.additionalReader.setTime(currentTime /
         duration);
 		_this.sceneData.currentTime = currentTime / duration * 100.0;
   }
@@ -132,7 +132,7 @@ const OrgansSceneData = function() {
       this.NDCCameraControl.setCenterZoom(center, zoom);
     }
   }
-  
+
   const postRenderSelectedCoordinatesUpdate = function() {
     //It is animating, the coordinates may have been updated
     if (_this.zincRenderer.playAnimation && _this.liveUpdatesObjects) {
@@ -146,19 +146,19 @@ const OrgansSceneData = function() {
       _this.selectedScreenCoordinates.y = coord.y;
     }
   }
-	
+
 	const preRenderUpdateCallback = function() {
 		return function() {
       preRenderTimeUpdate();
 		}
   }
-  
+
   const postRenderUpdateCallback = function() {
 		return function() {
       postRenderSelectedCoordinatesUpdate();
 		}
 	}
-	
+
 	/**
 	 * Add a callback which will be called when time has changed
 	 */
@@ -166,7 +166,7 @@ const OrgansSceneData = function() {
 	  if (typeof(callback === "function"))
 	    timeChangedCallbacks.push(callback);
 	}
-	
+
 	this.setTexturePos = function(value) {
 		if (_this.sceneData.nerveMap && _this.sceneData.nerveMap.additionalReader)
 			_this.sceneData.nerveMap.additionalReader.setSliderPos(value);
@@ -177,7 +177,7 @@ const OrgansSceneData = function() {
 	    sceneChangedCallbacks.push(callback);
 	  }
 	}
-	
+
 	this.addOrganPartAddedCallback = function(callback) {
     if (typeof(callback === "function"))
       organPartAddedCallbacks.push(callback);
@@ -223,7 +223,7 @@ const OrgansSceneData = function() {
     let intersectedObject = undefined;
     if (intersected !== undefined) {
       let marker = false;
-      if (intersected.object.userData && 
+      if (intersected.object.userData &&
         intersected.object.userData.isMarker) {
         marker = true;
         intersectedObject = intersected.object.userData.parent.getMorph();
@@ -247,12 +247,12 @@ const OrgansSceneData = function() {
     }
     return {"id":id, "object":intersectedObject};
   }
-	 
+
 	/**
 	 * Callback function when a pickable object has been picked. It will then
 	 * call functions in tissueViewer and cellPanel to show corresponding
 	 * informations.
-	 * 
+	 *
 	 * @callback
 	 */
    const _pickingCallback = function() {
@@ -271,7 +271,7 @@ const OrgansSceneData = function() {
       const coords = { x: window_x, y: window_y };
       if (idObject.id) {
 				extraData.threeID = idObject.object?.id;
-        if (idObject.object.userData.isGlyph) { 
+        if (idObject.object.userData.isGlyph) {
           if (idObject.object.name) {
             _this.setSelectedByObjects([idObject.object], coords,
 							extraData, true);
@@ -289,10 +289,10 @@ const OrgansSceneData = function() {
 			}
 		}
 	};
-	
+
 	/**
 	 * Callback function when a pickable object has been hovered over.
-	 * 
+	 *
 	 * @callback
 	 */
    const _hoverCallback = function() {
@@ -382,7 +382,7 @@ const OrgansSceneData = function() {
 		if (pickerScene)
 			changeOrganPartsVisibilityForScene(pickerScene, name, value, 'pointsets');
   }
-  			
+
 	/**
 	 * Change visibility for parts of the current scene.
 	 */
@@ -394,13 +394,13 @@ const OrgansSceneData = function() {
 		if (pickerScene)
 			changeOrganPartsVisibilityForScene(pickerScene, name, value, type);
 	}
-	
+
 	this.changeOrganPartsVisibilityCallback = function(name) {
 		return function(value) {
 			_this.changeOrganPartsVisibility(name, value);
 		}
 	}
-			
+
 	this.changeBackgroundColour = function(backgroundColourString) {
 		const colour = new THREE.Color(backgroundColourString);
 		if (_this.zincRenderer) {
@@ -447,7 +447,7 @@ const OrgansSceneData = function() {
 	    	removeOrganPart(systemName, partName, useDefautColour, zincObject);
 	    }
 	  }
-	  
+
 	  const downloadCompletedCallback = function() {
 		  return function() {
 			  _this.settingsChanged();
@@ -459,7 +459,7 @@ const OrgansSceneData = function() {
 
 		//The payload can either be a zinc object when the loading is successful or
 		//an object containg the details of error message on failure.
-		//We only use it to handle an error 
+		//We only use it to handle an error
 	  const singleItemFinishCallback = function() {
       return function(payload) {
 
@@ -474,7 +474,7 @@ const OrgansSceneData = function() {
 				}
       }
 	  }
-	  
+
 	  /**
 		 * Toggle data field displays. Data fields displays flow/pressure and      <button @click="play">Play</button>
 		 * other activities of the organs.
@@ -499,11 +499,11 @@ const OrgansSceneData = function() {
         }
 	    }
 	  }
-	  
+
 	  /**
 		 * Return an array containing name(s) of species that also contains the
 		 * currently displayed organs.
-		 * 
+		 *
 		 * @returns {Array} containing species name
 		 */
 	  this.getAvailableSpecies = function(currentSpecies, currentSystem, currentPart) {
@@ -534,7 +534,7 @@ const OrgansSceneData = function() {
 			const size = [vector.x, vector.y, vector.z];
 			return {centre, size};
 		}
-	  
+
 	  const setSceneData = function(speciesName, systemName, partName, organsDetails) {
       _this.sceneData.nerveMapIsActive = false;
       _this.sceneData.nerveMap = undefined;
@@ -623,14 +623,14 @@ const OrgansSceneData = function() {
 			  }
 		  }
 	  }
-	  	  
+
 	  this.alignCameraWithSelectedObject = function(transitionTime) {
 	    const objects = _this.graphicsHighlight.getSelected();
 	    if (objects && objects[0] && objects[0].userData) {
 	      _this.scene.alignObjectToCameraView(objects[0].userData, transitionTime);
 	    }
 	  }
-	  
+
 	  this.exportSettings = function() {
 		  const settings = {};
 		  settings.name = _this.instanceName;
@@ -646,7 +646,7 @@ const OrgansSceneData = function() {
 		  settings.dialog = "Organ Viewer";
 		  return settings;
 	  }
-	  
+
 	  this.importSettings = function(settings) {
 		  if (settings && (settings.dialog == this.typeName)) {
 			  _this.setName(settings.name);
@@ -660,11 +660,11 @@ const OrgansSceneData = function() {
 		  }
 		  return false;
 	  }
-		
+
 	/**
 	 * initialise loading of the html layout for the organs panel, this is
 	 * called when the {@link PJP.OrgansViewer} is created.
-	 * 
+	 *
 	 * @async
 	 */
 	 const initialise = function() {
@@ -674,7 +674,7 @@ const OrgansSceneData = function() {
        _this.zincRenderer.addPostRenderCallbackFunction(postRenderUpdateCallback());
      }
   }
-	 
+
 	initialise();
 
 }

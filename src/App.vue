@@ -150,7 +150,7 @@
                   id="annotations-upload"
                   type="file"
                   accept="application/json"
-                  @change="importOfflineAnnotations" 
+                  @change="importOfflineAnnotations"
                 />
               </el-button>
           </el-col>
@@ -357,7 +357,7 @@ const writeTextFile = (filename, data) => {
   hrefElement.href = dataStr;
   hrefElement.click();
   hrefElement.remove();
-} 
+}
 
 export default {
   name: "app",

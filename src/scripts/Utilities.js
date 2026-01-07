@@ -33,15 +33,31 @@ const getDistance = (point1, point2) => {
   return Math.sqrt(dist0 * dist0 + dist1 * dist1 + dist2 * dist2);
 }
 
-export const getEditableLines = (event) => {
-  const zincObjects = event.zincObjects;
-  if (zincObjects.length > 0 && zincObjects[0]) {
-    const zincObject = zincObjects[0];
+export const getEditablePoint = (eventIdentifiers) => {
+  //const zincObjects = event.zincObjects;
+  const zincObject = eventIdentifiers[0].data?.zincObject;
+  if (zincObject) {
+    if (zincObject.isEditable && zincObject.isPointset) {
+      const info = eventIdentifiers[0].extraData.intersected;
+      if (info && info.index > -1) {
+        const v = zincObject.getVerticesByIndex(info.index);
+        if (v) {
+          return { zincObject, index: info.index, point: v};
+        }
+      }
+    }
+  }
+  return undefined;
+}
+
+export const getEditableLines = (eventIdentifiers) => {
+  const zincObject = eventIdentifiers[0].data?.zincObject;
+  if (zincObject) {
     if (zincObject.isEditable && zincObject.isLines2) {
-      const info = event.identifiers[0].extraData.intersected;
+      const info = eventIdentifiers[0].extraData.intersected;
       if (info && info.faceIndex > -1) {
         const v = zincObject.getVerticesByFaceIndex(info.faceIndex);
-        const p = event.identifiers[0].extraData.intersected.pointOnLine;
+        const p = eventIdentifiers[0].extraData.intersected.pointOnLine;
         if (v.length > 1) {
           const dist0 = getDistance(v[0], [p.x, p.y, p.z]);
           const dist1 = getDistance(v[1], [p.x, p.y, p.z]);
@@ -111,7 +127,7 @@ export const getLineDistance = (zincObject, faceIndex) => {
   }
   return 0;
 }
- 
+
 //Move or extend a line
 export const moveAndExtendLine = (zincObject, faceIndex, unit, extendOnly) => {
   if (zincObject && unit !== 0.0) {
@@ -218,7 +234,7 @@ export const convertUUIDsToFullPaths = (rootRegion, IDs) => {
     let region = undefined;
     let primitive = undefined;
     let regionID = undefined;
-    
+
     IDs.forEach(id => {
       const uuids = id.split("/");
       regionID = uuids[0];
