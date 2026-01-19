@@ -824,6 +824,7 @@ export default {
         editingIndex: -1,
         faceIndex: -1,
         toBeDeleted: false,
+        regionPrefix: "__annotation"
       },
       currentTime: 0.0,
       timeVarying: false,

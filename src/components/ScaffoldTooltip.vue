@@ -13,7 +13,9 @@
     >
       <template #default>
         <div class="tooltip-text">{{ label }}</div>
-        <div class="tooltip-text" v-if="region">Region: {{ region }}</div>
+        <div class="tooltip-text" v-if="region && region != '/'">
+          Region: {{ region }}
+        </div>
         <CreateTooltipContent
           v-show="createData.toBeConfirmed"
           :createData="createData"
