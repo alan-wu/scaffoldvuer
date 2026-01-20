@@ -21,6 +21,8 @@
           :createData="createData"
           @confirm-create="$emit('confirm-create', $event)"
           @cancel-create="$emit('cancel-create')"
+          @create-region-suggestions="$emit('create-region-suggestions', $event)"
+          @create-group-suggestions="$emit('create-group-suggestions', $event)"
         />
         <Tooltip
           class="p-tooltip"

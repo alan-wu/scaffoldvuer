@@ -24,6 +24,8 @@
       @confirm-comment="confirmComment($event)"
       @confirm-delete="confirmDelete()"
       @tooltip-hide="onTooltipHide()"
+      @create-group-suggestions="$emit('create-group-suggestions', $event)"
+      @create-region-suggestions="$emit('create-region-suggestions', $event)"
     />
     <div
       id="organsDisplayArea"
