@@ -817,9 +817,10 @@ export default {
       colourRadio: true,
       createData: {
         drawingBox: false,
+        renaming: false,
         toBeConfirmed: false,
         points: [],
-        tempGroupName: "",
+        tempGroupName: undefined,
         shape: "",
         x: 0,
         y: 0,
@@ -1205,6 +1206,18 @@ export default {
       }
     },
     /**
+     * Rename Zinc Object
+     */
+     renameZincObject: function (zincObject, newName) {
+      if (this.$module.scene) {
+        const scaffoldTreeControls = this.$refs.scaffoldTreeControls;
+        const oldName = zincObject.groupName;
+        zincObject.setName(newName);
+        scaffoldTreeControls.zincObjectRenamed(zincObject, oldName);
+        this.$_searchIndex.updateZincObject(zincObject, zincObject.uuid);
+      }
+    },
+    /**
      * Internal only.
      * This is called when a zinc object is removed.
      */
@@ -1323,6 +1336,45 @@ export default {
     },
     /**
      * @public
+     * Rename group in annotations, only support local annotations at this moment.
+     * @arg `region`,
+     * @arg `group`,
+     * @arg `zincObject`,
+     * @arg `oldName`
+     */
+     renameAnnotations: function (region, group, zincObject, oldName) {
+      //Pending support for online annotation
+      let regionPath = region.slice(-1) === "/" ? region : region + "/";
+      const oldFeatureID = regionPath + oldName;
+      const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken, zincObject,
+        region, group, this.url, `Rename from ${oldFeatureID}`);
+      this.existDrawnFeatures = markRaw(this.existDrawnFeatures.filter(feature => feature.id !== oldFeatureID));
+      this.existDrawnFeatures.push(annotation.feature);
+      if (this.offlineAnnotationEnabled) {
+        annotation.group = group;
+        regionPath = region;
+        if (regionPath.slice(-1) === "/") {
+          regionPath = regionPath.slice(0, -1);
+        }
+        annotation.region = regionPath;
+        //console.log(annotation, "oldName", oldName);
+        this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
+        const found = this.offlineAnnotations.find((element) => {
+          return element.group === oldName &&
+                 element.region === annotation.region &&
+                 element.resource === annotation.resource &&
+                 element.feature.geometry.type === annotation.feature.geometry.type;
+        });
+        if (found) {
+          //console.log('found', found)
+          Object.assign(found, annotation);
+        }
+        sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
+      }
+      this.$emit('userPrimitivesUpdated', {region, group, zincObject, renamedFrom: oldName});
+    },
+    /**
+     * @public
      * Callback for when primitives have been update using primitive controls.
      * This is only called from callback.
      * @arg `object`
@@ -1373,6 +1425,11 @@ export default {
             const group = this._editingZincObject.groupName;
             this.addAndEditAnnotations(region, group, this._editingZincObject, "Position Updated");
           }
+        } else if (payload.renaming) {
+          const oldGroupName = this._editingZincObject.groupName;
+          this.renameZincObject(this._editingZincObject, payload.group);
+          this.renameAnnotations(payload.region, payload.group,
+            this._editingZincObject, oldGroupName);
         }
         if (object) {
           this.addAndEditAnnotations(payload.region, payload.group, object.zincObject, "Create");
@@ -1391,10 +1448,12 @@ export default {
     cancelCreate: function() {
       this.changeActiveByName(undefined);
       this.createData.points.length = 0;
+      this.createData.renaming = false;
       this.createData.toBeConfirmed = false;
       this._editingZincObject = undefined;
       this.createData.editingIndex = -1;
       this.createData.faceIndex = -1;
+      this.createData.tempGroupName = undefined;
       this.tData.visible = false;
       this.createData.toBeDeleted = false;
       if (this._tempLine) {
@@ -1564,6 +1623,7 @@ export default {
         this.$module.selectObjectOnPick = true;
       } else if (type === 'tool') {
         this.activeDrawTool = icon;
+        this.createData.renaming = false;
         this.createData.shape = this.activeDrawTool ? this.activeDrawTool : '';
         this.$module.selectObjectOnPick = false;
       }
@@ -1699,6 +1759,9 @@ export default {
       if (this.createData.toBeConfirmed === false) {
         this.createData.points.length = 0;
         this.createData.points.push(coords);
+        if (this.createData.editingIndex === -1 && !this.createData.renaming) {
+          this.createData.tempGroupName = undefined;
+        }
         this.createData.toBeConfirmed = true;
         this.showRegionTooltipWithAnnotations(data, true, false);
         this.tData.x = 50;
@@ -1712,6 +1775,9 @@ export default {
       if (this.createData.toBeConfirmed === false) {
         if (this.createData.points.length === 1) {
           this.createData.points.push(coords);
+          if (this.createData.editingIndex === -1  && !this.createData.renaming) {
+            this.createData.tempGroupName = undefined;
+          }
           this.createData.toBeConfirmed = true;
           this.showRegionTooltipWithAnnotations(data, true, false);
           this.tData.x = 50;
@@ -1761,6 +1827,23 @@ export default {
         }
       }
     },
+    activateRenamingMode: function(eventIdentifiers) {
+      let editing = getEditablePoint(eventIdentifiers);
+      if (!editing) {
+        editing = getEditableLines(eventIdentifiers);
+      }
+      if (editing) {
+        this._editingZincObject = editing.zincObject;
+        this.createData.faceIndex = -1;
+        this.createData.editingIndex = -1;
+        this.createData.renaming = true;
+        this.createData.tempGroupName = this._editingZincObject.groupName;
+        this.createData.toBeConfirmed = true;
+        this.showRegionTooltipWithAnnotations(eventIdentifiers, true, false);
+        this.tData.x = 50;
+        this.tData.y = 200;
+      }
+    },
     activateAnnotationMode: function(names, event) {
       if (this.authorisedUser || this.offlineAnnotationEnabled) {
         this.createData.toBeDeleted = false;
@@ -1768,8 +1851,6 @@ export default {
           // Create new shape bsaed on current settings
           if (names.length > 0) {
             if (event.identifiers[0].coords) {
-              this.createData.x = event.identifiers[0].coords.x;
-              this.createData.y = event.identifiers[0].coords.y;
               this.draw(event.identifiers);
             }
           }
@@ -1797,6 +1878,7 @@ export default {
     activatePointEditingMode: function(zincObject, index, point) {
       this._editingZincObject = zincObject;
       this.createData.faceIndex = -1;
+      this.createData.renaming = false;
       this.createData.editingIndex = index;
       this.createData.tempGroupName = this._editingZincObject.groupName;
       //this.drawPoint(point, undefined);
@@ -1804,6 +1886,7 @@ export default {
     activateLineEditingMode: function(zincObject, faceIndex, vertexIndex, point) {
       this._editingZincObject = zincObject;
       this.createData.faceIndex = faceIndex;
+      this.createData.renaming = false;
       this.createData.editingIndex = vertexIndex;
       this.createData.tempGroupName = this._editingZincObject.groupName;
       this.drawLine(point, undefined);

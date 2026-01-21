@@ -49,6 +49,19 @@ export class SearchIndex
         this.idMaps = {};
     }
 
+    updateZincObject(zincObject, id)
+    //=======================
+    {
+        const path = zincObject.getRegion().getFullPath();
+        let groupName = zincObject.groupName;
+        let fullPath = path ? `${path}/${zincObject.groupName}` : zincObject.groupName;
+        groupName = groupName.replaceAll('"', '');
+        fullPath = fullPath.replaceAll('"', '');
+        const item = { path: fullPath, name: groupName, id };
+        this._searchEngine.replace(item);
+        this.idMaps[id] = { path: fullPath, zincObject };
+    }
+
     addZincObject(zincObject, id)
     //=======================
     {
@@ -169,7 +182,7 @@ export class SearchIndex
         const result = this.search(term);
         results.push(...result);
       });
-    
+
       return results;
     }
 
