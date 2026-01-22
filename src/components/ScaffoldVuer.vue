@@ -1357,7 +1357,6 @@ export default {
           regionPath = regionPath.slice(0, -1);
         }
         annotation.region = regionPath;
-        //console.log(annotation, "oldName", oldName);
         this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
         const found = this.offlineAnnotations.find((element) => {
           return element.group === oldName &&
@@ -1838,6 +1837,7 @@ export default {
         this.createData.editingIndex = -1;
         this.createData.renaming = true;
         this.createData.tempGroupName = this._editingZincObject.groupName;
+        this.createData.regionPrefix =  this._editingZincObject.region.getFullPath();
         this.createData.toBeConfirmed = true;
         this.showRegionTooltipWithAnnotations(eventIdentifiers, true, false);
         this.tData.x = 50;
@@ -1880,6 +1880,7 @@ export default {
       this.createData.faceIndex = -1;
       this.createData.renaming = false;
       this.createData.editingIndex = index;
+      this.createData.regionPrefix =  this._editingZincObject.region.getFullPath();
       this.createData.tempGroupName = this._editingZincObject.groupName;
       //this.drawPoint(point, undefined);
     },
@@ -1888,6 +1889,7 @@ export default {
       this.createData.faceIndex = faceIndex;
       this.createData.renaming = false;
       this.createData.editingIndex = vertexIndex;
+      this.createData.regionPrefix =  this._editingZincObject.region.getFullPath();
       this.createData.tempGroupName = this._editingZincObject.groupName;
       this.drawLine(point, undefined);
     },
