@@ -1694,7 +1694,7 @@ export default {
       if (worldCoords) {
         if (this.createData.shape === "Point" || this.createData.editingIndex > -1) {
           if (this.createData.points.length === 0)  {
-            this.showRegionTooltipWithAnnotations(identifiers, true, false);
+            this.showRegionTooltipWithAnnotations(identifiers, false, false);
             this.tData.x = 50;
             this.tData.y = 200;
             if (this._tempPoint) {
@@ -1715,7 +1715,7 @@ export default {
         if (this.createData.shape === "LineString" ||
         (this.createData.editingIndex > -1 && this.createData.faceIndex > -1)) {
           if (this.createData.points.length === 1)  {
-            this.showRegionTooltipWithAnnotations(identifiers, true, false);
+            this.showRegionTooltipWithAnnotations(identifiers, false, false);
             //this.tData.x = 50;
             //this.tData.y = 200;
             if (this._tempLine) {
@@ -1762,7 +1762,7 @@ export default {
           this.createData.tempGroupName = undefined;
         }
         this.createData.toBeConfirmed = true;
-        this.showRegionTooltipWithAnnotations(data, true, false);
+        this.showRegionTooltipWithAnnotations(data, false, false);
         this.tData.x = 50;
         this.tData.y = 200;
         if (!this._tempPoint) {
@@ -1778,7 +1778,7 @@ export default {
             this.createData.tempGroupName = undefined;
           }
           this.createData.toBeConfirmed = true;
-          this.showRegionTooltipWithAnnotations(data, true, false);
+          this.showRegionTooltipWithAnnotations(data, false, false);
           this.tData.x = 50;
           this.tData.y = 200;
         } else {
@@ -1839,7 +1839,7 @@ export default {
         this.createData.tempGroupName = this._editingZincObject.groupName;
         this.createData.regionPrefix =  this._editingZincObject.region.getFullPath();
         this.createData.toBeConfirmed = true;
-        this.showRegionTooltipWithAnnotations(eventIdentifiers, true, false);
+        this.showRegionTooltipWithAnnotations(eventIdentifiers, false, false);
         this.tData.x = 50;
         this.tData.y = 200;
       }
