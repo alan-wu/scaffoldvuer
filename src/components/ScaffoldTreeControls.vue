@@ -210,21 +210,29 @@ export default {
         }
       }
     },
+    removeGroupFromRegionTreeData: function(region, groupName) {
+      const paths = region.getFullSeparatedPath();
+      const regionData = this.findOrCreateRegion(this.treeData[0], paths, "");
+      for (let i = 0; i < regionData.children.length; i++) {
+        if (regionData.children[i].label === groupName) {
+          regionData.children.splice(i, 1);
+          this.nodeNumbers--;
+          return;
+        }
+      }
+    },
+    zincObjectRenamed: function(zincObject, oldName) {
+      const objects = zincObject.region.findObjectsWithGroupName(oldName, false);
+      if (objects.length < 1) {
+        this.removeGroupFromRegionTreeData(zincObject.region, oldName);
+      }
+      this.zincObjectAdded(zincObject);
+    },
     zincObjectRemoved: function(zincObject) {
       const group = zincObject.groupName;
       const objects = zincObject.region.findObjectsWithGroupName(group, false);
       if (objects.length === 0) {
-        const paths = zincObject.region.getFullSeparatedPath();
-        const regionData = this.findOrCreateRegion(this.treeData[0], paths, "");
-        if (regionData.children) {
-          for (let i = 0; i < regionData.children.length; i++) {
-            if (regionData.children[i].label === group) {
-              regionData.children.splice(i, 1);
-              this.nodeNumbers--;
-              return;
-            }
-          }
-        }
+        this.removeGroupFromRegionTreeData(zincObject.region, group);
       }
     },
     checkChanged: function (node, data) {
