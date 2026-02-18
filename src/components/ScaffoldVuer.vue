@@ -2223,8 +2223,8 @@ export default {
         if (coords) {
           //The coords is not in view, view all if resetView flag is true
           if (!coords.inView) {
-            this.hideRegionTooltip();
             if (resetView) {
+              this.hideRegionTooltip();
               this.$module.scene.viewAll();
               //Use the post render callback to make sure the scene has been updated
               //before getting the position of the tooltip.
