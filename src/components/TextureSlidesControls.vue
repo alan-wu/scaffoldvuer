@@ -1,6 +1,57 @@
 <template>
   <el-container class="t-slides-container">
     <el-main class="slides-block">
+      <el-row class="slide-row">
+        <el-col :offset="0" :span="8">
+          Brightness
+        </el-col>
+        <el-col :offset="0" :span="10">
+          <el-slider
+            v-model="brightness"
+            class="my-slider"
+            :step="0.01"
+            :min="-1"
+            :max="1"
+            :show-tooltip="false"
+          />
+        </el-col>
+        <el-col :offset="0" :span="6">
+          <el-input-number
+            v-model="brightness"
+            :step="0.01"
+            :min="-1"
+            :max="1"
+            :controls="false"
+            class="input-box number-input"
+          />
+        </el-col>
+      </el-row>
+      <el-row class="slide-row">
+        <el-col :offset="0" :span="8">
+          Contrast
+        </el-col>
+        <el-col :offset="0" :span="10">
+          <el-slider
+            v-model="contrast"
+            class="my-slider"
+            :step="0.01"
+            :min="0"
+            :max="10"
+            :show-tooltip="false"
+          />
+        </el-col>
+        <el-col :offset="0" :span="6">
+          <el-input-number
+            v-model="contrast"
+            :step="0.01"
+            :min="0"
+            :max="10"
+            :controls="false"
+            class="input-box number-input"
+          />
+        </el-col>
+      </el-row>
+      <el-divider />
       <el-row v-for="(slide, index) in settings" :key="slide.id" class="slide-row">
         <el-col :offset="0" :span="6">
           <el-select
@@ -70,6 +121,7 @@ import {
 import {
   ElCol as Col,
   ElContainer as Container,
+  ElDivider as Divider,
   ElFooter as Footer,
   ElIcon as Icon,
   ElInputNumber as InputNumber,
@@ -89,6 +141,7 @@ export default {
   components: {
     Col,
     Container,
+    Divider,
     Footer,
     Icon,
     InputNumber,
@@ -102,6 +155,8 @@ export default {
   },
   data: function () {
     return {
+      brightness: 0.0,
+      contrast: 1.0,
       settings: [],
       directions: [
         {
@@ -120,14 +175,36 @@ export default {
       zincObject: undefined,
     };
   },
+  watch: {
+    brightness: {
+      handler: function (value) {
+        if (this.zincObject) {
+          this.zincObject.setBrightness(value);
+        }
+      },
+      immediate: false,
+    },
+    contrast: {
+      handler: function (value) {
+        if (this.zincObject) {
+          this.zincObject.setContrast(value);
+        }
+      },
+      immediate: false,
+    }
+  },
   methods: {
     setObject: function (object) {
       if (object.isTextureSlides) {
         this.zincObject = markRaw(object);
         this.settings = this.zincObject.getTextureSettings();
+        this.brightness = this.zincObject.getBrightness();
+        this.contrast = this.zincObject.getContrast();
       } else {
         this.zincObject = undefined;
         this.settings = [];
+        this.brightness = 0.0;
+        this.contrast = 1.0;
       }
     },
     addNewSlide: function () {
@@ -168,6 +245,10 @@ export default {
   direction:ltr;
 }
 
+:deep(.el-divider--horizontal) {
+  margin: 8px 0;
+}
+
 .slides-block {
   direction:rtl;
   pointer-events: auto;
@@ -195,7 +276,7 @@ export default {
 
 .t-slides-container {
   width: 250px;
-  height: 150px;
+  height: 218px;
   overflow-y: auto;
 }
 
