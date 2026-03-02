@@ -111,6 +111,38 @@ export default {
     */
   },
   methods: {
+    setCheckboxDisabled: function(data, flag, recursive) {
+      if (data) {
+        data.disabled = flag;
+        if (recursive && data.children) {
+          data.children.forEach(child =>
+            this.setCheckboxDisabled(child, flag, recursive)
+          );
+        }
+      }
+    },
+    setRegionCheckboxDisabled: function (region, flag) {
+      if (this.treeData[0] && region?.uuid) {
+        const data = this.findDataWithId(this.treeData[0], region?.uuid)
+        if (data) {
+          this.setCheckboxDisabled(data, flag, true);
+        }
+      }
+    },
+    findDataWithId: function(data, uuid) {
+      if (data) {
+        if (data.id === uuid) {
+          return data;
+        }
+        if (data.children) {
+          for (let i = 0; i < data.children.length; i++) {
+            const found = this.findDataWithId(data.children[i], uuid);
+            if (found) return found;
+          }
+        }
+      }
+      return;
+    },
     addTreeItem: function (parentContainer, item, object) {
       //The following block prevent duplicate graphics with the same name
       if (parentContainer.some((child) => child.label === item.label)) {
