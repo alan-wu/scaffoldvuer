@@ -308,66 +308,74 @@
         virtual-triggering
       >
         <div class="control-layer">
-          <el-row class="backgroundText">Viewing Mode</el-row>
-          <el-row class="backgroundControl">
-            <div style="margin-bottom: 2px;">
-              <template
-                  v-for="(value, key, index) in viewingModes"
-                  :key="key"
-                >
-                  <template v-if="key === viewingMode">
-                    <span class="viewing-mode-title"><b >{{ key }}</b></span>
-                  </template>
-                  <template v-else>
-                    <span class="viewing-mode-unselected" @click="changeViewingMode(key)">{{ key }}</span>
-                  </template>
-              </template>
-            </div>
-            <el-row class="viewing-mode-description">
-              {{ modeDescription }}
+          <div class="viewing-mode-container">
+            <el-row class="backgroundText">Viewing Mode</el-row>
+            <el-row class="backgroundControl">
+              <div style="margin-bottom: 2px;">
+                <template
+                    v-for="(value, key, index) in viewingModes"
+                    :key="key"
+                  >
+                    <template v-if="key === viewingMode">
+                      <span class="viewing-mode-title"><b >{{ key }}</b></span>
+                    </template>
+                    <template v-else>
+                      <span class="viewing-mode-unselected" @click="changeViewingMode(key)">{{ key }}</span>
+                    </template>
+                </template>
+              </div>
+              <el-row class="viewing-mode-description">
+                {{ modeDescription }}
+              </el-row>
+              <el-row v-if="viewingMode === 'Annotation' && offlineAnnotationEnabled" class="viewing-mode-description">
+                (Anonymous annotate)
+              </el-row>
             </el-row>
-            <el-row v-if="viewingMode === 'Annotation' && offlineAnnotationEnabled" class="viewing-mode-description">
-              (Anonymous annotate)
+          </div>
+          <div class="colour-radio-container">
+            <el-row class="backgroundSpacer"></el-row>
+            <el-row class="backgroundText">Organs display</el-row>
+            <el-row class="backgroundControl">
+              <el-radio-group
+                v-model="colourRadio"
+                class="scaffold-radio"
+                @change="setColour(colourRadio, true)"
+              >
+                <el-radio :value="true">Colour</el-radio>
+                <el-radio :value="false">Greyscale</el-radio>
+              </el-radio-group>
             </el-row>
-          </el-row>
-          <el-row class="backgroundSpacer"></el-row>
-          <el-row class="backgroundText">Organs display</el-row>
-          <el-row class="backgroundControl">
-            <el-radio-group
-              v-model="colourRadio"
-              class="scaffold-radio"
-              @change="setColour(colourRadio, true)"
-            >
-              <el-radio :value="true">Colour</el-radio>
-              <el-radio :value="false">Greyscale</el-radio>
-            </el-radio-group>
-          </el-row>
-          <el-row class="backgroundSpacer"></el-row>
-          <el-row class="backgroundText">Outlines display</el-row>
-          <el-row class="backgroundControl">
-            <el-radio-group
-              v-model="outlinesRadio"
-              class="scaffold-radio"
-              @change="setOutlines(outlinesRadio, true)"
-            >
-              <el-radio :value="true">Show</el-radio>
-              <el-radio :value="false">Hide</el-radio>
-            </el-radio-group>
-          </el-row>
-          <el-row class="backgroundSpacer"></el-row>
-          <el-row class="backgroundText"> Change background </el-row>
-          <el-row class="backgroundChooser">
-            <div
-              v-for="item in availableBackground"
-              :key="item"
-              :class="[
-                'backgroundChoice',
-                item,
-                item == currentBackground ? 'active' : '',
-              ]"
-              @click="backgroundChangeCallback(item)"
-            />
-          </el-row>
+          </div>
+          <div class="outlines-radio-container">
+            <el-row class="backgroundSpacer"></el-row>
+            <el-row class="backgroundText">Outlines display</el-row>
+            <el-row class="backgroundControl">
+              <el-radio-group
+                v-model="outlinesRadio"
+                class="scaffold-radio"
+                @change="setOutlines(outlinesRadio, true)"
+              >
+                <el-radio :value="true">Show</el-radio>
+                <el-radio :value="false">Hide</el-radio>
+              </el-radio-group>
+            </el-row>
+          </div>
+          <div class="background-colour-container">
+            <el-row class="backgroundSpacer"></el-row>
+            <el-row class="backgroundText"> Change background </el-row>
+            <el-row class="backgroundChooser">
+              <div
+                v-for="item in availableBackground"
+                :key="item"
+                :class="[
+                  'backgroundChoice',
+                  item,
+                  item == currentBackground ? 'active' : '',
+                ]"
+                @click="backgroundChangeCallback(item)"
+              />
+            </el-row>
+          </div>
         </div>
       </el-popover>
       <div
@@ -2129,6 +2137,16 @@ export default {
       this.isPlaying = flag;
       //Hide tooltip as location may
       //this.hideRegionTooltip();
+    },
+    /**
+     * @public
+     * Disable/enable target region and its children checkbox
+     *
+     * @arg region Region to set the disable/enable checkbox
+     * @arg flag Disable the checkbox when true and enable when false
+     */
+     setRegionCheckboxDisabled: function(region, flag) {
+      this.$refs.scaffoldTreeControls.setRegionCheckboxDisabled(region, flag);
     },
     /**
      * @public
