@@ -1,52 +1,39 @@
 <template>
-  <div
-    v-show="hasValidPrimitive"
-    class="primitive-controls"
-    :class="{ open: drawerOpen, close: !drawerOpen }"
-  >
-    <div class="my-drawer" :class="{ open: drawerOpen, close: !drawerOpen }">
-      <el-collapse class="collapse" v-model="activeName" accordion>
-        <el-collapse-item title="Opacity" name="oControls" v-show="!isTextureSlides" >
-          <opacity-controls
-            :material="material"
-            :zincObject="zincObject"
-            ref="opacityControls" />
-        </el-collapse-item>
-        <el-collapse-item v-show="!isEditable" title="Transformation" name="trControls">
-          <transformation-controls
-            class="transformation-controls"
-            ref="transformationControls" />
-        </el-collapse-item>
-        <el-collapse-item v-show="isTextureSlides" title="Texture Slides" name="tsControls">
-          <texture-slides-controls
-            class="texture-controls"
-            ref="tSlidesControls" />
-        </el-collapse-item>
-        <el-collapse-item v-show="isPointset" title="Points" name="pControls">
-          <points-controls
-            class="pointset-controls"
-            ref="pointsetControls"
-            @primitivesUpdated="$emit('primitivesUpdated', $event)"
-          />
-        </el-collapse-item>
-        <el-collapse-item v-show="isLines" title="Lines" name="lControls">
-          <lines-controls
-            class="lines-controls"
-            ref="linesControls"
-            :createData="createData"
-            :usageConfig="usageConfig"
-            @primitivesUpdated="$emit('primitivesUpdated', $event)"
-          />
-        </el-collapse-item>
-      </el-collapse>
-    </div>
-    <div
-      class="drawer-button"
-      :class="{ open: drawerOpen, close: !drawerOpen }"
-      @click="toggleDrawer"
-    >
-      <el-icon><el-icon-arrow-right /></el-icon>
-    </div>
+  <div v-show="hasValidPrimitive" class="my-drawer">
+    <el-collapse class="collapse" v-model="activeName" accordion>
+      <el-collapse-item title="Opacity" name="oControls" v-show="!isTextureSlides" >
+        <opacity-controls
+          :material="material"
+          :zincObject="zincObject"
+          ref="opacityControls" />
+      </el-collapse-item>
+      <el-collapse-item v-show="!isEditable" title="Transformation" name="trControls">
+        <transformation-controls
+          class="transformation-controls"
+          ref="transformationControls" />
+      </el-collapse-item>
+      <el-collapse-item v-show="isTextureSlides" title="Texture Slides" name="tsControls">
+        <texture-slides-controls
+          class="texture-controls"
+          ref="tSlidesControls" />
+      </el-collapse-item>
+      <el-collapse-item v-show="isPointset" title="Points" name="pControls">
+        <points-controls
+          class="pointset-controls"
+          ref="pointsetControls"
+          @primitivesUpdated="$emit('primitivesUpdated', $event)"
+        />
+      </el-collapse-item>
+      <el-collapse-item v-show="isLines" title="Lines" name="lControls">
+        <lines-controls
+          class="lines-controls"
+          ref="linesControls"
+          :createData="createData"
+          :usageConfig="usageConfig"
+          @primitivesUpdated="$emit('primitivesUpdated', $event)"
+        />
+      </el-collapse-item>
+    </el-collapse>
   </div>
 </template>
 
@@ -101,7 +88,7 @@ export default {
       isTextureSlides: false,
       isPointset: false,
       isLines: false,
-      drawerOpen: true,
+
       zincObject: undefined,
       isEditable: false,
       displayString: "100%"
@@ -119,9 +106,6 @@ export default {
     formatTooltip: function(val) {
       this.displayString = Math.floor(100 * val + 0.5) + "%";
       return this.displayString;
-    },
-    toggleDrawer: function() {
-      this.drawerOpen = !this.drawerOpen;
     },
     setObject: function(object) {
       if (object) {
@@ -143,7 +127,7 @@ export default {
           this.isPointset = true;
           this.$refs.pointsetControls.setObject(object);
           this.activeName = "pControls";
-        } else if (object.isLines2 || (object.isTubeLines && 
+        } else if (object.isLines2 || (object.isTubeLines &&
           this.usageConfig?.showTubeLinesControls)) {
           this.isLines = true;
           this.$refs.linesControls.setObject(object);
@@ -163,72 +147,20 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-.primitive-controls {
-  position: absolute;
-  bottom: 30%;
-  transition: all 1s ease;
-
-  &.open {
-    right: 0px;
-    .my-drawer {
-      opacity: 1;
-    }
-  }
-  &.close {
-    right: -250px;
-    .my-drawer {
-      pointer-events: none;
-      opacity: 0;
-    }
-  }
-}
 .my-drawer {
-  transition: all 1s ease;
-  float: right;
-  max-height: 150px;
-  text-align: left;
-  background: #ffffff;
-  width:250px;
   .collapse {
-    border: 1px solid rgb(220, 223, 230);
-    :deep(.el-collapse-item__header) {
-      padding-left: 8px;
-    }
-    :deep(.el-collapse-item__content) {
-      padding-bottom: 8px;
-    }
+    border-top: none;
+    border-bottom: none;
+  }
+
+  :deep(.el-collapse-item__header) {
+    height:36px;
+  }
+
+  :deep(.el-collapse-item__content) {
+    padding-bottom: 0px;
   }
 }
 
-.drawer-button {
-  float: right;
-  width: 20px;
-  height: 40px;
-  z-index: 8;
-  border: solid 1px $app-primary-color;
-  background-color: #f9f2fc;
-  text-align: center;
-  vertical-align: middle;
-  cursor: pointer;
-  pointer-events: auto;
-  margin-top: 25px;
-
-  i {
-    font-weight: 600;
-    margin-top: 12px;
-    color: $app-primary-color;
-    transition-delay: 0.9s;
-  }
-  &.open {
-    i {
-      transform: rotate(0deg) scaleY(2.5);
-    }
-  }
-  &.close {
-    i {
-      transform: rotate(180deg) scaleY(2.5);
-    }
-  }
-}
 
 </style>

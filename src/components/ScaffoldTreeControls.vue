@@ -1,6 +1,6 @@
 <template>
   <div class="tree-controls" :class="{ open: drawerOpen, close: !drawerOpen }">
-    <div class="traditional-container">
+    <div class="tree-controls-container">
       <slot name="treeSlot"></slot>
       <TreeControls
         mapType="scaffold"
@@ -673,45 +673,46 @@ export default {
   }
   &.open {
     left: 0px;
-    .traditional-container {
+    .tree-controls-container {
       opacity: 1;
     }
   }
   &.close {
-    left: -298px;
-    .traditional-container {
+    left: -278px;
+    .tree-controls-container {
       pointer-events: none;
       opacity: 0;
     }
   }
 }
 
-.traditional-container {
+.tree-controls-container {
   transition: all 1s ease;
   float: left;
-  padding-left: 16px;
-  padding-right: 18px;
+  padding-left: 8px;
+  padding-right: 8px;
   max-height: calc(100% - 154px);
   text-align: left;
   overflow: none;
   border: 1px solid rgb(220, 223, 230);
-  padding-top: 7px;
   padding-bottom: 16px;
   background: #ffffff;
 }
 
 .drawer-button {
+  position: absolute;
   float: left;
   width: 20px;
   height: 40px;
   z-index: 8;
-  margin-top: calc(50% - 52px);
+  bottom: 100px;
   border: solid 1px $app-primary-color;
   background-color: #f9f2fc;
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
   pointer-events: auto;
+  right: -22px;
 }
 
 .drawer-button {

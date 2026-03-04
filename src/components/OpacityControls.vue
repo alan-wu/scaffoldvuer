@@ -75,7 +75,6 @@ export default {
 .block {
   left: 40px;
   position: absolute;
-  top: 57px;
   width: 200px;
 }
 

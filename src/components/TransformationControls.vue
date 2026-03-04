@@ -159,6 +159,7 @@ export default {
     calculateMinAndMax: function() {
       if (this.zincObject) {
         const originalPos = this.zincObject?.userData?.originalPos;
+        const morph = this.zincObject.getGroup();
         if (originalPos && this.boundingDims) {
           this.min = [
             originalPos[0] - this.boundingDims.size[0],
@@ -215,7 +216,8 @@ export default {
 .slides-block {
   pointer-events: auto;
   &.el-main {
-    padding: 5px;
+    padding: 0px 4px 8px 4px;
+    overflow: unset;
     &::-webkit-scrollbar {
       width: 10px;
     }
@@ -263,7 +265,7 @@ export default {
 .tool-row {
   align-items:center;
   text-align: center;
-  padding-top:8px;
+  padding-top:4px;
 }
 
 </style>

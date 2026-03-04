@@ -114,20 +114,31 @@
           >
           <template v-slot:treeSlot>
             <slot name="treeSlot"></slot>
+            <primitive-controls
+              class="control-layer"
+              ref="primitiveControls"
+              :createData="createData"
+              :viewingMode="viewingMode"
+              :usageConfig="usageConfig"
+              @primitivesUpdated="primitivesUpdated"
+            />
           </template>
           </ScaffoldTreeControls>
         </template>
       </el-popover>
-      <div class="primitive-controls-box">
-        <primitive-controls
-          class="control-layer"
-          ref="primitiveControls"
-          :createData="createData"
-          :viewingMode="viewingMode"
-          :usageConfig="usageConfig"
-          @primitivesUpdated="primitivesUpdated"
-        />
-      </div>
+        <!--
+        <div class="primitive-controls-box">
+
+          <primitive-controls
+            class="control-layer"
+            ref="primitiveControls"
+            :createData="createData"
+            :viewingMode="viewingMode"
+            :usageConfig="usageConfig"
+            @primitivesUpdated="primitivesUpdated"
+          />
+        </div>
+        -->
       <el-popover
         v-if="timeVarying"
         ref="sliderPopover"
@@ -3276,7 +3287,7 @@ export default {
   transition: all 1s ease;
 
   &.open {
-    left: 322px;
+    left: 302px;
   }
 
   &.close {
