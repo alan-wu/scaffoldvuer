@@ -111,21 +111,23 @@ export default {
     */
   },
   methods: {
-    setCheckboxDisabled: function(data, flag, recursive) {
+    setCheckboxDisabled: function(data, flag, childrenOnly) {
       if (data) {
-        data.disabled = flag;
-        if (recursive && data.children) {
+        if (!childrenOnly) {
+          data.disabled = flag;
+        }
+        if (data.children) {
           data.children.forEach(child =>
-            this.setCheckboxDisabled(child, flag, recursive)
+            this.setCheckboxDisabled(child, flag, false)
           );
         }
       }
     },
-    setRegionCheckboxDisabled: function (region, flag) {
+    setRegionCheckboxDisabled: function (region, flag, childrenOnly) {
       if (this.treeData[0] && region?.uuid) {
         const data = this.findDataWithId(this.treeData[0], region?.uuid)
         if (data) {
-          this.setCheckboxDisabled(data, flag, true);
+          this.setCheckboxDisabled(data, flag, childrenOnly);
         }
       }
     },
@@ -283,6 +285,7 @@ export default {
           region.hideAllPrimitives();
           //this.checkedRegions = this.checkedRegions.filter(region => region.label !== node.label);
         }
+        this.$emit("check-changed", {region, isChecked});
       }
       if (isPrimitives) {
         const primitives = region.findObjectsWithGroupName(node.label);
@@ -290,6 +293,7 @@ export default {
           const visibility = isChecked && !node.disabled;
           primitive.setVisibility(visibility);
         });
+        this.$emit("check-changed", {zincObjects: primitives, isChecked});
       }
     },
     updateActiveUI: function (primitives) {

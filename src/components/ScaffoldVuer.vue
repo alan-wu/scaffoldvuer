@@ -110,6 +110,7 @@
             @object-selected="objectSelected"
             @object-hovered="objectHovered"
             @drawer-toggled="drawerToggled"
+            @check-changed="$emit('check-changed', $event)"
           >
           <template v-slot:treeSlot>
             <slot name="treeSlot"></slot>
@@ -2144,9 +2145,10 @@ export default {
      *
      * @arg region Region to set the disable/enable checkbox
      * @arg flag Disable the checkbox when true and enable when false
+     * @arg childrenOnly Only disable/enable any child graphics/regions
      */
-     setRegionCheckboxDisabled: function(region, flag) {
-      this.$refs.scaffoldTreeControls.setRegionCheckboxDisabled(region, flag);
+     setRegionCheckboxDisabled: function(region, flag, childrenOnly = true) {
+      this.$refs.scaffoldTreeControls.setRegionCheckboxDisabled(region, flag, childrenOnly);
     },
     /**
      * @public
