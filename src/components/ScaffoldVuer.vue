@@ -106,6 +106,7 @@
             class="control-layer"
             ref="scaffoldTreeControls"
             :isReady="isReady"
+            :containerHeight="clientHeight"
             :show-colour-picker="enableColourPicker"
             @object-selected="objectSelected"
             @object-hovered="objectHovered"
@@ -838,6 +839,7 @@ export default {
   data: function () {
     return {
       annotator: undefined,
+      clientHeight: 300,
       colourRadio: true,
       createData: {
         drawingBox: false,
@@ -1071,6 +1073,7 @@ export default {
     this.$module.addOrganPartRemovedCallback(this.zincObjectRemoved);
     this.$module.initialiseRenderer(this.$refs.display);
     this.toggleRendering(this.render);
+    this.clientHeight = this.$refs.scaffoldContainer.$el.clientHeight;
     this.ro = new ResizeObserver(this.adjustLayout).observe(
       this.$refs.scaffoldContainer.$el
     );
@@ -3021,6 +3024,7 @@ export default {
     adjustLayout: function () {
       if (this.$refs.scaffoldContainer?.$el) {
         let width = this.$refs.scaffoldContainer.$el.clientWidth;
+        this.clientHeight = this.$refs.scaffoldContainer.$el.clientHeight;
         this.minimisedSlider = width < 812;
         if (this.minimisedSlider) {
           this.sliderPosition = this.drawerOpen ? "right" : "left";
