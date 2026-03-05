@@ -74,7 +74,7 @@
           <el-slider
             v-model="slide.value"
             class="my-slider"
-            :step="0.005"
+            :step="0.001"
             :min="0"
             :max="1"
             :show-tooltip="false"
@@ -84,7 +84,8 @@
         <el-col :offset="0" :span="6">
           <el-input-number
             v-model="slide.value"
-            :step="0.01"
+            @change="modifySlide(slide)"
+            :step="0.001"
             :min="0"
             :max="1"
             :controls="false"
