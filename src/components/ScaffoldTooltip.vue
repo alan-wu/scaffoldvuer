@@ -32,28 +32,6 @@
           :annotationEntry="annotationEntry"
           @annotation="$emit('confirm-comment', $event)"
         />
-        <div v-if="createData.toBeDeleted" class="delete-container">
-          <el-row>
-            <el-col :span="10">Delete this feature?</el-col>
-            <el-col :span="7">
-              <el-button
-                class="delete-button"
-                :icon="ElIconDelete"
-                @click="$emit('confirm-delete')"
-                >
-                  Delete
-              </el-button>
-            </el-col>
-            <el-col :span="6">
-              <el-button
-                class="delete-button"
-                @click="$emit('cancel-create')"
-                >
-                  Dismiss
-              </el-button>
-            </el-col>
-          </el-row>
-        </div>
       </template>
     </el-popover>
   </div>
@@ -68,9 +46,6 @@ import {
   ElPopover as Popover,
   ElRow as Row,
 } from "element-plus";
-import {
-  Delete as ElIconDelete,
-} from '@element-plus/icons-vue'
 import { mapState } from 'pinia';
 import { useMainStore } from "@/store/index";
 import { CreateTooltipContent, Tooltip } from '@abi-software/map-utilities'
@@ -84,7 +59,6 @@ export default {
   components: {
     Col,
     CreateTooltipContent,
-    ElIconDelete,
     Icon,
     Popover,
     Row,
@@ -143,8 +117,7 @@ export default {
   data: function () {
     return {
       display: false,
-      annotationEntry: [],
-      ElIconDelete: shallowRef(ElIconDelete),
+      annotationEntry: []
     };
   },
   computed: {
@@ -252,24 +225,6 @@ export default {
     }
     &::before, &::after {
       display:none;
-    }
-  }
-
-  .delete-container {
-    margin-top: 12px;
-    margin-bottom: 12px;
-    font-size: 14px;
-    .delete-button {
-      pointer-events: auto;
-      cursor: pointer;
-      margin-left:8px;
-      padding-left: 8px;
-      padding-right: 8px;
-      height: 24px !important;
-      color: $app-primary-color;
-      &:hover {
-        background-color: var(--el-color-primary-light-9);
-      }
     }
   }
 }

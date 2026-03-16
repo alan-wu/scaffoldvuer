@@ -50,6 +50,16 @@ export const getEditablePoint = (eventIdentifiers) => {
   return undefined;
 }
 
+export const getDeletableObjects = (eventIdentifiers) => {
+  const zincObject = eventIdentifiers[0].data?.zincObject;
+  if (zincObject) {
+    if (zincObject.isEditable) {
+      return zincObject;
+    }
+  }
+  return undefined;
+}
+
 export const getEditableLines = (eventIdentifiers) => {
   const zincObject = eventIdentifiers[0].data?.zincObject;
   if (zincObject) {
@@ -78,17 +88,6 @@ export const getClickedObjects = (event) => {
   if (zincObjects.length > 0 && zincObjects[0]) {
     const zincObject = zincObjects[0];
     return zincObject;
-  }
-  return undefined;
-}
-
-export const getDeletableObjects = (event) => {
-  const zincObjects = event.zincObjects;
-  if (zincObjects.length > 0 && zincObjects[0]) {
-    const zincObject = zincObjects[0];
-    if (zincObject.isEditable) {
-      return zincObject;
-    }
   }
   return undefined;
 }

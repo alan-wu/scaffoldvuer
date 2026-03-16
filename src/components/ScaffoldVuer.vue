@@ -1457,6 +1457,9 @@ export default {
           this.renameAnnotations(payload.region, payload.group,
             this._editingZincObject, oldGroupName);
         }
+        else if (payload.deleting) {
+          this.confirmDelete();
+        }
         if (object) {
           this.addAndEditAnnotations(payload.region, payload.group, object.zincObject, "Create");
           object.zincObject.isEditable = true;
@@ -1535,6 +1538,12 @@ export default {
             this.offlineAnnotations = this.offlineAnnotations.filter(offline => offline.item.id !== annotation.item.id);
             sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
           }
+          this.$emit('userPrimitivesUpdated', {
+            region,
+            group,
+            zincObject: this._editingZincObject,
+            deleted: true
+          });
         }
       }
       this.cancelCreate();
@@ -1840,6 +1849,21 @@ export default {
         setTimeout(this.stopFreeSpin, 4000);
       }
     },
+    activateDeleteMode: function(eventIdentifiers) {
+      const zincObject = getDeletableObjects(eventIdentifiers);
+      if (zincObject) {
+        this._editingZincObject = zincObject;
+        this.createData.faceIndex = -1;
+        this.createData.editingIndex = -1;
+        this.createData.renaming = false;
+        this.createData.tempGroupName = this._editingZincObject.groupName;
+        this.createData.regionPrefix =  this._editingZincObject.region.getFullPath();
+        this.createData.toBeConfirmed = true;
+        this.createData.toBeDeleted = true;
+        this.tData.x = 50;
+        this.tData.y = 200;
+      }
+    },
     activateEditingMode: function(eventIdentifiers) {
       let editing = getEditablePoint(eventIdentifiers);
       if (editing) {
@@ -1866,6 +1890,7 @@ export default {
         this.createData.tempGroupName = this._editingZincObject.groupName;
         this.createData.regionPrefix =  this._editingZincObject.region.getFullPath();
         this.createData.toBeConfirmed = true;
+        this.createData.toBeDeleted = false;
         this.showRegionTooltipWithAnnotations(eventIdentifiers, false, false);
         this.tData.x = 50;
         this.tData.y = 200;
@@ -1886,11 +1911,7 @@ export default {
           if (this.activeDrawMode === "Edit") {
             this.activateEditingMode(event.identifiers);
           } else if (this.activeDrawMode === "Delete") {
-            const zincObject = getDeletableObjects(event);
-            if (zincObject) {
-              this.createData.toBeDeleted = true;
-              this._editingZincObject = zincObject;
-            }
+            this.activateDeleteMode(event.identifiers);
           }
           if (this.activeDrawMode !== "Point" && this.activeDrawMode !== "LineString") {
             this.showRegionTooltipWithAnnotations(event.identifiers, true, false);
@@ -1906,6 +1927,7 @@ export default {
       this._editingZincObject = zincObject;
       this.createData.faceIndex = -1;
       this.createData.renaming = false;
+      this.createData.toBeDeleted = false;
       this.createData.editingIndex = index;
       this.createData.regionPrefix =  this._editingZincObject.region.getFullPath();
       this.createData.tempGroupName = this._editingZincObject.groupName;
@@ -1915,6 +1937,7 @@ export default {
       this._editingZincObject = zincObject;
       this.createData.faceIndex = faceIndex;
       this.createData.renaming = false;
+      this.createData.toBeDeleted = false;
       this.createData.editingIndex = vertexIndex;
       this.createData.regionPrefix =  this._editingZincObject.region.getFullPath();
       this.createData.tempGroupName = this._editingZincObject.groupName;
