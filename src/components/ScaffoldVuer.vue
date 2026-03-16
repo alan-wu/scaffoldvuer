@@ -1539,7 +1539,7 @@ export default {
             sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
           }
           this.$emit('userPrimitivesUpdated', {
-            region,
+            region: this._editingZincObject.region,
             group,
             zincObject: this._editingZincObject,
             deleted: true
