@@ -2,6 +2,13 @@
   <el-container class="t-slides-container">
     <el-main class="slides-block">
       <el-row class="slide-row">
+      <el-checkbox
+          v-model="discardAlpha"
+        >
+          Discard Translucent Pixel
+        </el-checkbox>
+      </el-row>
+      <el-row class="slide-row">
         <el-col :offset="0" :span="8">
           Brightness
         </el-col>
@@ -74,7 +81,7 @@
           <el-slider
             v-model="slide.value"
             class="my-slider"
-            :step="0.005"
+            :step="0.001"
             :min="0"
             :max="1"
             :show-tooltip="false"
@@ -84,7 +91,8 @@
         <el-col :offset="0" :span="6">
           <el-input-number
             v-model="slide.value"
-            :step="0.01"
+            @change="modifySlide(slide)"
+            :step="0.001"
             :min="0"
             :max="1"
             :controls="false"
@@ -119,6 +127,7 @@ import {
   Plus as ElIconPlus,
 } from '@element-plus/icons-vue'
 import {
+  ElCheckbox as Checkbox,
   ElCol as Col,
   ElContainer as Container,
   ElDivider as Divider,
@@ -139,6 +148,7 @@ import { markRaw } from 'vue';
 export default {
   name: "TextureSlidesControls",
   components: {
+    Checkbox,
     Col,
     Container,
     Divider,
@@ -157,6 +167,7 @@ export default {
     return {
       brightness: 0.0,
       contrast: 1.0,
+      discardAlpha: true,
       settings: [],
       directions: [
         {
@@ -191,6 +202,14 @@ export default {
         }
       },
       immediate: false,
+    },
+    discardAlpha: {
+      handler: function (value) {
+        if (this.zincObject) {
+          this.zincObject.discardAlphaPixel(value);
+        }
+      },
+      immediate: false,
     }
   },
   methods: {
@@ -200,11 +219,13 @@ export default {
         this.settings = this.zincObject.getTextureSettings();
         this.brightness = this.zincObject.getBrightness();
         this.contrast = this.zincObject.getContrast();
+        this.discardAlpha = this.zincObject.isAlphaPixelDiscarded();
       } else {
         this.zincObject = undefined;
         this.settings = [];
         this.brightness = 0.0;
         this.contrast = 1.0;
+        this.discardAlpha = true;
       }
     },
     addNewSlide: function () {
@@ -276,7 +297,7 @@ export default {
 
 .t-slides-container {
   width: 250px;
-  height: 218px;
+  height: 250px;
   overflow-y: auto;
 }
 

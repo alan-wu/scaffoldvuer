@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     ElButton: typeof import('element-plus/es')['ElButton']
+    ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElCol: typeof import('element-plus/es')['ElCol']
     ElCollapse: typeof import('element-plus/es')['ElCollapse']
     ElCollapseItem: typeof import('element-plus/es')['ElCollapseItem']
@@ -16,7 +17,6 @@ declare module 'vue' {
     ElFooter: typeof import('element-plus/es')['ElFooter']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElIconArrowLeft: typeof import('@element-plus/icons-vue')['ArrowLeft']
-    ElIconArrowRight: typeof import('@element-plus/icons-vue')['ArrowRight']
     ElIconDelete: typeof import('@element-plus/icons-vue')['Delete']
     ElIconPlus: typeof import('@element-plus/icons-vue')['Plus']
     ElIconWarningFilled: typeof import('@element-plus/icons-vue')['WarningFilled']

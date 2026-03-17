@@ -1,26 +1,30 @@
 <template>
   <div class="tree-controls" :class="{ open: drawerOpen, close: !drawerOpen }">
-    <div class="traditional-container">
-      <slot name="treeSlot"></slot>
-      <TreeControls
-        mapType="scaffold"
-        title="Regions"
-        :isReady="isReady"
-        :treeData="treeDataEntry"
-        :active="active"
-        :hover="hover"
-        :showColourPicker="showColourPicker"
-        @setColour="setColour"
-        @checkChanged="checkChanged"
-        @changeActive="changeActiveByNode"
-        @changeHover="changeHoverByNode"
-        ref="treeControls"
-        @mouseleave="removeHover(true)"
-      />
+    <div class="tree-controls-scroll">
+      <div class="tree-controls-container"
+        :style="{ 'max-height': `${maxHeight}px` }">
+        <slot name="treeSlot"></slot>
+        <TreeControls
+          mapType="scaffold"
+          title="Regions"
+          :isReady="isReady"
+          :treeData="treeDataEntry"
+          :active="active"
+          :hover="hover"
+          :showColourPicker="showColourPicker"
+          @setColour="setColour"
+          @checkChanged="checkChanged"
+          @changeActive="changeActiveByNode"
+          @changeHover="changeHoverByNode"
+          ref="treeControls"
+          @mouseleave="removeHover(true)"
+        />
+      </div>
     </div>
     <div
       class="drawer-button"
       :class="{ open: drawerOpen, close: !drawerOpen }"
+      :style="{ 'bottom': `${drawerBottom}px` }"
       @click="toggleDrawer"
     >
       <el-icon><el-icon-arrow-left /></el-icon>
@@ -63,11 +67,12 @@ export default {
     TreeControls,
   },
   props: {
+    containerHeight: Number,
+    isReady: Boolean,
     /**
      * Enable/disable colour picker
      */
     showColourPicker: Boolean,
-    isReady: Boolean,
   },
   data: function () {
     return {
@@ -83,6 +88,19 @@ export default {
     };
   },
   computed: {
+    drawerBottom: function() {
+      if (100 > this.maxHeight) {
+        return this.maxHeight;
+      }
+      return 100;
+    },
+    maxHeight: function() {
+      let height = this.containerHeight - 114;
+      if (0 > height) {
+        height = 0;
+      }
+      return height;
+    },
     treeDataEntry: function () {
       return this.treeData[0].children;
     },
@@ -673,45 +691,69 @@ export default {
   }
   &.open {
     left: 0px;
-    .traditional-container {
+    .tree-controls-container {
       opacity: 1;
     }
   }
   &.close {
-    left: -298px;
-    .traditional-container {
+    left: -278px;
+    .tree-controls-container {
       pointer-events: none;
       opacity: 0;
     }
   }
 }
 
-.traditional-container {
+.tree-controls-container {
   transition: all 1s ease;
   float: left;
-  padding-left: 16px;
-  padding-right: 18px;
-  max-height: calc(100% - 154px);
+  padding-left: 8px;
+  padding-right: 8px;
   text-align: left;
-  overflow: none;
   border: 1px solid rgb(220, 223, 230);
-  padding-top: 7px;
   padding-bottom: 16px;
   background: #ffffff;
 }
 
+.tree-controls-scroll {
+  overflow-y:auto;
+  overflow-x:hidden;
+  //scrollbar-width: thin;
+
+  &:hover {
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+  }
+
+  &::-webkit-scrollbar-track {
+    border-radius: 8px; /* Rounded corners for the track */
+
+  }
+  &::-webkit-scrollbar {
+    width:4px;
+
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    box-shadow: inset 0 0 6px #c0c4cc;
+    background: #a1a1a1;
+  }
+}
+
 .drawer-button {
+  position: absolute;
   float: left;
   width: 20px;
   height: 40px;
   z-index: 8;
-  margin-top: calc(50% - 52px);
   border: solid 1px $app-primary-color;
   background-color: #f9f2fc;
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
   pointer-events: auto;
+  right: -22px;
 }
 
 .drawer-button {
