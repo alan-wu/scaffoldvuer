@@ -184,7 +184,7 @@ export default {
 .region-tooltip {
   position: absolute;
   height: 50px;
-  z-index: 2;
+  z-index: 3;
   :deep(.tooltip-popper.el-popover.el-popper) {
     padding: 2px 6px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
