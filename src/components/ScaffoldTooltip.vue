@@ -67,13 +67,20 @@ export default {
   props: {
     createData: {
       type: Object,
-      default: {
+      default:{
+        drawingBox: false,
+        renaming: false,
         toBeConfirmed: false,
         points: [],
+        tempGroupName: undefined,
         shape: "",
         x: 0,
         y: 0,
-      }
+        editingIndex: -1,
+        faceIndex: -1,
+        toBeDeleted: false,
+        regionPrefix: "__annotation"
+      },
     },
     label: {
       type: String,
