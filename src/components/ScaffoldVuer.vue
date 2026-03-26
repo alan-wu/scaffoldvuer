@@ -22,7 +22,6 @@
       @confirm-create="confirmCreate($event)"
       @cancel-create="cancelCreate()"
       @confirm-comment="confirmComment($event)"
-      @confirm-delete="confirmDelete()"
       @tooltip-hide="onTooltipHide()"
       @create-group-suggestions="$emit('create-group-suggestions', $event)"
       @create-region-suggestions="$emit('create-region-suggestions', $event)"
@@ -1348,9 +1347,9 @@ export default {
         this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
         const found = this.offlineAnnotations.find((element) => {
           return element.group === annotation.group &&
-                 element.region === annotation.region &&
-                 element.resource === annotation.resource &&
-                 element.feature.geometry.type === annotation.feature.geometry.type;
+            element.region === annotation.region &&
+            element.resource === annotation.resource &&
+            element.feature.geometry.type === annotation.feature.geometry.type;
         });
         if (found) {
           Object.assign(found, annotation);
@@ -1392,7 +1391,6 @@ export default {
                  element.feature.geometry.type === annotation.feature.geometry.type;
         });
         if (found) {
-          //console.log('found', found)
           Object.assign(found, annotation);
         }
         sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
@@ -1435,6 +1433,8 @@ export default {
             [this.createData.points[0], this.createData.points[1]],
             0x00ee22,
           );
+        } else if (payload.deleting) {
+          this.confirmDelete(payload);
         } else if (payload.editingIndex > -1) {
           if (this._editingZincObject) {
             let editedPoint = undefined;
@@ -1456,9 +1456,6 @@ export default {
           this.renameZincObject(this._editingZincObject, payload.group);
           this.renameAnnotations(payload.region, payload.group,
             this._editingZincObject, oldGroupName);
-        }
-        else if (payload.deleting) {
-          this.confirmDelete();
         }
         if (object) {
           this.addAndEditAnnotations(payload.region, payload.group, object.zincObject, "Create");
@@ -1523,19 +1520,45 @@ export default {
      * Confirm delete of user created primitive.
      * This is only called from callback.
      */
-    confirmDelete: function () {
+    confirmDelete: function (payload) {
       if (this._editingZincObject?.isEditable) {
         const regionPath = this._editingZincObject.region.getFullPath() + "/";
         const group = this._editingZincObject.groupName;
+        let toBeDeleted = true;
+        if (payload.editingIndex > -1 && this._editingZincObject.isPointset) {
+          toBeDeleted = 1 > this._editingZincObject.deleteVertices(payload.editingIndex);
+        }
+        const message = toBeDeleted ? "Deleted" : "Removed a vertex";
+
         const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken,
-          this._editingZincObject, regionPath, group, this.url, "Deleted");
+          this._editingZincObject, regionPath, group, this.url, message);
         if (annotation) {
           this.existDrawnFeatures = markRaw(this.existDrawnFeatures.filter(feature => feature.id !== annotation.item.id));
-          const childRegion = this.$module.scene.getRootRegion().findChildFromPath(regionPath);
-          childRegion.removeZincObject(this._editingZincObject);
+          if (toBeDeleted) {
+            const childRegion = this.$module.scene.getRootRegion().findChildFromPath(regionPath);
+            childRegion.removeZincObject(this._editingZincObject);
+          }
           if (this.offlineAnnotationEnabled) {
+            annotation.group = group;
+            let regionPath = payload.region;
+            if (regionPath.slice(-1) === "/") {
+              regionPath = regionPath.slice(0, -1);
+            }
+            annotation.region = regionPath;
             this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
-            this.offlineAnnotations = this.offlineAnnotations.filter(offline => offline.item.id !== annotation.item.id);
+            if (toBeDeleted) {
+              this.offlineAnnotations = this.offlineAnnotations.filter(offline => offline.item.id !== annotation.item.id);
+            } else {
+            //Do not remove completely if there is primitive left
+              const found = this.offlineAnnotations.find((element) => {
+                return element.group === group &&
+                      element.region === annotation.region &&
+                      element.resource === annotation.resource &&
+                      element.feature.geometry.type === annotation.feature.geometry.type;
+              });
+              Object.assign(found, annotation);
+              this.existDrawnFeatures.push(annotation.feature);
+            }
             sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
           }
           this.$emit('userPrimitivesUpdated', {
@@ -1852,9 +1875,11 @@ export default {
     activateDeleteMode: function(eventIdentifiers) {
       const zincObject = getDeletableObjects(eventIdentifiers);
       if (zincObject) {
+        const editing = getEditablePoint(eventIdentifiers);
+        const editingIndex = editing?.index !== undefined ? editing.index : -1;
         this._editingZincObject = zincObject;
         this.createData.faceIndex = -1;
-        this.createData.editingIndex = -1;
+        this.createData.editingIndex = editingIndex;
         this.createData.renaming = false;
         this.createData.tempGroupName = this._editingZincObject.groupName;
         this.createData.regionPrefix =  this._editingZincObject.region.getFullPath();
