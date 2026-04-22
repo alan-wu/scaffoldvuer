@@ -238,7 +238,7 @@ const OrgansSceneData = function() {
           id = intersectedObject.name;
         } else {
           const annotations = _this.getAnnotationsFromObjects(
-            [intersectedObject]);
+            [intersectedObject], undefined);
           if (annotations && annotations[0]) {
             id = annotations[0].data.group;
           }
@@ -267,6 +267,7 @@ const OrgansSceneData = function() {
 				],
 				intersected: intersected,
 				intersects: intersects,
+        instanceId: intersected?.instanceId ? intersected.instanceId : -1,
 			};
       const coords = { x: window_x, y: window_y };
       if (idObject.id) {
@@ -305,6 +306,7 @@ const OrgansSceneData = function() {
 					intersected ? intersected.point.y : 0,
 					intersected ? intersected.point.z : 0,
 				],
+        instanceId: intersected?.instanceId ? intersected.instanceId : -1,
 			}
       const coords = { x: window_x, y: window_y };
       if (idObject.id) {

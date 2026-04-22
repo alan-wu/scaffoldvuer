@@ -50,7 +50,7 @@ RendererModule.prototype.getIntersectedObject = function(intersects) {
         intersect.object.userData) {
         if (intersect.object.userData.isMarker) {
           return 1;
-        } else if (intersect.object.name && 
+        } else if (intersect.object.name &&
           intersect.object.userData.isZincObject) {
           if (intersect.object.name === "_Unnamed") {
             return 3;
@@ -75,7 +75,7 @@ RendererModule.prototype.getIntersectedObject = function(intersects) {
 }
 
 
-RendererModule.prototype.getAnnotationsFromObjects = function(objects) {
+RendererModule.prototype.getAnnotationsFromObjects = function(objects, extraData) {
   const annotations = [];
   for (var i = 0; i < objects.length; i++) {
     const zincObject = objects[i].userData;
@@ -88,10 +88,13 @@ RendererModule.prototype.getAnnotationsFromObjects = function(objects) {
         }
         annotation = glyphset.userData ? glyphset.userData.annotation : undefined;
         if (annotation && annotation.data) {
-          if (objects[i].name && objects[i].name != "")
+          if (extraData && 'instanceId' in extraData) {
+            annotation.data.id = glyphset.getLabel(extraData.instanceId);
+          } else if (objects[i].name && objects[i].name != "") {
             annotation.data.id = objects[i].name;
-          else
+          } else {
             annotation.data.id = glyphset.groupName;
+          }
         }
       } else {
         annotation = zincObject.userData ? zincObject.userData.annotation : undefined;
@@ -119,7 +122,7 @@ RendererModule.prototype.setHighlightedByObjects = function(
     let eventType = EVENT_TYPE.MOVE;
     if (changed)
       eventType = EVENT_TYPE.HIGHLIGHTED;
-    const annotations = this.getAnnotationsFromObjects(objects);
+    const annotations = this.getAnnotationsFromObjects(objects, extraData);
     if (annotations.length > 0) {
       annotations[0].coords = coords;
       annotations[0].extraData = extraData;
@@ -179,7 +182,7 @@ RendererModule.prototype.setSelectedByObjects = function(
     }
     if (propagateChanges) {
       const eventType = EVENT_TYPE.SELECTED;
-      const annotations = this.getAnnotationsFromObjects(objects);
+      const annotations = this.getAnnotationsFromObjects(objects, extraData);
       if (annotations.length > 0) {
         annotations[0].coords = coords;
         annotations[0].extraData = extraData;
@@ -239,7 +242,7 @@ RendererModule.prototype.resetView = function() {
   if (this.zincRenderer)
     this.zincRenderer.resetView();
 }
-  
+
 RendererModule.prototype.viewAll = function() {
   if (this.zincRenderer)
     this.zincRenderer.viewAll();
@@ -271,10 +274,10 @@ RendererModule.prototype.getPlayRate = function(value) {
   else
     return 0.0;
 }
-  
+
   /** Initialise everything in the renderer, including the 3D renderer,
  *  and picker for the 3D renderer.
- * 
+ *
  */
 RendererModule.prototype.initialiseRenderer = function(displayAreaIn) {
   if (this.zincRenderer === undefined || this.rendererContainer === undefined) {
