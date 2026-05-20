@@ -15,7 +15,7 @@
         @help-mode-last-item="onHelpModeLastItem"
         @shown-tooltip="onTooltipShown"
         @shown-map-tooltip="onMapTooltipShown"
-        :display-latest-changes="true"
+        :display-latest-changes="false"
         :display-minimap="displayMinimap"
         :display-markers="displayMarkers"
         :enableOpenMapUI="true"
