@@ -255,6 +255,11 @@
                   Arm slides
                 </el-button>
               </el-col>
+              <el-col :span="auto">
+                <el-button size="small" @click="multipleNifti()">
+                  Time x Nifti
+                </el-button>
+              </el-col>
             </el-row>
             <el-row :gutter="20" justify="center" align="middle">
               <el-col :span="auto">
@@ -321,6 +326,7 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import { AnnotationService } from '@abi-software/sparc-annotation'
+import { ElMessage } from 'element-plus';
 import { markRaw, shallowRef } from 'vue';
 import { ScaffoldVuer } from "./components/index.js";
 import DropZone from "./app/DropZone.vue";
@@ -342,6 +348,7 @@ import {
   ElUpload as Upload,
   ElSwitch as Switch,
 } from "element-plus";
+import { readNIFTIFromSource } from "./scripts/niftiHelper.js"
 import { useRoute, useRouter } from 'vue-router'
 import { HelpModeDialog } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
@@ -597,6 +604,20 @@ export default {
       }
       this.$refs.scaffold.clearScene();
       testSlides(this.$refs.scaffold, texture_prefix);
+    },
+    multipleNifti: async function () {
+      const urls = [
+        "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/tara/19-01-26/Aug16_Body_Seg_low.nii.gz",
+        "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/tara/19-01-26/Aug16_WholeBodyMRI_2_short.nii.gz"
+      ]
+      const newTexture = await readNIFTIFromSource(urls, true, this.maskUrl);
+      newTexture.timeEnabled = true;
+      newTexture.setIsPickable(false);
+      const scene = this.$refs.scaffold.$module.scene;
+      newTexture.setBrightness(0.38);
+      newTexture.setContrast(3.5);
+      scene.addZincObject(newTexture);
+      console.log(newTexture)
     },
     saveSettings: function () {
       this.sceneSettings.push(this.$refs.scaffold.getState());
