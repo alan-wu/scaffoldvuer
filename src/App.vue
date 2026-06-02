@@ -607,8 +607,9 @@ export default {
     },
     multipleNifti: async function () {
       const urls = [
-        "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/tara/19-01-26/Aug16_Body_Seg_low.nii.gz",
-        "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/tara/19-01-26/Aug16_WholeBodyMRI_2_short.nii.gz"
+        "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/digital_twins/080626-demo/downsample_phase_1.nii.gz",
+        "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/digital_twins/080626-demo/downsample_phase_3.nii.gz",
+        "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/digital_twins/080626-demo/downsample_phase_5.nii.gz"
       ]
       const newTexture = await readNIFTIFromSource(urls, true, this.maskUrl);
       newTexture.timeEnabled = true;

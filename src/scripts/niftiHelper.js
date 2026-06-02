@@ -6,7 +6,7 @@ import {
 
 const options = {
   hideWhitePixel: false,
-  hideBlackPixel: true,
+  hideBlackPixel: false,
   keepScalePosition: true,
   filterByValue: true,
   timeEnabled: true,
