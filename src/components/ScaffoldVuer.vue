@@ -454,6 +454,7 @@ import {
 } from '@element-plus/icons-vue'
 import PrimitiveControls from "./PrimitiveControls.vue";
 import ScaffoldOverlay from "./ScaffoldOverlay.vue";
+import { readNIFTIFromSource } from "../scripts/niftiHelper.js"
 import ScaffoldTooltip from "./ScaffoldTooltip.vue";
 import ScaffoldTreeControls from "./ScaffoldTreeControls.vue";
 import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
@@ -3130,6 +3131,10 @@ export default {
       for (const [key, value] of Object.entries(this.markerLabels)) {
         this.setMarkerModeForObjectsWithName(key, value, "on");
       }
+    },
+    readNIFTIFromSource: async function(urls, useHeaderInfo, maskURL) {
+      const newTexture = await readNIFTIFromSource(urls, useHeaderInfo, maskURL);
+      return newTexture;
     },
   },
 };

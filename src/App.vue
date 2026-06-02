@@ -348,7 +348,6 @@ import {
   ElUpload as Upload,
   ElSwitch as Switch,
 } from "element-plus";
-import { readNIFTIFromSource } from "./scripts/niftiHelper.js"
 import { useRoute, useRouter } from 'vue-router'
 import { HelpModeDialog } from '@abi-software/map-utilities'
 import '@abi-software/map-utilities/dist/style.css'
@@ -611,7 +610,7 @@ export default {
         "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/digital_twins/080626-demo/downsample_phase_3.nii.gz",
         "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/digital_twins/080626-demo/downsample_phase_5.nii.gz"
       ]
-      const newTexture = await readNIFTIFromSource(urls, true, this.maskUrl);
+      const newTexture = await this.$refs.scaffold.readNIFTIFromSource(urls, true, this.maskUrl);
       newTexture.timeEnabled = true;
       newTexture.setIsPickable(false);
       const scene = this.$refs.scaffold.$module.scene;
