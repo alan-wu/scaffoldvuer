@@ -1,8 +1,5 @@
 //import * as nifti from 'nifti-reader-js';
 import { createPrimitivesFromNIFTI } from "zincjs/src/loaders/niftiReader.js";
-import {
-  THREE
-} from "zincjs";
 
 const options = {
   hideWhitePixel: false,

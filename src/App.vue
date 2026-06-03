@@ -616,8 +616,8 @@ export default {
       const scene = this.$refs.scaffold.$module.scene;
       newTexture.setBrightness(0.38);
       newTexture.setContrast(3.5);
+      newTexture.setPosition(-158.73, -150.51, -198.50);
       scene.addZincObject(newTexture);
-      console.log(newTexture)
     },
     saveSettings: function () {
       this.sceneSettings.push(this.$refs.scaffold.getState());
