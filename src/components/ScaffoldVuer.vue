@@ -3132,8 +3132,8 @@ export default {
         this.setMarkerModeForObjectsWithName(key, value, "on");
       }
     },
-    readNIFTIFromSource: async function(urls, useHeaderInfo, maskURL) {
-      const newTexture = await readNIFTIFromSource(urls, useHeaderInfo, maskURL);
+    readNIFTIFromSource: async function(urls, useHeaderInfo, maskURL, settings, options) {
+      const newTexture = await readNIFTIFromSource(urls, useHeaderInfo, maskURL, settings, options);
       return newTexture;
     },
   },
