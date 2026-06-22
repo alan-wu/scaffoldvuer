@@ -605,12 +605,51 @@ export default {
       testSlides(this.$refs.scaffold, texture_prefix);
     },
     multipleNifti: async function () {
+      const v1 = {
+        "id": "mesh-location-orientation",
+        "locations": [
+          {
+            "identifier": 1,
+            "label": "original",
+            "orientation": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
+            "position": [-283, -363, 1090],
+            "scale": [540, 540, 276],
+            "flipY": false,
+            "flipZ": true,
+            "reference_point": "corner"
+          }
+        ],
+        "settings": {
+          "slides": [
+            {
+              "direction": "x",
+              "value": 0.5
+            },
+            {
+              "direction": "y",
+              "value": 0.5
+            },
+            {
+              "direction": "z",
+              "value": 0.45
+            }
+          ]
+        },
+        "type": "slides"
+      }
+      const options = {
+        hideWhitePixel: false,
+        hideBlackPixel: false,
+        keepScalePosition: true,
+        filterByValue: true,
+        timeEnabled: true,
+      }
       const urls = [
         "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/digital_twins/080626-demo/downsample_phase_1.nii.gz",
         "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/digital_twins/080626-demo/downsample_phase_3.nii.gz",
         "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/digital_twins/080626-demo/downsample_phase_5.nii.gz"
       ]
-      const newTexture = await this.$refs.scaffold.readNIFTIFromSource(urls, true, this.maskUrl);
+      const newTexture = await this.$refs.scaffold.readNIFTIFromSource(urls, true, this.maskUrl, v1, options, true);
       newTexture.timeEnabled = true;
       newTexture.setIsPickable(false);
       const scene = this.$refs.scaffold.$module.scene;
