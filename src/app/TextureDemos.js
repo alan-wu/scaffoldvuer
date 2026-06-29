@@ -1,4 +1,4 @@
-import volumeTexture from "zincjs/src/shaders/volumeTexture.js";
+import * as volumeTexture from "zincjs/src/shaders/volumeTexture.js";
 
 const getVolumeTexture = (texture) => {
   const myUniforms = volumeTexture.getUniforms();
@@ -68,7 +68,7 @@ export const testVolume = async (scaffoldVuer, texture_prefix) => {
 const addCylinder = (scaffoldVuer) => {
   const THREE = scaffoldVuer.$module.Zinc.THREE;
   const cylinderGeometry = new THREE.CylinderGeometry(50, 50, 200,80);
-  const material = new THREE.MeshPhongMaterial( {color: 0xffff00, side : THREE.DoubleSide} ); 
+  const material = new THREE.MeshPhongMaterial( {color: 0xffff00, side : THREE.DoubleSide} );
   const cylinderMesh = new THREE.Mesh( cylinderGeometry, material );
   const zincGeometry = new scaffoldVuer.$module.Zinc.Geometry();
   zincGeometry.setMesh(cylinderMesh, false, false);
