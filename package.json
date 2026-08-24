@@ -74,6 +74,9 @@
     "vitepress": "^1.0.0-rc.42",
     "vue-docgen-api": "^4.79.2"
   },
+  "overrides": {
+    "three": "^0.185.1"
+  },
   "optionalDependencies": {
     "@rollup/rollup-darwin-arm64": "4.62.3",
     "@rollup/rollup-linux-x64-gnu": "4.62.3",
