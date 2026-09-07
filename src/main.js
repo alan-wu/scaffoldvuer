@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import * as VueRouter from 'vue-router'
 import App from './App.vue'
 import { useMainStore } from '@/store/index'
+import './assets/fonts.scss'
 
 const routes = [
   { path: '/'},

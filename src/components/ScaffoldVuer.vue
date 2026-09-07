@@ -2876,10 +2876,10 @@ export default {
         this._slides = this.$module.scene.addSlicesPrimitive(
           "_helper", ["x-plane", "y-plane", "z-plane"], [0xFF5555, 0x55FF55, 0x5555FF],
           0.5);
-        this.calculateBoundingBox();
         //this.$module.scene.createAxisDisplay(false);
         //this.$module.scene.enableAxisDisplay(true, true);
         this.isReady = true;
+        this.calculateBoundingBox();
         //console.log(`found ${foundNerves}`);
         this.$nextTick(() => {
           this.restoreSettings(options);

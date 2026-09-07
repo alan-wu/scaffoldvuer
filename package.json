@@ -1,9 +1,9 @@
 {
   "name": "@abi-software/scaffoldvuer",
-  "version": "1.18.1",
+  "version": "1.20.0",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=20"
+    "node": "^24.20.0"
   },
   "repository": {
     "type": "git",
@@ -13,6 +13,7 @@
     "serve": "vite --host --force",
     "build-bundle": "vite build",
     "build-static": "vite build -c vite.static-build.js",
+    "lint": "eslint .",
     "vuese-gen": "node vuese-generator.js",
     "vuese-watch": "node vuese-generator.js watch",
     "changelog": "auto-changelog -p --output CHANGELOG.md --template keepachangelog",
@@ -44,60 +45,56 @@
     "*.js"
   ],
   "dependencies": {
-    "@abi-software/map-utilities": "1.9.0",
+    "@abi-software/map-utilities": "1.11.0",
     "@abi-software/sparc-annotation": "^0.3.2",
-    "@abi-software/svg-sprite": "1.1.0",
-    "@element-plus/icons-vue": "^2.3.1",
-    "core-js": "^3.22.5",
-    "element-plus": "2.8.4",
-    "minisearch": "^6.0.1",
-    "pinia": "^2.1.7",
+    "@abi-software/svg-sprite": "1.4.0",
+    "@element-plus/icons-vue": "^2.3.2",
+    "core-js": "^3.50.0",
+    "element-plus": "^2.14.5",
+    "minisearch": "^7.2.0",
+    "pinia": "^4.0.3",
     "simple-dropzone": "^0.8.3",
-    "unplugin-vue-components": "^0.26.0",
-    "vue": "^3.4.21",
-    "vue-router": "^4.2.5",
-    "zincjs": "^2.1.1"
+    "vue": "^3.5.41",
+    "vue-router": "^5.2.0",
+    "zincjs": "^2.3.0"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.28.0",
-    "@vitejs/plugin-vue": "^4.6.2",
+    "@eslint/js": "^10.0.1",
+    "@babel/eslint-parser": "^8.0.1",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "unplugin-vue-components": "^32.1.0",
     "@vuese/markdown-render": "^2.11.3",
-    "auto-changelog": "^2.4.0",
+    "auto-changelog": "^2.6.0",
     "babel-plugin-component": "^1.1.1",
-    "chokidar": "^3.6.0",
-    "concurrently": "^8.2.2",
-    "eslint": "^9.34.0",
-    "eslint-plugin-vue": "^9.19.2",
-    "sass": "^1.69.5",
-    "vite": "^5.0.10",
-    "vite-plugin-node-polyfills": "^0.21.0",
-    "vitepress": "^1.0.0-rc.42",
+    "chokidar": "^5.0.0",
+    "concurrently": "^9.2.4",
+    "eslint": "^10.9.1",
+    "eslint-plugin-vue": "^10.10.0",
+    "globals": "^17.11.0",
+    "sass": "^1.103.1",
+    "vite": "^8.2.1",
+    "vite-plugin-node-polyfills": "^0.28.0",
+    "vitepress": "^1.6.4",
     "vue-docgen-api": "^4.79.2"
   },
   "overrides": {
     "three": "^0.185.1"
   },
   "optionalDependencies": {
-    "@rollup/rollup-darwin-arm64": "4.62.3",
-    "@rollup/rollup-linux-x64-gnu": "4.62.3",
-    "@rollup/rollup-win32-x64-msvc": "4.62.3"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "rules": {},
-    "parserOptions": {
-      "parser": "babel-eslint"
-    }
+    "@esbuild/darwin-arm64": "0.28.2",
+    "@esbuild/linux-x64": "0.28.2",
+    "@rollup/rollup-darwin-arm64": "4.63.0",
+    "@rollup/rollup-linux-x64-gnu": "4.63.0",
+    "@rollup/rollup-win32-x64-msvc": "4.63.0"
   },
   "browserslist": [
     "> 1%",
     "last 2 versions"
-  ]
+  ],
+  "allowScripts": {
+    "@parcel/watcher@2.6.0": true,
+    "core-js@3.50.0": true,
+    "fsevents@2.3.3": true,
+    "esbuild@0.21.5": true
+  }
 }
