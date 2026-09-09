@@ -548,6 +548,14 @@ export default {
   },
   props: {
     /**
+      * The option to edit annotation regardless of whether
+      * resources matches or not
+      */
+      annotationIgnoreResource: {
+      type: Boolean,
+      default: false,
+    },
+    /**
       * The option to show annotation information in sidebar
       */
     annotationSidebar: {
@@ -1374,7 +1382,7 @@ export default {
         const found = this.offlineAnnotations.find((element) => {
           return element.group === annotation.group &&
             element.region === annotation.region &&
-            element.resource === annotation.resource &&
+            (this.annotationIgnoreResource || element.resource === annotation.resource) &&
             element.feature.geometry.type === annotation.feature.geometry.type;
         });
         if (found) {
@@ -1413,7 +1421,7 @@ export default {
         const found = this.offlineAnnotations.find((element) => {
           return element.group === oldName &&
                  element.region === annotation.region &&
-                 element.resource === annotation.resource &&
+                 (this.annotationIgnoreResource || element.resource === annotation.resource) &&
                  element.feature.geometry.type === annotation.feature.geometry.type;
         });
         if (found) {
@@ -1579,7 +1587,7 @@ export default {
               const found = this.offlineAnnotations.find((element) => {
                 return element.group === group &&
                       element.region === annotation.region &&
-                      element.resource === annotation.resource &&
+                      (this.annotationIgnoreResource || element.resource === annotation.resource) &&
                       element.feature.geometry.type === annotation.feature.geometry.type;
               });
               Object.assign(found, annotation);
@@ -2880,7 +2888,6 @@ export default {
         //this.$module.scene.enableAxisDisplay(true, true);
         this.isReady = true;
         this.calculateBoundingBox();
-        //console.log(`found ${foundNerves}`);
         this.$nextTick(() => {
           this.restoreSettings(options);
           this.$emit("on-ready");
