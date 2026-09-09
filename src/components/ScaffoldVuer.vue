@@ -970,6 +970,11 @@ export default {
         isSearch: false,
       }),
       //checkedRegions: []
+      unwatchURL: null,
+      unwatchRegion: null,
+      unwatchState: null,
+      unwatchViewURL: null,
+      unwatchMarkerCluster: null,
     };
   },
   watch: {
@@ -979,6 +984,7 @@ export default {
       },
       immediate: true,
     },
+    /*
     url: {
       handler: function (newValue) {
         if (this.state === undefined || this.state.url === undefined)
@@ -1005,6 +1011,13 @@ export default {
       },
       immediate: true,
     },
+    markerCluster: {
+      handler: function (val) {
+        this.$module.scene.enableMarkerCluster(val);
+      },
+      immediate: true,
+    },
+    */
     helpMode: function (newVal, oldVal) {
       if (newVal !== oldVal) {
         this.setHelpMode(newVal)
@@ -1045,12 +1058,6 @@ export default {
     render: function (val) {
       this.toggleRendering(val);
     },
-    markerCluster: {
-      handler: function (val) {
-        this.$module.scene.enableMarkerCluster(val);
-      },
-      immediate: true,
-    },
     markerLabels: function(labels) {
       for (const [key, value] of Object.entries(this.previousMarkerLabels)) {
         this.setMarkerModeForObjectsWithName(key, value, "off");
@@ -1070,16 +1077,16 @@ export default {
     this.availableBackground = ["white", "black", "lightskyblue"];
     this.$_searchIndex = new SearchIndex();
   },
-  mounted: function () {
+  mounted: async function () {
     this.openMapRef = shallowRef(this.$refs.openMapRef);
     this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef);
-    this.$refs.scaffoldTreeControls.setModule(this.$module);
+    //this.$refs.scaffoldTreeControls.setModule(this.$module);
     let eventNotifier = new EventNotifier();
     eventNotifier.subscribe(this, this.eventNotifierCallback);
     this.$module.addNotifier(eventNotifier);
     this.$module.addOrganPartAddedCallback(this.zincObjectAdded);
     this.$module.addOrganPartRemovedCallback(this.zincObjectRemoved);
-    this.$module.initialiseRenderer(this.$refs.display);
+    await this.$module.initialiseRenderer(this.$refs.display);
     this.toggleRendering(this.render);
     this.clientHeight = this.$refs.scaffoldContainer.$el.clientHeight;
     this.ro = new ResizeObserver(this.adjustLayout).observe(
@@ -1094,11 +1101,66 @@ export default {
     this.$module.zincRenderer.addContextRestoredCallbackFunction(() => {
       this.backgroundChangeCallback(this.currentBackground);
     })
+    //Setup some watchers that depend on threejs init()
+    this.unwatchURL = this.$watch(
+      'url',
+      (newVal) => {
+        if (this.state === undefined || this.state.url === undefined) {
+          this.setURL(newVal);
+        }
+      },
+      { immediate: true } // Runs immediately after creation, if desired
+    );
+    this.unwatchRegion = this.$watch(
+      'region',
+      (region) => {
+        if (!(this.state || this.viewURL)) {
+          this.setFocusedRegion(region);
+        }
+      },
+      { immediate: true }
+    );
+    this.unwatchState = this.$watch(
+      'state',
+      (state) => {
+        this.setState(state);
+      },
+      {  deep: true, immediate: true }
+    );
+    this.unwatchViewURL = this.$watch(
+      'viewURL',
+      (viewURL) => {
+        this.updateViewURL(viewURL);
+      },
+      { immediate: true }
+    );
+    this.unwatchURL = this.$watch(
+      'url',
+      (newValue) => {
+        if (this.state === undefined || this.state.url === undefined) {
+          this.setURL(newValue);
+        }
+      },
+      { immediate: true }
+    );
+    this.unwatchMarkerCluster = this.$watch(
+      'markerCluster',
+      (val) => {
+        this.$module.scene.enableMarkerCluster(val);
+      },
+      { immediate: true }
+    );
   },
   beforeUnmount: function () {
+    if (this.unwatchURL) this.unwatchURL();
+    if (this.unwatchRegion) this.unwatchRegion();
+    if (this.unwatchState) this.unwatchState();
+    if (this.unwatchViewURL) this.unwatchViewURL();
+    if (this.unwatchMarkerCluster) this.unwatchMarkerCluster();
     if (this.ro) this.ro.disconnect();
     this.$module.destroy();
     this.$module = undefined;
+
   },
   computed: {
     ...mapStores(useMainStore),

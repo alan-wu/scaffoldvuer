@@ -669,8 +669,8 @@ const OrgansSceneData = function() {
 	 *
 	 * @async
 	 */
-	 const initialise = function() {
-	   _this.initialiseRenderer(undefined);
+	 const initialise = async function() {
+	   await _this.initialiseRenderer(undefined);
 	   if (_this.zincRenderer) {
        _this.zincRenderer.addPreRenderCallbackFunction(preRenderUpdateCallback());
        _this.zincRenderer.addPostRenderCallbackFunction(postRenderUpdateCallback());

@@ -11,14 +11,14 @@ import { objectsToZincObjects } from "./Utilities";
  * @param {String} elementID - id of the target dom element.
  * @returns {Zinc.Renderer}
  */
-const createRenderer = function () {
+const createRenderer = async function () {
   const localContainer = document.createElement( 'div' );
   let localRenderer = undefined;;
   localContainer.style.height = "100%";
   if (WEBGL.isWebGLAvailable()) {
     localRenderer = new Zinc.Renderer(localContainer, window);
     Zinc.defaultMaterialColor = 0xFFFF9C;
-    localRenderer.initialiseVisualisation();
+    await localRenderer.initialiseVisualisation();
     localRenderer.playAnimation = false;
   } else {
     const warning = WEBGL.getWebGLErrorMessage();
@@ -279,9 +279,9 @@ RendererModule.prototype.getPlayRate = function(value) {
  *  and picker for the 3D renderer.
  *
  */
-RendererModule.prototype.initialiseRenderer = function(displayAreaIn) {
+RendererModule.prototype.initialiseRenderer = async function(displayAreaIn) {
   if (this.zincRenderer === undefined || this.rendererContainer === undefined) {
-    let returnedValue = createRenderer();
+    let returnedValue = await createRenderer();
     this.Zinc = returnedValue["Zinc"];
     this.zincRenderer = returnedValue["renderer"];
     this.rendererContainer = returnedValue["container"];

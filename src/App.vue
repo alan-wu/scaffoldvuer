@@ -771,9 +771,9 @@ export default {
       this.$refs.scaffold.search(term, true);
     },
     viewerMounted: function() {
-      this.selectedCoordinates =
-        this.$refs.scaffold.getDynamicSelectedCoordinates();
-      this.rendererInfo = this.$refs.scaffold.getRendererInfo();
+    //  this.selectedCoordinates =
+    //    this.$refs.scaffold.getDynamicSelectedCoordinates();
+    //  this.rendererInfo = this.$refs.scaffold.getRendererInfo();
     },
     PrintViewport: function() {
       const scene = this.$refs.scaffold.$module.scene;
