@@ -77,9 +77,6 @@
     "vitepress": "^1.6.4",
     "vue-docgen-api": "^4.79.2"
   },
-  "overrides": {
-    "three": "^0.185.1"
-  },
   "optionalDependencies": {
     "@esbuild/darwin-arm64": "0.28.2",
     "@esbuild/linux-x64": "0.28.2",
