@@ -431,237 +431,207 @@ const OrgansSceneData = function() {
     }
 	}
 
-	  /**
-		 * New organs geometry has been added to the scene, add UIs and make
-		 * sure the viewport is correct.
-		 */
-	  const _addOrganPartCallback = function(systemName, partName, useDefautColour) {
-	    return function(zincObject) {
-	    	addOrganPart(systemName, partName, useDefautColour, zincObject);
-	    }
-	  }
+  /**
+   * New organs geometry has been added to the scene, add UIs and make
+   * sure the viewport is correct.
+   */
+  const _addOrganPartCallback = function(systemName, partName, useDefautColour) {
+    return function(zincObject) {
+      addOrganPart(systemName, partName, useDefautColour, zincObject);
+    }
+  }
 
-	  /**
-		 * Organs geometry has been removed to the scene.
-		 */
-	  const _removeOrganPartCallback = function(systemName, partName, useDefautColour) {
-	    return function(zincObject) {
-	    	removeOrganPart(systemName, partName, useDefautColour, zincObject);
-	    }
-	  }
+  /**
+   * Organs geometry has been removed to the scene.
+   */
+  const _removeOrganPartCallback = function(systemName, partName, useDefautColour) {
+    return function(zincObject) {
+      removeOrganPart(systemName, partName, useDefautColour, zincObject);
+    }
+  }
 
-	  const downloadCompletedCallback = function() {
-		  return function() {
-			  _this.settingsChanged();
-			  _this.sceneData.timeVarying = _this.scene.isTimeVarying();
-        if (finishDownloadCallback)
-          finishDownloadCallback();
-		  }
-	  }
+  const downloadCompletedCallback = function() {
+    return function() {
+      _this.settingsChanged();
+      _this.sceneData.timeVarying = _this.scene.isTimeVarying();
+      if (finishDownloadCallback)
+        finishDownloadCallback();
+    }
+  }
 
-		//The payload can either be a zinc object when the loading is successful or
-		//an object containg the details of error message on failure.
-		//We only use it to handle an error
-	  const singleItemFinishCallback = function() {
-      return function(payload) {
+  //The payload can either be a zinc object when the loading is successful or
+  //an object containg the details of error message on failure.
+  //We only use it to handle an error
+  const singleItemFinishCallback = function() {
+    return function(payload) {
 
-				if (payload?.type === "Error") {
-					if (downloadErrorCallback) {
-						const error = {
-							xhr: payload.xhr,
-							type: "download-error",
-						};
-						downloadErrorCallback(error);
-					}
-				}
-      }
-	  }
-
-	  /**
-		 * Toggle data field displays. Data fields displays flow/pressure and      <button @click="play">Play</button>
-		 * other activities of the organs.
-		 */
-	  this.updateFieldvisibility = function(dataFields, value) {
-      for ( let i = 0; i < dataFields.length; i ++ ) {
-        if (value != i) {
-          const geometryName = dataFields[i].PartName;
-          _this.changeOrganPartsVisibility(geometryName, false);
+      if (payload?.type === "Error") {
+        if (downloadErrorCallback) {
+          const error = {
+            xhr: payload.xhr,
+            type: "download-error",
+          };
+          downloadErrorCallback(error);
         }
       }
-      if (value > -1) {
-        const partName = dataFields[value].PartName;
-        if ((_this.scene.findGeometriesWithGroupName(partName).length > 0) ||
-          (_this.scene.findGlyphsetsWithGroupName(partName).length > 0)) {
-          _this.changeOrganPartsVisibility(partName, true);
-        } else {
-          const partDetails = getOrganDetails(dataFields[value].SystemName, partName);
-          if (partDetails != undefined) {
-            _this.scene.loadMetadataURL(modelsLoader.getOrgansDirectoryPrefix() + "/" + partDetails.meta);
+    }
+  }
+
+  /**
+   * Toggle data field displays. Data fields displays flow/pressure and      <button @click="play">Play</button>
+   * other activities of the organs.
+   */
+  this.updateFieldvisibility = function(dataFields, value) {
+    for ( let i = 0; i < dataFields.length; i ++ ) {
+      if (value != i) {
+        const geometryName = dataFields[i].PartName;
+        _this.changeOrganPartsVisibility(geometryName, false);
+      }
+    }
+    if (value > -1) {
+      const partName = dataFields[value].PartName;
+      if ((_this.scene.findGeometriesWithGroupName(partName).length > 0) ||
+        (_this.scene.findGlyphsetsWithGroupName(partName).length > 0)) {
+        _this.changeOrganPartsVisibility(partName, true);
+      } else {
+        const partDetails = getOrganDetails(dataFields[value].SystemName, partName);
+        if (partDetails != undefined) {
+          _this.scene.loadMetadataURL(modelsLoader.getOrgansDirectoryPrefix() + "/" + partDetails.meta);
+        }
+      }
+    }
+  }
+
+  /**
+   * Return an array containing name(s) of species that also contains the
+   * currently displayed organs.
+   *
+   * @returns {Array} containing species name
+   */
+  this.getAvailableSpecies = function(currentSpecies, currentSystem, currentPart) {
+    const availableSpecies = new Array();
+    availableSpecies.push("none");
+    const keysArray = Object.keys(organsFileMap);
+    for (index in keysArray) {
+      const species = keysArray[index];
+      if (species != currentSpecies) {
+        if (organsFileMap[species].hasOwnProperty(currentSystem) &&
+            organsFileMap[species][currentSystem].hasOwnProperty(currentPart)) {
+          availableSpecies.push(species);
+        }
+      }
+    }
+    return availableSpecies;
+  }
+
+  /**
+   * Return the center and size of the cuurrent viewing scene
+   */
+  this.getCentreAndSize = function() {
+    const vector = new THREE.Vector3();
+    const boundingBox = this.scene.getBoundingBox();
+    boundingBox.getCenter(vector);
+    const centre = [vector.x, vector.y, vector.z];
+    boundingBox.getSize(vector);
+    const size = [vector.x, vector.y, vector.z];
+    return {centre, size};
+  }
+
+  const setSceneData = function(speciesName, systemName, partName, organsDetails) {
+    _this.sceneData.nerveMapIsActive = false;
+    _this.sceneData.nerveMap = undefined;
+    _this.sceneData.metaURL = "";
+    _this.sceneData.viewURL = "";
+    _this.sceneData.currentSpecies = speciesName;
+    _this.sceneData.currentSystem = systemName;
+    _this.sceneData.currentPart = partName;
+    _this.sceneData.currentTime = 0.0;
+    _this.sceneData.timeVarying = false;
+    // This is used as title
+    let name = "";
+    if (speciesName)
+      name = speciesName + "/";
+    if (systemName)
+      name = systemName + "/";
+    if (partName)
+      name = partName;
+    _this.sceneData.currentName = name;
+  }
+
+  this.loadOrgansFromURL = function(url, speciesName, systemName, partName, viewURL, clearFirst, options) {
+    if (_this.zincRenderer) {
+      if (partName && (_this.sceneData.metaURL !== url)) {
+          setSceneData(speciesName, systemName, partName, undefined);
+          const name = _this.sceneData.currentName;
+          let organScene = _this.zincRenderer.getSceneByName(name);
+          if (organScene) {
+            if (clearFirst)
+              organScene.clearAll();
+          } else {
+            organScene = _this.zincRenderer.createScene(name);
           }
-        }
-	    }
-	  }
+          _this.selectObjectOnPick = true;
+          for (let i = 0; i < sceneChangedCallbacks.length;i++) {
+            sceneChangedCallbacks[i](_this.sceneData);
+          }
+          if (viewURL && viewURL != "") {
+            _this.sceneData.viewURL = viewURL;
+            organScene.loadViewURL(_this.sceneData.viewURL);
+          } else {
+            _this.sceneData.viewURL = undefined;
+          }
+          _this.sceneData.metaURL = url;
+          organScene.addZincObjectAddedCallbacks(_addOrganPartCallback(systemName, partName, false));
+          organScene.addZincObjectRemovedCallbacks(_removeOrganPartCallback(undefined, partName, false));
+          organScene.loadMetadataURL(url, singleItemFinishCallback(), downloadCompletedCallback(), options);
+          _this.scene = organScene;
+          _this.zincRenderer.setCurrentScene(organScene);
+          _this.graphicsHighlight.reset();
+          const zincCameraControl = organScene.getZincCameraControls();
+          zincCameraControl.enableRaycaster(organScene, _pickingCallback(), _hoverCallback());
+          zincCameraControl.setMouseButtonAction("AUXILIARY", "ZOOM");
+          zincCameraControl.setMouseButtonAction("SECONDARY", "PAN");
+      }
+    }
+  }
 
-	  /**
-		 * Return an array containing name(s) of species that also contains the
-		 * currently displayed organs.
-		 *
-		 * @returns {Array} containing species name
-		 */
-	  this.getAvailableSpecies = function(currentSpecies, currentSystem, currentPart) {
-	    const availableSpecies = new Array();
-	    availableSpecies.push("none");
-	    const keysArray = Object.keys(organsFileMap);
-	    for (index in keysArray) {
-	      const species = keysArray[index];
-	      if (species != currentSpecies) {
-	        if (organsFileMap[species].hasOwnProperty(currentSystem) &&
-	            organsFileMap[species][currentSystem].hasOwnProperty(currentPart)) {
-	          availableSpecies.push(species);
-	        }
-	      }
-	    }
-	    return availableSpecies;
-	  }
+  this.loadGLTFFromURL = function(url, partName, clearFirst) {
+    if (_this.zincRenderer) {
+      if (partName && (_this.sceneData.metaURL !== url)) {
+          setSceneData(undefined, undefined, partName, undefined);
+          const name = _this.sceneData.currentName;
+          let organScene = _this.zincRenderer.getSceneByName(name);
+          if (organScene) {
+            if (clearFirst)
+              organScene.clearAll();
+          } else {
+            organScene = _this.zincRenderer.createScene(name);
+          }
+          for (let i = 0; i < sceneChangedCallbacks.length;i++) {
+            sceneChangedCallbacks[i](_this.sceneData);
+          }
+          _this.sceneData.viewURL = undefined;
+          _this.sceneData.metaURL = url;
+          organScene.addZincObjectAddedCallbacks(_addOrganPartCallback(undefined, partName, false));
+          organScene.addZincObjectRemovedCallbacks(_removeOrganPartCallback(undefined, partName, false));
+          organScene.loadGLTF(url, undefined, downloadCompletedCallback());
+          _this.scene = organScene;
+          _this.zincRenderer.setCurrentScene(organScene);
+          _this.graphicsHighlight.reset();
+          const zincCameraControl = organScene.getZincCameraControls();
+          zincCameraControl.enableRaycaster(organScene, _pickingCallback(), _hoverCallback());
+          zincCameraControl.setMouseButtonAction("AUXILIARY", "ZOOM");
+          zincCameraControl.setMouseButtonAction("SECONDARY", "PAN");
+      }
+    }
+  }
 
-		/**
-		 * Return the center and size of the cuurrent viewing scene
-		 */
-		this.getCentreAndSize = function() {
-			const vector = new THREE.Vector3();
-			const boundingBox = this.scene.getBoundingBox();
-			boundingBox.getCenter(vector);
-			const centre = [vector.x, vector.y, vector.z];
-			boundingBox.getSize(vector);
-			const size = [vector.x, vector.y, vector.z];
-			return {centre, size};
-		}
-
-	  const setSceneData = function(speciesName, systemName, partName, organsDetails) {
-      _this.sceneData.nerveMapIsActive = false;
-      _this.sceneData.nerveMap = undefined;
-      _this.sceneData.metaURL = "";
-      _this.sceneData.viewURL = "";
-      _this.sceneData.currentSpecies = speciesName;
-      _this.sceneData.currentSystem = systemName;
-			_this.sceneData.currentPart = partName;
-			_this.sceneData.currentTime = 0.0;
-			_this.sceneData.timeVarying = false;
-      // This is used as title
-      let name = "";
-      if (speciesName)
-        name = speciesName + "/";
-      if (systemName)
-        name = systemName + "/";
-      if (partName)
-        name = partName;
-      _this.sceneData.currentName = name;
-	  }
-
-	  this.loadOrgansFromURL = function(url, speciesName, systemName, partName, viewURL, clearFirst, options) {
-		  if (_this.zincRenderer) {
-			  if (partName && (_this.sceneData.metaURL !== url)) {
-			      setSceneData(speciesName, systemName, partName, undefined);
-			      const name = _this.sceneData.currentName;
-			      let organScene = _this.zincRenderer.getSceneByName(name);
-			      if (organScene) {
-              if (clearFirst)
-			    	    organScene.clearAll();
-			      } else {
-			    	  organScene = _this.zincRenderer.createScene(name);
-			      }
-						_this.selectObjectOnPick = true;
-			      for (let i = 0; i < sceneChangedCallbacks.length;i++) {
-			    	  sceneChangedCallbacks[i](_this.sceneData);
-			      }
-			      if (viewURL && viewURL != "") {
-			    	  _this.sceneData.viewURL = viewURL;
-				      organScene.loadViewURL(_this.sceneData.viewURL);
-			      } else {
-			    	  _this.sceneData.viewURL = undefined;
-            }
-			      _this.sceneData.metaURL = url;
-						organScene.addZincObjectAddedCallbacks(_addOrganPartCallback(systemName, partName, false));
-			      organScene.addZincObjectRemovedCallbacks(_removeOrganPartCallback(undefined, partName, false));
-						organScene.loadMetadataURL(url, singleItemFinishCallback(), downloadCompletedCallback(), options);
-			      _this.scene = organScene;
-			      _this.zincRenderer.setCurrentScene(organScene);
-			      _this.graphicsHighlight.reset();
-			      const zincCameraControl = organScene.getZincCameraControls();
-			      zincCameraControl.enableRaycaster(organScene, _pickingCallback(), _hoverCallback());
-			      zincCameraControl.setMouseButtonAction("AUXILIARY", "ZOOM");
-			      zincCameraControl.setMouseButtonAction("SECONDARY", "PAN");
-			  }
-		  }
-	  }
-
-    this.loadGLTFFromURL = function(url, partName, clearFirst) {
-		  if (_this.zincRenderer) {
-			  if (partName && (_this.sceneData.metaURL !== url)) {
-			      setSceneData(undefined, undefined, partName, undefined);
-			      const name = _this.sceneData.currentName;
-			      let organScene = _this.zincRenderer.getSceneByName(name);
-			      if (organScene) {
-              if (clearFirst)
-			    	    organScene.clearAll();
-			      } else {
-			    	  organScene = _this.zincRenderer.createScene(name);
-			      }
-			      for (let i = 0; i < sceneChangedCallbacks.length;i++) {
-			    	  sceneChangedCallbacks[i](_this.sceneData);
-			      }
-  	    	  _this.sceneData.viewURL = undefined;
-			      _this.sceneData.metaURL = url;
-						organScene.addZincObjectAddedCallbacks(_addOrganPartCallback(undefined, partName, false));
-			      organScene.addZincObjectRemovedCallbacks(_removeOrganPartCallback(undefined, partName, false));
-						organScene.loadGLTF(url, undefined, downloadCompletedCallback());
-			      _this.scene = organScene;
-			      _this.zincRenderer.setCurrentScene(organScene);
-			      _this.graphicsHighlight.reset();
-			      const zincCameraControl = organScene.getZincCameraControls();
-			      zincCameraControl.enableRaycaster(organScene, _pickingCallback(), _hoverCallback());
-			      zincCameraControl.setMouseButtonAction("AUXILIARY", "ZOOM");
-			      zincCameraControl.setMouseButtonAction("SECONDARY", "PAN");
-			  }
-		  }
-	  }
-
-	  this.alignCameraWithSelectedObject = function(transitionTime) {
-	    const objects = _this.graphicsHighlight.getSelected();
-	    if (objects && objects[0] && objects[0].userData) {
-	      _this.scene.alignObjectToCameraView(objects[0].userData, transitionTime);
-	    }
-	  }
-
-	  this.exportSettings = function() {
-		  const settings = {};
-		  settings.name = _this.instanceName;
-		  if (_this.sceneData.currentSystem)
-			  settings.system = _this.sceneData.currentSystem;
-		  if (_this.sceneData.currentSpecies)
-			  settings.species  = _this.sceneData.currentSpecies;
-		  if (_this.sceneData.currentPart)
-			  settings.part = _this.sceneData.currentPart;
-		  settings.metaURL = _this.sceneData.metaURL;
-		  if (_this.sceneData.viewURL)
-			  settings.viewURL = _this.sceneData.viewURL;
-		  settings.dialog = "Organ Viewer";
-		  return settings;
-	  }
-
-	  this.importSettings = function(settings) {
-		  if (settings && (settings.dialog == this.typeName)) {
-			  _this.setName(settings.name);
-			  if (settings.metaURL !== undefined && settings.metaURL != "") {
-				  _this.loadOrgansFromURL(settings.metaURL, settings.species,
-					  settings.system, settings.part, settings.viewURL, true);
-			  } else {
-				  _this.loadOrgans(settings.species, settings.system, settings.part);
-			  }
-			  return true;
-		  }
-		  return false;
-	  }
+  this.alignCameraWithSelectedObject = function(transitionTime) {
+    const objects = _this.graphicsHighlight.getSelected();
+    if (objects && objects[0] && objects[0].userData) {
+      _this.scene.alignObjectToCameraView(objects[0].userData, transitionTime);
+    }
+  }
 
 	/**
 	 * initialise loading of the html layout for the organs panel, this is

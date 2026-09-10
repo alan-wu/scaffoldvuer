@@ -25,21 +25,6 @@ BaseModule.prototype.settingsChanged = function() {
   }
 }
 
-BaseModule.prototype.exportSettings = function() {
-  const settings = {};
-  settings.dialog = this.typeName;
-  settings.name = this.instanceName;
-  return settings;
-}
-
-BaseModule.prototype.importSettings = function(settings) {
-	if (settings.dialog == this.typeName) {
-		this.setName(settings.name);
-		return true;
-	}
-	return false;
-}
-
 BaseModule.prototype.publishChanges = function(annotations, eventType, zincObjects) {
   for (let i = 0; i < this.eventNotifiers.length; i++) {
     this.eventNotifiers[i].publish(this, eventType, annotations, zincObjects);
@@ -58,7 +43,7 @@ BaseModule.prototype.destroy = function() {
   }
 
   delete this;
-} 
+}
 
 BaseModule.prototype.addChangedCallback = function(callback) {
   if (this.onChangedCallbacks.includes(callback) == false)
@@ -70,7 +55,7 @@ BaseModule.prototype.removeChangedCallback = function(callback) {
   if (index > -1) {
     this.onChangedCallbacks.splice(index, 1);
   }
-} 
+}
 
 BaseModule.prototype.addNotifier = function(eventNotifier) {
   this.eventNotifiers.push(eventNotifier);

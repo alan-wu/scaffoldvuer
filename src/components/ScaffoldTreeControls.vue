@@ -466,14 +466,16 @@ export default {
     },
     //Set this right at the beginning.
     setModule: function (moduleIn) {
-      this.module = markRaw(moduleIn);
-      this.nodeNumbers = 0;
-      const objects = this.module.scene.getRootRegion().getAllObjects(true);
-      objects.forEach((zincObject) => {
-        this.zincObjectAdded(zincObject);
-      });
-      this.module.addOrganPartAddedCallback(this.zincObjectAdded);
-      this.module.addOrganPartRemovedCallback(this.zincObjectRemoved);
+      if (!this.module && moduleIn?.scene) {
+        this.module = markRaw(moduleIn);
+        this.nodeNumbers = 0;
+        const objects = this.module.scene.getRootRegion().getAllObjects(true);
+        objects.forEach((zincObject) => {
+          this.zincObjectAdded(zincObject);
+        });
+        this.module.addOrganPartAddedCallback(this.zincObjectAdded);
+        this.module.addOrganPartRemovedCallback(this.zincObjectRemoved);
+      }
     },
     setColourField: function (treeData, nodeData = undefined) {
       treeData

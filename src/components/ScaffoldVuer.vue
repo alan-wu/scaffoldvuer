@@ -1080,7 +1080,6 @@ export default {
   mounted: async function () {
     this.openMapRef = shallowRef(this.$refs.openMapRef);
     this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef);
-    //this.$refs.scaffoldTreeControls.setModule(this.$module);
     let eventNotifier = new EventNotifier();
     eventNotifier.subscribe(this, this.eventNotifierCallback);
     this.$module.addNotifier(eventNotifier);
@@ -1160,7 +1159,6 @@ export default {
     if (this.ro) this.ro.disconnect();
     this.$module.destroy();
     this.$module = undefined;
-
   },
   computed: {
     ...mapStores(useMainStore),
@@ -3137,6 +3135,7 @@ export default {
           );
         }
         if (this.$module && this.$module.scene) {
+          this.$refs.scaffoldTreeControls.setModule(this.$module);
           this.$module.scene.displayMarkers = this.displayMarkers;
           this.$module.scene.forcePickableObjectsUpdate = true;
           this.$module.scene.displayMinimap = this.displayMinimap;
