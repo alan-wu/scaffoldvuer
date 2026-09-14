@@ -42,6 +42,7 @@ const OrgansViewer = function (ModelsLoaderIn) {
   let finishDownloadCallback = undefined;
   let downloadErrorCallback = undefined;
   const modelsLoader = ModelsLoaderIn;
+  const organsFileMap = modelsLoader?.organsFileMap ?? {};
   this.NDCCameraControl = undefined;
   _this.typeName = 'Organ Viewer';
   let ignorePicking = false;
@@ -197,6 +198,21 @@ const OrgansViewer = function (ModelsLoaderIn) {
 
   this.getNamedObjectsToScreenCoordinates = function (name, camera) {
     const vector = new THREE.Vector3();
+    if (!_this.scene || !camera) {
+      return vector;
+    }
+    const zincObject =
+      _this.scene.findGeometriesWithGroupName(name)[0] ||
+      _this.scene.findGlyphsetsWithGroupName(name)[0] ||
+      _this.scene.findPointsetsWithGroupName(name)[0] ||
+      _this.scene.findLinesWithGroupName(name)[0];
+    const obj = zincObject?.getMorph?.() || zincObject?.morph;
+    if (!obj) {
+      return vector;
+    }
+    const renderer = _this.zincRenderer?.getThreeJSRenderer();
+    const width = renderer?.domElement?.clientWidth ?? _this.displayArea?.clientWidth ?? 0;
+    const height = renderer?.domElement?.clientHeight ?? _this.displayArea?.clientHeight ?? 0;
     vector.setFromMatrixPosition(obj.matrixWorld);
     const widthHalf = width / 2;
     const heightHalf = height / 2;
@@ -217,9 +233,8 @@ const OrgansViewer = function (ModelsLoaderIn) {
       } else {
         intersectedObject = intersected.object;
       }
-      try {
+      if (intersectedObject?.userData?.userData?.annotation?.data) {
         intersectedObject.userData.userData.annotation.data.lastActionOnMarker = marker;
-      } finally {
       }
       if (intersectedObject) {
         if (intersectedObject.name) {
@@ -463,6 +478,10 @@ const OrgansViewer = function (ModelsLoaderIn) {
     };
   };
 
+  const getOrganDetails = function (systemName, partName) {
+    return organsFileMap[_this.sceneData.currentSpecies]?.[systemName]?.[partName];
+  };
+
   /**
    * Toggle data field displays. Data fields displays flow/pressure and      <button @click="play">Play</button>
    * other activities of the organs.
@@ -502,12 +521,11 @@ const OrgansViewer = function (ModelsLoaderIn) {
     const availableSpecies = new Array();
     availableSpecies.push('none');
     const keysArray = Object.keys(organsFileMap);
-    for (index in keysArray) {
-      const species = keysArray[index];
+    for (const species of keysArray) {
       if (species != currentSpecies) {
         if (
-          organsFileMap[species].hasOwnProperty(currentSystem) &&
-          organsFileMap[species][currentSystem].hasOwnProperty(currentPart)
+          Object.hasOwn(organsFileMap[species], currentSystem) &&
+          Object.hasOwn(organsFileMap[species][currentSystem], currentPart)
         ) {
           availableSpecies.push(species);
         }
@@ -529,7 +547,7 @@ const OrgansViewer = function (ModelsLoaderIn) {
     return { centre, size };
   };
 
-  const setSceneData = function (speciesName, systemName, partName, organsDetails) {
+  const setSceneData = function (speciesName, systemName, partName) {
     _this.sceneData.nerveMapIsActive = false;
     _this.sceneData.nerveMap = undefined;
     _this.sceneData.metaURL = '';
@@ -558,7 +576,7 @@ const OrgansViewer = function (ModelsLoaderIn) {
   ) {
     if (_this.zincRenderer) {
       if (partName && _this.sceneData.metaURL !== url) {
-        setSceneData(speciesName, systemName, partName, undefined);
+        setSceneData(speciesName, systemName, partName);
         const name = _this.sceneData.currentName;
         let organScene = _this.zincRenderer.getSceneByName(name);
         if (organScene) {
@@ -601,7 +619,7 @@ const OrgansViewer = function (ModelsLoaderIn) {
   this.loadGLTFFromURL = function (url, partName, clearFirst) {
     if (_this.zincRenderer) {
       if (partName && _this.sceneData.metaURL !== url) {
-        setSceneData(undefined, undefined, partName, undefined);
+        setSceneData(undefined, undefined, partName);
         const name = _this.sceneData.currentName;
         let organScene = _this.zincRenderer.getSceneByName(name);
         if (organScene) {
