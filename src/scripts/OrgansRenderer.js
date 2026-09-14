@@ -157,7 +157,7 @@ const OrgansViewer = function (ModelsLoaderIn) {
    * Add a callback which will be called when time has changed
    */
   this.addTimeChangedCallback = function (callback) {
-    if (typeof (callback === 'function')) timeChangedCallbacks.push(callback);
+    if (typeof callback === 'function') timeChangedCallbacks.push(callback);
   };
 
   this.setTexturePos = function (value) {
@@ -166,21 +166,21 @@ const OrgansViewer = function (ModelsLoaderIn) {
   };
 
   this.addSceneChangedCallback = function (callback) {
-    if (typeof (callback === 'function')) {
+    if (typeof callback === 'function') {
       sceneChangedCallbacks.push(callback);
     }
   };
 
   this.addOrganPartAddedCallback = function (callback) {
-    if (typeof (callback === 'function')) organPartAddedCallbacks.push(callback);
+    if (typeof callback === 'function') organPartAddedCallbacks.push(callback);
   };
 
   this.addOrganPartRemovedCallback = function (callback) {
-    if (typeof (callback === 'function')) organPartRemovedCallbacks.push(callback);
+    if (typeof callback === 'function') organPartRemovedCallbacks.push(callback);
   };
 
   this.setFinishDownloadCallback = function (callback) {
-    if (typeof (callback === 'function')) finishDownloadCallback = callback;
+    if (typeof callback === 'function') finishDownloadCallback = callback;
   };
 
   this.unsetFinishDownloadCallback = function () {
@@ -188,7 +188,7 @@ const OrgansViewer = function (ModelsLoaderIn) {
   };
 
   this.setDownloadErrorCallback = function (callback) {
-    if (typeof (callback === 'function')) downloadErrorCallback = callback;
+    if (typeof callback === 'function') downloadErrorCallback = callback;
   };
 
   this.unsetDownloadErrorCallback = function () {

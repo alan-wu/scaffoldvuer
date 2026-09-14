@@ -6,10 +6,6 @@ const SelectionEvent = function (eventTypeIn, identifiersIn, zincObjects) {
   this.zincObjects = zincObjects;
 };
 
-const returnFullID = function (sourceId) {
-  //return full annotations with all different name
-};
-
 const Subscription = function (subscriberIn, callbackIn, eventType) {
   this.targetedID = [];
   const subscriber = subscriberIn;
