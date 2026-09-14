@@ -1,4 +1,4 @@
-import { Label, THREE } from 'zincjs';
+import { THREE } from 'zincjs';
 
 // This will be the config for nerves selection and highlight
 export const NERVE_CONFIG = {
@@ -328,7 +328,7 @@ export const createNewAnnotationsWithFeatures = (
   scaffoldUrl,
   comment,
 ) => {
-  let type = undefined;
+  let type;
   if (zincObject.isPointset) {
     type = 'MultiPoint';
   } else if (zincObject.isLines2) {

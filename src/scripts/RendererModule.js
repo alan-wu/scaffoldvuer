@@ -173,7 +173,7 @@ RendererModule.prototype.setSelectedByObjects = function (
   extraData,
   propagateChanges,
 ) {
-  let changed = false;
+  let changed;
   if (this.selectObjectOnPick) {
     changed = this.graphicsHighlight.setSelected(objects);
   } else {
@@ -218,11 +218,12 @@ RendererModule.prototype.setSelectedByZincObjects = function (
   return this.setSelectedByObjects(morphs, coords, extraData, propagateChanges);
 };
 
-const addGlyphToArray = function (objects) {
-  return function (glyph) {
-    objects.push(glyph.getMesh());
-  };
-};
+// Unused function, but keep it for reference.
+// const addGlyphToArray = function (objects) {
+//   return function (glyph) {
+//     objects.push(glyph.getMesh());
+//   };
+// };
 
 RendererModule.prototype.findObjectsByGroupName = function (groupName) {
   return this.scene.findObjectsWithGroupName(groupName);
@@ -272,7 +273,7 @@ RendererModule.prototype.setPlayRate = function (value) {
 /**
  * Get the speed of playback
  */
-RendererModule.prototype.getPlayRate = function (value) {
+RendererModule.prototype.getPlayRate = function (_value) {
   if (this.zincRenderer) return this.zincRenderer.getPlayRate();
   else return 0.0;
 };

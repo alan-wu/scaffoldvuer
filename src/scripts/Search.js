@@ -125,14 +125,14 @@ export class SearchIndex {
   processResults(zincObjects, searchText) {
     const result = {
       regionPath: undefined,
-      label: `Search Results for \"`,
+      label: `Search Results for "`,
     };
     if (Array.isArray(searchText)) {
       result.label += ','.join(searchText);
     } else {
       result.label += searchText;
     }
-    result.label += `\"`;
+    result.label += `"`;
     if (zincObjects.length === 1) {
       if (zincObjects[0].isRegion) {
         result.regionPath = zincObjects[0].getFullPath();
@@ -173,7 +173,7 @@ export class SearchIndex {
   }
 
   searchAndProcessResult(terms) {
-    let zincObjectResults = [];
+    let zincObjectResults;
     if (Array.isArray(terms)) {
       zincObjectResults = this.searchTerms(terms);
     } else {
