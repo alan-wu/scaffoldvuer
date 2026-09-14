@@ -412,9 +412,7 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 import { AnnotationService } from '@abi-software/sparc-annotation';
-import { ElMessage } from 'element-plus';
 import { markRaw, shallowRef } from 'vue';
 import { ScaffoldVuer } from './components/index.js';
 import DropZone from './app/DropZone.vue';
