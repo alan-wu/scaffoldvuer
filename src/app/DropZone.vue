@@ -10,14 +10,6 @@ import { markRaw } from 'vue';
 import { SimpleDropzone } from 'simple-dropzone';
 import { createURLFromFiles } from '../scripts/LocalFilesHelper.js';
 
-const getJSON = async (URL) => {
-  return fetch(URL)
-    .then((response) => response.json())
-    .then((responseJson) => {
-      return responseJson;
-    });
-};
-
 export default {
   name: 'DropZone',
   data: function () {

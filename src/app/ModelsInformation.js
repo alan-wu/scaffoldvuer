@@ -44,10 +44,10 @@ export default async function (keywords, spreadsheet_id) {
   json.rows.forEach((r) => {
     const row = [];
     r.c.forEach((cel) => {
-      let value = '';
+      let value;
       try {
         value = cel.f ? cel.f : cel.v;
-      } catch (e) {
+      } catch (_e) {
         value = '';
       }
       row.push(value);

@@ -48,16 +48,16 @@ export const testVolume = async (scaffoldVuer, texture_prefix) => {
   window.texture = zincObject;
 };
 
-const addCylinder = (scaffoldVuer) => {
-  const THREE = scaffoldVuer.$module.Zinc.THREE;
-  const cylinderGeometry = new THREE.CylinderGeometry(50, 50, 200, 80);
-  const material = new THREE.MeshPhongMaterial({ color: 0xffff00, side: THREE.DoubleSide });
-  const cylinderMesh = new THREE.Mesh(cylinderGeometry, material);
-  const zincGeometry = new scaffoldVuer.$module.Zinc.Geometry();
-  zincGeometry.setMesh(cylinderMesh, false, false);
-  zincGeometry.setName('Cylinder');
-  scaffoldVuer.addZincObject(zincGeometry);
-};
+// const addCylinder = (scaffoldVuer) => {
+//   const THREE = scaffoldVuer.$module.Zinc.THREE;
+//   const cylinderGeometry = new THREE.CylinderGeometry(50, 50, 200, 80);
+//   const material = new THREE.MeshPhongMaterial({ color: 0xffff00, side: THREE.DoubleSide });
+//   const cylinderMesh = new THREE.Mesh(cylinderGeometry, material);
+//   const zincGeometry = new scaffoldVuer.$module.Zinc.Geometry();
+//   zincGeometry.setMesh(cylinderMesh, false, false);
+//   zincGeometry.setName('Cylinder');
+//   scaffoldVuer.addZincObject(zincGeometry);
+// };
 
 export const testSlides = async (scaffoldVuer, texture_prefix) => {
   const scaffoldModule = scaffoldVuer.$module;
@@ -144,8 +144,8 @@ const getArmTexture = async (scaffoldModule) => {
 */
 
 //https://threejs.org/docs/#manual/en/introduction/Matrix-transformations
-const applyTransformation = (scaffoldVuer, mesh, rotation, position, scale, reference) => {
-  //if (reference === "centre") {
+const applyTransformation = (scaffoldVuer, mesh, rotation, position, scale, _reference) => {
+  //if (_reference === "centre") {
   //  mesh.geometry.translate(-0.5, -0.5, -0.5);
   //}
   const THREE = scaffoldVuer.$module.Zinc.THREE;
