@@ -514,7 +514,6 @@ export default {
       loadTextureVolumeOnReady: false,
       readyCallback: undefined,
       flatmapAPI: 'https://mapcore-demo.org/devel/flatmap/v4/',
-      helpMode: false,
       helpModeActiveItem: 0,
       helpModeLastItem: false,
       useHelpModeDialog: true,
