@@ -731,7 +731,7 @@ export default {
         "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/digital_twins/080626-demo/downsample_phase_3.nii.gz",
         "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/digital_twins/080626-demo/downsample_phase_5.nii.gz"
       ]
-      const newTexture = await this.$refs.scaffold.readNIFTIFromSource(urls, true, this.maskUrl, v1, options, true);
+      const newTexture = await this.$refs.scaffold.readNIFTIFromSource(urls, true, undefined, v1, options, true);
       newTexture.timeEnabled = true;
       newTexture.setIsPickable(false);
       const scene = this.$refs.scaffold.$module.scene;
