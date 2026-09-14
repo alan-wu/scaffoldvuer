@@ -2,9 +2,7 @@
   <el-container class="pointset-container">
     <el-main class="slides-block">
       <el-row>
-        <el-col :offset="0" :span="6">
-          Size:
-        </el-col>
+        <el-col :offset="0" :span="6">Size:</el-col>
         <el-col :offset="0" :span="10">
           <el-slider
             v-model="size"
@@ -28,9 +26,7 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :offset="0" :span="16">
-          Size attenuation:
-        </el-col>
+        <el-col :offset="0" :span="16">Size attenuation:</el-col>
         <el-col :offset="0" :span="5">
           <el-select
             :teleported="false"
@@ -53,27 +49,19 @@
         <el-row>
           <el-col :offset="0" :span="4">
             <el-button
-              size='small'
+              size="small"
               :disabled="currentIndex === 0"
               :icon="ElIconArrowLeft"
               @click="changeIndex(false)"
             />
           </el-col>
-          <el-col :offset="4" :span="9">
-            Editing Point {{ currentIndex + 1}}
-          </el-col>
+          <el-col :offset="4" :span="9">Editing Point {{ currentIndex + 1 }}</el-col>
           <el-col :offset="2" :span="2">
-            <el-button
-              size='small'
-              :icon="ElIconArrowRight"
-              @click="changeIndex(true)"
-            />
+            <el-button size="small" :icon="ElIconArrowRight" @click="changeIndex(true)" />
           </el-col>
         </el-row>
         <el-row>
-          <el-col :offset="0" :span="6">
-            x:
-          </el-col>
+          <el-col :offset="0" :span="6">x:</el-col>
           <el-col :offset="0" :span="16">
             <el-slider
               v-model="translation[0]"
@@ -87,9 +75,7 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col :offset="0" :span="6">
-            y:
-          </el-col>
+          <el-col :offset="0" :span="6">y:</el-col>
           <el-col :offset="0" :span="16">
             <el-slider
               v-model="translation[1]"
@@ -103,9 +89,7 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col :offset="0" :span="6">
-            z:
-          </el-col>
+          <el-col :offset="0" :span="6">z:</el-col>
           <el-col :offset="0" :span="16">
             <el-slider
               v-model="translation[2]"
@@ -126,9 +110,7 @@
 <script>
 /* eslint-disable no-alert, no-console */
 import { markRaw, shallowRef } from 'vue';
-import {
-  movePoint,
-} from "../scripts/Utilities.js";
+import { movePoint } from '../scripts/Utilities.js';
 import {
   ElCol as Col,
   ElContainer as Container,
@@ -138,8 +120,8 @@ import {
   ElSelect as Select,
   ElSlider as Slider,
   ElOption as Option,
-} from "element-plus";
-import{
+} from 'element-plus';
+import {
   ArrowLeft as ElIconArrowLeft,
   ArrowRight as ElIconArrowRight,
 } from '@element-plus/icons-vue';
@@ -148,7 +130,7 @@ import{
  * A component to control the opacity of the target object.
  */
 export default {
-  name: "PointsControls",
+  name: 'PointsControls',
   components: {
     Col,
     Container,
@@ -169,11 +151,11 @@ export default {
       choices: [
         {
           value: true,
-          label: "On",
+          label: 'On',
         },
         {
           value: false,
-          label: "off",
+          label: 'off',
         },
       ],
       min: [0, 0, 0],
@@ -191,23 +173,15 @@ export default {
     boundingDims: {
       handler: function (value) {
         const size = value.size;
-        this.min = [
-          -size[0] / 2,
-          -size[1] / 2,
-          -size[2] / 2,
-        ];
-        this.max = [
-          size[0] / 2,
-          size[1] / 2,
-          size[2] / 2,
-        ];
+        this.min = [-size[0] / 2, -size[1] / 2, -size[2] / 2];
+        this.max = [size[0] / 2, size[1] / 2, size[2] / 2];
       },
       immediate: true,
       deep: true,
     },
   },
   methods: {
-    changeIndex: function(increment) {
+    changeIndex: function (increment) {
       if (increment) {
         if (this.zincObject.drawRange > this.currentIndex + 1) {
           this.currentIndex++;
@@ -218,7 +192,7 @@ export default {
         this.reset();
       }
     },
-    onMoveSliding: function() {
+    onMoveSliding: function () {
       const diff = [
         this.translation[0] - this.pTranslation[0],
         this.translation[1] - this.pTranslation[1],
@@ -229,11 +203,11 @@ export default {
         this.pTranslation[i] = this.translation[i];
       }
     },
-    reset: function() {
+    reset: function () {
       this.translation = [0, 0, 0];
       this.pTranslation = [0, 0, 0];
       if (this.edited) {
-        this.$emit("primitivesUpdated", this.zincObject);
+        this.$emit('primitivesUpdated', this.zincObject);
         this.edited = false;
       }
     },
@@ -254,7 +228,7 @@ export default {
         this.attenuation = false;
       }
     },
-    modifyAttenuation: function(flag) {
+    modifyAttenuation: function (flag) {
       this.attenuation = flag;
       this.zincObject.setSizeAttenuation(flag);
     },
@@ -267,7 +241,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-
 .slides-block {
   pointer-events: auto;
   &.el-main {
@@ -324,7 +297,7 @@ export default {
     padding-left: 4px;
     padding-right: 8px;
     border: none;
-    font-family: "Asap", sans-serif;
+    font-family: 'Asap', sans-serif;
     line-height: 22px;
   }
 
@@ -333,5 +306,4 @@ export default {
     line-height: 22px;
   }
 }
-
 </style>

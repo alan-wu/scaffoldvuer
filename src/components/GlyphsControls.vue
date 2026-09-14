@@ -1,28 +1,19 @@
 <template>
   <el-container class="glyph-container">
-    <el-checkbox
-      v-model="displayLabels"
-      class="block"
-    >
-      Display labels
-    </el-checkbox>
+    <el-checkbox v-model="displayLabels" class="block">Display labels</el-checkbox>
   </el-container>
 </template>
 
 <script>
 /* eslint-disable no-alert, no-console */
 import { markRaw } from 'vue';
-import {
-  ElCheckbox as Checkbox,
-  ElContainer as Container,
-  ElMain as Main,
-} from "element-plus";
+import { ElCheckbox as Checkbox, ElContainer as Container, ElMain as Main } from 'element-plus';
 
 /**
  * A component to control the opacity of the target object.
  */
 export default {
-  name: "GlyphsControls",
+  name: 'GlyphsControls',
   components: {
     Checkbox,
     Container,
@@ -45,7 +36,7 @@ export default {
     },
   },
   methods: {
-    reset: function() {
+    reset: function () {
       this.displayLabels = true;
     },
     setObject: function (object) {
@@ -62,7 +53,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-
 .block {
   left: 40px;
   :deep(.el-checkbox__label) {
@@ -75,7 +65,4 @@ export default {
   height: auto;
   overflow-y: none;
 }
-
-
-
 </style>

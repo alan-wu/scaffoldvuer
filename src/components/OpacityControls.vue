@@ -21,14 +21,14 @@ import {
   ElContainer as Container,
   ElHeader as Header,
   ElMain as Main,
-  ElSlider as Slider
-} from "element-plus";
+  ElSlider as Slider,
+} from 'element-plus';
 
 /**
  * A component to control the opacity of the target object.
  */
 export default {
-  name: "OpacityControls",
+  name: 'OpacityControls',
   components: {
     Container,
     Header,
@@ -39,21 +39,21 @@ export default {
     material: undefined,
     zincObject: undefined,
   },
-  data: function() {
+  data: function () {
     return {
-      displayString: "100%",
+      displayString: '100%',
     };
   },
   watch: {
-    "material.opacity": function() {
+    'material.opacity': function () {
       if (this.material && this.zincObject) {
         this.zincObject.setAlpha(this.material.opacity);
       }
-    }
+    },
   },
   methods: {
     formatTooltip(val) {
-      this.displayString = Math.floor(100 * val + 0.5) + "%";
+      this.displayString = Math.floor(100 * val + 0.5) + '%';
       return this.displayString;
     },
   },
@@ -62,7 +62,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-
 .display {
   width: 44px;
 }
@@ -94,5 +93,4 @@ export default {
 :deep(.el-slider__bar) {
   background-color: $app-primary-color;
 }
-
 </style>

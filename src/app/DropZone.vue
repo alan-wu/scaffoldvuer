@@ -1,30 +1,26 @@
 <template>
-  <div
-    ref="dropEl"
-    class="dropzone"
-  >
+  <div ref="dropEl" class="dropzone">
     <slot />
-    <input
-      ref="fileInput"
-      type="file"
-    >
+    <input ref="fileInput" type="file" />
   </div>
 </template>
 
 <script>
 /* eslint-disable no-alert, no-console */
 import { markRaw } from 'vue';
-import { SimpleDropzone } from "simple-dropzone";
-import { createURLFromFiles } from "../scripts/LocalFilesHelper.js";
+import { SimpleDropzone } from 'simple-dropzone';
+import { createURLFromFiles } from '../scripts/LocalFilesHelper.js';
 
 const getJSON = async (URL) => {
   return fetch(URL)
     .then((response) => response.json())
-    .then((responseJson) => {return responseJson});
-}
+    .then((responseJson) => {
+      return responseJson;
+    });
+};
 
 export default {
-  name: "DropZone",
+  name: 'DropZone',
   data: function () {
     return {
       objectURLs: markRaw([]),
@@ -32,20 +28,17 @@ export default {
     };
   },
   mounted: function () {
-    const dropCtrl = new SimpleDropzone(
-      this.$refs.dropEl,
-      this.$refs.fileInput
-    );
-    dropCtrl.on("drop", ({ files }) => {
+    const dropCtrl = new SimpleDropzone(this.$refs.dropEl, this.$refs.fileInput);
+    dropCtrl.on('drop', ({ files }) => {
       this.localDrop(files);
     });
   },
   methods: {
-    findRealFilename: function(objectURL) {
-      return this.filesMapping[objectURL]
+    findRealFilename: function (objectURL) {
+      return this.filesMapping[objectURL];
     },
     revokeURLs: function () {
-      this.objectURLs.forEach(objectURL => URL.revokeObjectURL(objectURL));
+      this.objectURLs.forEach((objectURL) => URL.revokeObjectURL(objectURL));
       this.objectURLs.length = 0;
       this.filesMapping = markRaw({});
     },
@@ -61,7 +54,7 @@ export default {
           Object.assign(this.filesMapping, data.filesMapping);
         }
         if (data.format && data.url) {
-          this.$emit("files-drop", { url: data.url, format : data.format } );
+          this.$emit('files-drop', { url: data.url, format: data.format });
         }
       }
     },

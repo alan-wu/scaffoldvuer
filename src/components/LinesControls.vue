@@ -3,9 +3,7 @@
     <el-main class="slides-block">
       <template v-if="isTubeLines && showTubeLinesControls">
         <el-row>
-          <el-col :offset="0" :span="6">
-            Radius:
-          </el-col>
+          <el-col :offset="0" :span="6">Radius:</el-col>
           <el-col :offset="0" :span="12">
             <el-slider
               v-model="radius"
@@ -30,9 +28,7 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col :offset="0" :span="6">
-            Radial Segments:
-          </el-col>
+          <el-col :offset="0" :span="6">Radial Segments:</el-col>
           <el-col :offset="0" :span="12">
             <el-slider
               v-model="radialSegments"
@@ -59,9 +55,7 @@
       </template>
       <template v-else-if="!isTubeLines">
         <el-row>
-          <el-col :offset="0" :span="6">
-            Width:
-          </el-col>
+          <el-col :offset="0" :span="6">Width:</el-col>
           <el-col :offset="0" :span="12">
             <el-slider
               v-model="width"
@@ -89,27 +83,19 @@
         <el-row>
           <el-col :offset="0" :span="4">
             <el-button
-              size='small'
+              size="small"
               :disabled="currentIndex === 0"
               :icon="ElIconArrowLeft"
               @click="changeIndex(false)"
             />
           </el-col>
-          <el-col :offset="4" :span="9">
-            Editing Line {{ currentIndex + 1}}
-          </el-col>
+          <el-col :offset="4" :span="9">Editing Line {{ currentIndex + 1 }}</el-col>
           <el-col :offset="2" :span="2">
-            <el-button
-              size='small'
-              :icon="ElIconArrowRight"
-              @click="changeIndex(true)"
-            />
+            <el-button size="small" :icon="ElIconArrowRight" @click="changeIndex(true)" />
           </el-col>
         </el-row>
         <el-row>
-          <el-col :offset="0" :span="6">
-            Move:
-          </el-col>
+          <el-col :offset="0" :span="6">Move:</el-col>
           <el-col :offset="0" :span="16">
             <el-slider
               v-model="adjust"
@@ -123,9 +109,7 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col :offset="0" :span="6">
-            Length:
-          </el-col>
+          <el-col :offset="0" :span="6">Length:</el-col>
           <el-col :offset="0" :span="10">
             <el-slider
               v-model="lengthScale"
@@ -156,11 +140,7 @@
 // This is not in use at this moment, due to
 // limited support to line width
 import { markRaw, shallowRef } from 'vue';
-import {
-  getLineDistance,
-  moveAndExtendLine,
-  NERVE_CONFIG
-} from "../scripts/Utilities.js";
+import { getLineDistance, moveAndExtendLine, NERVE_CONFIG } from '../scripts/Utilities.js';
 import {
   ElButton as Button,
   ElCol as Col,
@@ -168,8 +148,8 @@ import {
   ElInputNumber as InputNumber,
   ElMain as Main,
   ElSlider as Slider,
-} from "element-plus";
-import{
+} from 'element-plus';
+import {
   ArrowLeft as ElIconArrowLeft,
   ArrowRight as ElIconArrowRight,
 } from '@element-plus/icons-vue';
@@ -178,7 +158,7 @@ import{
  * A component to control the opacity of the target object.
  */
 export default {
-  name: "LinesControls",
+  name: 'LinesControls',
   components: {
     Button,
     Col,
@@ -203,7 +183,7 @@ export default {
       pAdjust: 0,
       lengthScale: 0,
       distance: 0,
-      newDistance: 0, 
+      newDistance: 0,
       width: 1,
       radius: NERVE_CONFIG.DEFAULT_RADIUS,
       radialSegments: NERVE_CONFIG.DEFAULT_RADIAL_SEGMENTS,
@@ -221,7 +201,7 @@ export default {
     },
   },
   watch: {
-    "createData.faceIndex": {
+    'createData.faceIndex': {
       handler: function (value) {
         if (this.zincObject?.isLines2) {
           this.currentIndex = value;
@@ -232,7 +212,7 @@ export default {
     },
   },
   methods: {
-    changeIndex: function(increment) {
+    changeIndex: function (increment) {
       if (increment) {
         const dist = getLineDistance(this.zincObject, this.currentIndex + 1);
         if (dist > 0) {
@@ -244,34 +224,36 @@ export default {
         this.reset();
       }
     },
-    onLengthInput: function() {
+    onLengthInput: function () {
       if (this.newDistance !== 0) {
         this.distance = this.newDistance;
-        this.edited = moveAndExtendLine(
-          this.zincObject, this.currentIndex, this.newDistance, true) || this.edited;
+        this.edited =
+          moveAndExtendLine(this.zincObject, this.currentIndex, this.newDistance, true) ||
+          this.edited;
       } else {
         this.newDistance = this.distance;
       }
     },
-    onLengthSliding: function() {
+    onLengthSliding: function () {
       this.newDistance = Math.pow(10, this.lengthScale) * this.distance;
-      this.edited = moveAndExtendLine(
-        this.zincObject, this.currentIndex, this.newDistance, true) || this.edited;
+      this.edited =
+        moveAndExtendLine(this.zincObject, this.currentIndex, this.newDistance, true) ||
+        this.edited;
     },
-    onMoveSliding: function() {
+    onMoveSliding: function () {
       const diff = (this.adjust - this.pAdjust) * this.distance;
-      this.edited =  moveAndExtendLine(
-        this.zincObject, this.currentIndex, diff, false) || this.edited;
+      this.edited =
+        moveAndExtendLine(this.zincObject, this.currentIndex, diff, false) || this.edited;
       this.pAdjust = this.adjust;
     },
-    reset: function() {
+    reset: function () {
       this.adjust = 0;
       this.pAdjust = 0;
       this.lengthScale = 0;
       this.distance = getLineDistance(this.zincObject, this.currentIndex);
       this.newDistance = this.distance;
       if (this.edited) {
-        this.$emit("primitivesUpdated", this.zincObject);
+        this.$emit('primitivesUpdated', this.zincObject);
         this.edited = false;
       }
     },
@@ -306,7 +288,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-
 .slides-block {
   pointer-events: auto;
   &.el-main {
@@ -362,7 +343,7 @@ export default {
     padding-left: 4px;
     padding-right: 8px;
     border: none;
-    font-family: "Asap", sans-serif;
+    font-family: 'Asap', sans-serif;
     line-height: 22px;
   }
 
@@ -371,5 +352,4 @@ export default {
     line-height: 22px;
   }
 }
-
 </style>

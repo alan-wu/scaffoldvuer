@@ -3,8 +3,8 @@
 layout: home
 
 hero:
-  name: "ScaffoldVuer"
-  text: "API documentation for ScaffoldVuer"
+  name: 'ScaffoldVuer'
+  text: 'API documentation for ScaffoldVuer'
   tagline: Providing high-level 3D physiological models viewing capability.
   actions:
     - theme: brand
@@ -13,5 +13,4 @@ hero:
     - theme: alt
       text: Live demo
       link: /demo
-
 ---
