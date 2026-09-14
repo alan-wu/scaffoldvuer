@@ -42,7 +42,6 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 import getTableData from './ModelsInformation.js';
 
 import {

@@ -6,7 +6,6 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 import { markRaw } from 'vue';
 import { SimpleDropzone } from 'simple-dropzone';
 import { createURLFromFiles } from '../scripts/LocalFilesHelper.js';
