@@ -136,19 +136,10 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 // This is not in use at this moment, due to
 // limited support to line width
 import { markRaw, shallowRef } from 'vue';
 import { getLineDistance, moveAndExtendLine, NERVE_CONFIG } from '../scripts/Utilities.js';
-import {
-  ElButton as Button,
-  ElCol as Col,
-  ElContainer as Container,
-  ElInputNumber as InputNumber,
-  ElMain as Main,
-  ElSlider as Slider,
-} from 'element-plus';
 import {
   ArrowLeft as ElIconArrowLeft,
   ArrowRight as ElIconArrowRight,
@@ -159,16 +150,6 @@ import {
  */
 export default {
   name: 'LinesControls',
-  components: {
-    Button,
-    Col,
-    Container,
-    InputNumber,
-    Main,
-    Slider,
-    ElIconArrowLeft,
-    ElIconArrowRight,
-  },
   props: {
     createData: {
       type: Object,

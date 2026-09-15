@@ -110,22 +110,7 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 import { Delete as ElIconDelete, Plus as ElIconPlus } from '@element-plus/icons-vue';
-import {
-  ElCheckbox as Checkbox,
-  ElCol as Col,
-  ElContainer as Container,
-  ElDivider as Divider,
-  ElFooter as Footer,
-  ElIcon as Icon,
-  ElInputNumber as InputNumber,
-  ElMain as Main,
-  ElRow as Row,
-  ElSelect as Select,
-  ElSlider as Slider,
-  ElOption as Option,
-} from 'element-plus';
 import { markRaw } from 'vue';
 
 /**
@@ -134,18 +119,6 @@ import { markRaw } from 'vue';
 export default {
   name: 'TextureSlidesControls',
   components: {
-    Checkbox,
-    Col,
-    Container,
-    Divider,
-    Footer,
-    Icon,
-    InputNumber,
-    Main,
-    Row,
-    Select,
-    Slider,
-    Option,
     ElIconDelete,
     ElIconPlus,
   },

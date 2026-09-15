@@ -45,8 +45,6 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
-
 const rotationOverlays = [
   { position: 'top', mode: 'vertical', text: 'Begin interaction here to rotate on the x-axis' },
   { position: 'bottom', mode: 'vertical', text: 'Begin interaction here to rotate on the x-axis' },

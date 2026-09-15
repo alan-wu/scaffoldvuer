@@ -16,25 +16,11 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
-import {
-  ElContainer as Container,
-  ElHeader as Header,
-  ElMain as Main,
-  ElSlider as Slider,
-} from 'element-plus';
-
 /**
  * A component to control the opacity of the target object.
  */
 export default {
   name: 'OpacityControls',
-  components: {
-    Container,
-    Header,
-    Main,
-    Slider,
-  },
   props: {
     material: undefined,
     zincObject: undefined,

@@ -38,10 +38,7 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 import { markRaw } from 'vue';
-import { ArrowRight as ElIconArrowRight } from '@element-plus/icons-vue';
-import { ElCollapse as Collapse, ElCollapseItem as CollapseItem } from 'element-plus';
 
 import OpacityControls from './OpacityControls.vue';
 import PointsControls from './PointsControls.vue';
@@ -56,15 +53,12 @@ import TransformationControls from './TransformationControls.vue';
 export default {
   name: 'PrimitiveControls',
   components: {
-    Collapse,
-    CollapseItem,
     GlyphsControls,
     LinesControls,
     OpacityControls,
     PointsControls,
     TextureSlidesControls,
     TransformationControls,
-    ElIconArrowRight,
   },
   props: {
     createData: {

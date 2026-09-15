@@ -5,20 +5,13 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 import { markRaw } from 'vue';
-import { ElCheckbox as Checkbox, ElContainer as Container, ElMain as Main } from 'element-plus';
 
 /**
  * A component to control the opacity of the target object.
  */
 export default {
   name: 'GlyphsControls',
-  components: {
-    Checkbox,
-    Container,
-    Main,
-  },
   data: function () {
     return {
       displayLabels: true,

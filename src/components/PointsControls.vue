@@ -108,19 +108,8 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 import { markRaw, shallowRef } from 'vue';
 import { movePoint } from '../scripts/Utilities.js';
-import {
-  ElCol as Col,
-  ElContainer as Container,
-  ElInputNumber as InputNumber,
-  ElMain as Main,
-  ElRow as Row,
-  ElSelect as Select,
-  ElSlider as Slider,
-  ElOption as Option,
-} from 'element-plus';
 import {
   ArrowLeft as ElIconArrowLeft,
   ArrowRight as ElIconArrowRight,
@@ -131,18 +120,6 @@ import {
  */
 export default {
   name: 'PointsControls',
-  components: {
-    Col,
-    Container,
-    InputNumber,
-    Main,
-    Select,
-    Slider,
-    Row,
-    Option,
-    ElIconArrowLeft,
-    ElIconArrowRight,
-  },
   inject: ['boundingDims'],
   data: function () {
     return {

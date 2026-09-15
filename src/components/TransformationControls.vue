@@ -102,15 +102,6 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
-
-import {
-  ElCol as Col,
-  ElContainer as Container,
-  ElInputNumber as InputNumber,
-  ElMain as Main,
-  ElSlider as Slider,
-} from 'element-plus';
 import { markRaw } from 'vue';
 
 /**
@@ -118,13 +109,6 @@ import { markRaw } from 'vue';
  */
 export default {
   name: 'TransformationControls',
-  components: {
-    Col,
-    Container,
-    InputNumber,
-    Main,
-    Slider,
-  },
   inject: ['boundingDims'],
   data: function () {
     return {
@@ -140,7 +124,7 @@ export default {
   },
   watch: {
     boundingDims: {
-      handler: function (value) {
+      handler: function (_value) {
         this.calculateMinAndMax();
       },
       immediate: true,
@@ -151,7 +135,6 @@ export default {
     calculateMinAndMax: function () {
       if (this.zincObject) {
         const originalPos = this.zincObject?.userData?.originalPos;
-        const morph = this.zincObject.getGroup();
         if (originalPos && this.boundingDims) {
           this.min = [
             originalPos[0] - this.boundingDims.size[0],
@@ -170,7 +153,6 @@ export default {
       if (object.isZincObject) {
         this.zincObject = markRaw(object);
         const morph = this.zincObject.getGroup();
-        const originalPos = this.zincObject.userData.originalPos;
         if (morph && morph.position) {
           this.x = morph.position.x;
           this.y = morph.position.y;

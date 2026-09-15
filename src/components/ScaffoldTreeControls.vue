@@ -32,7 +32,6 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 import { ArrowLeft as ElIconArrowLeft } from '@element-plus/icons-vue';
 import {
   convertUUIDsToFullPaths,
@@ -494,7 +493,7 @@ export default {
         checkedList,
         '',
         true,
-        (node, regionPath, parentsAreVisible) => {
+        (node, _regionPath, _parentsAreVisible) => {
           if (node.isPrimitives) {
             node.activeColour = this.getColour(node);
           }
@@ -550,7 +549,7 @@ export default {
     },
     //Set visibility using full paths and add found id to the ids list
     //and remove item from list if remove is set to true.
-    setTreeVisibilityWithFullPaths: function (node, list, ids, remove) {
+    setTreeVisibilityWithFullPaths: function (node, list, ids, _remove) {
       let flag = false;
       let nodeName = '';
       if (node.isRegion) {

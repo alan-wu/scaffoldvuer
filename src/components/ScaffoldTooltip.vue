@@ -36,9 +36,6 @@
 </template>
 
 <script>
-import { shallowRef } from 'vue';
-/* eslint-disable no-alert, no-console */
-import { ElCol as Col, ElIcon as Icon, ElPopover as Popover, ElRow as Row } from 'element-plus';
 import { mapState } from 'pinia';
 import { useMainStore } from '@/store/index';
 import { CreateTooltipContent, Tooltip } from '@abi-software/map-utilities';
@@ -50,17 +47,13 @@ import '@abi-software/map-utilities/dist/style.css';
 export default {
   name: 'ScaffoldTooltip',
   components: {
-    Col,
     CreateTooltipContent,
-    Icon,
-    Popover,
-    Row,
     Tooltip,
   },
   props: {
     createData: {
       type: Object,
-      default: {
+      default: () => ({
         drawingBox: false,
         renaming: false,
         toBeConfirmed: false,
@@ -73,7 +66,7 @@ export default {
         faceIndex: -1,
         toBeDeleted: false,
         regionPrefix: '__annotation',
-      },
+      }),
     },
     label: {
       type: String,
@@ -85,7 +78,7 @@ export default {
     },
     annotationFeature: {
       type: Object,
-      default: {},
+      default: () => ({}),
     },
     offlineAnnotationEnabled: {
       type: Boolean,
