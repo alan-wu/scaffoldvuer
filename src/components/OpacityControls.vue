@@ -3,7 +3,8 @@
     <div class="block">
       <span class="display">{{ displayString }}</span>
       <el-slider
-        v-model="opacity"
+        :model-value="material.opacity"
+        @update:model-value="updateOpacity"
         class="my-slider"
         :step="0.01"
         :min="0"
@@ -28,24 +29,27 @@ export default {
   data: function () {
     return {
       displayString: '100%',
-      opacity: 1,
     };
   },
   watch: {
     'material.opacity': {
-      handler(newVal) {
-        this.opacity = newVal;
-      },
       immediate: true,
-    },
-    opacity: function (newVal) {
-      if (this.material && this.zincObject) {
-        this.material.opacity = newVal;
-        this.zincObject.setAlpha(newVal);
-      }
+      handler: function () {
+        if (!this.material) {
+          return;
+        }
+      this.displayString = this.formatTooltip(this.material.opacity);
+        if (this.zincObject) {
+          this.zincObject.setAlpha(this.material.opacity);
+        }
+      },
     },
   },
   methods: {
+    updateOpacity(val) {
+      this.displayString = this.formatTooltip(val);
+      this.$emit('update:opacity', val);
+    },
     formatTooltip(val) {
       this.displayString = Math.floor(100 * val + 0.5) + '%';
       return this.displayString;

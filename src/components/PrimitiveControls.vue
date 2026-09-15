@@ -2,7 +2,12 @@
   <div v-show="hasValidPrimitive" class="my-drawer">
     <el-collapse class="collapse" v-model="activeName" accordion>
       <el-collapse-item title="Opacity" name="oControls" v-show="!isTextureSlides">
-        <opacity-controls :material="material" :zincObject="zincObject" ref="opacityControls" />
+        <opacity-controls
+          :material="material"
+          :zincObject="zincObject"
+          ref="opacityControls"
+          @update:opacity="material.opacity = $event"
+        />
       </el-collapse-item>
       <el-collapse-item v-show="!isEditable" title="Transformation" name="trControls">
         <transformation-controls class="transformation-controls" ref="transformationControls" />
