@@ -31,7 +31,7 @@
       ref="display"
       tabindex="-1"
       style="height: 100%; width: 100%"
-      @keydown.66="backgroundChangeCallback"
+      @keydown.b="backgroundChangeCallback"
     />
     <div v-show="displayUI && !isTransitioning">
       <DrawToolbar
@@ -320,7 +320,7 @@
             <el-row class="backgroundText">Viewing Mode</el-row>
             <el-row class="backgroundControl">
               <div style="margin-bottom: 2px">
-                <template v-for="(value, key, index) in viewingModes" :key="key">
+                <template v-for="(value, key) in viewingModes" :key="key">
                   <template v-if="key === viewingMode">
                     <span class="viewing-mode-title">
                       <b>{{ key }}</b>
@@ -438,13 +438,8 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 import { inject, markRaw, provide, shallowRef } from 'vue';
-import {
-  WarningFilled as ElIconWarningFilled,
-  ArrowDown as ElIconArrowDown,
-  ArrowLeft as ElIconArrowLeft,
-} from '@element-plus/icons-vue';
+import { WarningFilled as ElIconWarningFilled } from '@element-plus/icons-vue';
 import PrimitiveControls from './PrimitiveControls.vue';
 import ScaffoldOverlay from './ScaffoldOverlay.vue';
 import { readNIFTIFromSource } from '../scripts/niftiHelper.js';
@@ -466,20 +461,6 @@ import {
   findObjectsWithNames,
   updateBoundingBox,
 } from '../scripts/Utilities.js';
-import {
-  ElButton as Button,
-  ElCol as Col,
-  ElLoading as Loading,
-  ElRadio as Radio,
-  ElRadioGroup as RadioGroup,
-  ElOption as Option,
-  ElPopover as Popover,
-  ElRow as Row,
-  ElSelect as Select,
-  ElSlider as Slider,
-  ElTabPane as TabPane,
-  ElTabs as Tabs,
-} from 'element-plus';
 import { AnnotationService } from '@abi-software/sparc-annotation';
 import { EventNotifier } from '../scripts/EventNotifier.js';
 import { OrgansViewer } from '../scripts/OrgansRenderer.js';
@@ -490,14 +471,7 @@ import { getNerveMaps } from '../scripts/MappedNerves.js';
 import { getOrganMaps } from '../scripts/MappedOrgans.js';
 const nervesMap = getNerveMaps();
 const organsMap = getOrganMaps();
-let foundNerves = 0;
-
-const haveSameElements = (arr1, arr2) => {
-  if (arr1.length !== arr2.length) return false;
-  return arr1.sort().every((value, index) => {
-    return value === arr2.sort()[index];
-  });
-};
+// let foundNerves = 0;
 
 /**
  * A vue component of the scaffold viewer.
@@ -508,26 +482,12 @@ const haveSameElements = (arr1, arr2) => {
 export default {
   name: 'ScaffoldVuer',
   components: {
-    Button,
-    Col,
-    Loading,
-    Option,
-    Popover,
-    Radio,
-    RadioGroup,
-    Row,
     ScaffoldOverlay,
-    Select,
-    Slider,
-    TabPane,
-    Tabs,
     MapSvgIcon,
     MapSvgSpriteColor,
     PrimitiveControls,
     ScaffoldTooltip,
     ElIconWarningFilled,
-    ElIconArrowDown,
-    ElIconArrowLeft,
     DrawToolbar,
     ScaffoldTreeControls,
   },
@@ -831,7 +791,6 @@ export default {
   },
   data: function () {
     return {
-      annotator: undefined,
       clientHeight: 300,
       colourRadio: true,
       createData: {
@@ -1186,7 +1145,7 @@ export default {
             zincObject.userData.defaultColour = `#${zincObject.getColourHex()}`;
             zincObject.userData.isGreyScale = false;
             if (groupName in nervesMap) {
-              foundNerves++;
+              // foundNerves++;
               zincObject.setAnatomicalId(nervesMap[groupName]);
             }
           } else {
@@ -2003,7 +1962,7 @@ export default {
         this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
       }
     },
-    activatePointEditingMode: function (zincObject, index, point) {
+    activatePointEditingMode: function (zincObject, index, _point) {
       this._editingZincObject = zincObject;
       this.createData.faceIndex = -1;
       this.createData.renaming = false;
