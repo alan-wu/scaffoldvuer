@@ -148,15 +148,11 @@ const OrgansSceneData = function() {
   }
 
 	const preRenderUpdateCallback = function() {
-		return function() {
-      preRenderTimeUpdate();
-		}
+    preRenderTimeUpdate();
   }
 
   const postRenderUpdateCallback = function() {
-		return function() {
-      postRenderSelectedCoordinatesUpdate();
-		}
+    postRenderSelectedCoordinatesUpdate();
 	}
 
 	/**
@@ -464,7 +460,6 @@ const OrgansSceneData = function() {
   //We only use it to handle an error
   const singleItemFinishCallback = function() {
     return function(payload) {
-
       if (payload?.type === "Error") {
         if (downloadErrorCallback) {
           const error = {
@@ -639,15 +634,17 @@ const OrgansSceneData = function() {
 	 *
 	 * @async
 	 */
-	 const initialise = async function() {
-	   await _this.initialiseRenderer(undefined);
+	 this.initialise = async function(displayAreaIn) {
+	   await _this.initialiseRenderer(displayAreaIn);
 	   if (_this.zincRenderer) {
-       _this.zincRenderer.addPreRenderCallbackFunction(preRenderUpdateCallback());
-       _this.zincRenderer.addPostRenderCallbackFunction(postRenderUpdateCallback());
+       _this.zincRenderer.addPreRenderCallbackFunction(() => {
+          preRenderUpdateCallback();
+        });
+       _this.zincRenderer.addPostRenderCallbackFunction(() => {
+        postRenderUpdateCallback()
+      });
      }
   }
-
-	initialise();
 
 }
 

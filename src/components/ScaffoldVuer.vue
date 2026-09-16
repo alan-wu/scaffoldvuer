@@ -1085,7 +1085,7 @@ export default {
     this.$module.addNotifier(eventNotifier);
     this.$module.addOrganPartAddedCallback(this.zincObjectAdded);
     this.$module.addOrganPartRemovedCallback(this.zincObjectRemoved);
-    await this.$module.initialiseRenderer(this.$refs.display);
+    await this.$module.initialise(this.$refs.display);
     this.toggleRendering(this.render);
     this.clientHeight = this.$refs.scaffoldContainer.$el.clientHeight;
     this.ro = new ResizeObserver(this.adjustLayout).observe(
