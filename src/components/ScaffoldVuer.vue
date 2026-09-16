@@ -501,16 +501,16 @@ export default {
   },
   props: {
     /**
-      * The option to edit annotation regardless of whether
-      * resources matches or not
-      */
-      annotationIgnoreResource: {
+     * The option to edit annotation regardless of whether
+     * resources matches or not
+     */
+    annotationIgnoreResource: {
       type: Boolean,
       default: false,
     },
     /**
-      * The option to show annotation information in sidebar
-      */
+     * The option to show annotation information in sidebar
+     */
     annotationSidebar: {
       type: Boolean,
       default: false,
