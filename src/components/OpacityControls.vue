@@ -38,7 +38,7 @@ export default {
         if (!this.material) {
           return;
         }
-      this.displayString = this.formatTooltip(this.material.opacity);
+        this.displayString = this.formatTooltip(this.material.opacity);
         if (this.zincObject) {
           this.zincObject.setAlpha(this.material.opacity);
         }
