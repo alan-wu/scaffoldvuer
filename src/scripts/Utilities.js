@@ -306,12 +306,23 @@ export const getObjectsFromAnnotations = (scene, annotations) => {
 
 const getCoordinatesForAnnotationFeature = (zincObject) => {
   const mesh = zincObject.getMorph();
+  const coords = [];
+  let vIndex = 0;
+  if (zincObject.isPointset) {
+    const positionArray = mesh.pointPositions;
+    for (let i = 0; i < zincObject.drawRange; i++) {
+      coords.push([
+        positionArray[vIndex++],
+        positionArray[vIndex++],
+        positionArray[vIndex++],
+      ]);
+    }
+    return coords;
+  }
   let attr = 'position';
   if (zincObject.isLines2) {
     attr = 'instanceStart';
   }
-  const coords = [];
-  let vIndex = 0;
   const position = mesh.geometry.getAttribute( attr );
   for (let i = 0; i < zincObject.drawRange; i++) {
     coords.push([

@@ -1851,9 +1851,12 @@ export default {
             this.tData.x = 50;
             this.tData.y = 200;
             if (this._tempPoint) {
-              const positionAttribute = this._tempPoint.geometry.getAttribute( 'position' );
+              const positionAttribute = this._tempPoint.geometry.getAttribute( 'instancePosition' );
               positionAttribute.setXYZ(0, worldCoords[0], worldCoords[1], worldCoords[2]);
               positionAttribute.needsUpdate = true;
+              this._tempPoint.pointPositions[0] = worldCoords[0];
+              this._tempPoint.pointPositions[1] = worldCoords[1];
+              this._tempPoint.pointPositions[2] = worldCoords[2];
             } else {
               this._tempPoint = this.$module.scene.addTemporaryPoints(
                 [worldCoords], 0x00ffff);
