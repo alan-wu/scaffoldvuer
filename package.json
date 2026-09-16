@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/scaffoldvuer",
-  "version": "1.20.0",
+  "version": "1.21.0",
   "license": "Apache-2.0",
   "engines": {
     "node": "^24.20.0"
@@ -58,7 +58,7 @@
     "simple-dropzone": "^0.8.3",
     "vue": "^3.5.41",
     "vue-router": "^5.2.0",
-    "zincjs": "^2.3.0"
+    "zincjs": "^2.4.0"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^8.0.1",

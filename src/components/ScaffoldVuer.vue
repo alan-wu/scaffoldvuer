@@ -501,8 +501,16 @@ export default {
   },
   props: {
     /**
-     * The option to show annotation information in sidebar
-     */
+      * The option to edit annotation regardless of whether
+      * resources matches or not
+      */
+      annotationIgnoreResource: {
+      type: Boolean,
+      default: false,
+    },
+    /**
+      * The option to show annotation information in sidebar
+      */
     annotationSidebar: {
       type: Boolean,
       default: false,
@@ -1324,7 +1332,7 @@ export default {
           return (
             element.group === annotation.group &&
             element.region === annotation.region &&
-            element.resource === annotation.resource &&
+            (this.annotationIgnoreResource || element.resource === annotation.resource) &&
             element.feature.geometry.type === annotation.feature.geometry.type
           );
         });
@@ -1374,7 +1382,7 @@ export default {
           return (
             element.group === oldName &&
             element.region === annotation.region &&
-            element.resource === annotation.resource &&
+            (this.annotationIgnoreResource || element.resource === annotation.resource) &&
             element.feature.geometry.type === annotation.feature.geometry.type
           );
         });
@@ -1560,7 +1568,7 @@ export default {
                 return (
                   element.group === group &&
                   element.region === annotation.region &&
-                  element.resource === annotation.resource &&
+                  (this.annotationIgnoreResource || element.resource === annotation.resource) &&
                   element.feature.geometry.type === annotation.feature.geometry.type
                 );
               });
@@ -2871,7 +2879,6 @@ export default {
         //this.$module.scene.enableAxisDisplay(true, true);
         this.isReady = true;
         this.calculateBoundingBox();
-        //console.log(`found ${foundNerves}`);
         this.$nextTick(() => {
           this.restoreSettings(options);
           this.$emit('on-ready');
