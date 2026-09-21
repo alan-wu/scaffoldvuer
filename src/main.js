@@ -1,30 +1,28 @@
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import * as VueRouter from 'vue-router'
-import App from './App.vue'
-import { useMainStore } from '@/store/index'
-import './assets/fonts.scss'
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import * as VueRouter from 'vue-router';
+import App from './App.vue';
+import { useMainStore } from '@/store/index';
+import './assets/fonts.scss';
 
-const routes = [
-  { path: '/'},
-]
+const routes = [{ path: '/' }];
 
-const app = createApp(App)
+const app = createApp(App);
 
 const router = VueRouter.createRouter({
   // 4. Provide the history implementation to use. We are using the hash history for simplicity here.
   history: VueRouter.createWebHashHistory(),
   routes,
-})
-app.use(router)
-const pinia = createPinia()
+});
+app.use(router);
+const pinia = createPinia();
 
-app.use(pinia)
+app.use(pinia);
 
-const mainStore = useMainStore()
-const token = document.cookie.split("; ").find((row) => row.startsWith("user-token"))
+const mainStore = useMainStore();
+const token = document.cookie.split('; ').find((row) => row.startsWith('user-token'));
 if (mainStore && token) {
-  mainStore.setUserToken(token.split("=")[1])
+  mainStore.setUserToken(token.split('=')[1]);
 }
 
-app.mount('#app')
+app.mount('#app');

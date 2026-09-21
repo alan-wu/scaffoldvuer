@@ -2,16 +2,10 @@
   <el-container class="t-slides-container">
     <el-main class="slides-block">
       <el-row class="slide-row">
-      <el-checkbox
-          v-model="discardAlpha"
-        >
-          Discard Translucent Pixel
-        </el-checkbox>
+        <el-checkbox v-model="discardAlpha">Discard Translucent Pixel</el-checkbox>
       </el-row>
       <el-row class="slide-row">
-        <el-col :offset="0" :span="8">
-          Brightness
-        </el-col>
+        <el-col :offset="0" :span="8">Brightness</el-col>
         <el-col :offset="0" :span="10">
           <el-slider
             v-model="brightness"
@@ -34,9 +28,7 @@
         </el-col>
       </el-row>
       <el-row class="slide-row">
-        <el-col :offset="0" :span="8">
-          Contrast
-        </el-col>
+        <el-col :offset="0" :span="8">Contrast</el-col>
         <el-col :offset="0" :span="10">
           <el-slider
             v-model="contrast"
@@ -100,10 +92,7 @@
           />
         </el-col>
         <el-col :offset="0" :span="2">
-          <el-icon
-            class="delete-icon"
-            @click="removeSlide(index, slide)"
-          >
+          <el-icon class="delete-icon" @click="removeSlide(index, slide)">
             <el-icon-delete />
           </el-icon>
         </el-col>
@@ -114,52 +103,22 @@
         <el-col :span="2">
           <el-icon><el-icon-plus /></el-icon>
         </el-col>
-        <el-col :span="20"> Add a new slide </el-col>
+        <el-col :span="20">Add a new slide</el-col>
       </el-row>
     </el-footer>
   </el-container>
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
-import {
-  Delete as ElIconDelete,
-  Plus as ElIconPlus,
-} from '@element-plus/icons-vue'
-import {
-  ElCheckbox as Checkbox,
-  ElCol as Col,
-  ElContainer as Container,
-  ElDivider as Divider,
-  ElFooter as Footer,
-  ElIcon as Icon,
-  ElInputNumber as InputNumber,
-  ElMain as Main,
-  ElRow as Row,
-  ElSelect as Select,
-  ElSlider as Slider,
-  ElOption as Option,
-} from "element-plus";
+import { Delete as ElIconDelete, Plus as ElIconPlus } from '@element-plus/icons-vue';
 import { markRaw } from 'vue';
 
 /**
  * A component to control the opacity of the target object.
  */
 export default {
-  name: "TextureSlidesControls",
+  name: 'TextureSlidesControls',
   components: {
-    Checkbox,
-    Col,
-    Container,
-    Divider,
-    Footer,
-    Icon,
-    InputNumber,
-    Main,
-    Row,
-    Select,
-    Slider,
-    Option,
     ElIconDelete,
     ElIconPlus,
   },
@@ -171,16 +130,16 @@ export default {
       settings: [],
       directions: [
         {
-          value: "x",
-          label: "x",
+          value: 'x',
+          label: 'x',
         },
         {
-          value: "y",
-          label: "y",
+          value: 'y',
+          label: 'y',
         },
         {
-          value: "z",
-          label: "z",
+          value: 'z',
+          label: 'z',
         },
       ],
       zincObject: undefined,
@@ -210,7 +169,7 @@ export default {
         }
       },
       immediate: false,
-    }
+    },
   },
   methods: {
     setObject: function (object) {
@@ -229,11 +188,11 @@ export default {
       }
     },
     addNewSlide: function () {
-      const newSettings = { direction: "x", value: 0 };
+      const newSettings = { direction: 'x', value: 0 };
       const returnSettings = this.zincObject.createSlide(newSettings);
       this.settings.push(returnSettings);
     },
-    modifyDirection: function(direction, slide) {
+    modifyDirection: function (direction, slide) {
       if (slide) {
         slide.direction = direction;
         this.zincObject.modifySlideSettings(slide);
@@ -254,7 +213,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-
 .add-slides-text {
   color: $app-primary-color;
   line-height: 1;
@@ -263,7 +221,7 @@ export default {
   font-size: 12px;
   cursor: pointer;
   pointer-events: auto;
-  direction:ltr;
+  direction: ltr;
 }
 
 :deep(.el-divider--horizontal) {
@@ -271,7 +229,7 @@ export default {
 }
 
 .slides-block {
-  direction:rtl;
+  direction: rtl;
   pointer-events: auto;
   &.el-main {
     padding: 5px;
@@ -286,8 +244,8 @@ export default {
   }
 }
 
-#scroll div{
-    direction:ltr;
+#scroll div {
+  direction: ltr;
 }
 
 .my-slider {
@@ -331,7 +289,7 @@ export default {
     padding-left: 4px;
     padding-right: 8px;
     border: none;
-    font-family: "Asap", sans-serif;
+    font-family: 'Asap', sans-serif;
     line-height: 22px;
   }
 
@@ -349,6 +307,6 @@ export default {
 }
 
 .slide-row {
-  direction:ltr;
+  direction: ltr;
 }
 </style>

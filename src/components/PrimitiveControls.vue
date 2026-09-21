@@ -1,21 +1,19 @@
 <template>
   <div v-show="hasValidPrimitive" class="my-drawer">
     <el-collapse class="collapse" v-model="activeName" accordion>
-      <el-collapse-item title="Opacity" name="oControls" v-show="!isTextureSlides" >
+      <el-collapse-item title="Opacity" name="oControls" v-show="!isTextureSlides">
         <opacity-controls
           :material="material"
           :zincObject="zincObject"
-          ref="opacityControls" />
+          ref="opacityControls"
+          @update:opacity="material.opacity = $event"
+        />
       </el-collapse-item>
       <el-collapse-item v-show="!isEditable" title="Transformation" name="trControls">
-        <transformation-controls
-          class="transformation-controls"
-          ref="transformationControls" />
+        <transformation-controls class="transformation-controls" ref="transformationControls" />
       </el-collapse-item>
       <el-collapse-item v-show="isTextureSlides" title="Texture Slides" name="tsControls">
-        <texture-slides-controls
-          class="texture-controls"
-          ref="tSlidesControls" />
+        <texture-slides-controls class="texture-controls" ref="tSlidesControls" />
       </el-collapse-item>
       <el-collapse-item v-show="isPointset" title="Points" name="pControls">
         <points-controls
@@ -45,38 +43,27 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 import { markRaw } from 'vue';
-import {
-  ArrowRight as ElIconArrowRight,
-} from '@element-plus/icons-vue';
-import {
-  ElCollapse as Collapse,
-  ElCollapseItem as CollapseItem,
-} from "element-plus";
 
-import OpacityControls from "./OpacityControls.vue";
-import PointsControls from "./PointsControls.vue";
-import LinesControls from "./LinesControls.vue";
-import GlyphsControls from "./GlyphsControls.vue";
-import TextureSlidesControls from "./TextureSlidesControls.vue";
-import TransformationControls from "./TransformationControls.vue";
+import OpacityControls from './OpacityControls.vue';
+import PointsControls from './PointsControls.vue';
+import LinesControls from './LinesControls.vue';
+import GlyphsControls from './GlyphsControls.vue';
+import TextureSlidesControls from './TextureSlidesControls.vue';
+import TransformationControls from './TransformationControls.vue';
 
 /**
  * A component to control the opacity of the target object.
  */
 export default {
-  name: "PrimitiveControls",
+  name: 'PrimitiveControls',
   components: {
-    Collapse,
-    CollapseItem,
     GlyphsControls,
     LinesControls,
     OpacityControls,
     PointsControls,
     TextureSlidesControls,
     TransformationControls,
-    ElIconArrowRight,
   },
   props: {
     createData: {
@@ -84,15 +71,15 @@ export default {
     },
     viewingMode: {
       type: String,
-      default: "Exploration",
+      default: 'Exploration',
     },
     usageConfig: {
       type: Object,
-    }
+    },
   },
-  data: function() {
+  data: function () {
     return {
-      activeName: "oControls",
+      activeName: 'oControls',
       material: undefined,
       isTextureSlides: false,
       isPointset: false,
@@ -100,23 +87,23 @@ export default {
       isGlyph: false,
       zincObject: undefined,
       isEditable: false,
-      displayString: "100%"
+      displayString: '100%',
     };
   },
   computed: {
     hasValidPrimitive: function () {
       if (this.viewingMode === 'Exploration' || this.viewingMode === 'Annotation') {
-        return (this.material !== undefined || this.isTextureSlides === true);
+        return this.material !== undefined || this.isTextureSlides === true;
       }
       return false;
-    }
+    },
   },
   methods: {
-    formatTooltip: function(val) {
-      this.displayString = Math.floor(100 * val + 0.5) + "%";
+    formatTooltip: function (val) {
+      this.displayString = Math.floor(100 * val + 0.5) + '%';
       return this.displayString;
     },
-    setObject: function(object) {
+    setObject: function (object) {
       if (object) {
         this.zincObject = markRaw(object);
       } else {
@@ -126,27 +113,28 @@ export default {
       this.isPointset = false;
       this.isTextureSlides = false;
       this.isLines = false;
-      this.isGlyph = false,
-      this.activeName  = "trControls";
+      ((this.isGlyph = false), (this.activeName = 'trControls'));
       if (object) {
         if (object.isTextureSlides) {
           this.isTextureSlides = true;
           this.$refs.tSlidesControls.setObject(object);
-          this.activeName = "tsControls";
+          this.activeName = 'tsControls';
         } else if (object.isPointset) {
           this.isPointset = true;
           this.$refs.pointsetControls.setObject(object);
-          this.activeName = "pControls";
-        } else if (object.isLines2 || (object.isTubeLines &&
-          this.usageConfig?.showTubeLinesControls)) {
+          this.activeName = 'pControls';
+        } else if (
+          object.isLines2 ||
+          (object.isTubeLines && this.usageConfig?.showTubeLinesControls)
+        ) {
           this.isLines = true;
           this.$refs.linesControls.setObject(object);
-          this.activeName = "lControls";
+          this.activeName = 'lControls';
         } else if (object.isGlyphset) {
           if (object.canShowLabel()) {
             this.isGlyph = true;
             this.$refs.glyphControls.setObject(object);
-            this.activeName = "gControls";
+            this.activeName = 'gControls';
           }
         }
         this.$refs.transformationControls.setObject(object);
@@ -156,8 +144,8 @@ export default {
       } else {
         this.material = undefined;
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -170,13 +158,11 @@ export default {
   }
 
   :deep(.el-collapse-item__header) {
-    height:36px;
+    height: 36px;
   }
 
   :deep(.el-collapse-item__content) {
     padding-bottom: 0px;
   }
 }
-
-
 </style>

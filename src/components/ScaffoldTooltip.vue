@@ -13,9 +13,7 @@
     >
       <template #default>
         <div class="tooltip-text">{{ label }}</div>
-        <div class="tooltip-text" v-if="region && region != '/'">
-          Region: {{ region }}
-        </div>
+        <div class="tooltip-text" v-if="region && region != '/'">Region: {{ region }}</div>
         <CreateTooltipContent
           v-show="createData.toBeConfirmed"
           :createData="createData"
@@ -38,53 +36,41 @@
 </template>
 
 <script>
-import { shallowRef } from 'vue';
-/* eslint-disable no-alert, no-console */
-import {
-  ElCol as Col,
-  ElIcon as Icon,
-  ElPopover as Popover,
-  ElRow as Row,
-} from "element-plus";
 import { mapState } from 'pinia';
-import { useMainStore } from "@/store/index";
-import { CreateTooltipContent, Tooltip } from '@abi-software/map-utilities'
-import '@abi-software/map-utilities/dist/style.css'
+import { useMainStore } from '@/store/index';
+import { CreateTooltipContent, Tooltip } from '@abi-software/map-utilities';
+import '@abi-software/map-utilities/dist/style.css';
 
 /**
  * A component to control the opacity of the target object.
  */
 export default {
-  name: "ScaffoldTooltip",
+  name: 'ScaffoldTooltip',
   components: {
-    Col,
     CreateTooltipContent,
-    Icon,
-    Popover,
-    Row,
     Tooltip,
   },
   props: {
     createData: {
       type: Object,
-      default:{
+      default: () => ({
         drawingBox: false,
         renaming: false,
         toBeConfirmed: false,
         points: [],
         tempGroupName: undefined,
-        shape: "",
+        shape: '',
         x: 0,
         y: 0,
         editingIndex: -1,
         faceIndex: -1,
         toBeDeleted: false,
-        regionPrefix: "__annotation"
-      },
+        regionPrefix: '__annotation',
+      }),
     },
     label: {
       type: String,
-      default: "",
+      default: '',
     },
     annotationDisplay: {
       type: Boolean,
@@ -92,7 +78,7 @@ export default {
     },
     annotationFeature: {
       type: Object,
-      default: {},
+      default: () => ({}),
     },
     offlineAnnotationEnabled: {
       type: Boolean,
@@ -100,7 +86,7 @@ export default {
     },
     region: {
       type: String,
-      default: "",
+      default: '',
     },
     visible: {
       type: Boolean,
@@ -124,41 +110,42 @@ export default {
   data: function () {
     return {
       display: false,
-      annotationEntry: []
+      annotationEntry: [],
     };
   },
   computed: {
-    ...mapState(useMainStore,  ['userToken']),
+    ...mapState(useMainStore, ['userToken']),
     position: function () {
       let yOffset = 40;
       if (this.region) {
         yOffset = 55;
       }
       const x = this.x - 40;
-      return { left: x + "px", top: this.y - yOffset + "px" };
+      return { left: x + 'px', top: this.y - yOffset + 'px' };
     },
   },
   methods: {
     checkForDisplay: function () {
-      if (this.visible && this.label && this.label !== "") {
+      if (this.visible && this.label && this.label !== '') {
         this.display = true;
         if (this.annotationDisplay) {
-          const region = this.region ? this.region +"/" : "";
-          this.annotationEntry = [{
-            "featureId": region + this.label,
-            "resourceId": this.scaffoldUrl,
-            "resource": this.scaffoldUrl,
-            "feature": this.annotationFeature,
-            "offline": this.offlineAnnotationEnabled,
-          }];
+          const region = this.region ? this.region + '/' : '';
+          this.annotationEntry = [
+            {
+              featureId: region + this.label,
+              resourceId: this.scaffoldUrl,
+              resource: this.scaffoldUrl,
+              feature: this.annotationFeature,
+              offline: this.offlineAnnotationEnabled,
+            },
+          ];
         }
-      }
-      else {
+      } else {
         this.display = false;
         this.annotationEntry = [];
       }
     },
-    hideTriggered: function() {
+    hideTriggered: function () {
       this.$emit('tooltip-hide');
     },
   },
@@ -180,14 +167,13 @@ export default {
         this.checkForDisplay();
       },
       immediate: true,
-    }
+    },
   },
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-
 .region-tooltip {
   position: absolute;
   height: 50px;
@@ -201,9 +187,9 @@ export default {
     border: 1px solid $app-primary-color;
     border-radius: 4px;
     white-space: nowrap;
-    min-width: unset!important;
-    max-width:fit-content;
-    width:unset!important;
+    min-width: unset !important;
+    max-width: fit-content;
+    width: unset !important;
     pointer-events: none;
     top: -15px !important;
     .el-popper__arrow {
@@ -226,12 +212,13 @@ export default {
   .p-tooltip {
     display: flex;
     width: 300px;
-    white-space:normal;
+    white-space: normal;
     .attribute-content {
       color: rgb(44, 62, 80);
     }
-    &::before, &::after {
-      display:none;
+    &::before,
+    &::after {
+      display: none;
     }
   }
 }
