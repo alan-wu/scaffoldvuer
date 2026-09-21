@@ -1,22 +1,22 @@
-import { Label, THREE } from 'zincjs';
+import { THREE } from 'zincjs';
 
-  // This will be the config for nerves selection and highlight
-  export const NERVE_CONFIG = {
-    SELECTED_COLOUR: '#00ff00',
-    HIGHLIGHTED_COLOUR: '#ff0000',
-    DEFAULT_RADIUS: 1,
-    DEFAULT_RADIAL_SEGMENTS: 8,
-    ZOOM_RADIUS: 5,
-    ZOOM_RADIAL_SEGMENTS: 12,
-  }
+// This will be the config for nerves selection and highlight
+export const NERVE_CONFIG = {
+  SELECTED_COLOUR: '#00ff00',
+  HIGHLIGHTED_COLOUR: '#ff0000',
+  DEFAULT_RADIUS: 1,
+  DEFAULT_RADIAL_SEGMENTS: 8,
+  ZOOM_RADIUS: 5,
+  ZOOM_RADIAL_SEGMENTS: 12,
+};
 
 export const createListFromPrimitives = (primitives, list) => {
   if (primitives) {
-    let id = "";
-    primitives.forEach(primitive => {
+    let id = '';
+    primitives.forEach((primitive) => {
       id = primitive.uuid;
       if (primitive.region) {
-        id = primitive.region.uuid + "/" + id;
+        id = primitive.region.uuid + '/' + id;
       }
       if (primitive && primitive.getVisibility()) {
         list.push(id);
@@ -24,14 +24,14 @@ export const createListFromPrimitives = (primitives, list) => {
     });
   }
   return list;
-}
+};
 
 const getDistance = (point1, point2) => {
   const dist0 = point1[0] - point2[0];
   const dist1 = point1[1] - point2[1];
   const dist2 = point1[2] - point2[2];
   return Math.sqrt(dist0 * dist0 + dist1 * dist1 + dist2 * dist2);
-}
+};
 
 export const getEditablePoint = (eventIdentifiers) => {
   //const zincObjects = event.zincObjects;
@@ -42,13 +42,13 @@ export const getEditablePoint = (eventIdentifiers) => {
       if (info && info.index > -1) {
         const v = zincObject.getVerticesByIndex(info.index);
         if (v) {
-          return { zincObject, index: info.index, point: v};
+          return { zincObject, index: info.index, point: v };
         }
       }
     }
   }
   return undefined;
-}
+};
 
 export const getDeletableObjects = (eventIdentifiers) => {
   const zincObject = eventIdentifiers[0].data?.zincObject;
@@ -58,7 +58,7 @@ export const getDeletableObjects = (eventIdentifiers) => {
     }
   }
   return undefined;
-}
+};
 
 export const getEditableLines = (eventIdentifiers) => {
   const zincObject = eventIdentifiers[0].data?.zincObject;
@@ -72,16 +72,26 @@ export const getEditableLines = (eventIdentifiers) => {
           const dist0 = getDistance(v[0], [p.x, p.y, p.z]);
           const dist1 = getDistance(v[1], [p.x, p.y, p.z]);
           if (dist0 > dist1) {
-            return { zincObject, faceIndex: info.faceIndex, vertexIndex: info.faceIndex * 2 + 1, point: v[0]};
+            return {
+              zincObject,
+              faceIndex: info.faceIndex,
+              vertexIndex: info.faceIndex * 2 + 1,
+              point: v[0],
+            };
           } else {
-            return { zincObject, faceIndex: info.faceIndex, vertexIndex: info.faceIndex * 2, point: v[1]};
+            return {
+              zincObject,
+              faceIndex: info.faceIndex,
+              vertexIndex: info.faceIndex * 2,
+              point: v[1],
+            };
           }
         }
       }
     }
   }
   return undefined;
-}
+};
 
 export const getClickedObjects = (event) => {
   const zincObjects = event.zincObjects;
@@ -90,7 +100,7 @@ export const getClickedObjects = (event) => {
     return zincObject;
   }
   return undefined;
-}
+};
 
 export const movePoint = (zincObject, index, diff) => {
   if (zincObject?.isEditable && zincObject?.isPointset) {
@@ -113,7 +123,7 @@ export const movePoint = (zincObject, index, diff) => {
     }
   }
   return false;
-}
+};
 
 export const getLineDistance = (zincObject, faceIndex) => {
   if (zincObject?.isEditable && zincObject?.isLines2) {
@@ -125,7 +135,7 @@ export const getLineDistance = (zincObject, faceIndex) => {
     }
   }
   return 0;
-}
+};
 
 //Move or extend a line
 export const moveAndExtendLine = (zincObject, faceIndex, unit, extendOnly) => {
@@ -136,7 +146,7 @@ export const moveAndExtendLine = (zincObject, faceIndex, unit, extendOnly) => {
         let d = [v[1][0] - v[0][0], v[1][1] - v[0][1], v[1][2] - v[0][2]];
         const mag = Math.sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
         for (let i = 0; i < 3; i++) {
-          d[i] = d[i] / mag * unit;
+          d[i] = (d[i] / mag) * unit;
           if (!extendOnly) {
             v[0][i] = v[0][i] + d[i];
             v[1][i] = v[1][i] + d[i];
@@ -151,30 +161,26 @@ export const moveAndExtendLine = (zincObject, faceIndex, unit, extendOnly) => {
     }
   }
   return false;
-}
+};
 
 export const updateBoundingBox = (geometry, scene) => {
   const box = scene.getBoundingBox();
   const dim = new THREE.Vector3().subVectors(box.max, box.min);
   const boxGeo = new THREE.BoxGeometry(dim.x, dim.y, dim.z);
-  dim.addVectors(box.min, box.max).multiplyScalar( 0.5 );
-  const positions = boxGeo.getAttribute("position");
+  dim.addVectors(box.min, box.max).multiplyScalar(0.5);
+  const positions = boxGeo.getAttribute('position');
   const count = positions.count;
   const vertices = [];
   for (let i = 0; i < count; i++) {
-    vertices[i] = [
-      positions.array[i * 3],
-      positions.array[i * 3 + 1],
-      positions.array[i * 3 + 2]
-    ];
+    vertices[i] = [positions.array[i * 3], positions.array[i * 3 + 1], positions.array[i * 3 + 2]];
   }
-  geometry.editVertices(vertices , 0);
+  geometry.editVertices(vertices, 0);
   geometry.setPosition(dim.x, dim.y, dim.z);
   boxGeo.dispose();
-}
+};
 
 export const extractAllFullPaths = (item, list) => {
-  let nodeName = "";
+  let nodeName = '';
   if (item.isRegion) {
     nodeName = `__r${item.regionPath}`;
   }
@@ -182,37 +188,35 @@ export const extractAllFullPaths = (item, list) => {
     nodeName = `${item.regionPath}/${item.label}`;
   }
   list.push(nodeName);
-  if (item.children)
-    item.children.forEach(child => extractAllFullPaths(child, list));
-}
+  if (item.children) item.children.forEach((child) => extractAllFullPaths(child, list));
+};
 
 export const findObjectsWithNames = (rootRegion, names, regionPath, transverse) => {
   let targetRegion = rootRegion;
   const targetObjects = [];
-  if (regionPath)
-    targetRegion = rootRegion.findChildFromPath(regionPath);
+  if (regionPath) targetRegion = rootRegion.findChildFromPath(regionPath);
   if (targetRegion) {
     const isArray = Array.isArray(names);
     let array = names;
     if (!isArray) {
       array = [array];
     }
-    array.forEach(name => {
+    array.forEach((name) => {
       const temp = targetRegion.findObjectsWithGroupName(name, transverse);
       targetObjects.push(...temp);
     });
   }
   return targetObjects;
-}
+};
 
 export const getAllObjects = (scene) => {
   let objects = scene.getRootRegion().getAllObjects(true);
   let id = 1;
-  return objects.map(object => Object.assign(object, { id: id++ })); // Add id to each object
-}
+  return objects.map((object) => Object.assign(object, { id: id++ })); // Add id to each object
+};
 
 const findObjectWithUUID = (objects, uuid, remove) => {
-  const index = objects.findIndex(obj => obj.uuid === uuid);
+  const index = objects.findIndex((obj) => obj.uuid === uuid);
   let object = undefined;
   if (index > -1) {
     object = objects[index];
@@ -221,7 +225,7 @@ const findObjectWithUUID = (objects, uuid, remove) => {
     }
   }
   return object;
-}
+};
 
 export const convertUUIDsToFullPaths = (rootRegion, IDs) => {
   const results = [];
@@ -234,8 +238,8 @@ export const convertUUIDsToFullPaths = (rootRegion, IDs) => {
     let primitive = undefined;
     let regionID = undefined;
 
-    IDs.forEach(id => {
-      const uuids = id.split("/");
+    IDs.forEach((id) => {
+      const uuids = id.split('/');
       regionID = uuids[0];
       region = findObjectWithUUID(allRegions, regionID, false);
       if (region) {
@@ -257,28 +261,26 @@ export const convertUUIDsToFullPaths = (rootRegion, IDs) => {
     });
   }
   return results;
-}
+};
 
 export const createUnqiuesFromObjects = (zincObjects) => {
   if (zincObjects) {
     const expanded = [];
-    zincObjects.forEach(obj => {
+    zincObjects.forEach((obj) => {
       if (obj.isZincObject) {
         expanded.push(obj);
       } else if (obj.isRegion) {
         expanded.push(...obj.getAllObjects(true));
       }
     });
-    const uniq = Object.values(
-      expanded.reduce((acc, obj) => ({ ...acc, [obj.uuid]: obj }), {})
-    );
+    const uniq = Object.values(expanded.reduce((acc, obj) => ({ ...acc, [obj.uuid]: obj }), {}));
     return uniq;
   }
   return [];
-}
+};
 
 export const getObjectsFromAnnotations = (scene, annotations) => {
-  const returned = {label: "Multiple selections", regionPath: "", objects: []};
+  const returned = { label: 'Multiple selections', regionPath: '', objects: [] };
   if (annotations && scene) {
     const rpList = {};
     const rootRegion = scene.getRootRegion();
@@ -286,12 +288,12 @@ export const getObjectsFromAnnotations = (scene, annotations) => {
       returned.regionPath = annotations[0].data.region;
       returned.label = annotations[0].data.group;
     }
-    annotations.forEach(annotation => {
+    annotations.forEach((annotation) => {
       if (!annotation.data.region.includes(returned.regionPath)) {
-        returned.regionPath = "";
+        returned.regionPath = '';
       }
       if (returned.label !== annotation.data.group) {
-        returned.label = "Multiple selections";
+        returned.label = 'Multiple selections';
       }
       const region = rootRegion.findChildFromPath(annotation.data.region);
       if (!rpList[region.uuid]) {
@@ -302,7 +304,7 @@ export const getObjectsFromAnnotations = (scene, annotations) => {
     });
   }
   return returned;
-}
+};
 
 const getCoordinatesForAnnotationFeature = (zincObject) => {
   const mesh = zincObject.getMorph();
@@ -312,86 +314,102 @@ const getCoordinatesForAnnotationFeature = (zincObject) => {
   }
   const coords = [];
   let vIndex = 0;
-  const position = mesh.geometry.getAttribute( attr );
+  const position = mesh.geometry.getAttribute(attr);
   for (let i = 0; i < zincObject.drawRange; i++) {
-    coords.push([
-      position.array[vIndex++],
-      position.array[vIndex++],
-      position.array[vIndex++],
-    ]);
+    coords.push([position.array[vIndex++], position.array[vIndex++], position.array[vIndex++]]);
   }
   return coords;
-}
+};
 
-export const createNewAnnotationsWithFeatures = (zincObject, region, group, scaffoldUrl, comment) => {
-  let type = undefined;
+export const createNewAnnotationsWithFeatures = (
+  zincObject,
+  region,
+  group,
+  scaffoldUrl,
+  comment,
+) => {
+  let type;
   if (zincObject.isPointset) {
-    type = "MultiPoint";
+    type = 'MultiPoint';
   } else if (zincObject.isLines2) {
-    type = "MultiLineString";
+    type = 'MultiLineString';
   } else {
-    type = "Feature";
+    type = 'Feature';
   }
-  const drawn = type === "Feature" ? false : true;
-  const label = type === "Feature" ? "Feature annotation" : "Drawn annotation";
+  const drawn = type === 'Feature' ? false : true;
+  const label = type === 'Feature' ? 'Feature annotation' : 'Drawn annotation';
   if (type) {
     const coords = getCoordinatesForAnnotationFeature(zincObject);
     //Check if region ends with a slash
-    let fullName = region.slice(-1) === "/" ? region : region + "/";
+    let fullName = region.slice(-1) === '/' ? region : region + '/';
     fullName = fullName + group;
     const featureID = fullName;
     const userAnnotation = {
       resource: scaffoldUrl,
       item: {
-        "id": featureID,
+        id: featureID,
       },
       body: {
         evidence: [],
         comment: comment,
       },
       feature: {
-        "id": featureID,
-        "properties": {
-            "drawn": drawn,
-            "label": label
+        id: featureID,
+        properties: {
+          drawn: drawn,
+          label: label,
         },
-        "geometry": {
-            "coordinates": coords,
-            "type": type
-        }
+        geometry: {
+          coordinates: coords,
+          type: type,
+        },
       },
-    }
-    if (comment === "Deleted") {
+    };
+    if (comment === 'Deleted') {
       userAnnotation.feature = undefined;
     }
 
     return userAnnotation;
   }
-}
+};
 
 /*
  * Add/Update drawn annotations to the server.
  */
-export const addUserAnnotationWithFeature = (service, userToken, zincObject,
-  region, group, scaffoldUrl, action) => {
-  const annotation = createNewAnnotationsWithFeatures(zincObject, region, group, scaffoldUrl, action);
+export const addUserAnnotationWithFeature = (
+  service,
+  userToken,
+  zincObject,
+  region,
+  group,
+  scaffoldUrl,
+  action,
+) => {
+  const annotation = createNewAnnotationsWithFeatures(
+    zincObject,
+    region,
+    group,
+    scaffoldUrl,
+    action,
+  );
   if (annotation) {
     if (service && service.currentUser) {
-      annotation.creator = {...service.currentUser};
+      annotation.creator = { ...service.currentUser };
       if (!annotation.creator.orcid) annotation.creator.orcid = '0000-0000-0000-0000';
-      service.addAnnotation(userToken, annotation)
-      .then((response) => {
-        if (!response.annotationId) {
+      service
+        .addAnnotation(userToken, annotation)
+        .then((response) => {
+          if (!response.annotationId) {
+            console.log('There is a problem with the submission, please try again later');
+          }
+        })
+        .catch(() => {
           console.log('There is a problem with the submission, please try again later');
-        }
-      })
-      .catch(() => {
-        console.log('There is a problem with the submission, please try again later');
-      })
+        });
     }
     return annotation;
   }
-}
+};
 
 /*
  * Get the drawn annotation stored on the annotation server
@@ -399,12 +417,12 @@ export const addUserAnnotationWithFeature = (service, userToken, zincObject,
 export const getDrawnAnnotations = async (service, userToken, scaffoldUrl) => {
   const resource = scaffoldUrl;
   return await service.drawnFeatures(userToken, resource);
-}
+};
 
 /*
  * Convert features store in annotation server into primitives
  */
-export const annotationFeaturesToPrimitives = (scene, features)  => {
+export const annotationFeaturesToPrimitives = (scene, features) => {
   if (scene) {
     features.forEach((feature) => {
       const geometry = feature.geometry;
@@ -413,36 +431,24 @@ export const annotationFeaturesToPrimitives = (scene, features)  => {
       const region = regionGroup.substring(0, last);
       const group = regionGroup.substring(last + 1);
       let object = undefined;
-      if (geometry.type === "MultiPoint") {
-        object = scene.createPoints(
-          region,
-          group,
-          geometry.coordinates,
-          group,
-          0x0022ee,
-        );
-      } else if (geometry.type === "MultiLineString") {
-        object = scene.createLines(
-          region,
-          group,
-          geometry.coordinates,
-          0x00ee22,
-        );
+      if (geometry.type === 'MultiPoint') {
+        object = scene.createPoints(region, group, geometry.coordinates, group, 0x0022ee);
+      } else if (geometry.type === 'MultiLineString') {
+        object = scene.createLines(region, group, geometry.coordinates, 0x00ee22);
       }
       if (object) object.zincObject.isEditable = true;
     });
   }
-}
+};
 
-export const objectsToZincObjects = function(objects) {
+export const objectsToZincObjects = function (objects) {
   const zincObjects = [];
   for (let i = 0; i < objects.length; i++) {
     let zincObject = objects[i].userData;
     if (zincObject) {
       if (zincObject.isGlyph || zincObject.isGlyphset) {
         let glyphset = zincObject;
-        if (zincObject.isGlyph)
-          glyphset = zincObject.getGlyphset();
+        if (zincObject.isGlyph) glyphset = zincObject.getGlyphset();
         zincObjects.push(glyphset);
       } else {
         zincObjects.push(zincObject);
@@ -450,4 +456,4 @@ export const objectsToZincObjects = function(objects) {
     }
   }
   return zincObjects;
-}
+};

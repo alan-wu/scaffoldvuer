@@ -3,7 +3,8 @@
     <div class="block">
       <span class="display">{{ displayString }}</span>
       <el-slider
-        v-model="material.opacity"
+        :model-value="material.opacity"
+        @update:model-value="updateOpacity"
         class="my-slider"
         :step="0.01"
         :min="0"
@@ -16,44 +17,41 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
-import {
-  ElContainer as Container,
-  ElHeader as Header,
-  ElMain as Main,
-  ElSlider as Slider
-} from "element-plus";
-
 /**
  * A component to control the opacity of the target object.
  */
 export default {
-  name: "OpacityControls",
-  components: {
-    Container,
-    Header,
-    Main,
-    Slider,
-  },
+  name: 'OpacityControls',
   props: {
     material: undefined,
     zincObject: undefined,
   },
-  data: function() {
+  data: function () {
     return {
-      displayString: "100%",
+      displayString: '100%',
     };
   },
   watch: {
-    "material.opacity": function() {
-      if (this.material && this.zincObject) {
-        this.zincObject.setAlpha(this.material.opacity);
-      }
-    }
+    'material.opacity': {
+      immediate: true,
+      handler: function () {
+        if (!this.material) {
+          return;
+        }
+        this.displayString = this.formatTooltip(this.material.opacity);
+        if (this.zincObject) {
+          this.zincObject.setAlpha(this.material.opacity);
+        }
+      },
+    },
   },
   methods: {
+    updateOpacity(val) {
+      this.displayString = this.formatTooltip(val);
+      this.$emit('update:opacity', val);
+    },
     formatTooltip(val) {
-      this.displayString = Math.floor(100 * val + 0.5) + "%";
+      this.displayString = Math.floor(100 * val + 0.5) + '%';
       return this.displayString;
     },
   },
@@ -62,7 +60,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-
 .display {
   width: 44px;
 }
@@ -94,5 +91,4 @@ export default {
 :deep(.el-slider__bar) {
   background-color: $app-primary-color;
 }
-
 </style>

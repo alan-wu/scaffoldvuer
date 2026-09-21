@@ -31,7 +31,7 @@
       ref="display"
       tabindex="-1"
       style="height: 100%; width: 100%"
-      @keydown.66="backgroundChangeCallback"
+      @keydown.b="backgroundChangeCallback"
     />
     <div v-show="displayUI && !isTransitioning">
       <DrawToolbar
@@ -40,7 +40,7 @@
         :toolbarOptions="toolbarOptions"
         :activeDrawTool="activeDrawTool"
         :activeDrawMode="activeDrawMode"
-        :hoverVisibilities=hoverVisibilities
+        :hoverVisibilities="hoverVisibilities"
         @clickToolbar="toggleDrawing"
         @showTooltip="showHelpText"
         @hideTooltip="hideHelpText"
@@ -112,21 +112,21 @@
             @drawer-toggled="drawerToggled"
             @check-changed="$emit('check-changed', $event)"
           >
-          <template v-slot:treeSlot>
-            <slot name="treeSlot"></slot>
-            <primitive-controls
-              class="control-layer"
-              ref="primitiveControls"
-              :createData="createData"
-              :viewingMode="viewingMode"
-              :usageConfig="usageConfig"
-              @primitivesUpdated="primitivesUpdated"
-            />
-          </template>
+            <template v-slot:treeSlot>
+              <slot name="treeSlot"></slot>
+              <primitive-controls
+                class="control-layer"
+                ref="primitiveControls"
+                :createData="createData"
+                :viewingMode="viewingMode"
+                :usageConfig="usageConfig"
+                @primitivesUpdated="primitivesUpdated"
+              />
+            </template>
           </ScaffoldTreeControls>
         </template>
       </el-popover>
-        <!--
+      <!--
         <div class="primitive-controls-box">
 
           <primitive-controls
@@ -174,7 +174,7 @@
                   <el-slider
                     :min="0"
                     :max="timeMax"
-                    :model-value="currentTime / 100 * timeMax"
+                    :model-value="(currentTime / 100) * timeMax"
                     :step="0.1"
                     tooltip-class="time-slider-tooltip"
                     class="slider"
@@ -300,11 +300,7 @@
         virtual-triggering
       >
         <el-row v-for="item in openMapOptions" :key="item.key">
-          <el-button
-            type="primary"
-            plain
-            @click="$emit('open-map', item.key)"
-          >
+          <el-button type="primary" plain @click="$emit('open-map', item.key)">
             {{ item.display }}
           </el-button>
         </el-row>
@@ -323,23 +319,27 @@
           <div class="viewing-mode-container">
             <el-row class="backgroundText">Viewing Mode</el-row>
             <el-row class="backgroundControl">
-              <div style="margin-bottom: 2px;">
-                <template
-                    v-for="(value, key, index) in viewingModes"
-                    :key="key"
-                  >
-                    <template v-if="key === viewingMode">
-                      <span class="viewing-mode-title"><b >{{ key }}</b></span>
-                    </template>
-                    <template v-else>
-                      <span class="viewing-mode-unselected" @click="changeViewingMode(key)">{{ key }}</span>
-                    </template>
+              <div style="margin-bottom: 2px">
+                <template v-for="(value, key) in viewingModes" :key="key">
+                  <template v-if="key === viewingMode">
+                    <span class="viewing-mode-title">
+                      <b>{{ key }}</b>
+                    </span>
+                  </template>
+                  <template v-else>
+                    <span class="viewing-mode-unselected" @click="changeViewingMode(key)">
+                      {{ key }}
+                    </span>
+                  </template>
                 </template>
               </div>
               <el-row class="viewing-mode-description">
                 {{ modeDescription }}
               </el-row>
-              <el-row v-if="viewingMode === 'Annotation' && offlineAnnotationEnabled" class="viewing-mode-description">
+              <el-row
+                v-if="viewingMode === 'Annotation' && offlineAnnotationEnabled"
+                class="viewing-mode-description"
+              >
                 (Anonymous annotate)
               </el-row>
             </el-row>
@@ -374,26 +374,19 @@
           </div>
           <div class="background-colour-container">
             <el-row class="backgroundSpacer"></el-row>
-            <el-row class="backgroundText"> Change background </el-row>
+            <el-row class="backgroundText">Change background</el-row>
             <el-row class="backgroundChooser">
               <div
                 v-for="item in availableBackground"
                 :key="item"
-                :class="[
-                  'backgroundChoice',
-                  item,
-                  item == currentBackground ? 'active' : '',
-                ]"
+                :class="['backgroundChoice', item, item == currentBackground ? 'active' : '']"
                 @click="backgroundChangeCallback(item)"
               />
             </el-row>
           </div>
         </div>
       </el-popover>
-      <div
-        class="settings-group control-layer"
-        :class="{ open: drawerOpen, close: !drawerOpen }"
-      >
+      <div class="settings-group control-layer" :class="{ open: drawerOpen, close: !drawerOpen }">
         <el-row v-if="showOpenMapButton">
           <el-popover
             :visible="hoverVisibilities[3].value"
@@ -445,21 +438,16 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
 import { inject, markRaw, provide, shallowRef } from 'vue';
-import {
-  WarningFilled as ElIconWarningFilled,
-  ArrowDown as ElIconArrowDown,
-  ArrowLeft as ElIconArrowLeft,
-} from '@element-plus/icons-vue'
-import PrimitiveControls from "./PrimitiveControls.vue";
-import ScaffoldOverlay from "./ScaffoldOverlay.vue";
-import { readNIFTIFromSource } from "../scripts/niftiHelper.js"
-import ScaffoldTooltip from "./ScaffoldTooltip.vue";
-import ScaffoldTreeControls from "./ScaffoldTreeControls.vue";
-import { MapSvgIcon, MapSvgSpriteColor } from "@abi-software/svg-sprite";
-import { DrawToolbar } from '@abi-software/map-utilities'
-import '@abi-software/map-utilities/dist/style.css'
+import { WarningFilled as ElIconWarningFilled } from '@element-plus/icons-vue';
+import PrimitiveControls from './PrimitiveControls.vue';
+import ScaffoldOverlay from './ScaffoldOverlay.vue';
+import { readNIFTIFromSource } from '../scripts/niftiHelper.js';
+import ScaffoldTooltip from './ScaffoldTooltip.vue';
+import ScaffoldTreeControls from './ScaffoldTreeControls.vue';
+import { MapSvgIcon, MapSvgSpriteColor } from '@abi-software/svg-sprite';
+import { DrawToolbar } from '@abi-software/map-utilities';
+import '@abi-software/map-utilities/dist/style.css';
 import {
   createNewAnnotationsWithFeatures,
   addUserAnnotationWithFeature,
@@ -472,39 +460,18 @@ import {
   getObjectsFromAnnotations,
   findObjectsWithNames,
   updateBoundingBox,
-} from "../scripts/Utilities.js";
-import {
-  ElButton as Button,
-  ElCol as Col,
-  ElLoading as Loading,
-  ElRadio as Radio,
-  ElRadioGroup as RadioGroup,
-  ElOption as Option,
-  ElPopover as Popover,
-  ElRow as Row,
-  ElSelect as Select,
-  ElSlider as Slider,
-  ElTabPane as TabPane,
-  ElTabs as Tabs,
-} from "element-plus";
+} from '../scripts/Utilities.js';
 import { AnnotationService } from '@abi-software/sparc-annotation';
-import { EventNotifier } from "../scripts/EventNotifier.js";
-import { OrgansViewer } from "../scripts/OrgansRenderer.js";
-import { SearchIndex } from "../scripts/Search.js";
+import { EventNotifier } from '../scripts/EventNotifier.js';
+import { OrgansViewer } from '../scripts/OrgansRenderer.js';
+import { SearchIndex } from '../scripts/Search.js';
 import { mapState, mapStores } from 'pinia';
-import { useMainStore } from "@/store/index";
-import { getNerveMaps } from "../scripts/MappedNerves.js";
+import { useMainStore } from '@/store/index';
+import { getNerveMaps } from '../scripts/MappedNerves.js';
 import { getOrganMaps } from '../scripts/MappedOrgans.js';
 const nervesMap = getNerveMaps();
 const organsMap = getOrganMaps();
-let foundNerves = 0;
-
-const haveSameElements = (arr1, arr2) => {
-  if (arr1.length !== arr2.length) return false;
-  return arr1.sort().every((value, index) => {
-    return value === arr2.sort()[index]
-  });
-}
+// let foundNerves = 0;
 
 /**
  * A vue component of the scaffold viewer.
@@ -513,51 +480,37 @@ const haveSameElements = (arr1, arr2) => {
  * @requires ./TreeControls.vue
  */
 export default {
-  name: "ScaffoldVuer",
+  name: 'ScaffoldVuer',
   components: {
-    Button,
-    Col,
-    Loading,
-    Option,
-    Popover,
-    Radio,
-    RadioGroup,
-    Row,
     ScaffoldOverlay,
-    Select,
-    Slider,
-    TabPane,
-    Tabs,
     MapSvgIcon,
     MapSvgSpriteColor,
     PrimitiveControls,
     ScaffoldTooltip,
     ElIconWarningFilled,
-    ElIconArrowDown,
-    ElIconArrowLeft,
     DrawToolbar,
-    ScaffoldTreeControls
+    ScaffoldTreeControls,
   },
   setup(props) {
-    let annotator = inject('$annotator')
+    let annotator = inject('$annotator');
     if (!annotator) {
       annotator = markRaw(new AnnotationService(`${props.flatmapAPI}annotator`));
-      provide('$annotator', annotator)
+      provide('$annotator', annotator);
     }
-    return { annotator }
+    return { annotator };
   },
   props: {
     /**
-      * The option to edit annotation regardless of whether
-      * resources matches or not
-      */
-      annotationIgnoreResource: {
+     * The option to edit annotation regardless of whether
+     * resources matches or not
+     */
+    annotationIgnoreResource: {
       type: Boolean,
       default: false,
     },
     /**
-      * The option to show annotation information in sidebar
-      */
+     * The option to show annotation information in sidebar
+     */
     annotationSidebar: {
       type: Boolean,
       default: false,
@@ -570,7 +523,7 @@ export default {
      */
     url: {
       type: String,
-      default: "",
+      default: '',
     },
     /**
      * Show the colour control of set to true.
@@ -646,7 +599,7 @@ export default {
      */
     warningMessage: {
       type: String,
-      default: "Beta feature - under active development",
+      default: 'Beta feature - under active development',
     },
     displayLatestChanges: {
       type: Boolean,
@@ -654,7 +607,7 @@ export default {
     },
     latestChangesMessage: {
       type: String,
-      default: "New feature - Local search is now available",
+      default: 'New feature - Local search is now available',
     },
     /**
      * Show/hide pickable markers for regions.
@@ -684,11 +637,11 @@ export default {
      * the image in imgURL as marker instead.
      *
      */
-    markerLabels : {
+    markerLabels: {
       type: Object,
       default: function () {
-        return {}
-      }
+        return {};
+      },
     },
     /**
      * Show/hide minimap.
@@ -702,7 +655,7 @@ export default {
      */
     format: {
       type: String,
-      default: "metadata",
+      default: 'metadata',
     },
     /**
      * Settings for minimap position, size and alignment.
@@ -715,7 +668,7 @@ export default {
           y_offset: 16,
           width: 128,
           height: 128,
-          align: "top-right",
+          align: 'top-right',
         };
       },
     },
@@ -742,7 +695,7 @@ export default {
       type: Object,
       default: function () {
         return {
-          regions: ["nerves"]
+          regions: ['nerves'],
         };
       },
     },
@@ -755,18 +708,18 @@ export default {
       default: function () {
         return [
           {
-            display: "Open AC Map",
-            key: "AC"
+            display: 'Open AC Map',
+            key: 'AC',
           },
           {
-            display: "Open FC Map",
-            key: "FC"
+            display: 'Open FC Map',
+            key: 'FC',
           },
           {
-            display: "Open 3D Human Map",
-            key: "3D"
+            display: 'Open 3D Human Map',
+            key: '3D',
           },
-        ]
+        ];
       },
     },
     /**
@@ -782,7 +735,7 @@ export default {
      */
     region: {
       type: String,
-      default: "",
+      default: '',
     },
     /**
      * Optional prop for an URL of containing information of a viewport.
@@ -791,7 +744,7 @@ export default {
      */
     viewURL: {
       type: String,
-      default: "",
+      default: '',
     },
     /**
      * Settings for turning on/off rendering
@@ -807,7 +760,7 @@ export default {
      */
     flatmapAPI: {
       type: String,
-      default: "https://mapcore-demo.org/current/flatmap/v3/"
+      default: 'https://mapcore-demo.org/current/flatmap/v3/',
     },
     /**
      * The option to show local settings UI
@@ -846,7 +799,6 @@ export default {
   },
   data: function () {
     return {
-      annotator: undefined,
       clientHeight: 300,
       colourRadio: true,
       createData: {
@@ -855,13 +807,13 @@ export default {
         toBeConfirmed: false,
         points: [],
         tempGroupName: undefined,
-        shape: "",
+        shape: '',
         x: 0,
         y: 0,
         editingIndex: -1,
         faceIndex: -1,
         toBeDeleted: false,
-        regionPrefix: "__annotation"
+        regionPrefix: '__annotation',
       },
       currentTime: 0.0,
       timeVarying: false,
@@ -892,37 +844,37 @@ export default {
       loading: false,
       duration: 3000,
       drawerOpen: true,
-      currentBackground: "white",
-      availableBackground: ["white", "lightskyblue", "black"],
+      currentBackground: 'white',
+      availableBackground: ['white', 'lightskyblue', 'black'],
       minimisedSlider: false,
-      sliderPosition: "",
+      sliderPosition: '',
       timeMax: 100,
-      orginalDuration: "",
-      animateDuration: "6secs",
+      orginalDuration: '',
+      animateDuration: '6secs',
       playSpeed: [
         {
           value: 0.1,
-          label: "0.1x",
+          label: '0.1x',
         },
         {
           value: 0.5,
-          label: "0.5x",
+          label: '0.5x',
         },
         {
           value: 1,
-          label: "1x",
+          label: '1x',
         },
         {
           value: 2,
-          label: "2x",
+          label: '2x',
         },
         {
           value: 5,
-          label: "5x",
+          label: '5x',
         },
         {
           value: 10,
-          label: "10x",
+          label: '10x',
         },
       ],
       currentSpeed: 1,
@@ -930,20 +882,21 @@ export default {
       defaultCheckedKeys: [],
       outlinesRadio: true,
       tData: {
-        label: "",
-        region: "",
+        label: '',
+        region: '',
         visible: false,
         x: 200,
         y: 200,
         active: false,
       },
-      fileFormat: "metadata",
+      fileFormat: 'metadata',
       previousMarkerLabels: markRaw({}),
-      viewingMode: "Exploration",
+      viewingMode: 'Exploration',
       viewingModes: {
-        "Exploration": "View and explore detailed visualization of 3D scaffolds",
-        "Neuron Connection": "Discover nerve connections by selecting a nerve and viewing its associated connections",
-        "Annotation": ['View feature annotations', 'Add, comment on and view feature annotations'],
+        Exploration: 'View and explore detailed visualization of 3D scaffolds',
+        'Neuron Connection':
+          'Discover nerve connections by selecting a nerve and viewing its associated connections',
+        Annotation: ['View feature annotations', 'Add, comment on and view feature annotations'],
       },
       openMapRef: undefined,
       backgroundIconRef: undefined,
@@ -951,22 +904,17 @@ export default {
       offlineAnnotationEnabled: false,
       offlineAnnotations: markRaw([]),
       authorisedUser: undefined,
-      toolbarOptions: [
-        "Delete",
-        "Edit",
-        "Point",
-        "LineString",
-      ],
+      toolbarOptions: ['Delete', 'Edit', 'Point', 'LineString'],
       existDrawnFeatures: markRaw([]), // Store all exist drawn features
       activeDrawTool: undefined,
       activeDrawMode: undefined,
       boundingDims: {
         centre: [0, 0, 0],
-        size:[1, 1, 1],
+        size: [1, 1, 1],
       },
       lastSelected: markRaw({
-        region: "",
-        group: "",
+        region: '',
+        group: '',
         isSearch: false,
       }),
       //checkedRegions: []
@@ -981,8 +929,7 @@ export default {
     },
     url: {
       handler: function (newValue) {
-        if (this.state === undefined || this.state.url === undefined)
-          this.setURL(newValue);
+        if (this.state === undefined || this.state.url === undefined) this.setURL(newValue);
       },
       immediate: true,
     },
@@ -1007,7 +954,7 @@ export default {
     },
     helpMode: function (newVal, oldVal) {
       if (newVal !== oldVal) {
-        this.setHelpMode(newVal)
+        this.setHelpMode(newVal);
       }
     },
     helpModeActiveItem: function () {
@@ -1032,7 +979,7 @@ export default {
          * Emit when time in the current scene has changed
          * @arg {String} "Current time in scene"
          */
-        this.$emit("timeChanged", this.currentTime);
+        this.$emit('timeChanged', this.currentTime);
       },
     },
     duration: function () {
@@ -1040,7 +987,7 @@ export default {
     },
     minimapSettings: {
       deep: true,
-      handler: "updateMinimapScissor",
+      handler: 'updateMinimapScissor',
     },
     render: function (val) {
       this.toggleRendering(val);
@@ -1051,23 +998,23 @@ export default {
       },
       immediate: true,
     },
-    markerLabels: function(labels) {
+    markerLabels: function (labels) {
       for (const [key, value] of Object.entries(this.previousMarkerLabels)) {
-        this.setMarkerModeForObjectsWithName(key, value, "off");
+        this.setMarkerModeForObjectsWithName(key, value, 'off');
       }
       for (const [key, value] of Object.entries(labels)) {
-        this.setMarkerModeForObjectsWithName(key, value, "on");
+        this.setMarkerModeForObjectsWithName(key, value, 'on');
       }
-      this.previousMarkerLabels = markRaw({...labels});
+      this.previousMarkerLabels = markRaw({ ...labels });
     },
   },
   beforeCreate: function () {
     this.$module = new OrgansViewer();
     this.selectedObjects = [];
     this.hoveredObjects = [];
-    this.currentBackground = "white";
+    this.currentBackground = 'white';
     this._currentURL = undefined;
-    this.availableBackground = ["white", "black", "lightskyblue"];
+    this.availableBackground = ['white', 'black', 'lightskyblue'];
     this.$_searchIndex = new SearchIndex();
   },
   mounted: function () {
@@ -1082,18 +1029,16 @@ export default {
     this.$module.initialiseRenderer(this.$refs.display);
     this.toggleRendering(this.render);
     this.clientHeight = this.$refs.scaffoldContainer.$el.clientHeight;
-    this.ro = new ResizeObserver(this.adjustLayout).observe(
-      this.$refs.scaffoldContainer.$el
-    );
+    this.ro = new ResizeObserver(this.adjustLayout).observe(this.$refs.scaffoldContainer.$el);
     this.helpTextWait = [];
     this.helpTextWait.length = this.hoverVisibilities.length;
     this.defaultRate = this.$module.getPlayRate();
     this.$module.zincRenderer.addPreRenderCallbackFunction(() => {
       this.currentTime = this.$module.getCurrentTime();
-    })
+    });
     this.$module.zincRenderer.addContextRestoredCallbackFunction(() => {
       this.backgroundChangeCallback(this.currentBackground);
-    })
+    });
   },
   beforeUnmount: function () {
     if (this.ro) this.ro.disconnect();
@@ -1102,22 +1047,26 @@ export default {
   },
   computed: {
     ...mapStores(useMainStore),
-    ...mapState(useMainStore,  ['userToken']),
-    annotationDisplay: function() {
-      return this.viewingMode === 'Annotation' && this.tData.active === true &&
-        (this.activeDrawMode !== "Point" && this.activeDrawMode !== 'LineString');
+    ...mapState(useMainStore, ['userToken']),
+    annotationDisplay: function () {
+      return (
+        this.viewingMode === 'Annotation' &&
+        this.tData.active === true &&
+        this.activeDrawMode !== 'Point' &&
+        this.activeDrawMode !== 'LineString'
+      );
     },
-    enableColourPicker: function() {
+    enableColourPicker: function () {
       return this.showColourPicker && this.colourRadio;
     },
     modeDescription: function () {
       let description = this.viewingModes[this.viewingMode];
       if (this.viewingMode === 'Annotation') {
         if (this.authorisedUser) {
-          return description[1]
+          return description[1];
         }
-        return description[0]
-      };
+        return description[0];
+      }
       return description;
     },
   },
@@ -1190,11 +1139,7 @@ export default {
       }
       const morph = zincObject.getGroup();
       if (morph && morph.position) {
-        zincObject.userData.originalPos = [
-          morph.position.x,
-          morph.position.y,
-          morph.position.z
-        ];
+        zincObject.userData.originalPos = [morph.position.x, morph.position.y, morph.position.z];
       } else {
         zincObject.userData.originalPos = [0, 0, 0];
       }
@@ -1208,7 +1153,7 @@ export default {
             zincObject.userData.defaultColour = `#${zincObject.getColourHex()}`;
             zincObject.userData.isGreyScale = false;
             if (groupName in nervesMap) {
-              foundNerves++;
+              // foundNerves++;
               zincObject.setAnatomicalId(nervesMap[groupName]);
             }
           } else {
@@ -1223,18 +1168,17 @@ export default {
        * Emit when a new object is added to the scene
        * @arg {Object} "The object added to the sceene"
        */
-      this.$emit("zinc-object-added", zincObject);
+      this.$emit('zinc-object-added', zincObject);
     },
     /**
      * Internal only.
      * Remove an entry matching region and group from
      * local annotation list.
      */
-    removeFromOfflineAnnotation: function(regionPath, groupName) {
+    removeFromOfflineAnnotation: function (regionPath, groupName) {
       for (let i = 0; i < this.offlineAnnotations.length; i++) {
         const annotation = this.offlineAnnotations[i];
-        if (annotation.region === regionPath &&
-          annotation.group === groupName) {
+        if (annotation.region === regionPath && annotation.group === groupName) {
           this.offlineAnnotations.splice(i, 1);
           return;
         }
@@ -1243,7 +1187,7 @@ export default {
     /**
      * Rename Zinc Object
      */
-     renameZincObject: function (zincObject, newName) {
+    renameZincObject: function (zincObject, newName) {
       if (this.$module.scene) {
         const scaffoldTreeControls = this.$refs.scaffoldTreeControls;
         const oldName = zincObject.groupName;
@@ -1274,7 +1218,7 @@ export default {
     addRegionsToSearchIndex: function () {
       const rootRegion = this.$module.scene.getRootRegion();
       const regions = rootRegion.getChildRegions(true);
-      regions.forEach(region => {
+      regions.forEach((region) => {
         this.$_searchIndex.addRegion(region, region.uuid);
       });
     },
@@ -1287,9 +1231,7 @@ export default {
      */
     backgroundChangeCallback: function (colour) {
       this.currentBackground = colour;
-      this.$module.zincRenderer
-        .getThreeJSRenderer()
-        .setClearColor(this.currentBackground, 1);
+      this.$module.zincRenderer.getThreeJSRenderer().setClearColor(this.currentBackground, 1);
     },
     /**
      * Internal only.
@@ -1298,10 +1240,8 @@ export default {
      */
     captureScreenshotCallback: function (filename, width, height) {
       return () => {
-      //Remove the callback, only needs to happen once
-        this.$module.zincRenderer.removePostRenderCallbackFunction(
-          this.captureID
-        );
+        //Remove the callback, only needs to happen once
+        this.$module.zincRenderer.removePostRenderCallbackFunction(this.captureID);
 
         const renderer = this.$module.zincRenderer.getThreeJSRenderer();
         const camera = this.$module.scene.camera;
@@ -1319,7 +1259,7 @@ export default {
         this.$module.zincRenderer.render();
         //renderer.render(this.$module.scene, camera);
 
-        let screenshot = renderer.domElement.toDataURL("image/png");
+        let screenshot = renderer.domElement.toDataURL('image/png');
 
         renderer.setPixelRatio(originalPixelRatio);
         renderer.setSize(originalWidth, originalHeight, false);
@@ -1329,14 +1269,14 @@ export default {
         this.$module.zincRenderer.render();
         //renderer.render(this.$module.scene, camera);
 
-        let hrefElement = document.createElement("a");
+        let hrefElement = document.createElement('a');
         //document.body.append(hrefElement);
         if (!filename) hrefElement.download = `screenshot.png`;
         else hrefElement.download = filename;
         hrefElement.href = screenshot;
         hrefElement.click();
         hrefElement.remove();
-      }
+      };
     },
     /**
      * @public
@@ -1346,7 +1286,7 @@ export default {
      */
     captureScreenshot: function (filename, width = 1920, height = 1080) {
       this.captureID = this.$module.zincRenderer.addPostRenderCallbackFunction(
-        this.captureScreenshotCallback(filename, width, height)
+        this.captureScreenshotCallback(filename, width, height),
       );
     },
     /**
@@ -1367,23 +1307,34 @@ export default {
      * @arg `comment`
      */
     addAndEditAnnotations: function (region, group, zincObject, comment) {
-      const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken, zincObject,
-        region, group, this.url, comment);
-      this.existDrawnFeatures = markRaw(this.existDrawnFeatures.filter(feature => feature.id !== annotation.item.id));
+      const annotation = addUserAnnotationWithFeature(
+        this.annotator,
+        this.userToken,
+        zincObject,
+        region,
+        group,
+        this.url,
+        comment,
+      );
+      this.existDrawnFeatures = markRaw(
+        this.existDrawnFeatures.filter((feature) => feature.id !== annotation.item.id),
+      );
       this.existDrawnFeatures.push(annotation.feature);
       if (this.offlineAnnotationEnabled) {
         annotation.group = group;
         let regionPath = region;
-        if (regionPath.slice(-1) === "/") {
+        if (regionPath.slice(-1) === '/') {
           regionPath = regionPath.slice(0, -1);
         }
         annotation.region = regionPath;
         this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
         const found = this.offlineAnnotations.find((element) => {
-          return element.group === annotation.group &&
+          return (
+            element.group === annotation.group &&
             element.region === annotation.region &&
             (this.annotationIgnoreResource || element.resource === annotation.resource) &&
-            element.feature.geometry.type === annotation.feature.geometry.type;
+            element.feature.geometry.type === annotation.feature.geometry.type
+          );
         });
         if (found) {
           Object.assign(found, annotation);
@@ -1392,7 +1343,7 @@ export default {
         }
         sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
       }
-      this.$emit('userPrimitivesUpdated', {region, group, zincObject});
+      this.$emit('userPrimitivesUpdated', { region, group, zincObject });
     },
     /**
      * @public
@@ -1402,34 +1353,45 @@ export default {
      * @arg `zincObject`,
      * @arg `oldName`
      */
-     renameAnnotations: function (region, group, zincObject, oldName) {
+    renameAnnotations: function (region, group, zincObject, oldName) {
       //Pending support for online annotation
-      let regionPath = region.slice(-1) === "/" ? region : region + "/";
+      let regionPath = region.slice(-1) === '/' ? region : region + '/';
       const oldFeatureID = regionPath + oldName;
-      const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken, zincObject,
-        region, group, this.url, `Rename from ${oldFeatureID}`);
-      this.existDrawnFeatures = markRaw(this.existDrawnFeatures.filter(feature => feature.id !== oldFeatureID));
+      const annotation = addUserAnnotationWithFeature(
+        this.annotator,
+        this.userToken,
+        zincObject,
+        region,
+        group,
+        this.url,
+        `Rename from ${oldFeatureID}`,
+      );
+      this.existDrawnFeatures = markRaw(
+        this.existDrawnFeatures.filter((feature) => feature.id !== oldFeatureID),
+      );
       this.existDrawnFeatures.push(annotation.feature);
       if (this.offlineAnnotationEnabled) {
         annotation.group = group;
         regionPath = region;
-        if (regionPath.slice(-1) === "/") {
+        if (regionPath.slice(-1) === '/') {
           regionPath = regionPath.slice(0, -1);
         }
         annotation.region = regionPath;
         this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
         const found = this.offlineAnnotations.find((element) => {
-          return element.group === oldName &&
-                 element.region === annotation.region &&
-                 (this.annotationIgnoreResource || element.resource === annotation.resource) &&
-                 element.feature.geometry.type === annotation.feature.geometry.type;
+          return (
+            element.group === oldName &&
+            element.region === annotation.region &&
+            (this.annotationIgnoreResource || element.resource === annotation.resource) &&
+            element.feature.geometry.type === annotation.feature.geometry.type
+          );
         });
         if (found) {
           Object.assign(found, annotation);
         }
         sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
       }
-      this.$emit('userPrimitivesUpdated', {region, group, zincObject, renamedFrom: oldName});
+      this.$emit('userPrimitivesUpdated', { region, group, zincObject, renamedFrom: oldName });
     },
     /**
      * @public
@@ -1437,11 +1399,11 @@ export default {
      * This is only called from callback.
      * @arg `object`
      */
-    primitivesUpdated: function(object) {
+    primitivesUpdated: function (object) {
       if (object.isZincObject && object.isEditable) {
         const group = object.groupName;
         const region = object.region.getFullPath();
-        this.addAndEditAnnotations(region, group, object, "Position Updated");
+        this.addAndEditAnnotations(region, group, object, 'Position Updated');
       }
     },
     /**
@@ -1449,10 +1411,10 @@ export default {
      * Confirm creation of new primitive. This is only called from callback.
      * @arg `payload`
      */
-    confirmCreate: function(payload) {
+    confirmCreate: function (payload) {
       if (payload) {
         let object = undefined;
-        if (payload.shape === "Point") {
+        if (payload.shape === 'Point') {
           object = this.$module.scene.createPoints(
             payload.region,
             payload.group,
@@ -1460,7 +1422,7 @@ export default {
             payload.group,
             0x0022ee,
           );
-        } else if (payload.shape === "LineString") {
+        } else if (payload.shape === 'LineString') {
           object = this.$module.scene.createLines(
             payload.region,
             payload.group,
@@ -1479,20 +1441,23 @@ export default {
                 editedPoint = this.createData.points[0];
               }
             }
-            this._editingZincObject.editVertices([editedPoint],
-              payload.editingIndex);
-            const region = this._editingZincObject.region.getFullPath() + "/";
+            this._editingZincObject.editVertices([editedPoint], payload.editingIndex);
+            const region = this._editingZincObject.region.getFullPath() + '/';
             const group = this._editingZincObject.groupName;
-            this.addAndEditAnnotations(region, group, this._editingZincObject, "Position Updated");
+            this.addAndEditAnnotations(region, group, this._editingZincObject, 'Position Updated');
           }
         } else if (payload.renaming) {
           const oldGroupName = this._editingZincObject.groupName;
           this.renameZincObject(this._editingZincObject, payload.group);
-          this.renameAnnotations(payload.region, payload.group,
-            this._editingZincObject, oldGroupName);
+          this.renameAnnotations(
+            payload.region,
+            payload.group,
+            this._editingZincObject,
+            oldGroupName,
+          );
         }
         if (object) {
-          this.addAndEditAnnotations(payload.region, payload.group, object.zincObject, "Create");
+          this.addAndEditAnnotations(payload.region, payload.group, object.zincObject, 'Create');
           object.zincObject.isEditable = true;
           this.tData.region = payload.region;
           this.tData.label = payload.group;
@@ -1505,7 +1470,7 @@ export default {
      * Internal only.
      * Cancel create workflows. Reset all relevant UIs and data.
      */
-    cancelCreate: function() {
+    cancelCreate: function () {
       this.changeActiveByName(undefined);
       this.createData.points.length = 0;
       this.createData.renaming = false;
@@ -1524,8 +1489,8 @@ export default {
         this.$module.scene.removeTemporaryPrimitive(this._tempPoint);
         this._tempPoint = undefined;
       }
-      if (this.annotationSidebar){
-        this.$emit("annotation-close");
+      if (this.annotationSidebar) {
+        this.$emit('annotation-close');
       }
     },
     /**
@@ -1535,15 +1500,18 @@ export default {
      */
     confirmComment: function (payload) {
       if (this._editingZincObject) {
-        let annotation = payload
+        let annotation = payload;
         if (this._editingZincObject.isEditable) {
-          this.existDrawnFeatures = markRaw(this.existDrawnFeatures.filter(feature => feature.id !== annotation.item.id));
+          this.existDrawnFeatures = markRaw(
+            this.existDrawnFeatures.filter((feature) => feature.id !== annotation.item.id),
+          );
           this.existDrawnFeatures.push(payload.feature);
         }
         if (this.offlineAnnotationEnabled) {
-          annotation.group = this._editingZincObject.groupName;;
+          annotation.group = this._editingZincObject.groupName;
           annotation.region = this._editingZincObject.region.getFullPath();
-          this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
+          this.offlineAnnotations =
+            JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
           this.offlineAnnotations.push(annotation);
           sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
         }
@@ -1556,18 +1524,27 @@ export default {
      */
     confirmDelete: function (payload) {
       if (this._editingZincObject?.isEditable) {
-        const regionPath = this._editingZincObject.region.getFullPath() + "/";
+        const regionPath = this._editingZincObject.region.getFullPath() + '/';
         const group = this._editingZincObject.groupName;
         let toBeDeleted = true;
         if (payload.editingIndex > -1 && this._editingZincObject.isPointset) {
           toBeDeleted = 1 > this._editingZincObject.deleteVertices(payload.editingIndex);
         }
-        const message = toBeDeleted ? "Deleted" : "Removed a vertex";
+        const message = toBeDeleted ? 'Deleted' : 'Removed a vertex';
 
-        const annotation = addUserAnnotationWithFeature(this.annotator, this.userToken,
-          this._editingZincObject, regionPath, group, this.url, message);
+        const annotation = addUserAnnotationWithFeature(
+          this.annotator,
+          this.userToken,
+          this._editingZincObject,
+          regionPath,
+          group,
+          this.url,
+          message,
+        );
         if (annotation) {
-          this.existDrawnFeatures = markRaw(this.existDrawnFeatures.filter(feature => feature.id !== annotation.item.id));
+          this.existDrawnFeatures = markRaw(
+            this.existDrawnFeatures.filter((feature) => feature.id !== annotation.item.id),
+          );
           if (toBeDeleted) {
             const childRegion = this.$module.scene.getRootRegion().findChildFromPath(regionPath);
             childRegion.removeZincObject(this._editingZincObject);
@@ -1575,20 +1552,25 @@ export default {
           if (this.offlineAnnotationEnabled) {
             annotation.group = group;
             let regionPath = payload.region;
-            if (regionPath.slice(-1) === "/") {
+            if (regionPath.slice(-1) === '/') {
               regionPath = regionPath.slice(0, -1);
             }
             annotation.region = regionPath;
-            this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
+            this.offlineAnnotations =
+              JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
             if (toBeDeleted) {
-              this.offlineAnnotations = this.offlineAnnotations.filter(offline => offline.item.id !== annotation.item.id);
+              this.offlineAnnotations = this.offlineAnnotations.filter(
+                (offline) => offline.item.id !== annotation.item.id,
+              );
             } else {
-            //Do not remove completely if there is primitive left
+              //Do not remove completely if there is primitive left
               const found = this.offlineAnnotations.find((element) => {
-                return element.group === group &&
-                      element.region === annotation.region &&
-                      (this.annotationIgnoreResource || element.resource === annotation.resource) &&
-                      element.feature.geometry.type === annotation.feature.geometry.type;
+                return (
+                  element.group === group &&
+                  element.region === annotation.region &&
+                  (this.annotationIgnoreResource || element.resource === annotation.resource) &&
+                  element.feature.geometry.type === annotation.feature.geometry.type
+                );
               });
               Object.assign(found, annotation);
               this.existDrawnFeatures.push(annotation.feature);
@@ -1599,7 +1581,7 @@ export default {
             region: this._editingZincObject.region,
             group,
             zincObject: this._editingZincObject,
-            deleted: true
+            deleted: true,
           });
         }
       }
@@ -1609,7 +1591,7 @@ export default {
      * Internal only.
      * This is triggered when tooltip is hidden
      */
-     onTooltipHide: function() {
+    onTooltipHide: function () {
       if (this.createData.toBeConfirmed && !this.annotationSidebar) {
         this.cancelCreate();
       }
@@ -1617,12 +1599,12 @@ export default {
     formatTooltip(val) {
       if (this.timeMax >= 1000) {
         if (val) {
-          let sec = ((val % 60000) / 1000).toFixed(2) + "s";
-          let min = val > 60000 ? (val / 60000).toFixed(0) + "m " : "";
+          let sec = ((val % 60000) / 1000).toFixed(2) + 's';
+          let min = val > 60000 ? (val / 60000).toFixed(0) + 'm ' : '';
           return min + sec;
         }
       }
-      return val ? val.toFixed(2) + " ms" : "0 ms";
+      return val ? val.toFixed(2) + ' ms' : '0 ms';
     },
     /**
      * @public
@@ -1695,7 +1677,7 @@ export default {
      */
     findObjectsWithGroupName: function (name) {
       let objects = [];
-      if (name && name != "" && this.$module.scene) {
+      if (name && name != '' && this.$module.scene) {
         objects = this.$module.scene.findObjectsWithGroupName(name);
       }
       return objects;
@@ -1709,7 +1691,7 @@ export default {
     toggleDrawing: function (type, icon) {
       this.createData.toBeDeleted = false;
       if (type === 'mode') {
-        this.cancelCreate()
+        this.cancelCreate();
         this.activeDrawMode = icon;
         this.createData.shape = '';
         this.$module.selectObjectOnPick = true;
@@ -1725,7 +1707,7 @@ export default {
      *
      * @public
      */
-     toggleDrawingBox: function () {
+    toggleDrawingBox: function () {
       this.createData.drawingBox = !this.createData.drawingBox;
     },
     /**
@@ -1737,14 +1719,13 @@ export default {
     viewRegion: function (names) {
       const rootRegion = this.$module.scene.getRootRegion();
       const groups = Array.isArray(names) ? names : [names];
-      const objects = findObjectsWithNames(rootRegion, groups, "", true);
+      const objects = findObjectsWithNames(rootRegion, groups, '', true);
       let box = this.$module.scene.getBoundingBoxOfZincObjects(objects);
       if (box) {
         if (this.$module.isSyncControl()) {
           this.$module.setSyncControlZoomToBox(box);
         } else {
-          const dist =
-            this.$module.scene.camera.far - this.$module.scene.camera.near;
+          const dist = this.$module.scene.camera.far - this.$module.scene.camera.near;
           this.$module.scene.viewAllWithBoundingBox(box);
           this.$module.scene.camera.far = this.$module.scene.camera.near + dist;
           this.$module.scene.camera.updateProjectionMatrix();
@@ -1758,13 +1739,11 @@ export default {
         if (this.isReady) {
           this.viewRegion(name);
         } else {
-          this.$module.setFinishDownloadCallback(
-            this.setURLFinishCallback({ region: name })
-          );
+          this.$module.setFinishDownloadCallback(this.setURLFinishCallback({ region: name }));
         }
       }
     },
-    setRotationMode: function(mode) {
+    setRotationMode: function (mode) {
       if (this.$module.scene) {
         const cameracontrol = this.$module.scene.getZincCameraControls();
         cameracontrol.setRotationMode(mode);
@@ -1776,78 +1755,84 @@ export default {
           const url = new URL(viewURL, this.url);
           this.$module.scene.loadViewURL(url);
         } else {
-          this.$module.setFinishDownloadCallback(
-            this.setURLFinishCallback({ viewURL: viewURL })
-          );
+          this.$module.setFinishDownloadCallback(this.setURLFinishCallback({ viewURL: viewURL }));
         }
       }
     },
-    createEditTemporaryPoint: function(identifiers) {
+    createEditTemporaryPoint: function (identifiers) {
       const worldCoords = identifiers[0].extraData.worldCoords;
       if (worldCoords) {
-        if (this.createData.shape === "Point" || this.createData.editingIndex > -1) {
-          if (this.createData.points.length === 0)  {
+        if (this.createData.shape === 'Point' || this.createData.editingIndex > -1) {
+          if (this.createData.points.length === 0) {
             this.showRegionTooltipWithAnnotations(identifiers, false, false);
             this.tData.x = 50;
             this.tData.y = 200;
             if (this._tempPoint) {
-              const positionAttribute = this._tempPoint.geometry.getAttribute( 'position' );
+              const positionAttribute = this._tempPoint.geometry.getAttribute('position');
               positionAttribute.setXYZ(0, worldCoords[0], worldCoords[1], worldCoords[2]);
               positionAttribute.needsUpdate = true;
             } else {
-              this._tempPoint = this.$module.scene.addTemporaryPoints(
-                [worldCoords], 0x00ffff);
+              this._tempPoint = this.$module.scene.addTemporaryPoints([worldCoords], 0x00ffff);
             }
           }
         }
       }
     },
-    createEditTemporaryLines: function(identifiers) {
+    createEditTemporaryLines: function (identifiers) {
       const worldCoords = identifiers[0].extraData.worldCoords;
       if (worldCoords) {
-        if (this.createData.shape === "LineString" ||
-        (this.createData.editingIndex > -1 && this.createData.faceIndex > -1)) {
-          if (this.createData.points.length === 1)  {
+        if (
+          this.createData.shape === 'LineString' ||
+          (this.createData.editingIndex > -1 && this.createData.faceIndex > -1)
+        ) {
+          if (this.createData.points.length === 1) {
             this.showRegionTooltipWithAnnotations(identifiers, false, false);
             //this.tData.x = 50;
             //this.tData.y = 200;
             if (this._tempLine) {
-              const positionAttribute = this._tempLine.geometry.getAttribute( 'position' );
+              const positionAttribute = this._tempLine.geometry.getAttribute('position');
               positionAttribute.setXYZ(1, worldCoords[0], worldCoords[1], worldCoords[2]);
               positionAttribute.needsUpdate = true;
             } else {
               this._tempLine = this.$module.scene.addTemporaryLines(
-                [this.createData.points[0], worldCoords], 0x00ffff);
+                [this.createData.points[0], worldCoords],
+                0x00ffff,
+              );
             }
           }
         }
       }
     },
-    createEditTemporaryPrimitive: function(identifiers) {
-      if (this.createData.shape === "LineString" ||
-        (this.createData.editingIndex > -1 &&
-        this.createData.faceIndex > -1)) {
+    createEditTemporaryPrimitive: function (identifiers) {
+      if (
+        this.createData.shape === 'LineString' ||
+        (this.createData.editingIndex > -1 && this.createData.faceIndex > -1)
+      ) {
         this.createEditTemporaryLines(identifiers);
       } else {
-        if (this.createData.shape === "Point" || this.createData.editingIndex > -1) {
+        if (this.createData.shape === 'Point' || this.createData.editingIndex > -1) {
           this.createEditTemporaryPoint(identifiers);
         }
       }
     },
-    draw: function(data) {
+    draw: function (data) {
       if (data && data.length > 0 && data[0].data.group) {
         if (data[0].extraData.worldCoords) {
-          if (this.createData.shape === "LineString" ||
-            (this.createData.editingIndex > -1 && this.createData.faceIndex > -1)) {
+          if (
+            this.createData.shape === 'LineString' ||
+            (this.createData.editingIndex > -1 && this.createData.faceIndex > -1)
+          ) {
             this.drawLine(data[0].extraData.worldCoords, data);
-          } else if (this.createData.shape === "Point" ||
-            (this.createData.editingIndex > -1 && this.createData.faceIndex === -1)) {
+          } else if (
+            this.createData.shape === 'Point' ||
+            (this.createData.editingIndex > -1 && this.createData.faceIndex === -1)
+          ) {
             this.drawPoint(data[0].extraData.worldCoords, data);
           }
         }
       }
     },
-    drawPoint: function(coords, data) {
+    drawPoint: function (coords, data) {
       if (this.createData.toBeConfirmed === false) {
         this.createData.points.length = 0;
         this.createData.points.push(coords);
@@ -1863,11 +1848,11 @@ export default {
         }
       }
     },
-    drawLine: function(coords, data) {
+    drawLine: function (coords, data) {
       if (this.createData.toBeConfirmed === false) {
         if (this.createData.points.length === 1) {
           this.createData.points.push(coords);
-          if (this.createData.editingIndex === -1  && !this.createData.renaming) {
+          if (this.createData.editingIndex === -1 && !this.createData.renaming) {
             this.createData.tempGroupName = undefined;
           }
           this.createData.toBeConfirmed = true;
@@ -1906,7 +1891,7 @@ export default {
         setTimeout(this.stopFreeSpin, 4000);
       }
     },
-    activateDeleteMode: function(eventIdentifiers) {
+    activateDeleteMode: function (eventIdentifiers) {
       const zincObject = getDeletableObjects(eventIdentifiers);
       if (zincObject) {
         const editing = getEditablePoint(eventIdentifiers);
@@ -1916,27 +1901,30 @@ export default {
         this.createData.editingIndex = editingIndex;
         this.createData.renaming = false;
         this.createData.tempGroupName = this._editingZincObject.groupName;
-        this.createData.regionPrefix =  this._editingZincObject.region.getFullPath();
+        this.createData.regionPrefix = this._editingZincObject.region.getFullPath();
         this.createData.toBeConfirmed = true;
         this.createData.toBeDeleted = true;
         this.tData.x = 50;
         this.tData.y = 200;
       }
     },
-    activateEditingMode: function(eventIdentifiers) {
+    activateEditingMode: function (eventIdentifiers) {
       let editing = getEditablePoint(eventIdentifiers);
       if (editing) {
-        this.activatePointEditingMode(editing.zincObject, editing.index,
-          editing.point);
+        this.activatePointEditingMode(editing.zincObject, editing.index, editing.point);
       } else {
         editing = getEditableLines(eventIdentifiers);
         if (editing) {
-          this.activateLineEditingMode(editing.zincObject, editing.faceIndex,
-            editing.vertexIndex, editing.point);
+          this.activateLineEditingMode(
+            editing.zincObject,
+            editing.faceIndex,
+            editing.vertexIndex,
+            editing.point,
+          );
         }
       }
     },
-    activateRenamingMode: function(eventIdentifiers) {
+    activateRenamingMode: function (eventIdentifiers) {
       let editing = getEditablePoint(eventIdentifiers);
       if (!editing) {
         editing = getEditableLines(eventIdentifiers);
@@ -1947,7 +1935,7 @@ export default {
         this.createData.editingIndex = -1;
         this.createData.renaming = true;
         this.createData.tempGroupName = this._editingZincObject.groupName;
-        this.createData.regionPrefix =  this._editingZincObject.region.getFullPath();
+        this.createData.regionPrefix = this._editingZincObject.region.getFullPath();
         this.createData.toBeConfirmed = true;
         this.createData.toBeDeleted = false;
         this.showRegionTooltipWithAnnotations(eventIdentifiers, false, false);
@@ -1955,10 +1943,10 @@ export default {
         this.tData.y = 200;
       }
     },
-    activateAnnotationMode: function(names, event) {
+    activateAnnotationMode: function (names, event) {
       if (this.authorisedUser || this.offlineAnnotationEnabled) {
         this.createData.toBeDeleted = false;
-        if ((this.createData.shape !== "") || (this.createData.editingIndex > -1)) {
+        if (this.createData.shape !== '' || this.createData.editingIndex > -1) {
           // Create new shape bsaed on current settings
           if (names.length > 0) {
             if (event.identifiers[0].coords) {
@@ -1967,12 +1955,12 @@ export default {
           }
         } else {
           //Make sure the tooltip is displayed with annotaion mode
-          if (this.activeDrawMode === "Edit") {
+          if (this.activeDrawMode === 'Edit') {
             this.activateEditingMode(event.identifiers);
-          } else if (this.activeDrawMode === "Delete") {
+          } else if (this.activeDrawMode === 'Delete') {
             this.activateDeleteMode(event.identifiers);
           }
-          if (this.activeDrawMode !== "Point" && this.activeDrawMode !== "LineString") {
+          if (this.activeDrawMode !== 'Point' && this.activeDrawMode !== 'LineString') {
             this.showRegionTooltipWithAnnotations(event.identifiers, true, false);
           } else {
             this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
@@ -1982,23 +1970,23 @@ export default {
         this.showRegionTooltipWithAnnotations(event.identifiers, true, true);
       }
     },
-    activatePointEditingMode: function(zincObject, index, point) {
+    activatePointEditingMode: function (zincObject, index, _point) {
       this._editingZincObject = zincObject;
       this.createData.faceIndex = -1;
       this.createData.renaming = false;
       this.createData.toBeDeleted = false;
       this.createData.editingIndex = index;
-      this.createData.regionPrefix =  this._editingZincObject.region.getFullPath();
+      this.createData.regionPrefix = this._editingZincObject.region.getFullPath();
       this.createData.tempGroupName = this._editingZincObject.groupName;
       //this.drawPoint(point, undefined);
     },
-    activateLineEditingMode: function(zincObject, faceIndex, vertexIndex, point) {
+    activateLineEditingMode: function (zincObject, faceIndex, vertexIndex, point) {
       this._editingZincObject = zincObject;
       this.createData.faceIndex = faceIndex;
       this.createData.renaming = false;
       this.createData.toBeDeleted = false;
       this.createData.editingIndex = vertexIndex;
-      this.createData.regionPrefix =  this._editingZincObject.region.getFullPath();
+      this.createData.regionPrefix = this._editingZincObject.region.getFullPath();
       this.createData.tempGroupName = this._editingZincObject.groupName;
       this.drawLine(point, undefined);
     },
@@ -2014,9 +2002,7 @@ export default {
         if (event.eventType == 1 || event.eventType == 2) {
           event.identifiers.forEach((identifier) => {
             if (identifier) {
-              let id = identifier.data.id
-                ? identifier.data.id
-                : identifier.data.group;
+              let id = identifier.data.id ? identifier.data.id : identifier.data.group;
               names.push(id);
             }
           });
@@ -2026,30 +2012,35 @@ export default {
         let regionPath = undefined;
         if (event.identifiers.length > 0 && event.identifiers[0]) {
           id = event.identifiers[0].data.id
-                ? event.identifiers[0].data.id
-                : event.identifiers[0].data.group;
+            ? event.identifiers[0].data.id
+            : event.identifiers[0].data.group;
           if (event.identifiers[0].data.region) {
             regionPath = event.identifiers[0].data.region;
           }
         }
         /*
-        * Event Type 1: Selected
-        * Event Type 2: Highlighted
-        * Event Type 3: Move
-        */
+         * Event Type 1: Selected
+         * Event Type 2: Highlighted
+         * Event Type 3: Move
+         */
         if (event.eventType == 1) {
           if (this.viewingMode === 'Annotation') {
             this.tData.label = id;
             this.tData.region = regionPath;
             const zincObject = getClickedObjects(event);
-            if (this.createData.editingIndex === -1 ) {
+            if (this.createData.editingIndex === -1) {
               this._editingZincObject = zincObject;
             }
             if (zincObject) {
-              const regionPath = this._editingZincObject.region.getFullPath() + "/";
+              const regionPath = this._editingZincObject.region.getFullPath() + '/';
               const group = this._editingZincObject.groupName;
-              this.annotationFeature = createNewAnnotationsWithFeatures(this._editingZincObject,
-                regionPath, group, this.url, '').feature;
+              this.annotationFeature = createNewAnnotationsWithFeatures(
+                this._editingZincObject,
+                regionPath,
+                group,
+                this.url,
+                '',
+              ).feature;
             }
             this.activateAnnotationMode(names, event);
           } else {
@@ -2070,19 +2061,19 @@ export default {
                 isSearch: false,
                 region: regionPath,
                 group: event.identifiers[0].data.group,
-              }
+              };
             } else if (event.identifiers.length === 0) {
               this.lastSelected = {
                 isSearch: false,
-                region: "",
-                group: "",
-              }
+                region: '',
+                group: '',
+              };
             }
             /**
              * Emit when an object is selected
              * @arg {Object} "Identifier of selected objects"
              */
-            this.$emit("scaffold-selected", event.identifiers);
+            this.$emit('scaffold-selected', event.identifiers);
           }
         } else if (event.eventType == 2) {
           this.hideRegionTooltip();
@@ -2096,7 +2087,7 @@ export default {
           if (event.identifiers.length > 0 && event.identifiers[0]) {
             if (event.identifiers[0].coords) {
               this.tData.active = false;
-              if (this.viewingMode !== "Annotation" ||  !this.annotationSidebar) {
+              if (this.viewingMode !== 'Annotation' || !this.annotationSidebar) {
                 this.tData.visible = true;
               }
               this.tData.label = id;
@@ -2110,13 +2101,12 @@ export default {
            * Emit when an object is highlighted
            * @arg {Object} "Identifier of selected objects"
            */
-          this.$emit("scaffold-highlighted", event.identifiers);
+          this.$emit('scaffold-highlighted', event.identifiers);
         } else if (event.eventType == 3) {
           //MOVE
           if (event.identifiers.length > 0 && event.identifiers[0]) {
             if (event.identifiers[0].coords) {
-              const offsets =
-                this.$refs.scaffoldContainer.$el.getBoundingClientRect();
+              const offsets = this.$refs.scaffoldContainer.$el.getBoundingClientRect();
               this.tData.x = event.identifiers[0].coords.x - offsets.left;
               this.tData.y = event.identifiers[0].coords.y - offsets.top;
             }
@@ -2243,7 +2233,7 @@ export default {
      * @arg flag Disable the checkbox when true and enable when false
      * @arg childrenOnly Only disable/enable any child graphics/regions
      */
-     setRegionCheckboxDisabled: function(region, flag, childrenOnly = true) {
+    setRegionCheckboxDisabled: function (region, flag, childrenOnly = true) {
       this.$refs.scaffoldTreeControls.setRegionCheckboxDisabled(region, flag, childrenOnly);
     },
     /**
@@ -2284,10 +2274,8 @@ export default {
           item.value = true;
         });
       } else if (helpMode && this.helpModeDialog && toolTipsLength > this.helpModeActiveIndex) {
-
         // Show the map tooltip as first item
         if (this.helpModeActiveIndex > -1) {
-
           // wait for CSS transition
           setTimeout(() => {
             this.inHelp = false;
@@ -2309,17 +2297,11 @@ export default {
      * Callback function used by showRegionTooltip in the case when the tooltip
      * is out of view.
      */
-    displayTooltipOfObjectsCallback: function (
-      name,
-      objects,
-      regionPath,
-      resetView,
-      liveUpdates
-    ) {
+    displayTooltipOfObjectsCallback: function (name, objects, regionPath, resetView, liveUpdates) {
       const instance = this;
       return function () {
         instance.$module.zincRenderer.removePostRenderCallbackFunction(
-          instance.$_regionTooltipCallback
+          instance.$_regionTooltipCallback,
         );
         instance.$_regionTooltipCallback = undefined;
         instance.displayTooltipOfObjects(name, objects, regionPath, resetView, liveUpdates);
@@ -2333,9 +2315,7 @@ export default {
     },
     displayTooltipOfObjects: function (name, objects, regionPath, resetView, liveUpdates) {
       if (objects.length > 0) {
-        let coords = objects[0].getClosestVertexDOMElementCoords(
-          this.$module.scene
-        );
+        let coords = objects[0].getClosestVertexDOMElementCoords(this.$module.scene);
         if (coords) {
           //The coords is not in view, view all if resetView flag is true
           if (!coords.inView) {
@@ -2346,7 +2326,7 @@ export default {
               //before getting the position of the tooltip.
               if (this.$_regionTooltipCallback) {
                 this.$module.zincRenderer.removePostRenderCallbackFunction(
-                  this.$_regionTooltipCallback
+                  this.$_regionTooltipCallback,
                 );
                 this.$module.$_regionTooltipCallback = undefined;
               }
@@ -2357,12 +2337,12 @@ export default {
                     objects,
                     regionPath,
                     resetView,
-                    liveUpdates
-                  )
+                    liveUpdates,
+                  ),
                 );
             }
           } else {
-            if (!name.includes("Search Results for")) {
+            if (!name.includes('Search Results for')) {
               this.tData.active = true;
             } else {
               this.tData.active = false;
@@ -2374,7 +2354,7 @@ export default {
             this.tData.region = regionPath;
             if (this.$_liveCoordinatesUpdated) {
               this.$module.zincRenderer.removePostRenderCallbackFunction(
-                this.$_liveCoordinatesUpdated
+                this.$_liveCoordinatesUpdated,
               );
               this.$_liveCoordinatesUpdated = undefined;
             }
@@ -2382,7 +2362,7 @@ export default {
               this.$module.setupLiveCoordinates(objects);
               this.$_liveCoordinatesUpdated =
                 this.$module.zincRenderer.addPostRenderCallbackFunction(
-                  this.liveUpdateTooltipPosition
+                  this.liveUpdateTooltipPosition,
                 );
             }
           }
@@ -2399,15 +2379,15 @@ export default {
      * Setting liveUpdates to true will update the tooltip location
      * at every rendering loop.
      */
-    showRegionTooltipWithObjects: function (label, zincObjects, regionPath, resetView, liveUpdates) {
+    showRegionTooltipWithObjects: function (
+      label,
+      zincObjects,
+      regionPath,
+      resetView,
+      liveUpdates,
+    ) {
       if (label && zincObjects && zincObjects.length > 0 && this.$module.scene) {
-        return this.displayTooltipOfObjects(
-          label,
-          zincObjects,
-          regionPath,
-          resetView,
-          liveUpdates
-        );
+        return this.displayTooltipOfObjects(label, zincObjects, regionPath, resetView, liveUpdates);
       }
       this.hideRegionTooltip();
       return false;
@@ -2422,18 +2402,12 @@ export default {
       if (name && this.$module.scene) {
         const rootRegion = this.$module.scene.getRootRegion();
         const groups = [name];
-        const objects = findObjectsWithNames(rootRegion, groups, "", true);
+        const objects = findObjectsWithNames(rootRegion, groups, '', true);
         let regionPath = undefined;
         if (objects && objects.length > 0) {
           regionPath = objects[0].getRegion().getFullPath();
         }
-        return this.showRegionTooltipWithObjects(
-          name,
-          objects,
-          regionPath,
-          resetView,
-          liveUpdates
-        );
+        return this.showRegionTooltipWithObjects(name, objects, regionPath, resetView, liveUpdates);
       }
       this.hideRegionTooltip();
       return false;
@@ -2449,7 +2423,7 @@ export default {
       if (this.$module.scene) {
         const result = getObjectsFromAnnotations(this.$module.scene, annotations);
         if (this._editingZincObject) {
-          result.regionPath = this._editingZincObject.region.getFullPath() + "/";
+          result.regionPath = this._editingZincObject.region.getFullPath() + '/';
           result.label = this._editingZincObject.groupName;
         }
         if (result && result.objects.length > 0) {
@@ -2459,24 +2433,26 @@ export default {
               result.objects,
               result.regionPath,
               resetView,
-              liveUpdates
+              liveUpdates,
             );
           } else {
-            const region = this.tData.region ? this.tData.region +"/" : "";
-            const annotationEntry = [{
-              "featureId": region + this.tData.label,
-              "resourceId": this.url,
-              "resource": this.url,
-              "feature": this.annotationFeature,
-              "offline": this.offlineAnnotationEnabled,
-            }];
+            const region = this.tData.region ? this.tData.region + '/' : '';
+            const annotationEntry = [
+              {
+                featureId: region + this.tData.label,
+                resourceId: this.url,
+                resource: this.url,
+                feature: this.annotationFeature,
+                offline: this.offlineAnnotationEnabled,
+              },
+            ];
             this.$emit('annotation-open', {
               annotationEntry: annotationEntry,
               createData: this.createData,
               confirmCreate: this.confirmCreate,
               cancelCreate: this.cancelCreate,
               confirmDelete: this.confirmDelete,
-              confirmComment: this.confirmComment
+              confirmComment: this.confirmComment,
             });
             return;
           }
@@ -2487,15 +2463,17 @@ export default {
     },
     clearAnnotationFeature: function () {
       const annotations = this.getOfflineAnnotations();
-      const featureGroups = this.existDrawnFeatures.map(feature => decodeURIComponent(feature.id).split("/").pop());
+      const featureGroups = this.existDrawnFeatures.map((feature) =>
+        decodeURIComponent(feature.id).split('/').pop(),
+      );
       featureGroups.forEach((name) => {
         const zincObject = this.$module.scene.findObjectsWithGroupName(name, false);
         if (zincObject && zincObject.length) {
-          const regionPath = zincObject[0].region.getFullPath() + "/";
+          const regionPath = zincObject[0].region.getFullPath() + '/';
           const childRegion = this.$module.scene.getRootRegion().findChildFromPath(regionPath);
           childRegion.removeZincObject(zincObject[0]);
         }
-      })
+      });
       this.$refs.scaffoldTreeControls.removeRegion('__annotation');
       // Offline annotations are removed when switch viewing mode
       // Restore data in case need to save settings, doesn't affect anything
@@ -2505,16 +2483,22 @@ export default {
       let drawnFeatures;
       if (this.offlineAnnotationEnabled) {
         this.offlineAnnotations = JSON.parse(sessionStorage.getItem('anonymous-annotation')) || [];
-        drawnFeatures = this.offlineAnnotations.filter((offline) => {
-          return offline.resource === this.url && offline.feature.properties.drawn;
-        }).map(offline => offline.feature);
+        drawnFeatures = this.offlineAnnotations
+          .filter((offline) => {
+            return offline.resource === this.url && offline.feature.properties.drawn;
+          })
+          .map((offline) => offline.feature);
       } else {
         drawnFeatures = [];
         const drawn = await getDrawnAnnotations(this.annotator, this.userToken, this.url);
         if (drawn && drawn.features) {
           drawnFeatures = [...drawn.features];
         }
-        const drawnEncode = await getDrawnAnnotations(this.annotator, this.userToken, encodeURIComponent(this.url));
+        const drawnEncode = await getDrawnAnnotations(
+          this.annotator,
+          this.userToken,
+          encodeURIComponent(this.url),
+        );
         if (drawnEncode && drawnEncode.features) {
           drawnFeatures = [...drawnFeatures, ...drawnEncode.features];
         }
@@ -2533,7 +2517,7 @@ export default {
           this.viewingMode = modeName;
         }
         this.clearAnnotationFeature();
-        if (this.viewingMode === "Annotation") {
+        if (this.viewingMode === 'Annotation') {
           this.loading = true;
           this.annotator.authenticate(this.userToken).then((userData) => {
             if (userData.name && userData.email && userData.canUpdate) {
@@ -2547,19 +2531,20 @@ export default {
             this.addAnnotationFeature();
             this.loading = false;
           });
-        } else if (this.viewingMode === "Exploration") {
+        } else if (this.viewingMode === 'Exploration') {
           this.activeDrawTool = undefined;
           this.activeDrawMode = undefined;
-          this.createData.shape = "";
-        } else if (this.viewingMode === "Neuron Connection") {
+          this.createData.shape = '';
+        } else if (this.viewingMode === 'Neuron Connection') {
           // enable to make organs and nerves clickable and searchable for neuron connection mode
           objectIsPickable = false;
         }
-        if ((this.viewingMode === "Exploration") ||
-          (this.viewingMode === "Neuron Connection") ||
-          (this.viewingMode === "Annotation") &&
-          (this.createData.shape === "")) {
-            this.$module.selectObjectOnPick = true;
+        if (
+          this.viewingMode === 'Exploration' ||
+          this.viewingMode === 'Neuron Connection' ||
+          (this.viewingMode === 'Annotation' && this.createData.shape === '')
+        ) {
+          this.$module.selectObjectOnPick = true;
         } else {
           this.$module.selectObjectOnPick = false;
         }
@@ -2575,10 +2560,10 @@ export default {
     emitOfflineAnnotationUpdate: function () {
       this.$emit('update-offline-annotation-enabled', this.offlineAnnotationEnabled);
     },
-    forceContextRestore: function() {
+    forceContextRestore: function () {
       this.$module.zincRenderer.forceContextRestore();
     },
-    forceContextLoss: function() {
+    forceContextLoss: function () {
       this.$module.zincRenderer.forceContextLoss();
     },
     /**
@@ -2587,9 +2572,7 @@ export default {
      */
     hideRegionTooltip: function () {
       if (this.$_liveCoordinatesUpdated) {
-        this.$module.zincRenderer.removePostRenderCallbackFunction(
-          this.$_liveCoordinatesUpdated
-        );
+        this.$module.zincRenderer.removePostRenderCallbackFunction(this.$_liveCoordinatesUpdated);
         //Unset the tracking
         this.$module.setupLiveCoordinates(undefined);
         this.$_liveCoordinatesUpdated = undefined;
@@ -2640,14 +2623,17 @@ export default {
      * @arg {Boolean} `flag`
      */
     setColour: function (flag, forced = false) {
-      if (this.isReady && this.$module.scene &&
-        typeof flag === "boolean" &&
-        (forced || flag !== this.colourRadio)) {
+      if (
+        this.isReady &&
+        this.$module.scene &&
+        typeof flag === 'boolean' &&
+        (forced || flag !== this.colourRadio)
+      ) {
         this.loading = true;
         //This can take sometime to finish , nextTick does not bring out
         //the loading screen so I opt for timeout loop here.
         setTimeout(() => {
-          this.setGreyScale(!flag)
+          this.setGreyScale(!flag);
           this.loading = false;
           this.colourRadio = flag;
         }, 100);
@@ -2659,10 +2645,13 @@ export default {
      * The parameter ``flag`` is a boolean, ``true`` to show lines, ``false`` to hide them.
      * @arg {Boolean} `flag`
      */
-     setOutlines: function (flag, forced = false) {
-      if (this.isReady && this.$module.scene &&
-        typeof flag === "boolean" &&
-        (forced || flag !== this.outlinesRadio)) {
+    setOutlines: function (flag, forced = false) {
+      if (
+        this.isReady &&
+        this.$module.scene &&
+        typeof flag === 'boolean' &&
+        (forced || flag !== this.outlinesRadio)
+      ) {
         this.outlinesRadio = flag;
         this.$nextTick(() => this.$refs.scaffoldTreeControls.setOutlines(flag));
       }
@@ -2681,8 +2670,8 @@ export default {
         }
         const rootRegion = this.$module.scene.getRootRegion();
         const groups = [name];
-        const objects = findObjectsWithNames(rootRegion, groups, "", true);
-        objects.forEach(object => object.setMarkerMode(mode, options));
+        const objects = findObjectsWithNames(rootRegion, groups, '', true);
+        objects.forEach((object) => object.setMarkerMode(mode, options));
       }
     },
     /**
@@ -2695,7 +2684,7 @@ export default {
       if (this.$module.scene) {
         const result = getObjectsFromAnnotations(this.$module.scene, annotations);
         if (result && result.objects.length > 0) {
-          result.objects.forEach(object => object.setMarkerMode(mode));
+          result.objects.forEach((object) => object.setMarkerMode(mode));
         }
       }
     },
@@ -2735,22 +2724,20 @@ export default {
      */
     search: function (text, displayLabel) {
       if (this.$_searchIndex) {
-        if (text === undefined || text === "" ||
-          ((Array.isArray(text) && text.length === 0))
-        ) {
+        if (text === undefined || text === '' || (Array.isArray(text) && text.length === 0)) {
           this.lastSelected = {
-            region: "",
-            group: "",
+            region: '',
+            group: '',
             isSearch: true,
-          }
+          };
           this.objectSelected([], true);
           return false;
         } else {
           this.lastSelected = {
-            region: "",
+            region: '',
             group: text,
             isSearch: true,
-          }
+          };
           const result = this.$_searchIndex.searchAndProcessResult(text);
           const zincObjects = result.zincObjects;
           if (zincObjects.length > 0) {
@@ -2763,7 +2750,7 @@ export default {
                     zincObjects,
                     result.regionPath,
                     true,
-                    true
+                    true,
                   );
                 }
               }
@@ -2800,26 +2787,23 @@ export default {
     updateSettingsfromScene: function () {
       this.currentSpeed = 1;
       this.$module.setPlayRate(this.defaultRate);
-      this.orginalDuration =
-        this.$module.scene.getMetadataTag("OriginalDuration");
-      this.animateDuration = this.$module.scene.getMetadataTag("Duration");
-      let timeStamps = this.$module.scene.getMetadataTag("TimeStamps");
+      this.orginalDuration = this.$module.scene.getMetadataTag('OriginalDuration');
+      this.animateDuration = this.$module.scene.getMetadataTag('Duration');
+      let timeStamps = this.$module.scene.getMetadataTag('TimeStamps');
       this.timeStamps = {};
       for (const key in timeStamps) {
         this.timeStamps[timeStamps[key]] = key;
       }
       this.timeMax = this.$module.scene.getDuration();
     },
-    restoreSettings: function(options) {
+    restoreSettings: function (options) {
       if (options) {
         if (options.viewport) {
-          this.$module.scene
-            .getZincCameraControls()
-            .setCurrentCameraSettings(options.viewport);
-        } else if (options.viewURL && options.viewURL !== "") {
+          this.$module.scene.getZincCameraControls().setCurrentCameraSettings(options.viewport);
+        } else if (options.viewURL && options.viewURL !== '') {
           const url = new URL(options.viewURL, this.url);
           this.$module.scene.loadViewURL(url);
-        } else if (options.region && options.region !== "") {
+        } else if (options.region && options.region !== '') {
           this.viewRegion(options.region);
         }
         if (options.visibility) {
@@ -2831,13 +2815,13 @@ export default {
         if (options.background) {
           this.backgroundChangeCallback(options.background);
         }
-        if ("colour" in options) {
+        if ('colour' in options) {
           this.setColour(options.colour);
         }
         if (options.offlineAnnotations) {
           sessionStorage.setItem('anonymous-annotation', options.offlineAnnotations);
         }
-        if ("outlines" in options) {
+        if ('outlines' in options) {
           this.setOutlines(options.outlines);
         }
         if (options.viewingMode) {
@@ -2853,17 +2837,17 @@ export default {
         }
       }
     },
-    calculateBoundingBox: function() {
+    calculateBoundingBox: function () {
       if (this.isReady) {
-        const {centre, size} = this.$module.getCentreAndSize();
+        const { centre, size } = this.$module.getCentreAndSize();
         this.boundingDims.centre = centre;
         this.boundingDims.size = size;
       }
     },
-    downloadErrorCallback: function() {
+    downloadErrorCallback: function () {
       return (error) => {
         this.$emit('on-error', error);
-      }
+      };
     },
     setURLFinishCallback: function (options) {
       return () => {
@@ -2879,18 +2863,25 @@ export default {
         this.setMarkers();
         //Create a bounding box.
         this._boundingBoxGeo = this.$module.scene.addBoundingBoxPrimitive(
-          "_helper", "boundingBox", 0x40E0D0, 0.15);
+          '_helper',
+          'boundingBox',
+          0x40e0d0,
+          0.15,
+        );
         //Create planes.
         this._slides = this.$module.scene.addSlicesPrimitive(
-          "_helper", ["x-plane", "y-plane", "z-plane"], [0xFF5555, 0x55FF55, 0x5555FF],
-          0.5);
+          '_helper',
+          ['x-plane', 'y-plane', 'z-plane'],
+          [0xff5555, 0x55ff55, 0x5555ff],
+          0.5,
+        );
         //this.$module.scene.createAxisDisplay(false);
         //this.$module.scene.enableAxisDisplay(true, true);
         this.isReady = true;
         this.calculateBoundingBox();
         this.$nextTick(() => {
           this.restoreSettings(options);
-          this.$emit("on-ready");
+          this.$emit('on-ready');
         });
       };
     },
@@ -2919,7 +2910,7 @@ export default {
         state.viewport = zincCameraControls.getCurrentViewport();
       }
       if (this.lastSelected && this.lastSelected.group) {
-        state.search = {...this.lastSelected};
+        state.search = { ...this.lastSelected };
       }
       if (this.offlineAnnotationEnabled) {
         state.offlineAnnotations = sessionStorage.getItem('anonymous-annotation');
@@ -2948,8 +2939,15 @@ export default {
             offlineAnnotations: state.offlineAnnotations,
           });
         } else {
-          if (state.background || state.colour || state.search || state.outlines ||
-          state.viewport || state.viewingMode || state.visibility) {
+          if (
+            state.background ||
+            state.colour ||
+            state.search ||
+            state.outlines ||
+            state.viewport ||
+            state.viewingMode ||
+            state.visibility
+          ) {
             if (this.isReady && this.$module.scene) {
               this.restoreSettings(state);
             } else {
@@ -2963,7 +2961,7 @@ export default {
                   viewingMode: state.viewingMode,
                   viewport: state.viewport,
                   visibility: state.visibility,
-                })
+                }),
               );
             }
           }
@@ -3000,10 +2998,10 @@ export default {
     importOfflineAnnotations: function (annotationsList) {
       if (this.offlineAnnotationEnabled) {
         //Make sure the annotations are encoded correctly
-        annotationsList.forEach(annotation => {
+        annotationsList.forEach((annotation) => {
           const group = annotation.group;
           const region = annotation.region;
-          let fullName = region.slice(-1) === "/" ? region : region + "/";
+          let fullName = region.slice(-1) === '/' ? region : region + '/';
           const noSlash = fullName.slice(0, -1);
           annotation.region = noSlash;
           fullName = fullName + group;
@@ -3015,7 +3013,7 @@ export default {
         annotationFeaturesToPrimitives(this.$module.scene, featuresList);
         //Make a local non-reactive copy.
         annotationsList.forEach((annotation) => {
-          this.offlineAnnotations.push({...annotation});
+          this.offlineAnnotations.push({ ...annotation });
         });
         sessionStorage.setItem('anonymous-annotation', JSON.stringify(this.offlineAnnotations));
       }
@@ -3041,9 +3039,7 @@ export default {
         this.isReady = false;
         this.$_searchIndex.removeAll();
         this.hideRegionTooltip();
-        this.$module.setDownloadErrorCallback(
-          this.downloadErrorCallback()
-        );
+        this.$module.setDownloadErrorCallback(this.downloadErrorCallback());
         this.$module.setFinishDownloadCallback(
           this.setURLFinishCallback({
             background: state?.background,
@@ -3056,22 +3052,22 @@ export default {
             viewport: state?.viewport,
             visibility: state?.visibility,
             offlineAnnotations: state?.offlineAnnotations,
-          })
+          }),
         );
-        if (this.fileFormat === "gltf") {
-          this.$module.loadGLTFFromURL(newValue, "scene", true);
+        if (this.fileFormat === 'gltf') {
+          this.$module.loadGLTFFromURL(newValue, 'scene', true);
         } else {
-          if (this?.usageConfig?.tubeLines || state?.usageConfig?.tubeLines){
+          if (this?.usageConfig?.tubeLines || state?.usageConfig?.tubeLines) {
             options.tubeLines = true;
           }
           this.$module.loadOrgansFromURL(
             newValue,
             undefined,
             undefined,
-            "scene",
+            'scene',
             undefined,
             true,
-            options
+            options,
           );
         }
         if (this.$module && this.$module.scene) {
@@ -3108,9 +3104,9 @@ export default {
         this.clientHeight = this.$refs.scaffoldContainer.$el.clientHeight;
         this.minimisedSlider = width < 812;
         if (this.minimisedSlider) {
-          this.sliderPosition = this.drawerOpen ? "right" : "left";
+          this.sliderPosition = this.drawerOpen ? 'right' : 'left';
         } else {
-          this.sliderPosition = "";
+          this.sliderPosition = '';
         }
       }
     },
@@ -3145,7 +3141,7 @@ export default {
        * only triggered during syncControl mode
        * @arg {Object} "Information on the navigation"
        */
-      this.$emit("scaffold-navigated", payload);
+      this.$emit('scaffold-navigated', payload);
     },
     /**
      * Rotate mode - "none", "horizontal", "vertical", "free" but
@@ -3161,10 +3157,10 @@ export default {
      */
     setMarkers: function () {
       for (const [key, value] of Object.entries(this.markerLabels)) {
-        this.setMarkerModeForObjectsWithName(key, value, "on");
+        this.setMarkerModeForObjectsWithName(key, value, 'on');
       }
     },
-    readNIFTIFromSource: async function(urls, useHeaderInfo, maskURL, settings, options) {
+    readNIFTIFromSource: async function (urls, useHeaderInfo, maskURL, settings, options) {
       const newTexture = await readNIFTIFromSource(urls, useHeaderInfo, maskURL, settings, options);
       return newTexture;
     },
@@ -3174,7 +3170,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-
 .message-icon {
   position: absolute;
   top: 15px;
@@ -3259,7 +3254,11 @@ export default {
   font-weight: normal;
   line-height: 20px;
   padding-left: 8px;
-  text-shadow: -1px -1px #fff, 1px -1px #fff, -1px 1px #fff, 1px -1px #fff;
+  text-shadow:
+    -1px -1px #fff,
+    1px -1px #fff,
+    -1px 1px #fff,
+    1px -1px #fff;
 }
 
 .tab-content {
@@ -3428,7 +3427,7 @@ export default {
   height: 24px !important;
   width: 24px !important;
   &.open-map-button {
-    margin-bottom:4px;
+    margin-bottom: 4px;
   }
 
   &:hover {
@@ -3523,7 +3522,6 @@ export default {
   }
 }
 
-
 :deep(.scaffold-popper.el-popper.el-popper) {
   padding: 6px 4px;
   font-size: 12px;
@@ -3560,7 +3558,6 @@ export default {
     color: $app-primary-color;
   }
 }
-
 
 :deep(.popper-zoomout) {
   padding-right: 11px;
@@ -3605,11 +3602,11 @@ export default {
 
   &.speed {
     margin-left: 8px;
-    width:50px!important;
+    width: 50px !important;
     height: 24px;
     :deep(.el-select__wrapper) {
       padding: 0;
-      min-height: 24px
+      min-height: 24px;
     }
   }
 }
@@ -3625,8 +3622,6 @@ export default {
     }
   }
 }
-
-
 </style>
 
 <style lang="scss">
@@ -3635,11 +3630,10 @@ canvas:focus {
 }
 
 .scaffold-container {
-  --el-color-primary: #8300BF;
+  --el-color-primary: #8300bf;
   --el-color-primary-light-5: #cd99e5;
   --el-color-primary-light-7: #dab3ec;
-  --el-color-primary-light-8: #e6ccf2
-  --el-color-primary-light-9: #f3e6f9;
+  --el-color-primary-light-8: #e6ccf2 --el-color-primary-light-9: #f3e6f9;
   height: 100%;
   width: 100%;
   position: relative;
@@ -3647,7 +3641,7 @@ canvas:focus {
 
 .time-slider-tooltip {
   padding: 6px 4px !important;
-  font-family: "Asap", sans-serif;
+  font-family: 'Asap', sans-serif;
   font-size: 12px !important;
   color: rgb(48, 49, 51) !important;
   background-color: #f3ecf6 !important;
@@ -3656,8 +3650,8 @@ canvas:focus {
   min-width: unset !important;
   .el-popper__arrow {
     &:before {
-      border-color: $app-primary-color!important;
-      background-color: #f3ecf6!important;
+      border-color: $app-primary-color !important;
+      background-color: #f3ecf6 !important;
     }
   }
 }
@@ -3665,11 +3659,10 @@ canvas:focus {
 .scaffold_viewer_dropdown .el-select-dropdown__item {
   white-space: nowrap;
   text-align: left;
-  font-family: "Asap", sans-serif;
+  font-family: 'Asap', sans-serif;
   &.is-selected {
     color: $app-primary-color;
     font-weight: normal;
   }
 }
-
 </style>

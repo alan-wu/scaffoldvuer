@@ -1,6 +1,9 @@
 <template>
   <div id="app">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Asap:400,400i,500,600,700&display=swap" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Asap:400,400i,500,600,700&display=swap"
+    />
     <drop-zone ref="dropzone" @files-drop="onFilesDrop">
       <ScaffoldVuer
         v-if="url"
@@ -38,8 +41,7 @@
         @zinc-object-added="objectAdded"
         @vue:mounted="viewerMounted"
         :usageConfig="usageConfig"
-      >
-      </ScaffoldVuer>
+      ></ScaffoldVuer>
     </drop-zone>
 
     <HelpModeDialog
@@ -50,7 +52,13 @@
       @show-next="onHelpModeShowNext"
       @finish-help-mode="onFinishHelpMode"
     />
-    <el-popover popper-class="options-container" placement="bottom" trigger="hover" width="500" :teleported="false">
+    <el-popover
+      popper-class="options-container"
+      placement="bottom"
+      trigger="hover"
+      width="500"
+      :teleported="false"
+    >
       <div>
         <el-row :gutter="20">
           <el-col>
@@ -60,9 +68,7 @@
 
         <el-row :gutter="20" v-if="currentTime !== 0">
           <el-col>
-            <p>
-              time emited is: {{ currentTime.toFixed(2) }}
-            </p>
+            <p>time emited is: {{ currentTime.toFixed(2) }}</p>
           </el-col>
         </el-row>
 
@@ -71,16 +77,28 @@
             <el-switch v-model="displayUI" active-text="UI" />
           </el-col>
           <el-col :span="auto">
-            <el-switch v-model="displayMarkers" active-text="Markers" active-icon-class="el-icon-location"
-              active-color="#8300bf" />
+            <el-switch
+              v-model="displayMarkers"
+              active-text="Markers"
+              active-icon-class="el-icon-location"
+              active-color="#8300bf"
+            />
           </el-col>
           <el-col :span="auto">
-            <el-switch v-model="markerCluster" active-text="Marker Cluster" active-icon-class="el-icon-location"
-              active-color="#8300bf" />
+            <el-switch
+              v-model="markerCluster"
+              active-text="Marker Cluster"
+              active-icon-class="el-icon-location"
+              active-color="#8300bf"
+            />
           </el-col>
           <el-col :span="auto">
-            <el-switch v-model="displayMinimap" active-text="Minimap" active-icon-class="el-icon-discover"
-              active-color="#8300bf" />
+            <el-switch
+              v-model="displayMinimap"
+              active-text="Minimap"
+              active-icon-class="el-icon-discover"
+              active-color="#8300bf"
+            />
           </el-col>
         </el-row>
 
@@ -90,19 +108,37 @@
           </el-col>
           <el-col :span="auto">
             <el-row>
-              <el-col :span="8"> x: </el-col>
+              <el-col :span="8">x:</el-col>
               <el-col :span="16">
-                <el-input-number class="tumble-direction" controls-position="right" v-model="tumbleDirection[0]" :min="-1.0"
-                  :max="1.0" :controls="false" placeholder="Please input" aria-label="x" @change="autoTumble" />
+                <el-input-number
+                  class="tumble-direction"
+                  controls-position="right"
+                  v-model="tumbleDirection[0]"
+                  :min="-1.0"
+                  :max="1.0"
+                  :controls="false"
+                  placeholder="Please input"
+                  aria-label="x"
+                  @change="autoTumble"
+                />
               </el-col>
             </el-row>
           </el-col>
           <el-col :span="auto">
             <el-row>
-              <el-col :span="8"> y: </el-col>
+              <el-col :span="8">y:</el-col>
               <el-col :span="16">
-                <el-input-number class="tumble-direction" controls-position="right" v-model="tumbleDirection[1]" :min="-1.0"
-                  :max="1.0" :controls="false" placeholder="Please input" aria-label="y" @change="autoTumble" />
+                <el-input-number
+                  class="tumble-direction"
+                  controls-position="right"
+                  v-model="tumbleDirection[1]"
+                  :min="-1.0"
+                  :max="1.0"
+                  :controls="false"
+                  placeholder="Please input"
+                  aria-label="y"
+                  @change="autoTumble"
+                />
               </el-col>
             </el-row>
           </el-col>
@@ -110,9 +146,7 @@
 
         <el-row :gutter="20" justify="center" align="middle">
           <el-col :span="auto">
-            <el-button size="small" @click="helpMode = !helpMode">
-              Help Mode
-            </el-button>
+            <el-button size="small" @click="helpMode = !helpMode">Help Mode</el-button>
           </el-col>
           <el-col :span="auto">
             <el-button type="primary" size="small" @click="screenshotDialog = true">
@@ -123,20 +157,16 @@
 
         <el-row :gutter="20" justify="center" align="middle">
           <el-col :span="auto">
-            <el-button size="small" @click="saveSettings()">
-              Save Settings
-            </el-button>
+            <el-button size="small" @click="saveSettings()">Save Settings</el-button>
           </el-col>
           <el-col :span="auto">
-            <el-button size="small" @click="restoreSettings()">
-              Restore Settings
-            </el-button>
+            <el-button size="small" @click="restoreSettings()">Restore Settings</el-button>
           </el-col>
           <el-col :span="auto">
-            <el-button size="small" @click="exportGLB()"> Export GLB </el-button>
+            <el-button size="small" @click="exportGLB()">Export GLB</el-button>
           </el-col>
           <el-col :span="auto">
-            <el-button size="small" @click="exportGLTF()"> Export GLTF </el-button>
+            <el-button size="small" @click="exportGLTF()">Export GLTF</el-button>
           </el-col>
         </el-row>
 
@@ -147,21 +177,21 @@
             </el-button>
           </el-col>
           <el-col :span="auto">
-              <el-button size="small">
-                <label for="annotations-upload">Import Annotations</label>
-                <input
-                  id="annotations-upload"
-                  type="file"
-                  accept="application/json"
-                  @change="importOfflineAnnotations"
-                />
-              </el-button>
+            <el-button size="small">
+              <label for="annotations-upload">Import Annotations</label>
+              <input
+                id="annotations-upload"
+                type="file"
+                accept="application/json"
+                @change="importOfflineAnnotations"
+              />
+            </el-button>
           </el-col>
         </el-row>
 
         <el-row :gutter="20" justify="center" align="middle">
           <el-col :span="auto">
-            <el-button size="small" @click="() => fitBoundingBox=!fitBoundingBox">
+            <el-button size="small" @click="() => (fitBoundingBox = !fitBoundingBox)">
               {{ fitBoundingBox ? 'Unfit' : 'Fit' }} BoundingBox
             </el-button>
           </el-col>
@@ -177,15 +207,15 @@
               <el-button size="small" @click="enableAxisDisplay(true, false)">
                 Enable CoordSystem
               </el-button>
-              <el-button size="small" @click="enableAxisDisplay(true, true )">
+              <el-button size="small" @click="enableAxisDisplay(true, true)">
                 Enable MiniAxes CoordSystem
               </el-button>
             </el-button-group>
           </el-col>
           <el-col :span="auto">
-              <el-button size="small" @click="enableAxisDisplay(false, false)">
-                Disable CoordSystem
-              </el-button>
+            <el-button size="small" @click="enableAxisDisplay(false, false)">
+              Disable CoordSystem
+            </el-button>
           </el-col>
         </el-row>
 
@@ -193,7 +223,11 @@
           <el-col>
             <el-row :gutter="20" justify="center" align="middle">
               <el-col>
-                <el-switch v-model="positionalRotation" active-text="Rotation Helper" active-color="#8300bf" />
+                <el-switch
+                  v-model="positionalRotation"
+                  active-text="Rotation Helper"
+                  active-color="#8300bf"
+                />
               </el-col>
             </el-row>
           </el-col>
@@ -206,9 +240,7 @@
           <el-col :span="auto">
             <el-switch v-model="renderInfoOn" active-text="Renderer Info" active-color="#8300bf" />
           </el-col>
-          <el-button size="small" @click="PrintViewport()">
-              Print Viewport
-            </el-button>
+          <el-button size="small" @click="PrintViewport()">Print Viewport</el-button>
         </el-row>
 
         <template v-if="renderInfoOn && rendererInfo">
@@ -243,24 +275,16 @@
                 </el-button>
               </el-col>
               <el-col :span="auto">
-                <el-button size="small" @click="featureTextureVolume(true)">
-                  Body volume
-                </el-button>
+                <el-button size="small" @click="featureTextureVolume(true)">Body volume</el-button>
               </el-col>
               <el-col :span="auto">
-                <el-button size="small" @click="featureTextureSlides(true)">
-                  Body slides
-                </el-button>
+                <el-button size="small" @click="featureTextureSlides(true)">Body slides</el-button>
               </el-col>
               <el-col :span="auto">
-                <el-button size="small" @click="featureArmSlides(true)">
-                  Arm slides
-                </el-button>
+                <el-button size="small" @click="featureArmSlides(true)">Arm slides</el-button>
               </el-col>
               <el-col :span="auto">
-                <el-button size="small" @click="multipleNifti()">
-                  Time x Nifti
-                </el-button>
+                <el-button size="small" @click="multipleNifti()">Time x Nifti</el-button>
               </el-col>
             </el-row>
             <el-row :gutter="20" justify="center" align="middle">
@@ -293,29 +317,37 @@
             />
           </el-col>
         </el-row>
-
       </div>
       <template #reference>
-        <el-button class="options-button" :icon="ElIconSetting">
-          Options
-        </el-button>
+        <el-button class="options-button" :icon="ElIconSetting">Options</el-button>
       </template>
     </el-popover>
-    <el-popover placement="bottom" trigger="hover" width="800" popper-class="table-popover" :teleported="false">
+    <el-popover
+      placement="bottom"
+      trigger="hover"
+      width="800"
+      popper-class="table-popover"
+      :teleported="false"
+    >
       <template #default>
         <Suspense>
           <ModelsTable @viewModelClicked="viewModelClicked" />
         </Suspense>
       </template>
       <template #reference>
-        <el-button class="models-button control-layer" :icon="ElIconFolderOpened">
-          Models
-        </el-button>
+        <el-button class="models-button control-layer" :icon="ElIconFolderOpened">Models</el-button>
       </template>
     </el-popover>
-    <el-autocomplete v-model="searchText" class="search-box control-layer" placeholder="Search" :fetch-suggestions="fetchSuggestions"
-      :teleported="false" popper-class="autocomplete-popper" @keyup.enter="search(searchText)"
-      @select="search(searchText)">
+    <el-autocomplete
+      v-model="searchText"
+      class="search-box control-layer"
+      placeholder="Search"
+      :fetch-suggestions="fetchSuggestions"
+      :teleported="false"
+      popper-class="autocomplete-popper"
+      @keyup.enter="search(searchText)"
+      @select="search(searchText)"
+    >
       <template #default="{ item }">
         <div class="value">
           {{ item.value }}
@@ -328,45 +360,43 @@
       width="450px"
       destroy-on-close
     >
-    <el-form
-      ref="formRef"-
-      :model="screenshotData"
-      :rules="rules"
-      label-width="100px"
-      status-icon
-    >
-      <!-- Filename Field -->
-      <el-form-item label="Filename" prop="filename">
-        <el-input
-          v-model="screenshotData.filename"
-          placeholder="scaffold"
-        >
-          <template #append>.png</template>
-        </el-input>
-      </el-form-item>
+      <el-form
+        ref="formRef"
+        -
+        :model="screenshotData"
+        :rules="rules"
+        label-width="100px"
+        status-icon
+      >
+        <!-- Filename Field -->
+        <el-form-item label="Filename" prop="filename">
+          <el-input v-model="screenshotData.filename" placeholder="scaffold">
+            <template #append>.png</template>
+          </el-input>
+        </el-form-item>
 
-      <!-- Width Field -->
-      <el-form-item label="Width (px)" prop="width">
-        <el-input-number
-          v-model="screenshotData.width"
-          :min="100"
-          :max="7680"
-          :step="100"
-          controls-position="right"
-          style="width: 100%"
-        />
-      </el-form-item>
+        <!-- Width Field -->
+        <el-form-item label="Width (px)" prop="width">
+          <el-input-number
+            v-model="screenshotData.width"
+            :min="100"
+            :max="7680"
+            :step="100"
+            controls-position="right"
+            style="width: 100%"
+          />
+        </el-form-item>
 
-      <!-- Height Field -->
-      <el-form-item label="Height (px)" prop="height">
-        <el-input-number
-          v-model="screenshotData.height"
-          :min="100"
-          :max="4320"
-          :step="100"
-          controls-position="right"
-          style="width: 100%"
-        />
+        <!-- Height Field -->
+        <el-form-item label="Height (px)" prop="height">
+          <el-input-number
+            v-model="screenshotData.height"
+            :min="100"
+            :max="4320"
+            :step="100"
+            controls-position="right"
+            style="width: 100%"
+          />
         </el-form-item>
       </el-form>
 
@@ -374,9 +404,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="screenCancel">Cancel</el-button>
-          <el-button type="primary" :loading="loading" @click="screenCapture">
-            Capture
-          </el-button>
+          <el-button type="primary" :loading="loading" @click="screenCapture">Capture</el-button>
         </span>
       </template>
     </el-dialog>
@@ -384,63 +412,53 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
-import { AnnotationService } from '@abi-software/sparc-annotation'
-import { ElMessage } from 'element-plus';
+import { AnnotationService } from '@abi-software/sparc-annotation';
 import { markRaw, shallowRef } from 'vue';
-import { ScaffoldVuer } from "./components/index.js";
-import DropZone from "./app/DropZone.vue";
-import ModelsTable from "./app/ModelsTable.vue";
-import { testArmSlides, testSlides, testVolume } from "./app/TextureDemos.js";
+import { ScaffoldVuer } from './components/index.js';
+import DropZone from './app/DropZone.vue';
+import ModelsTable from './app/ModelsTable.vue';
+import { testArmSlides, testSlides, testVolume } from './app/TextureDemos.js';
 import {
   FolderOpened as ElIconFolderOpened,
   Setting as ElIconSetting,
-} from '@element-plus/icons-vue'
+} from '@element-plus/icons-vue';
 import {
-  ElAutocomplete as Autocomplete,
-  ElButton as Button,
-  ElCol as Col,
-  ElIcon as Icon,
-  ElInput as Input,
-  ElInputNumber as InputNumber,
-  ElPopover as Popover,
-  ElRow as Row,
-  ElUpload as Upload,
-  ElSwitch as Switch,
-} from "element-plus";
-import { useRoute, useRouter } from 'vue-router'
-import { HelpModeDialog } from '@abi-software/map-utilities'
-import '@abi-software/map-utilities/dist/style.css'
+  ElAutocomplete,
+  ElButton,
+  ElCol,
+  ElInput,
+  ElInputNumber,
+  ElPopover,
+  ElRow,
+  ElSwitch,
+} from 'element-plus';
+import { useRoute, useRouter } from 'vue-router';
+import { HelpModeDialog } from '@abi-software/map-utilities';
+import '@abi-software/map-utilities/dist/style.css';
 
 let texture_prefix = undefined;
 
 const writeTextFile = (filename, data) => {
-  let dataStr =
-    "data:text/json;charset=utf-8," +
-    encodeURIComponent(JSON.stringify(data));
-  let hrefElement = document.createElement("a");
+  let dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
+  let hrefElement = document.createElement('a');
   document.body.append(hrefElement);
   hrefElement.download = filename;
   hrefElement.href = dataStr;
   hrefElement.click();
   hrefElement.remove();
-}
+};
 
 export default {
-  name: "app",
+  name: 'app',
   components: {
-    Autocomplete,
-    Button,
-    Col,
-    Icon,
-    Input,
-    InputNumber,
-    Popover,
-    Row,
-    Switch,
-    Upload,
-    ElIconFolderOpened,
-    ElIconSetting,
+    ElAutocomplete,
+    ElButton,
+    ElCol,
+    ElInput,
+    ElInputNumber,
+    ElPopover,
+    ElRow,
+    ElSwitch,
     DropZone,
     ScaffoldVuer,
     ModelsTable,
@@ -449,7 +467,7 @@ export default {
   provide() {
     return {
       $annotator: this.annotator,
-    }
+    };
   },
   data: function () {
     return {
@@ -475,22 +493,21 @@ export default {
         y_offset: 50,
         width: 128,
         height: 128,
-        align: "top-right",
+        align: 'top-right',
       },
-      markerLabels: { },
+      markerLabels: {},
       render: true,
-      region: "",
-      viewURL: "",
+      region: '',
+      viewURL: '',
       renderInfoOn: false,
       rendererInfo: undefined,
-      format: "metadata",
+      format: 'metadata',
       sceneSettings: [],
-      searchInput: "",
-      searchText: "",
+      searchInput: '',
+      searchText: '',
       loadTextureVolumeOnReady: false,
       readyCallback: undefined,
-      flatmapAPI: "https://mapcore-demo.org/devel/flatmap/v4/",
-      helpMode: false,
+      flatmapAPI: 'https://mapcore-demo.org/devel/flatmap/v4/',
       helpModeActiveItem: 0,
       helpModeLastItem: false,
       useHelpModeDialog: true,
@@ -501,27 +518,33 @@ export default {
       ElIconSetting: shallowRef(ElIconSetting),
       ElIconFolderOpened: shallowRef(ElIconFolderOpened),
       auto: NaN,
-      annotator: markRaw(new AnnotationService(`https://mapcore-demo.org/devel/flatmap/v4/annotator`)),
+      annotator: markRaw(
+        new AnnotationService(`https://mapcore-demo.org/devel/flatmap/v4/annotator`),
+      ),
       fitBoundingBox: false,
       usageConfig: {
         tubeLines: false,
-        showTubeLinesControls: true
+        showTubeLinesControls: true,
       },
       screenshotData: {
-        filename: "screenshot",
+        filename: 'screenshot',
         width: 1920,
-        height: 1080
+        height: 1080,
       },
       wholeBody: false,
       rules: {
         filename: [
           { required: true, message: 'Please enter a filename', trigger: 'blur' },
-          { pattern: /^[a-zA-Z0-9_-]+$/, message: 'Filename can only contain letters, numbers, hyphens, and underscores', trigger: 'blur' } ],
-          width: [ { required: true, message: 'Please specify width', trigger: 'change' } ],
-          height: [ { required: true, message: 'Please specify height', trigger: 'change' }
-        ]
-      }
-    }
+          {
+            pattern: /^[a-zA-Z0-9_-]+$/,
+            message: 'Filename can only contain letters, numbers, hyphens, and underscores',
+            trigger: 'blur',
+          },
+        ],
+        width: [{ required: true, message: 'Please specify width', trigger: 'change' }],
+        height: [{ required: true, message: 'Please specify height', trigger: 'change' }],
+      },
+    };
   },
   watch: {
     input: function () {
@@ -530,30 +553,33 @@ export default {
     tumbleOn: function () {
       this.autoTumble();
     },
-    markerCluster: function(val) {
+    markerCluster: function (val) {
       if (val) {
         this.markerLabels = {
-          "body proper": 9,
-          "Spinal cord": 8,
-          "lung": 11,
-          "stomach": {number:12, imgURL: 'https://mapcore-bucket1.s3.us-west-2.amazonaws.com/texture/arm1/jpg/0984.jpg'},
-          "urinary bladder": 11,
-          "Brainstem": 11,
-          "heart": 9,
-          "skin epidermis": 5,
-          "Diaphragm": 7,
-          "colon": 9,
-          "vagus nerve": 3,
-          "myenteric nerve plexus": 2,
-          "esophagus": 1,
-          "urethra": 3
+          'body proper': 9,
+          'Spinal cord': 8,
+          lung: 11,
+          stomach: {
+            number: 12,
+            imgURL: 'https://mapcore-bucket1.s3.us-west-2.amazonaws.com/texture/arm1/jpg/0984.jpg',
+          },
+          'urinary bladder': 11,
+          Brainstem: 11,
+          heart: 9,
+          'skin epidermis': 5,
+          Diaphragm: 7,
+          colon: 9,
+          'vagus nerve': 3,
+          'myenteric nerve plexus': 2,
+          esophagus: 1,
+          urethra: 3,
         };
       } else {
-        this.markerLabels = { };
+        this.markerLabels = {};
       }
     },
-    "route.query": {
-      handler: "parseQuery",
+    'route.query': {
+      handler: 'parseQuery',
       deep: true,
       immediate: true,
     },
@@ -587,9 +613,9 @@ export default {
     },
     exportGLB: function () {
       this.$refs.scaffold.exportGLTF(true).then((data) => {
-        let blob = new Blob([data], { type: "octet/stream" });
+        let blob = new Blob([data], { type: 'octet/stream' });
         let url = window.URL.createObjectURL(blob);
-        let hrefElement = document.createElement("a");
+        let hrefElement = document.createElement('a');
         document.body.append(hrefElement);
         hrefElement.download = `export.glb`;
         hrefElement.href = url;
@@ -597,31 +623,31 @@ export default {
         hrefElement.remove();
       });
     },
-    exportOfflineAnnotations: function() {
+    exportOfflineAnnotations: function () {
       const annotations = this.$refs.scaffold.getOfflineAnnotations();
       const filename = 'scaffoldAnnotations' + JSON.stringify(new Date()) + '.json';
       writeTextFile(filename, annotations);
     },
-    onReaderLoad: function(event) {
+    onReaderLoad: function (event) {
       const annotationsList = JSON.parse(event.target.result);
       this.$refs.scaffold.importOfflineAnnotations(annotationsList);
     },
-    importOfflineAnnotations: function() {
-      const selectedFile = document.getElementById("annotations-upload").files[0];
+    importOfflineAnnotations: function () {
+      const selectedFile = document.getElementById('annotations-upload').files[0];
       const reader = new FileReader();
       reader.onload = this.onReaderLoad;
       reader.readAsText(selectedFile);
     },
     objectAdded: function (zincObject) {
       if (this.consoleOn) {
-        console.log(zincObject)
-        console.log(this.$refs.scaffold.$module.scene.getBoundingBox())
+        console.log(zincObject);
+        console.log(this.$refs.scaffold.$module.scene.getBoundingBox());
       }
       if (zincObject.isGeometry) {
         zincObject._lod._material.wireframe = this.wireframe;
       }
       if (this.wholeBody) {
-        if (zincObject.getRegion().getName() === "Nerves") {
+        if (zincObject.getRegion().getName() === 'Nerves') {
           zincObject.setGreyScale(true);
         }
       }
@@ -639,9 +665,9 @@ export default {
       //[-100, 0, 0, 0, 0, -100, 0, 0, 0, 0, -100, 0, -60, -100, 30, 1]
       if (overlap) {
         const url =
-          "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/WholeBody/6-match-2023/human/nerve_metadata.json";
+          'https://mapcore-bucket1.s3.us-west-2.amazonaws.com/WholeBody/6-match-2023/human/nerve_metadata.json';
         if (this.route.query.url !== encodeURI(url)) {
-          this.router.replace({ path: "/", query: { url } });
+          this.router.replace({ path: '/', query: { url } });
           this.readyCallback = testVolume;
           return;
         } else {
@@ -656,9 +682,9 @@ export default {
       //Test texture
       if (overlap) {
         const url =
-          "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/WholeBody/6-match-2023/human/nerve_metadata.json";
+          'https://mapcore-bucket1.s3.us-west-2.amazonaws.com/WholeBody/6-match-2023/human/nerve_metadata.json';
         if (this.route.query.url !== encodeURI(url)) {
-          this.router.replace({ path: "/", query: { url } });
+          this.router.replace({ path: '/', query: { url } });
           this.readyCallback = testSlides;
           return;
         } else {
@@ -673,9 +699,9 @@ export default {
       //Test texture
       if (overlap) {
         const url =
-          "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/texture/arm1/arm_texture_metadata.json";
+          'https://mapcore-bucket1.s3.us-west-2.amazonaws.com/texture/arm1/arm_texture_metadata.json';
         if (this.route.query.url !== encodeURI(url)) {
-          this.router.replace({ path: "/", query: { url } });
+          this.router.replace({ path: '/', query: { url } });
           this.readyCallback = testArmSlides;
           return;
         } else {
@@ -688,64 +714,70 @@ export default {
     },
     multipleNifti: async function () {
       const v1 = {
-        "id": "mesh-location-orientation",
-        "locations": [
+        id: 'mesh-location-orientation',
+        locations: [
           {
-            "identifier": 1,
-            "label": "original",
-            "orientation": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
-            "position": [-283, -363, 1090],
-            "scale": [540, 540, 276],
-            "flipY": false,
-            "flipZ": true,
-            "reference_point": "corner"
-          }
+            identifier: 1,
+            label: 'original',
+            orientation: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
+            position: [-283, -363, 1090],
+            scale: [540, 540, 276],
+            flipY: false,
+            flipZ: true,
+            reference_point: 'corner',
+          },
         ],
-        "settings": {
-          "slides": [
+        settings: {
+          slides: [
             {
-              "direction": "x",
-              "value": 0.5
+              direction: 'x',
+              value: 0.5,
             },
             {
-              "direction": "y",
-              "value": 0.5
+              direction: 'y',
+              value: 0.5,
             },
             {
-              "direction": "z",
-              "value": 0.45
-            }
-          ]
+              direction: 'z',
+              value: 0.45,
+            },
+          ],
         },
-        "type": "slides"
-      }
+        type: 'slides',
+      };
       const options = {
         hideWhitePixel: false,
         hideBlackPixel: false,
         keepScalePosition: true,
         filterByValue: true,
         timeEnabled: true,
-      }
+      };
       const urls = [
-        "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/digital_twins/080626-demo/downsample_phase_1.nii.gz",
-        "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/digital_twins/080626-demo/downsample_phase_3.nii.gz",
-        "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/digital_twins/080626-demo/downsample_phase_5.nii.gz"
-      ]
-      const newTexture = await this.$refs.scaffold.readNIFTIFromSource(urls, true, this.maskUrl, v1, options, true);
+        'https://mapcore-bucket1.s3.us-west-2.amazonaws.com/digital_twins/080626-demo/downsample_phase_1.nii.gz',
+        'https://mapcore-bucket1.s3.us-west-2.amazonaws.com/digital_twins/080626-demo/downsample_phase_3.nii.gz',
+        'https://mapcore-bucket1.s3.us-west-2.amazonaws.com/digital_twins/080626-demo/downsample_phase_5.nii.gz',
+      ];
+      const newTexture = await this.$refs.scaffold.readNIFTIFromSource(
+        urls,
+        true,
+        this.maskUrl,
+        v1,
+        options,
+        true,
+      );
       newTexture.timeEnabled = true;
       newTexture.setIsPickable(false);
       const scene = this.$refs.scaffold.$module.scene;
       newTexture.setBrightness(0.38);
       newTexture.setContrast(3.5);
-      newTexture.setPosition(-158.73, -150.51, -198.50);
+      newTexture.setPosition(-158.73, -150.51, -198.5);
       scene.addZincObject(newTexture);
     },
     saveSettings: function () {
       this.sceneSettings.push(this.$refs.scaffold.getState());
     },
     restoreSettings: function () {
-      if (this.sceneSettings.length > 0)
-        this.$refs.scaffold.setState(this.sceneSettings.pop());
+      if (this.sceneSettings.length > 0) this.$refs.scaffold.setState(this.sceneSettings.pop());
     },
     viewModelClicked: function (location) {
       this.input = location;
@@ -770,17 +802,16 @@ export default {
     search: function (term) {
       this.$refs.scaffold.search(term, true);
     },
-    viewerMounted: function() {
-      this.selectedCoordinates =
-        this.$refs.scaffold.getDynamicSelectedCoordinates();
+    viewerMounted: function () {
+      this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
       this.rendererInfo = this.$refs.scaffold.getRendererInfo();
     },
-    PrintViewport: function() {
+    PrintViewport: function () {
       const scene = this.$refs.scaffold.$module.scene;
       console.log(scene.getZincCameraControls().getCurrentViewport());
     },
     fetchSuggestions: function (term, cb) {
-      if (term === "" || !this.$refs.scaffold) {
+      if (term === '' || !this.$refs.scaffold) {
         cb([]);
       }
       cb(
@@ -788,21 +819,17 @@ export default {
           const value = item.suggestion;
           return {
             value: value,
-            label: value
+            label: value,
           };
-        })
+        }),
       );
       if (this.consoleOn) {
-        console.log(
-          "found suggestions",
-          this.$refs.scaffold.fetchSuggestions(term)
-        );
+        console.log('found suggestions', this.$refs.scaffold.fetchSuggestions(term));
       }
     },
     autoTumble: function () {
       const flag = this.tumbleOn;
-      let cameracontrol =
-        this.$refs.scaffold.$module.scene.getZincCameraControls();
+      let cameracontrol = this.$refs.scaffold.$module.scene.getZincCameraControls();
       if (flag) {
         this.displayUI = false;
         cameracontrol.enableAutoTumble();
@@ -822,8 +849,8 @@ export default {
         }
       });
     },
-    onError: function(payload) {
-      if (payload?.type === "download-error") {
+    onError: function (payload) {
+      if (payload?.type === 'download-error') {
         const dropZone = this.$refs.dropzone;
         if (dropZone) {
           const realFilename = dropZone.findRealFilename(payload.xhr.responseURL);
@@ -834,13 +861,13 @@ export default {
       }
     },
     onReady: function () {
-      if (this.consoleOn) console.log(this.$refs.scaffold)
+      if (this.consoleOn) console.log(this.$refs.scaffold);
       if (this.readyCallback) {
         this.readyCallback(this.$refs.scaffold, texture_prefix);
         this.readyCallback = undefined;
       } else {
         const url =
-          "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/texture/arm1/arm_texture_metadata.json";
+          'https://mapcore-bucket1.s3.us-west-2.amazonaws.com/texture/arm1/arm_texture_metadata.json';
         if (this.route.query.url === encodeURI(url)) {
           testArmSlides(this.$refs.scaffold);
         }
@@ -856,8 +883,8 @@ export default {
           coord[2] + normal.z * 1000,
         ];
         const returned = this.$refs.scaffold.$module.scene.createLines(
-          "test",
-          "lines",
+          'test',
+          'lines',
           [newCoords, coord],
           0x00ee22,
         );
@@ -868,13 +895,20 @@ export default {
     onSelected: function (data) {
       if (data && data.length > 0 && data[0].data.group) {
         if (this.consoleOn) console.log(data[0], data[0].extraData.intersected);
-        if (this.createLinesWithNormal && data[0].extraData.worldCoords &&
-          data[0].extraData.intersected?.face) {
-          this.addLinesWithNormal(data[0].extraData.worldCoords, data[0].extraData.intersected.face.normal)
+        if (
+          this.createLinesWithNormal &&
+          data[0].extraData.worldCoords &&
+          data[0].extraData.intersected?.face
+        ) {
+          this.addLinesWithNormal(
+            data[0].extraData.worldCoords,
+            data[0].extraData.intersected.face.normal,
+          );
         }
-        delete this.route.query["viewURL"];
+        delete this.route.query['viewURL'];
         //this.$refs.scaffold.showRegionTooltipWithAnnotations(data, false, true);
-        if (this.onClickMarkers) this.$refs.scaffold.setMarkerModeForObjectsWithName(data[0].data.group, "on");
+        if (this.onClickMarkers)
+          this.$refs.scaffold.setMarkerModeForObjectsWithName(data[0].data.group, 'on');
       }
       if (this.consoleOn) console.log(data);
     },
@@ -885,16 +919,16 @@ export default {
       this.pos[1] = data.target[1];
     },
     onFilesDrop: function (payload) {
-      if (payload.format == "gltf") this.format = "gltf";
-      else this.format = "metadata";
+      if (payload.format == 'gltf') this.format = 'gltf';
+      else this.format = 'metadata';
       this.input = payload.url;
     },
     parseInput: function () {
       if (this.route.query.url !== this.input) {
         const queries = { ...this.route.query };
-        if (this.input && this.input !== "") queries.url = this.input;
+        if (this.input && this.input !== '') queries.url = this.input;
         this.router.replace({
-          path: "/",
+          path: '/',
           query: { ...this.route.query, url: this.input },
         });
       }
@@ -911,31 +945,31 @@ export default {
           this.url = query.url;
         } else {
           this.url =
-            "https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json";
+            'https://mapcore-bucket1.s3-us-west-2.amazonaws.com/others/29_Jan_2020/heartICN_metadata.json';
         }
-        if (this.url.includes(".gltf") || this.url.includes(".glb")) {
-          this.format = "gltf";
-        } else if (this.url.includes(".json")) {
-          this.format = "metadata";
+        if (this.url.includes('.gltf') || this.url.includes('.glb')) {
+          this.format = 'gltf';
+        } else if (this.url.includes('.json')) {
+          this.format = 'metadata';
         }
         this.input = this.url;
         if (query.region) {
           this.region = query.region;
         } else {
-          this.region = "";
+          this.region = '';
         }
         if (query.viewURL) {
           this.viewURL = query.viewURL;
         } else {
-          this.viewURL = "";
+          this.viewURL = '';
         }
 
-        if (query.wholeBody && query.wholeBody === "true") {
-          console.log("wholebody", query.wholeBody)
+        if (query.wholeBody && query.wholeBody === 'true') {
+          console.log('wholebody', query.wholeBody);
           this.wholeBody = true;
           this.usageConfig.tubeLines = true;
         }
-      })
+      });
     },
     onHelpModeShowNext: function () {
       this.helpModeActiveItem += 1;
@@ -966,9 +1000,8 @@ export default {
 </script>
 
 <style lang="scss">
-
 #app {
-  font-family: "Asap", sans-serif;
+  font-family: 'Asap', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -1083,8 +1116,7 @@ svg.map-icon {
   z-index: 2;
 }
 
-input[type="file"] {
+input[type='file'] {
   display: none;
 }
-
 </style>

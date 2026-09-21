@@ -2,9 +2,7 @@
   <el-container class="transformation-container">
     <el-main class="slides-block">
       <el-row class="tool-row">
-        <el-col :offset="0" :span="6">
-          x:
-        </el-col>
+        <el-col :offset="0" :span="6">x:</el-col>
         <el-col :offset="0" :span="10">
           <el-slider
             v-model="x"
@@ -28,9 +26,7 @@
         </el-col>
       </el-row>
       <el-row class="tool-row">
-        <el-col :offset="0" :span="6">
-          y:
-        </el-col>
+        <el-col :offset="0" :span="6">y:</el-col>
         <el-col :offset="0" :span="10">
           <el-slider
             v-model="y"
@@ -54,9 +50,7 @@
         </el-col>
       </el-row>
       <el-row class="tool-row">
-        <el-col :offset="0" :span="6">
-          z:
-        </el-col>
+        <el-col :offset="0" :span="6">z:</el-col>
         <el-col :offset="0" :span="10">
           <el-slider
             v-model="z"
@@ -80,9 +74,7 @@
         </el-col>
       </el-row>
       <el-row class="tool-row" v-if="enableScaling">
-        <el-col :offset="0" :span="6">
-          Scale:
-        </el-col>
+        <el-col :offset="0" :span="6">Scale:</el-col>
         <el-col :offset="0" :span="10">
           <el-slider
             v-model="scale"
@@ -110,29 +102,13 @@
 </template>
 
 <script>
-/* eslint-disable no-alert, no-console */
-
-import {
-  ElCol as Col,
-  ElContainer as Container,
-  ElInputNumber as InputNumber,
-  ElMain as Main,
-  ElSlider as Slider,
-} from "element-plus";
-import { markRaw } from "vue";
+import { markRaw } from 'vue';
 
 /**
  * A component to control the opacity of the target object.
  */
 export default {
-  name: "TransformationControls",
-  components: {
-    Col,
-    Container,
-    InputNumber,
-    Main,
-    Slider,
-  },
+  name: 'TransformationControls',
   inject: ['boundingDims'],
   data: function () {
     return {
@@ -143,12 +119,12 @@ export default {
       min: [0, 0, 0],
       max: [1, 1, 1],
       zincObject: undefined,
-      enableScaling: true
+      enableScaling: true,
     };
   },
   watch: {
     boundingDims: {
-      handler: function (value) {
+      handler: function (_value) {
         this.calculateMinAndMax();
       },
       immediate: true,
@@ -156,20 +132,19 @@ export default {
     },
   },
   methods: {
-    calculateMinAndMax: function() {
+    calculateMinAndMax: function () {
       if (this.zincObject) {
         const originalPos = this.zincObject?.userData?.originalPos;
-        const morph = this.zincObject.getGroup();
         if (originalPos && this.boundingDims) {
           this.min = [
             originalPos[0] - this.boundingDims.size[0],
             originalPos[1] - this.boundingDims.size[1],
-            originalPos[2] - this.boundingDims.size[2]
+            originalPos[2] - this.boundingDims.size[2],
           ];
           this.max = [
             originalPos[0] + this.boundingDims.size[0],
             originalPos[1] + this.boundingDims.size[1],
-            originalPos[2] + this.boundingDims.size[2]
+            originalPos[2] + this.boundingDims.size[2],
           ];
         }
       }
@@ -178,7 +153,6 @@ export default {
       if (object.isZincObject) {
         this.zincObject = markRaw(object);
         const morph = this.zincObject.getGroup();
-        const originalPos = this.zincObject.userData.originalPos;
         if (morph && morph.position) {
           this.x = morph.position.x;
           this.y = morph.position.y;
@@ -199,12 +173,12 @@ export default {
         this.scale = 1;
       }
     },
-    modifyPosition: function() {
+    modifyPosition: function () {
       if (this.zincObject) {
         this.zincObject.setPosition(this.x, this.y, this.z);
       }
     },
-    modifyScale: function() {
+    modifyScale: function () {
       this.zincObject.setScaleAll(this.scale);
     },
   },
@@ -263,9 +237,8 @@ export default {
 }
 
 .tool-row {
-  align-items:center;
+  align-items: center;
   text-align: center;
-  padding-top:4px;
+  padding-top: 4px;
 }
-
 </style>

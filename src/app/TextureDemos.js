@@ -1,11 +1,11 @@
-import * as volumeTexture from "zincjs/src/shaders/volumeTexture.js";
+import * as volumeTexture from 'zincjs/src/shaders/volumeTexture.js';
 
 const getVolumeTexture = (texture) => {
   const myUniforms = volumeTexture.getUniforms();
   myUniforms.volume_scale.value.set(
     texture.size.width / texture.size.depth,
     texture.size.height / texture.size.depth,
-    1
+    1,
   );
   myUniforms.diffuse.value = texture.impl;
   myUniforms.depth.value = texture.size.depth;
@@ -33,7 +33,7 @@ const getTexture = async (scaffoldModule, texture_prefix) => {
 export const testVolume = async (scaffoldVuer, texture_prefix) => {
   const cube = new scaffoldVuer.$module.Zinc.THREE.BoxGeometry(1, 1, 1);
   const zincObject = new scaffoldVuer.$module.Zinc.Geometry();
-  zincObject.setName("Texture volume");
+  zincObject.setName('Texture volume');
   cube.translate(0.5, 0.5, 0.5);
   let meshOptions = {};
   meshOptions.opacity = 1.0;
@@ -44,70 +44,53 @@ export const testVolume = async (scaffoldVuer, texture_prefix) => {
   const material = texture.getMaterial(options);
   zincObject.createMesh(cube, material, meshOptions);
   scaffoldVuer.addZincObject(zincObject);
-  zincObject.getMorph().matrix.set(
-    -100,
-    0,
-    0,
-    -60,
-    0,
-    -100,
-    0,
-    -100,
-    0,
-    0,
-    -100,
-    30,
-    0,
-    0,
-    0,
-    1
-  );
+  zincObject.getMorph().matrix.set(-100, 0, 0, -60, 0, -100, 0, -100, 0, 0, -100, 30, 0, 0, 0, 1);
   window.texture = zincObject;
 };
 
-const addCylinder = (scaffoldVuer) => {
-  const THREE = scaffoldVuer.$module.Zinc.THREE;
-  const cylinderGeometry = new THREE.CylinderGeometry(50, 50, 200,80);
-  const material = new THREE.MeshPhongMaterial( {color: 0xffff00, side : THREE.DoubleSide} );
-  const cylinderMesh = new THREE.Mesh( cylinderGeometry, material );
-  const zincGeometry = new scaffoldVuer.$module.Zinc.Geometry();
-  zincGeometry.setMesh(cylinderMesh, false, false);
-  zincGeometry.setName("Cylinder");
-  scaffoldVuer.addZincObject(zincGeometry);
-}
+// const addCylinder = (scaffoldVuer) => {
+//   const THREE = scaffoldVuer.$module.Zinc.THREE;
+//   const cylinderGeometry = new THREE.CylinderGeometry(50, 50, 200, 80);
+//   const material = new THREE.MeshPhongMaterial({ color: 0xffff00, side: THREE.DoubleSide });
+//   const cylinderMesh = new THREE.Mesh(cylinderGeometry, material);
+//   const zincGeometry = new scaffoldVuer.$module.Zinc.Geometry();
+//   zincGeometry.setMesh(cylinderMesh, false, false);
+//   zincGeometry.setName('Cylinder');
+//   scaffoldVuer.addZincObject(zincGeometry);
+// };
 
 export const testSlides = async (scaffoldVuer, texture_prefix) => {
   const scaffoldModule = scaffoldVuer.$module;
   const texture = await getTexture(scaffoldModule, texture_prefix);
   const textureSlides = new scaffoldModule.Zinc.TextureSlides(texture);
-  textureSlides.setName("Texture slides");
+  textureSlides.setName('Texture slides');
   textureSlides.createSlides([
     {
-      direction: "y",
+      direction: 'y',
       value: 0.1,
     },
     {
-      direction: "y",
+      direction: 'y',
       value: 0.3,
     },
     {
-      direction: "y",
+      direction: 'y',
       value: 0.5,
     },
     {
-      direction: "y",
+      direction: 'y',
       value: 0.7,
     },
     {
-      direction: "y",
+      direction: 'y',
       value: 0.9,
     },
     {
-      direction: "x",
+      direction: 'x',
       value: 0.5,
     },
     {
-      direction: "z",
+      direction: 'z',
       value: 0.5,
     },
   ]);
@@ -125,24 +108,23 @@ export const testSlides = async (scaffoldVuer, texture_prefix) => {
 
 const padNumber = (number) => {
   let string = number.toString();
-  while(string.length < 4) {
-    string = "0" + string;
+  while (string.length < 4) {
+    string = '0' + string;
   }
   return string;
-}
+};
 
 const getArmTexture = async (scaffoldModule) => {
   const imgArray = [];
-  const prefix = "https://mapcore-bucket1.s3.us-west-2.amazonaws.com/texture/arm1/jpg";
+  const prefix = 'https://mapcore-bucket1.s3.us-west-2.amazonaws.com/texture/arm1/jpg';
   const texture = new scaffoldModule.Zinc.TextureArray();
   for (let i = 984; i <= 2184;) {
     imgArray.push(`${prefix}/${padNumber(i)}.jpg`);
-    i = i + 10 ;
+    i = i + 10;
   }
   await texture.loadFromImages(imgArray);
   return texture;
 };
-
 
 /*
 {
@@ -162,8 +144,8 @@ const getArmTexture = async (scaffoldModule) => {
 */
 
 //https://threejs.org/docs/#manual/en/introduction/Matrix-transformations
-const applyTransformation = (scaffoldVuer, mesh, rotation, position, scale, reference) => {
-  //if (reference === "centre") {
+const applyTransformation = (scaffoldVuer, mesh, rotation, position, scale, _reference) => {
+  //if (_reference === "centre") {
   //  mesh.geometry.translate(-0.5, -0.5, -0.5);
   //}
   const THREE = scaffoldVuer.$module.Zinc.THREE;
@@ -184,48 +166,40 @@ const applyTransformation = (scaffoldVuer, mesh, rotation, position, scale, refe
     0,
     0,
     0,
-    0
+    0,
   );
   const quaternion = new THREE.Quaternion().setFromRotationMatrix(matrix);
   mesh.position.set(...position);
-  mesh.quaternion.copy( quaternion );
+  mesh.quaternion.copy(quaternion);
   mesh.scale.set(...scale);
   mesh.updateMatrix();
-}
-
-
+};
 
 export const testArmSlides = async (scaffoldVuer) => {
   const scaffoldModule = scaffoldVuer.$module;
   const texture = await getArmTexture(scaffoldModule);
   const textureSlides = new scaffoldModule.Zinc.TextureSlides(texture);
-  textureSlides.setName("Arm texture");
+  textureSlides.setName('Arm texture');
   textureSlides.createSlides([
     {
-      direction: "x",
+      direction: 'x',
       value: 0.5,
     },
     {
-      direction: "y",
+      direction: 'y',
       value: 0.5,
     },
     {
-      direction: "z",
+      direction: 'z',
       value: 0.5,
     },
   ]);
 
-  const rotation = [
-    0, 0, 1,
-    0, 1, 0,
-    -1, 0, 0
-  ];
+  const rotation = [0, 0, 1, 0, 1, 0, -1, 0, 0];
   const position = [0, -1.0, 0.95];
   const scale = [1.6, 1.6, 1.2];
-  const reference = "corner";
+  const reference = 'corner';
   applyTransformation(scaffoldVuer, textureSlides.morph, rotation, position, scale, reference);
   scaffoldVuer.addZincObject(textureSlides);
   scaffoldVuer.fitWindow();
 };
-
-
