@@ -780,6 +780,7 @@ export default {
       if (this.sceneSettings.length > 0) this.$refs.scaffold.setState(this.sceneSettings.pop());
     },
     viewModelClicked: function (location) {
+      this.format = 'metadata';
       this.input = location;
     },
     userPrimitivesUpdated: function (event) {

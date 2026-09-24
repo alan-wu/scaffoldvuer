@@ -1,4 +1,4 @@
-import WEBGL from './WebGL';
+import GPU_SUPPORT from './WebGL';
 import Zinc from 'zincjs';
 const THREE = Zinc.THREE;
 import { BaseModule } from './BaseModule';
@@ -15,13 +15,20 @@ const createRenderer = async function () {
   const localContainer = document.createElement('div');
   let localRenderer = undefined;
   localContainer.style.height = '100%';
-  if (WEBGL.isWebGLAvailable()) {
-    localRenderer = new Zinc.Renderer(localContainer, window);
-    Zinc.defaultMaterialColor = 0xffff9c;
-    await localRenderer.initialiseVisualisation();
-    localRenderer.playAnimation = false;
-  } else {
-    const warning = WEBGL.getWebGLErrorMessage();
+  if (await GPU_SUPPORT.isRendererSupported()) {
+    try {
+      localRenderer = new Zinc.Renderer(localContainer, window);
+      Zinc.defaultMaterialColor = 0xffff9c;
+      await localRenderer.initialiseVisualisation();
+      localRenderer.playAnimation = false;
+    } catch (error) {
+      //Device or context creation can still fail after the support check.
+      console.error('Failed to initialise the renderer.', error);
+      localRenderer = undefined;
+    }
+  }
+  if (!localRenderer) {
+    const warning = GPU_SUPPORT.getErrorMessage();
     localContainer.appendChild(warning);
   }
   return { Zinc, renderer: localRenderer, container: localContainer };
