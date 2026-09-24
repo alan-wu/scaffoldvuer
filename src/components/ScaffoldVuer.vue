@@ -3177,11 +3177,11 @@ export default {
     toggleRendering: function (flag) {
       if (this.$module.zincRenderer) {
         if (flag) {
-          this.forceContextRestore();
+        //  this.forceContextRestore();
           this.$module.zincRenderer.animate();
         } else {
           this.$module.zincRenderer.stopAnimate();
-          this.forceContextLoss();
+        //  this.forceContextLoss();
         }
       }
     },
