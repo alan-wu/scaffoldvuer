@@ -47,7 +47,7 @@
     "*.js"
   ],
   "dependencies": {
-    "@abi-software/map-utilities": "1.11.0",
+    "@abi-software/map-utilities": "1.12.0",
     "@abi-software/sparc-annotation": "^0.3.2",
     "@abi-software/svg-sprite": "1.4.0",
     "@element-plus/icons-vue": "^2.3.2",
@@ -58,7 +58,7 @@
     "simple-dropzone": "^0.8.3",
     "vue": "^3.5.41",
     "vue-router": "^5.2.0",
-    "zincjs": "^2.4.1-beta.2"
+    "zincjs": "^2.4.1-beta.4"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^8.0.1",

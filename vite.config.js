@@ -61,6 +61,7 @@ export default defineConfig(({ command }) => {
             '@abi-software/sparc-annotation': '@abi-software/sparc-annotation',
             '@abi-software/svg-sprite': '@abi-software/svg-sprite',
             '@abi-software/map-utilities': '@abi-software/map-utilities',
+            '@abi-software/map-utilities/dist/style.css': '_abi_software_map_utilities_dist_style_css',
             pinia: 'pinia',
           },
           // keep css output name stable for the "./dist/style.css" export/import paths
