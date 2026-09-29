@@ -125,6 +125,8 @@ RendererModule.prototype.setHighlightedByObjects = function (
 ) {
   const zincObjects = objectsToZincObjects(objects);
   const changed = this.graphicsHighlight.setHighlighted(objects);
+  //Some highlights are applied to THREE.js materials directly
+  if (changed) this.zincRenderer?.invalidate?.();
   if (propagateChanges) {
     let eventType = EVENT_TYPE.MOVE;
     if (changed) eventType = EVENT_TYPE.HIGHLIGHTED;
@@ -183,6 +185,8 @@ RendererModule.prototype.setSelectedByObjects = function (
   let changed;
   if (this.selectObjectOnPick) {
     changed = this.graphicsHighlight.setSelected(objects);
+    //Some highlights are applied to THREE.js materials directly
+    if (changed) this.zincRenderer?.invalidate?.();
   } else {
     changed = true;
   }

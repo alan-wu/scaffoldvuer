@@ -754,6 +754,16 @@ export default {
       default: true,
     },
     /**
+     * If this flag is set to true, renderer will only be redrawn when changes are
+     * made through ZincJS APIs or time is running. Any external change made to the scene will require
+     * invalidate() be called on object, region, scene and renderer in order to be redrawn.
+     *
+     */
+    renderOnDemand: {
+      type: Boolean,
+      default: true,
+    },
+    /**
      * Specify the endpoint of the flatmap server.
      * This is used by annotation service included in
      * third party flatmapvuer library.
@@ -918,6 +928,7 @@ export default {
         isSearch: false,
       }),
       //checkedRegions: []
+      unwatchRenderOnDemand: null,
       unwatchURL: null,
       unwatchRegion: null,
       unwatchState: null,
@@ -1046,14 +1057,13 @@ export default {
       this.backgroundChangeCallback(this.currentBackground);
     });
     //Setup some watchers that depend on threejs init()
-    this.unwatchURL = this.$watch(
-      'url',
-      (newVal) => {
-        if (this.state === undefined || this.state.url === undefined) {
-          this.setURL(newVal);
-        }
+    this.unwatchRenderOnDemand = this.$watch(
+      'renderOnDemand',
+      (renderOnDemand) => {
+        //Older versions of ZincJS do not support render on demand
+        this.$module.zincRenderer.setRenderOnDemand?.(renderOnDemand);
       },
-      { immediate: true }, // Runs immediately after creation, if desired
+      { immediate: true },
     );
     this.unwatchRegion = this.$watch(
       'region',
@@ -1096,6 +1106,7 @@ export default {
     );
   },
   beforeUnmount: function () {
+    if (this.unwatchRenderOnDemand) this.unwatchRenderOnDemand();
     if (this.unwatchURL) this.unwatchURL();
     if (this.unwatchRegion) this.unwatchRegion();
     if (this.unwatchState) this.unwatchState();
@@ -1292,6 +1303,8 @@ export default {
     backgroundChangeCallback: function (colour) {
       this.currentBackground = colour;
       this.$module.zincRenderer.getThreeJSRenderer().setClearColor(this.currentBackground, 1);
+      //The clear colour is set on the THREE.js renderer directly
+      this.$module.zincRenderer.invalidate?.();
     },
     /**
      * Internal only.
@@ -1316,6 +1329,8 @@ export default {
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
         //this.$module.zincRenderer.onWindowResize();
+        //Force a draw, the size and camera are changed directly
+        this.$module.zincRenderer.invalidate?.();
         this.$module.zincRenderer.render();
         //renderer.render(this.$module.scene, camera);
 
@@ -1326,6 +1341,7 @@ export default {
         camera.aspect = originalAspect;
         camera.updateProjectionMatrix();
         //this.$module.zincRenderer.onWindowResize();
+        this.$module.zincRenderer.invalidate?.();
         this.$module.zincRenderer.render();
         //renderer.render(this.$module.scene, camera);
 
@@ -1348,6 +1364,8 @@ export default {
       this.captureID = this.$module.zincRenderer.addPostRenderCallbackFunction(
         this.captureScreenshotCallback(filename, width, height),
       );
+      //Post render callbacks only run when a frame is drawn
+      this.$module.zincRenderer.invalidate?.();
     },
     /**
      * @public
@@ -3177,11 +3195,11 @@ export default {
     toggleRendering: function (flag) {
       if (this.$module.zincRenderer) {
         if (flag) {
-        //  this.forceContextRestore();
+          //  this.forceContextRestore();
           this.$module.zincRenderer.animate();
         } else {
           this.$module.zincRenderer.stopAnimate();
-        //  this.forceContextLoss();
+          //  this.forceContextLoss();
         }
       }
     },
