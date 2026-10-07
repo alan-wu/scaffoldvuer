@@ -21,6 +21,7 @@
     "changelog": "auto-changelog -p --output CHANGELOG.md --template keepachangelog",
     "version": "npm run build-bundle;npm run changelog; git add CHANGELOG.md",
     "release:beta": "npm version prerelease --preid=beta; npm publish --tag beta",
+    "release:major": "npm version major;  npm publish",
     "release:minor": "npm version minor; npm publish",
     "release:patch": "npm version patch;  npm publish",
     "docs:dev": "vitepress dev docs",
