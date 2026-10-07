@@ -1,16 +1,16 @@
 /**
- * @author alteredq / http://alteredqualia.com/
- * @author mr.doob / http://mrdoob.com/
+ * Checks whether the browser can run the ZincJS renderer. ZincJS uses
+ * THREE.WebGPURenderer, which renders with WebGPU when it is available and
+ * falls back to WebGL 2 otherwise. WebGL 1 is not supported.
  */
 
-const WEBGL = {
-  isWebGLAvailable: function () {
+const GPU_SUPPORT = {
+  isWebGPUAvailable: async function () {
     try {
-      var canvas = document.createElement('canvas');
-      return !!(
-        window.WebGLRenderingContext &&
-        (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
-      );
+      if (typeof navigator === 'undefined' || !navigator.gpu) return false;
+      //navigator.gpu can exist without a usable adapter, e.g. on a blocklisted GPU.
+      const adapter = await navigator.gpu.requestAdapter();
+      return !!adapter;
     } catch (_e) {
       return false;
     }
@@ -18,36 +18,23 @@ const WEBGL = {
 
   isWebGL2Available: function () {
     try {
-      var canvas = document.createElement('canvas');
+      const canvas = document.createElement('canvas');
       return !!(window.WebGL2RenderingContext && canvas.getContext('webgl2'));
     } catch (_e) {
       return false;
     }
   },
 
-  getWebGLErrorMessage: function () {
-    return this.getErrorMessage(1);
+  isRendererSupported: async function () {
+    return (await this.isWebGPUAvailable()) || this.isWebGL2Available();
   },
 
-  getWebGL2ErrorMessage: function () {
-    return this.getErrorMessage(2);
-  },
+  getErrorMessage: function () {
+    let message =
+      'This module requires <a href="https://caniuse.com/webgpu" style="color:#008">WebGPU</a> or ' +
+      '<a href="https://caniuse.com/webgl2" style="color:#008">WebGL 2</a> support but your $0 does not seem to support either.';
 
-  getErrorMessage: function (version) {
-    var names = {
-      1: 'WebGL',
-      2: 'WebGL 2',
-    };
-
-    var contexts = {
-      1: window.WebGLRenderingContext,
-      2: window.WebGL2RenderingContext,
-    };
-
-    var message =
-      'This module requires <a href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation" style="color:#008">$1</a> support but your $0 does not seem to support it.';
-
-    var element = document.createElement('div');
+    const element = document.createElement('div');
     element.id = 'webglmessage';
     element.style.fontFamily = 'monospace';
     element.style.fontSize = '20px';
@@ -59,13 +46,12 @@ const WEBGL = {
     element.style.width = '400px';
     element.style.margin = '5em auto 0';
 
-    if (contexts[version]) {
+    //The browser knows the APIs but could not create a context: blame the graphics card.
+    if ((typeof navigator !== 'undefined' && navigator.gpu) || window.WebGL2RenderingContext) {
       message = message.replace('$0', 'graphics card');
     } else {
       message = message.replace('$0', 'browser');
     }
-
-    message = message.replace('$1', names[version]);
 
     element.innerHTML = message;
 
@@ -73,4 +59,4 @@ const WEBGL = {
   },
 };
 
-export { WEBGL as default };
+export { GPU_SUPPORT as default };

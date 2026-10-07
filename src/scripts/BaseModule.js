@@ -25,21 +25,6 @@ BaseModule.prototype.settingsChanged = function () {
   }
 };
 
-BaseModule.prototype.exportSettings = function () {
-  const settings = {};
-  settings.dialog = this.typeName;
-  settings.name = this.instanceName;
-  return settings;
-};
-
-BaseModule.prototype.importSettings = function (settings) {
-  if (settings.dialog == this.typeName) {
-    this.setName(settings.name);
-    return true;
-  }
-  return false;
-};
-
 BaseModule.prototype.publishChanges = function (annotations, eventType, zincObjects) {
   for (let i = 0; i < this.eventNotifiers.length; i++) {
     this.eventNotifiers[i].publish(this, eventType, annotations, zincObjects);

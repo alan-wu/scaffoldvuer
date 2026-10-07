@@ -1,4 +1,4 @@
-import WEBGL from './WebGL';
+import GPU_SUPPORT from './WebGL';
 import Zinc from 'zincjs';
 const THREE = Zinc.THREE;
 import { BaseModule } from './BaseModule';
@@ -11,17 +11,24 @@ import { objectsToZincObjects } from './Utilities';
  * @param {String} elementID - id of the target dom element.
  * @returns {Zinc.Renderer}
  */
-const createRenderer = function () {
+const createRenderer = async function () {
   const localContainer = document.createElement('div');
   let localRenderer = undefined;
   localContainer.style.height = '100%';
-  if (WEBGL.isWebGLAvailable()) {
-    localRenderer = new Zinc.Renderer(localContainer, window);
-    Zinc.defaultMaterialColor = 0xffff9c;
-    localRenderer.initialiseVisualisation();
-    localRenderer.playAnimation = false;
-  } else {
-    const warning = WEBGL.getWebGLErrorMessage();
+  if (await GPU_SUPPORT.isRendererSupported()) {
+    try {
+      localRenderer = new Zinc.Renderer(localContainer, window);
+      Zinc.defaultMaterialColor = 0xffff9c;
+      await localRenderer.initialiseVisualisation();
+      localRenderer.playAnimation = false;
+    } catch (error) {
+      //Device or context creation can still fail after the support check.
+      console.error('Failed to initialise the renderer.', error);
+      localRenderer = undefined;
+    }
+  }
+  if (!localRenderer) {
+    const warning = GPU_SUPPORT.getErrorMessage();
     localContainer.appendChild(warning);
   }
   return { Zinc, renderer: localRenderer, container: localContainer };
@@ -118,6 +125,8 @@ RendererModule.prototype.setHighlightedByObjects = function (
 ) {
   const zincObjects = objectsToZincObjects(objects);
   const changed = this.graphicsHighlight.setHighlighted(objects);
+  //Some highlights are applied to THREE.js materials directly
+  if (changed) this.zincRenderer?.invalidate?.();
   if (propagateChanges) {
     let eventType = EVENT_TYPE.MOVE;
     if (changed) eventType = EVENT_TYPE.HIGHLIGHTED;
@@ -176,6 +185,8 @@ RendererModule.prototype.setSelectedByObjects = function (
   let changed;
   if (this.selectObjectOnPick) {
     changed = this.graphicsHighlight.setSelected(objects);
+    //Some highlights are applied to THREE.js materials directly
+    if (changed) this.zincRenderer?.invalidate?.();
   } else {
     changed = true;
   }
@@ -282,9 +293,9 @@ RendererModule.prototype.getPlayRate = function (_value) {
  *  and picker for the 3D renderer.
  *
  */
-RendererModule.prototype.initialiseRenderer = function (displayAreaIn) {
+RendererModule.prototype.initialiseRenderer = async function (displayAreaIn) {
   if (this.zincRenderer === undefined || this.rendererContainer === undefined) {
-    let returnedValue = createRenderer();
+    let returnedValue = await createRenderer();
     this.Zinc = returnedValue['Zinc'];
     this.zincRenderer = returnedValue['renderer'];
     this.rendererContainer = returnedValue['container'];

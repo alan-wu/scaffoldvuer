@@ -760,7 +760,7 @@ export default {
       const newTexture = await this.$refs.scaffold.readNIFTIFromSource(
         urls,
         true,
-        this.maskUrl,
+        undefined,
         v1,
         options,
         true,
@@ -780,6 +780,7 @@ export default {
       if (this.sceneSettings.length > 0) this.$refs.scaffold.setState(this.sceneSettings.pop());
     },
     viewModelClicked: function (location) {
+      this.format = 'metadata';
       this.input = location;
     },
     userPrimitivesUpdated: function (event) {
@@ -803,8 +804,8 @@ export default {
       this.$refs.scaffold.search(term, true);
     },
     viewerMounted: function () {
-      this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
-      this.rendererInfo = this.$refs.scaffold.getRendererInfo();
+      //   this.selectedCoordinates = this.$refs.scaffold.getDynamicSelectedCoordinates();
+      //   this.rendererInfo = this.$refs.scaffold.getRendererInfo();
     },
     PrintViewport: function () {
       const scene = this.$refs.scaffold.$module.scene;

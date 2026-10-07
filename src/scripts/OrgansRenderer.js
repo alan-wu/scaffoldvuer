@@ -143,15 +143,11 @@ const OrgansViewer = function (ModelsLoaderIn) {
   };
 
   const preRenderUpdateCallback = function () {
-    return function () {
-      preRenderTimeUpdate();
-    };
+    preRenderTimeUpdate();
   };
 
   const postRenderUpdateCallback = function () {
-    return function () {
-      postRenderSelectedCoordinatesUpdate();
-    };
+    postRenderSelectedCoordinatesUpdate();
   };
 
   /**
@@ -655,53 +651,23 @@ const OrgansViewer = function (ModelsLoaderIn) {
     }
   };
 
-  this.exportSettings = function () {
-    const settings = {};
-    settings.name = _this.instanceName;
-    if (_this.sceneData.currentSystem) settings.system = _this.sceneData.currentSystem;
-    if (_this.sceneData.currentSpecies) settings.species = _this.sceneData.currentSpecies;
-    if (_this.sceneData.currentPart) settings.part = _this.sceneData.currentPart;
-    settings.metaURL = _this.sceneData.metaURL;
-    if (_this.sceneData.viewURL) settings.viewURL = _this.sceneData.viewURL;
-    settings.dialog = 'Organ Viewer';
-    return settings;
-  };
-
-  this.importSettings = function (settings) {
-    if (settings && settings.dialog == this.typeName) {
-      _this.setName(settings.name);
-      if (settings.metaURL !== undefined && settings.metaURL != '') {
-        _this.loadOrgansFromURL(
-          settings.metaURL,
-          settings.species,
-          settings.system,
-          settings.part,
-          settings.viewURL,
-          true,
-        );
-      } else {
-        _this.loadOrgans(settings.species, settings.system, settings.part);
-      }
-      return true;
-    }
-    return false;
-  };
-
   /**
    * initialise loading of the html layout for the organs panel, this is
    * called when the {@link PJP.OrgansViewer} is created.
    *
    * @async
    */
-  const initialise = function () {
-    _this.initialiseRenderer(undefined);
+  this.initialise = async function (displayAreaIn) {
+    await _this.initialiseRenderer(displayAreaIn);
     if (_this.zincRenderer) {
-      _this.zincRenderer.addPreRenderCallbackFunction(preRenderUpdateCallback());
-      _this.zincRenderer.addPostRenderCallbackFunction(postRenderUpdateCallback());
+      _this.zincRenderer.addPreRenderCallbackFunction(() => {
+        preRenderUpdateCallback();
+      });
+      _this.zincRenderer.addPostRenderCallbackFunction(() => {
+        postRenderUpdateCallback();
+      });
     }
   };
-
-  initialise();
 };
 
 OrgansViewer.prototype = Object.create(RendererModule.prototype);

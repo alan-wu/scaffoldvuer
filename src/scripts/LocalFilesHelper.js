@@ -88,7 +88,7 @@ const createGLTFURL = (content, binary) => {
   return {
     objectURLs,
     url: gltfURL,
-    format: 'gltfURL',
+    format: 'gltf',
   };
 };
 

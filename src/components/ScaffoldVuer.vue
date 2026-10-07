@@ -754,6 +754,16 @@ export default {
       default: true,
     },
     /**
+     * If this flag is set to true, renderer will only be redrawn when changes are
+     * made through ZincJS APIs or time is running. Any external change made to the scene will require
+     * invalidate() be called on object, region, scene and renderer in order to be redrawn.
+     *
+     */
+    renderOnDemand: {
+      type: Boolean,
+      default: true,
+    },
+    /**
      * Specify the endpoint of the flatmap server.
      * This is used by annotation service included in
      * third party flatmapvuer library.
@@ -918,6 +928,12 @@ export default {
         isSearch: false,
       }),
       //checkedRegions: []
+      unwatchRenderOnDemand: null,
+      unwatchURL: null,
+      unwatchRegion: null,
+      unwatchState: null,
+      unwatchViewURL: null,
+      unwatchMarkerCluster: null,
     };
   },
   watch: {
@@ -927,6 +943,7 @@ export default {
       },
       immediate: true,
     },
+    /*
     url: {
       handler: function (newValue) {
         if (this.state === undefined || this.state.url === undefined) this.setURL(newValue);
@@ -952,6 +969,13 @@ export default {
       },
       immediate: true,
     },
+    markerCluster: {
+      handler: function (val) {
+        this.$module.scene.enableMarkerCluster(val);
+      },
+      immediate: true,
+    },
+    */
     helpMode: function (newVal, oldVal) {
       if (newVal !== oldVal) {
         this.setHelpMode(newVal);
@@ -992,12 +1016,6 @@ export default {
     render: function (val) {
       this.toggleRendering(val);
     },
-    markerCluster: {
-      handler: function (val) {
-        this.$module.scene.enableMarkerCluster(val);
-      },
-      immediate: true,
-    },
     markerLabels: function (labels) {
       for (const [key, value] of Object.entries(this.previousMarkerLabels)) {
         this.setMarkerModeForObjectsWithName(key, value, 'off');
@@ -1017,16 +1035,15 @@ export default {
     this.availableBackground = ['white', 'black', 'lightskyblue'];
     this.$_searchIndex = new SearchIndex();
   },
-  mounted: function () {
+  mounted: async function () {
     this.openMapRef = shallowRef(this.$refs.openMapRef);
     this.backgroundIconRef = shallowRef(this.$refs.backgroundIconRef);
-    this.$refs.scaffoldTreeControls.setModule(this.$module);
     let eventNotifier = new EventNotifier();
     eventNotifier.subscribe(this, this.eventNotifierCallback);
     this.$module.addNotifier(eventNotifier);
     this.$module.addOrganPartAddedCallback(this.zincObjectAdded);
     this.$module.addOrganPartRemovedCallback(this.zincObjectRemoved);
-    this.$module.initialiseRenderer(this.$refs.display);
+    await this.$module.initialise(this.$refs.display);
     this.toggleRendering(this.render);
     this.clientHeight = this.$refs.scaffoldContainer.$el.clientHeight;
     this.ro = new ResizeObserver(this.adjustLayout).observe(this.$refs.scaffoldContainer.$el);
@@ -1039,8 +1056,62 @@ export default {
     this.$module.zincRenderer.addContextRestoredCallbackFunction(() => {
       this.backgroundChangeCallback(this.currentBackground);
     });
+    //Setup some watchers that depend on threejs init()
+    this.unwatchRenderOnDemand = this.$watch(
+      'renderOnDemand',
+      (renderOnDemand) => {
+        //Older versions of ZincJS do not support render on demand
+        this.$module.zincRenderer.setRenderOnDemand?.(renderOnDemand);
+      },
+      { immediate: true },
+    );
+    this.unwatchRegion = this.$watch(
+      'region',
+      (region) => {
+        if (!(this.state || this.viewURL)) {
+          this.setFocusedRegion(region);
+        }
+      },
+      { immediate: true },
+    );
+    this.unwatchState = this.$watch(
+      'state',
+      (state) => {
+        this.setState(state);
+      },
+      { deep: true, immediate: true },
+    );
+    this.unwatchViewURL = this.$watch(
+      'viewURL',
+      (viewURL) => {
+        this.updateViewURL(viewURL);
+      },
+      { immediate: true },
+    );
+    this.unwatchURL = this.$watch(
+      'url',
+      (newValue) => {
+        if (this.state === undefined || this.state.url === undefined) {
+          this.setURL(newValue);
+        }
+      },
+      { immediate: true },
+    );
+    this.unwatchMarkerCluster = this.$watch(
+      'markerCluster',
+      (val) => {
+        this.$module.scene.enableMarkerCluster(val);
+      },
+      { immediate: true },
+    );
   },
   beforeUnmount: function () {
+    if (this.unwatchRenderOnDemand) this.unwatchRenderOnDemand();
+    if (this.unwatchURL) this.unwatchURL();
+    if (this.unwatchRegion) this.unwatchRegion();
+    if (this.unwatchState) this.unwatchState();
+    if (this.unwatchViewURL) this.unwatchViewURL();
+    if (this.unwatchMarkerCluster) this.unwatchMarkerCluster();
     if (this.ro) this.ro.disconnect();
     this.$module.destroy();
     this.$module = undefined;
@@ -1232,6 +1303,8 @@ export default {
     backgroundChangeCallback: function (colour) {
       this.currentBackground = colour;
       this.$module.zincRenderer.getThreeJSRenderer().setClearColor(this.currentBackground, 1);
+      //The clear colour is set on the THREE.js renderer directly
+      this.$module.zincRenderer.invalidate?.();
     },
     /**
      * Internal only.
@@ -1256,6 +1329,8 @@ export default {
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
         //this.$module.zincRenderer.onWindowResize();
+        //Force a draw, the size and camera are changed directly
+        this.$module.zincRenderer.invalidate?.();
         this.$module.zincRenderer.render();
         //renderer.render(this.$module.scene, camera);
 
@@ -1266,6 +1341,7 @@ export default {
         camera.aspect = originalAspect;
         camera.updateProjectionMatrix();
         //this.$module.zincRenderer.onWindowResize();
+        this.$module.zincRenderer.invalidate?.();
         this.$module.zincRenderer.render();
         //renderer.render(this.$module.scene, camera);
 
@@ -1288,6 +1364,8 @@ export default {
       this.captureID = this.$module.zincRenderer.addPostRenderCallbackFunction(
         this.captureScreenshotCallback(filename, width, height),
       );
+      //Post render callbacks only run when a frame is drawn
+      this.$module.zincRenderer.invalidate?.();
     },
     /**
      * @public
@@ -1768,9 +1846,12 @@ export default {
             this.tData.x = 50;
             this.tData.y = 200;
             if (this._tempPoint) {
-              const positionAttribute = this._tempPoint.geometry.getAttribute('position');
+              const positionAttribute = this._tempPoint.geometry.getAttribute('instancePosition');
               positionAttribute.setXYZ(0, worldCoords[0], worldCoords[1], worldCoords[2]);
               positionAttribute.needsUpdate = true;
+              this._tempPoint.pointPositions[0] = worldCoords[0];
+              this._tempPoint.pointPositions[1] = worldCoords[1];
+              this._tempPoint.pointPositions[2] = worldCoords[2];
             } else {
               this._tempPoint = this.$module.scene.addTemporaryPoints([worldCoords], 0x00ffff);
             }
@@ -3071,6 +3152,7 @@ export default {
           );
         }
         if (this.$module && this.$module.scene) {
+          this.$refs.scaffoldTreeControls.setModule(this.$module);
           this.$module.scene.displayMarkers = this.displayMarkers;
           this.$module.scene.forcePickableObjectsUpdate = true;
           this.$module.scene.displayMinimap = this.displayMinimap;
@@ -3113,11 +3195,11 @@ export default {
     toggleRendering: function (flag) {
       if (this.$module.zincRenderer) {
         if (flag) {
-          this.forceContextRestore();
+          //  this.forceContextRestore();
           this.$module.zincRenderer.animate();
         } else {
           this.$module.zincRenderer.stopAnimate();
-          this.forceContextLoss();
+          //  this.forceContextLoss();
         }
       }
     },
